@@ -1,0 +1,17 @@
+name: upm-subtree-split
+
+on:
+  push:
+    branches:
+    - main
+jobs:
+  upm-subtree-split:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: upm subtree split
+      run: |
+        git subtree split --prefix="ProjectName/Packages/com.projectscope.projectname" -b upm
+        git push -u origin upm --force
