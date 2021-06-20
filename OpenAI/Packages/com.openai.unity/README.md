@@ -17,7 +17,7 @@ Based on [OpenAI-DotNet](https://github.com/RageAgainstThePixel/OpenAI-DotNet)
   - `Scope(s):`
     - `com.opanai`
 
-![scoped-registries](OpenAI/Packages/com.openai.unity/Documentation~/images/package-manager-scopes.png)
+![scoped-registries](Documentation~/images/package-manager-scopes.png)
 
 - Open the Unity Package Manager window
 - Change the Registry from Unity to `My Registries`

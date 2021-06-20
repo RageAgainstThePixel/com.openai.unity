@@ -1,0 +1,23 @@
+{
+  "name": "com.openai.unity",
+  "displayName": "OpenAI",
+  "description": "An OpenAI package for the Unity Game Engine.",
+  "keywords": [],
+  "version": "1.0.0-preview.1",
+  "unity": "2019.4",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "repository": "https://github.com/RageAgainstThePixel/com.openai.unity.git"
+  },
+  "author": {
+    "name": "Stephen Hodgson",
+    "url": "https://github.com/StephenHodgson"
+  },
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "2.0.1-preview.1"
+  },
+  "publishConfig": {
+    "registry": "https://package.openupm.com"
+  }
+}
