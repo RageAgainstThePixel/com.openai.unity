@@ -1,11 +1,5 @@
-# upm-template
+# OpenAI
 
-A Unity package manager repository template for quickly creating and setting up new UPM package projects in Unity.
+[![openupm](https://img.shields.io/npm/v/com.openai,unity?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.openai.unity/)
 
-## Getting Started
-
-1. Create a new repository in GitHub using this template
-2. Clone to your local machine
-3. Run the `InitializeTemplate.ps1` script from powershell, a command line, or terminal
-4. ???
-5. Profit
+The OpenAI package.

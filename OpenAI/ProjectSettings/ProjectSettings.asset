@@ -12,8 +12,8 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: ProjectAuthor
-  productName: ProjectName
+  companyName: Stephen Hodgson
+  productName: OpenAI
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -124,7 +124,7 @@ PlayerSettings:
     16:10: 1
     16:9: 1
     Others: 1
-  bundleVersion: 1.0
+  bundleVersion: 1.0.0
   preloadedAssets: []
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -168,9 +168,9 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.ProjectScope.ProjectName
-    Lumin: com.ProjectScope.ProjectName
-    Standalone: com.ProjectScope.ProjectName
+    Android: com.openai.unity
+    Lumin: com.openai.unity
+    Standalone: com.openai.unity
   buildNumber: {}
   AndroidBundleVersionCode: 1
   AndroidMinSdkVersion: 19
@@ -565,14 +565,14 @@ PlayerSettings:
     Windows Store Apps: 6
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: com.ProjectScope.ProjectName
-  metroPackageVersion: 0.1.0.0
+  metroPackageName: com.openai.unity
+  metroPackageVersion: 1.0.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
   metroCertificateIssuer: 
   metroCertificateNotAfter: 0000000000000000
-  metroApplicationDescription: com.ProjectScope.ProjectName
+  metroApplicationDescription: com.openai.unity
   wsaImages: {}
   metroTileShortName: 
   metroTileShowName: 0
