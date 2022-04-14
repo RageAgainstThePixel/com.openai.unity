@@ -3,8 +3,8 @@
   "displayName": "OpenAI",
   "description": "An OpenAI package for the Unity Game Engine.",
   "keywords": [],
-  "version": "1.0.0-preview.1",
-  "unity": "2019.4",
+  "version": "1.0.0",
+  "unity": "2020.3",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -15,7 +15,7 @@
     "url": "https://github.com/StephenHodgson"
   },
   "dependencies": {
-    "com.unity.nuget.newtonsoft-json": "2.0.1-preview.1"
+    "com.unity.nuget.newtonsoft-json": "3.0.2"
   },
   "publishConfig": {
     "registry": "https://package.openupm.com"

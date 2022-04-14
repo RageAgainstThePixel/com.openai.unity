@@ -3,6 +3,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using UnityEngine;
 
 namespace OpenAI
 {
@@ -53,9 +54,13 @@ namespace OpenAI
         }
 
         private static OpenAIAuthentication LoadFromAsset()
-            => (from asset in UnityEngine.Object.FindObjectsOfType<OpenAIConfigurationSettings>()
-                where !string.IsNullOrWhiteSpace(asset.ApiKey) && !string.IsNullOrWhiteSpace(asset.ApiKey)
+        {
+            var assets = UnityEngine.Object.FindObjectsOfType<OpenAIConfigurationSettings>().ToList();
+            assets.AddRange(Resources.FindObjectsOfTypeAll<OpenAIConfigurationSettings>().ToList());
+            return (from asset in assets where !string.IsNullOrWhiteSpace(asset.ApiKey) &&
+                                               !string.IsNullOrWhiteSpace(asset.ApiKey)
                 select new OpenAIAuthentication(asset.ApiKey)).FirstOrDefault();
+        }
 
 
         /// <summary>
