@@ -1,5 +1,6 @@
 # OpenAI
 
+[![Discord](https://img.shields.io/discord/855294214065487932.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/xQgMW9ufN4)
 [![openupm](https://img.shields.io/npm/v/com.openai.unity?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.openai.unity/)
 
 A [OpenAI](https://openai.com/) package for the [Unity](https://unity.com/) Game Engine.

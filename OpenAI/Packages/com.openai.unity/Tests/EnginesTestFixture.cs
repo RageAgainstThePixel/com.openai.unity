@@ -1,7 +1,9 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
 using NUnit.Framework;
 using System.Collections;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace OpenAI.Tests
@@ -27,15 +29,21 @@ namespace OpenAI.Tests
         {
             yield return AwaitTestUtilities.Await(async () =>
             {
-                var api = new OpenAIClient(Engine.Davinci);
-
+                var api = new OpenAIClient();
                 var engines = await api.EnginesEndpoint.GetEnginesAsync();
                 Assert.IsNotEmpty(engines);
 
                 foreach (var engine in engines)
                 {
-                    var result = await api.EnginesEndpoint.GetEngineDetailsAsync(engine.EngineName);
-                    Assert.IsNotNull(result);
+                    try
+                    {
+                        var result = await api.EnginesEndpoint.GetEngineDetailsAsync(engine.EngineName);
+                        Assert.IsNotNull(result);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogWarning($"Failed to retrieve engine data for {engine.EngineName}\n{e}");
+                    }
                 }
             });
         }
