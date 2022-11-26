@@ -36,7 +36,7 @@ namespace OpenAI
         /// <summary>
         /// Gets the main text of this completion
         /// </summary>
-        public override string ToString() => $"{{\"index\":{Index},\"finish_reason\":\"{FinishReason}\",\"text\":\"{Text}\"}}";
+        public override string ToString() => Text;
 
         public static implicit operator string(Choice choice) => choice.Text;
     }
