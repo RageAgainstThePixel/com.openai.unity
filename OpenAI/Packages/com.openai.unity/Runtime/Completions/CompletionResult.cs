@@ -53,8 +53,8 @@ namespace OpenAI
         /// </summary>
         public override string ToString()
         {
-            return Completions != null && Completions.Count > 0
-                ? Completions[0].ToString()
+            return Completions is { Count: > 0 }
+                ? Completions[0]
                 : $"CompletionResult {Id} has no valid output";
         }
     }
