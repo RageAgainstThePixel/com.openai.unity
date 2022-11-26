@@ -44,9 +44,9 @@ namespace OpenAI
                 }
 
                 var auth = (LoadFromAsset() ??
-                            LoadFromEnv() ??
                             LoadFromDirectory()) ??
-                            LoadFromDirectory(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+                            LoadFromDirectory(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)) ??
+                            LoadFromEnv();
                 cachedDefault = auth;
                 return auth;
             }
@@ -54,14 +54,10 @@ namespace OpenAI
         }
 
         private static OpenAIAuthentication LoadFromAsset()
-        {
-            var assets = UnityEngine.Object.FindObjectsOfType<OpenAIConfigurationSettings>().ToList();
-            assets.AddRange(Resources.FindObjectsOfTypeAll<OpenAIConfigurationSettings>().ToList());
-            return (from asset in assets where !string.IsNullOrWhiteSpace(asset.ApiKey) &&
-                                               !string.IsNullOrWhiteSpace(asset.ApiKey)
-                select new OpenAIAuthentication(asset.ApiKey)).FirstOrDefault();
-        }
-
+            => Resources.LoadAll<OpenAIConfigurationSettings>(string.Empty)
+                .Where(asset => asset != null)
+                .Where(asset => !string.IsNullOrWhiteSpace(asset.ApiKey))
+                .Select(asset => new OpenAIAuthentication(asset.ApiKey)).FirstOrDefault();
 
         /// <summary>
         /// Attempts to load api keys from environment variables, as "OPENAI_KEY" (or "OPENAI_SECRET_KEY", for backwards compatibility)

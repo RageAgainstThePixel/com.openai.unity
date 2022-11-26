@@ -16,7 +16,8 @@ Based on [OpenAI-DotNet](https://github.com/RageAgainstThePixel/OpenAI-DotNet)
   - `Name: OpenUPM`
   - `URL: https://package.openupm.com`
   - `Scope(s):`
-    - `com.opanai`
+    - `com.openai`
+    - `com.utilities`
 
 ![scoped-registries](OpenAI/Packages/com.openai.unity/Documentation~/images/package-manager-scopes.png)
 
@@ -181,4 +182,15 @@ Dictionary<string, string> examples = new Dictionary<string, string>
 
 var result = await api.ClassificationEndpoint.CreateClassificationAsync(new ClassificationRequest(query, examples, labels));
 // result.Label == "Negative"
+```
+
+### Image Generation
+
+The Image Generation API is accessed via `OpenAI.ImageGenerationEndpoint`:
+
+```csharp
+var api = new OpenAIClient();
+var results = await api.ImageGenerationEndPoint.GenerateImageAsync("A house riding a velociraptor", 1, ImageSize.Small);
+var image = results[0];
+// result == Texture2D generated image
 ```
