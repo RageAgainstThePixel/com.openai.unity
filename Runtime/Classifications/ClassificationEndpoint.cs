@@ -18,10 +18,7 @@ namespace OpenAI
         internal ClassificationEndpoint(OpenAIClient api) : base(api) { }
 
         /// <inheritdoc />
-        protected override string GetEndpoint(Engine engine = null)
-        {
-            return $"{Api.BaseUrl}classifications";
-        }
+        protected override string GetEndpoint(Engine engine = null) => $"{Api.BaseUrl}classifications";
 
         /// <summary>
         /// Given a query and a set of labeled examples, the model will predict the most likely label for the query.
@@ -37,7 +34,6 @@ namespace OpenAI
             {
                 var result = JsonConvert.DeserializeObject<ClassificationResponse>(await response.Content.ReadAsStringAsync());
                 result.SetResponseData(response.Headers);
-
                 return result;
             }
 

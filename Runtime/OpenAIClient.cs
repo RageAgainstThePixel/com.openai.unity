@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
+using OpenAI.Images;
 
 namespace OpenAI
 {
@@ -49,7 +50,13 @@ namespace OpenAI
             CompletionEndpoint = new CompletionEndpoint(this);
             SearchEndpoint = new SearchEndpoint(this);
             ClassificationEndpoint = new ClassificationEndpoint(this);
+            ImageGenerationEndPoint = new ImageGenerationEndpoint(this);
         }
+
+        /// <summary>
+        /// <see cref="HttpClient"/> to use when making calls to the API.
+        /// </summary>
+        internal HttpClient Client { get; }
 
         /// <summary>
         /// The API authentication information to use for API calls
@@ -75,6 +82,16 @@ namespace OpenAI
                 BaseUrl = $"https://api.openai.com/v{version}/";
             }
         }
+
+        /// <summary>
+        /// The base url to use when making calls to the API.
+        /// </summary>
+        internal string BaseUrl { get; private set; }
+
+        /// <summary>
+        /// The <see cref="JsonSerializationOptions"/> to use when making calls to the API.
+        /// </summary>
+        internal JsonSerializerSettings JsonSerializationOptions { get; }
 
         /// <summary>
         /// The API endpoint for querying available Engines/models
@@ -113,18 +130,8 @@ namespace OpenAI
         public ClassificationEndpoint ClassificationEndpoint { get; }
 
         /// <summary>
-        /// <see cref="HttpClient"/> to use when making calls to the API.
+        /// Given a prompt and/or an input image, the model will generate a new image.
         /// </summary>
-        internal HttpClient Client { get; }
-
-        /// <summary>
-        /// The base url to use when making calls to the API.
-        /// </summary>
-        internal string BaseUrl { get; private set; }
-
-        /// <summary>
-        /// The <see cref="JsonSerializationOptions"/> to use when making calls to the API.
-        /// </summary>
-        internal JsonSerializerSettings JsonSerializationOptions { get; }
+        public ImageGenerationEndpoint ImageGenerationEndPoint { get; }
     }
 }
