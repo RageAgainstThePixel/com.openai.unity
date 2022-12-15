@@ -1,11 +1,12 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace OpenAI
+namespace OpenAI.Completions
 {
     /// <summary>
     /// Represents a request to the <see cref="CompletionEndpoint"/>.  Mostly matches the parameters in
@@ -14,11 +15,14 @@ namespace OpenAI
     /// </summary>
     public sealed class CompletionRequest
     {
+        [JsonProperty("model")]
+        public string Model { get; set; }
+
         /// <summary>
         /// If you are requesting more than one prompt, specify them as an array of strings.
         /// </summary>
         [JsonProperty("prompt")]
-        public string[] Prompts { get; set; } = new string[0];
+        public string[] Prompts { get; set; } = Array.Empty<string>();
 
         /// <summary>
         /// For convenience, if you are only requesting a single prompt, set it here
@@ -46,6 +50,11 @@ namespace OpenAI
                 }
             }
         }
+
+        /// <summary>
+        /// The suffix that comes after a completion of inserted text.
+        /// </summary>
+        public string Suffix { get; set; }
 
         /// <summary>
         /// How many tokens to complete to. Can return fewer if a stop sequence is hit.
@@ -186,7 +195,9 @@ namespace OpenAI
                 return;
             }
 
+            Model = basedOn.Model;
             Prompts = basedOn.Prompts;
+            Suffix = basedOn.Suffix ?? DefaultCompletionRequestArgs?.Suffix;
             MaxTokens = basedOn.MaxTokens ?? DefaultCompletionRequestArgs?.MaxTokens;
             Temperature = basedOn.Temperature ?? DefaultCompletionRequestArgs?.Temperature;
             TopP = basedOn.TopP ?? DefaultCompletionRequestArgs?.TopP;
@@ -203,6 +214,7 @@ namespace OpenAI
         /// <summary>
         /// Creates a new <see cref="CompletionRequest"/> with the specified parameters
         /// </summary>
+        /// <param name="model">ID of the model to use. You can use the List models API to see all of your available models, or see our Model overview for descriptions of them.</param>
         /// <param name="prompt">The prompt to generate from</param>
         /// <param name="prompts">The prompts to generate from</param>
         /// <param name="max_tokens">How many tokens to complete to. Can return fewer if a stop sequence is hit.</param>
@@ -228,8 +240,10 @@ namespace OpenAI
         /// <param name="logitBias">A dictionary of logit bias to influence the probability of generating a token.</param>
         /// <param name="bestOf">Returns the top bestOf results based on the best probability.</param>
         public CompletionRequest(
+            Model model,
             string prompt = null,
             string[] prompts = null,
+            string suffix = null,
             int? max_tokens = null,
             double? temperature = null,
             double? top_p = null,
@@ -255,6 +269,7 @@ namespace OpenAI
                 throw new ArgumentNullException($"Missing required {prompt}(s)");
             }
 
+            Suffix = suffix ?? DefaultCompletionRequestArgs?.Suffix;
             MaxTokens = max_tokens ?? DefaultCompletionRequestArgs?.MaxTokens;
             Temperature = temperature ?? DefaultCompletionRequestArgs?.Temperature;
             TopP = top_p ?? DefaultCompletionRequestArgs?.TopP;

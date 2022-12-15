@@ -3,7 +3,7 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace OpenAI
+namespace OpenAI.Completions
 {
     /// <summary>
     /// Object belonging to a <see cref="Choice"/>

@@ -2,7 +2,7 @@
 
 using Newtonsoft.Json;
 
-namespace OpenAI
+namespace OpenAI.Completions
 {
     /// <summary>
     /// Represents a completion choice returned by the <see cref="CompletionEndpoint"/>.

@@ -10,7 +10,7 @@ namespace OpenAI
     /// <summary>
     /// Represents authentication to the OpenAPI API endpoint
     /// </summary>
-    public class OpenAIAuthentication
+    public sealed class OpenAIAuthentication
     {
         /// <summary>
         /// The API key, required to access the API endpoint.
