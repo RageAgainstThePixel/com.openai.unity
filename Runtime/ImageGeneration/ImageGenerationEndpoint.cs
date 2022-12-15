@@ -12,13 +12,13 @@ namespace OpenAI.Images
     /// <summary>
     /// Creates an image given a prompt.
     /// </summary>
-    public class ImageGenerationEndpoint : BaseEndPoint
+    public sealed class ImageGenerationEndpoint : BaseEndPoint
     {
         /// <inheritdoc />
         internal ImageGenerationEndpoint(OpenAIClient api) : base(api) { }
 
         /// <inheritdoc />
-        protected override string GetEndpoint(Engine engine = null) => $"{Api.BaseUrl}images/generations";
+        protected override string GetEndpoint() => $"{Api.BaseUrl}images/generations";
 
         /// <summary>
         /// Creates an image given a prompt.
@@ -59,7 +59,7 @@ namespace OpenAI.Images
                 {
                     images.Add(await Rest.DownloadTextureAsync(imageResult.Url));
                 }
-                
+
                 return images;
             }
 

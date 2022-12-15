@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
-namespace OpenAI
+namespace OpenAI.Completions
 {
     /// <summary>
     /// Represents a result from calling the <see cref="CompletionEndpoint"/>.
@@ -17,6 +17,9 @@ namespace OpenAI
         [JsonProperty("id")]
         public string Id { get; set; }
 
+        [JsonProperty("object")]
+        public string Object { get; set; }
+
         /// <summary>
         /// The time when the result was generated in unix epoch format
         /// </summary>
@@ -26,18 +29,6 @@ namespace OpenAI
         /// The time when the result was generated
         [JsonIgnore]
         public DateTime Created => DateTimeOffset.FromUnixTimeSeconds(CreatedUnixTime).DateTime;
-
-        private Engine engine;
-
-        /// <summary>
-        /// Which model was used to generate this result. Be sure to check <see cref="OpenAI.Engine.ModelRevision"/> for the specific revision number.
-        /// </summary>
-        [JsonIgnore]
-        public Engine Engine
-        {
-            get => engine ?? new Engine(Model);
-            set => engine = value;
-        }
 
         [JsonProperty("model")]
         public string Model { get; set; }
