@@ -18,10 +18,10 @@ namespace OpenAI.Completions
     /// (see the prompt library for inspiration).
     /// <see href="https://beta.openai.com/docs/api-reference/completions"/>
     /// </summary>
-    public sealed class CompletionEndpoint : BaseEndPoint
+    public sealed class CompletionsEndpoint : BaseEndPoint
     {
         /// <inheritdoc />
-        internal CompletionEndpoint(OpenAIClient api) : base(api) { }
+        internal CompletionsEndpoint(OpenAIClient api) : base(api) { }
 
         /// <inheritdoc />
         protected override string GetEndpoint()
