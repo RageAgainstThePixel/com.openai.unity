@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace OpenAI.Completions
 {
     /// <summary>
-    /// Represents a result from calling the <see cref="CompletionEndpoint"/>.
+    /// Represents a result from calling the <see cref="CompletionsEndpoint"/>.
     /// </summary>
     public sealed class CompletionResult : BaseResponse
     {

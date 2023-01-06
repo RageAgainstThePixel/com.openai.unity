@@ -21,8 +21,8 @@ namespace OpenAI.Tests
             yield return AwaitTestUtilities.Await(async () =>
             {
                 var api = new OpenAIClient();
-                Assert.IsNotNull(api.CompletionEndpoint);
-                var result = await api.CompletionEndpoint.CreateCompletionAsync(
+                Assert.IsNotNull(api.CompletionsEndpoint);
+                var result = await api.CompletionsEndpoint.CreateCompletionAsync(
                     completionPrompts,
                     temperature: 0.1,
                     max_tokens: 5,
@@ -42,10 +42,10 @@ namespace OpenAI.Tests
             yield return AwaitTestUtilities.Await(async () =>
             {
                 var api = new OpenAIClient();
-                Assert.IsNotNull(api.CompletionEndpoint);
+                Assert.IsNotNull(api.CompletionsEndpoint);
                 var allCompletions = new List<Choice>();
 
-                await api.CompletionEndpoint.StreamCompletionAsync(result =>
+                await api.CompletionsEndpoint.StreamCompletionAsync(result =>
                 {
                     Assert.IsNotNull(result);
                     Assert.NotNull(result.Completions);

@@ -9,7 +9,7 @@ using System.Linq;
 namespace OpenAI.Completions
 {
     /// <summary>
-    /// Represents a request to the <see cref="CompletionEndpoint"/>.  Mostly matches the parameters in
+    /// Represents a request to the <see cref="CompletionsEndpoint"/>.  Mostly matches the parameters in
     /// <see href="https://beta.openai.com/docs/api-reference/completions">the OpenAI docs</see>,
     /// although some have been renames or expanded into single/multiple properties for ease of use.
     /// </summary>
@@ -101,7 +101,7 @@ namespace OpenAI.Completions
 
         /// <summary>
         /// Specifies where the results should stream and be returned at one time.
-        /// Do not set this yourself, use the appropriate methods on <see cref="CompletionEndpoint"/> instead.
+        /// Do not set this yourself, use the appropriate methods on <see cref="CompletionsEndpoint"/> instead.
         /// </summary>
         [JsonProperty("stream")]
         public bool Stream { get; internal set; } = false;
@@ -172,6 +172,12 @@ namespace OpenAI.Completions
         public int? BestOf { get; set; }
 
         /// <summary>
+        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
+        /// </summary>
+        [JsonProperty("user")]
+        public string User { get; set; }
+
+        /// <summary>
         /// This allows you to set default parameters for every request, for example to set a default temperature or max tokens.
         /// For every request, if you do not have a parameter set on the request but do have it set here as a default,
         /// the request will automatically pick up the default value.
@@ -209,6 +215,7 @@ namespace OpenAI.Completions
             StopSequences = basedOn.StopSequences ?? DefaultCompletionRequestArgs?.StopSequences;
             LogitBias = basedOn.LogitBias ?? DefaultCompletionRequestArgs?.LogitBias;
             BestOf = basedOn.BestOf ?? DefaultCompletionRequestArgs?.BestOf;
+            User = basedOn.User ?? DefaultCompletionRequestArgs?.User;
         }
 
         /// <summary>
@@ -239,6 +246,7 @@ namespace OpenAI.Completions
         /// The returned text will not contain the stop sequence.</param>
         /// <param name="logitBias">A dictionary of logit bias to influence the probability of generating a token.</param>
         /// <param name="bestOf">Returns the top bestOf results based on the best probability.</param>
+        /// <param name="user">A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.</param>
         public CompletionRequest(
             Model model,
             string prompt = null,
@@ -254,7 +262,8 @@ namespace OpenAI.Completions
             bool? echo = null,
             string[] stopSequences = null,
             Dictionary<string, double> logitBias = null,
-            int? bestOf = null)
+            int? bestOf = null,
+            string user = null)
         {
             if (prompt != null)
             {
@@ -269,6 +278,7 @@ namespace OpenAI.Completions
                 throw new ArgumentNullException($"Missing required {prompt}(s)");
             }
 
+            Model = model ?? DefaultCompletionRequestArgs?.Model;
             Suffix = suffix ?? DefaultCompletionRequestArgs?.Suffix;
             MaxTokens = max_tokens ?? DefaultCompletionRequestArgs?.MaxTokens;
             Temperature = temperature ?? DefaultCompletionRequestArgs?.Temperature;
@@ -281,6 +291,8 @@ namespace OpenAI.Completions
             StopSequences = stopSequences ?? DefaultCompletionRequestArgs?.StopSequences;
             LogitBias = logitBias ?? DefaultCompletionRequestArgs?.LogitBias;
             BestOf = bestOf ?? DefaultCompletionRequestArgs?.BestOf;
+            User = user ?? DefaultCompletionRequestArgs?.User;
         }
+
     }
 }
