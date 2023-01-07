@@ -64,7 +64,7 @@ There are 4 ways to provide your API keys, in order of precedence:
 3. [Use System Environment Variables](#use-system-environment-variables)
 4. [Load key from configuration file](#load-key-from-configuration-file)
 
-You use the `Authentication` when you initialize the API as shown:
+You use the `OpenAIAuthentication` when you initialize the API as shown:
 
 #### Pass keys directly with constructor
 
@@ -72,10 +72,10 @@ You use the `Authentication` when you initialize the API as shown:
 var api = new OpenAIClient("sk-mykeyhere");
 ```
 
-Or create a `Authentication` object manually
+Or create a `OpenAIAuthentication` object manually
 
 ```csharp
-var api = new OpenAIClient(new Authentication("sk-secretkey"));
+var api = new OpenAIClient(new OpenAIAuthentication("sk-secretkey"));
 ```
 
 #### Unity Scriptable Object
@@ -90,8 +90,8 @@ You can create a new one by using the context menu of the project pane and creat
 
 > Use `OPENAI_KEY` or `OPENAI_SECRET_KEY` specify a key defined in the system's local environment:
 
-```chsarp
-OpenAI api = new OpenAIClient(Authentication LoadFromEnv());
+```csharp
+OpenAI api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
 ```
 
 #### Load key from configuration file
@@ -106,8 +106,8 @@ OPENAI_KEY=sk-aaaabbbbbccccddddd
 
 You can also load the file directly with known path by calling a static method in Authentication:
 
-```chsarp
-OpenAI api = new OpenAIClient(Authentication.LoadFromDirectory("C:\\Path\\To\\.openai"));;
+```csharp
+OpenAI api = new OpenAIClient(OpenAIAuthentication.LoadFromDirectory("C:\\Path\\To\\.openai"));;
 ```
 
 ### [Models](https://beta.openai.com/docs/api-reference/models)
