@@ -54,6 +54,8 @@ var api = new OpenAIClient();
   - [Create Image](#create-image)
   - [Edit Image](#edit-image)
   - [Create Image Variation](#create-image-variation)
+- [Moderations](#moderations)
+  - [Create Moderation](#create-moderation)
 
 ### Authentication
 
@@ -239,6 +241,7 @@ The Edit Image API is accessed via `OpenAIClient.ImagesEndPoint.CreateImageEditA
 ```csharp
 var api = new OpenAIClient();
 var results = await api.ImagesEndPoint.CreateImageEditAsync(Path.GetFullPath(imageAssetPath), Path.GetFullPath(maskAssetPath), "A sunlit indoor lounge area with a pool containing a flamingo", 1, ImageSize.Small);
+// results == file://path/to/image.png | Texture2D
 ```
 
 #### [Create Image Variation](https://beta.openai.com/docs/api-reference/images/create-variation)
@@ -250,6 +253,7 @@ The Edit Image API is accessed via `OpenAIClient.ImagesEndPoint.CreateImageVaria
 ```csharp
 var api = new OpenAIClient();
 var results = await api.ImagesEndPoint.CreateImageVariationAsync(Path.GetFullPath(imageAssetPath), 1, ImageSize.Small);
+// results == file://path/to/image.png | Texture2D
 ```
 
 ### [Moderations](https://beta.openai.com/docs/api-reference/moderations)
