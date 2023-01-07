@@ -19,7 +19,7 @@ Based on [OpenAI-DotNet](https://github.com/RageAgainstThePixel/OpenAI-DotNet)
     - `com.openai`
     - `com.utilities`
 
-![scoped-registries](OpenAI/Packages/com.openai.unity/Documentation~/images/package-manager-scopes.png)
+![scoped-registries](https://github.com/RageAgainstThePixel/com.openai.unity/blob/4760b8625dbf0c91f20418f1907042d144400149/OpenAI/Packages/com.openai.unity/Documentation~/images/package-manager-scopes.png)
 
 - Open the Unity Package Manager window
 - Change the Registry from Unity to `My Registries`
@@ -86,7 +86,7 @@ You can save the key directly into a scriptable object that is located in the re
 
 You can create a new one by using the context menu of the project pane and creating a new `OpenAIConfigurationSettings` scriptable object.
 
-![Create new OpenAIConfigurationSettings](OpenAI/Packages/com.openai.unity/Documentation~/images/create-scriptable-object.png)
+![Create new OpenAIConfigurationSettings](https://github.com/RageAgainstThePixel/com.openai.unity/blob/4760b8625dbf0c91f20418f1907042d144400149/OpenAI/Packages/com.openai.unity/Documentation~/images/create-scriptable-object.png)
 
 #### Use System Environment Variables
 
