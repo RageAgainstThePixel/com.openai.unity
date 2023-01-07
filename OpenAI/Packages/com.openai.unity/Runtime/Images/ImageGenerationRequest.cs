@@ -1,7 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
 using Newtonsoft.Json;
+using System;
 
 namespace OpenAI.Images
 {
@@ -13,17 +13,12 @@ namespace OpenAI.Images
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="prompt">
-        /// A text description of the desired image(s). The maximum length is 1000 characters.
-        /// </param>
-        /// <param name="numberOfResults">
-        /// The number of images to generate. Must be between 1 and 10.
-        /// </param>
-        /// <param name="size">
-        /// The size of the generated images.
-        /// </param>
+        /// <param name="prompt">A text description of the desired image(s). The maximum length is 1000 characters.</param>
+        /// <param name="numberOfResults">The number of images to generate. Must be between 1 and 10.</param>
+        /// <param name="size">The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.</param>
+        /// <param name="user">A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.</param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public ImageGenerationRequest(string prompt, int numberOfResults, ImageSize size)
+        public ImageGenerationRequest(string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null)
         {
             if (prompt.Length > 1000)
             {
@@ -46,6 +41,8 @@ namespace OpenAI.Images
                 ImageSize.Large => "1024x1024",
                 _ => throw new ArgumentOutOfRangeException(nameof(size), size, null)
             };
+
+            User = user;
         }
 
         /// <summary>
@@ -61,9 +58,15 @@ namespace OpenAI.Images
         public int Number { get; }
 
         /// <summary>
-        /// The size of the generated images.
+        /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
         /// </summary>
         [JsonProperty("size")]
         public string Size { get; }
+
+        /// <summary>
+        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
+        /// </summary>
+        [JsonProperty("user")]
+        public string User { get; }
     }
 }

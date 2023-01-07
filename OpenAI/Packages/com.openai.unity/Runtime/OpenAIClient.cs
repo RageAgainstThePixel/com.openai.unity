@@ -9,6 +9,7 @@ using OpenAI.Moderations;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
+using OpenAI.Embeddings;
 
 namespace OpenAI
 {
@@ -51,9 +52,10 @@ namespace OpenAI
 
             DefaultModel = model ?? Model.Default;
             ModelsEndpoint = new ModelsEndpoint(this);
-            CompletionEndpoint = new CompletionEndpoint(this);
+            CompletionsEndpoint = new CompletionsEndpoint(this);
             EditsEndpoint = new EditsEndpoint(this);
-            ImageGenerationEndPoint = new ImageGenerationEndpoint(this);
+            EmbeddingsEndpoint = new EmbeddingsEndpoint(this);
+            ImagesEndPoint = new ImagesEndpoint(this);
             ModerationsEndpoint = new ModerationsEndpoint(this);
         }
 
@@ -110,7 +112,7 @@ namespace OpenAI
         /// including summarization, translation, grammar correction, question answering, chatbots, composing emails,
         /// and much more (see the prompt library for inspiration).
         /// </summary>
-        public CompletionEndpoint CompletionEndpoint { get; }
+        public CompletionsEndpoint CompletionsEndpoint { get; }
 
         /// <summary>
         /// Given a prompt and an instruction, the model will return an edited version of the prompt.
@@ -118,9 +120,14 @@ namespace OpenAI
         public EditsEndpoint EditsEndpoint { get; }
 
         /// <summary>
+        /// Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.
+        /// </summary>
+        public EmbeddingsEndpoint EmbeddingsEndpoint { get; }
+
+        /// <summary>
         /// Given a prompt and/or an input image, the model will generate a new image.
         /// </summary>
-        public ImageGenerationEndpoint ImageGenerationEndPoint { get; }
+        public ImagesEndpoint ImagesEndPoint { get; }
 
         /// <summary>
         /// The moderation endpoint is a tool you can use to check whether content complies with OpenAI's content policy. Developers can thus identify content that our content policy prohibits and take action, for instance by filtering it.
