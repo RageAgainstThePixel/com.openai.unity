@@ -39,6 +39,7 @@ namespace OpenAI.Images
             }
 
             Image = File.OpenRead(imagePath);
+            ImageName = Path.GetFileName(imagePath);
 
             if (!File.Exists(maskPath))
             {
@@ -46,6 +47,7 @@ namespace OpenAI.Images
             }
 
             Mask = File.OpenRead(maskPath);
+            MaskName = Path.GetFileName(maskPath);
 
             if (prompt.Length > 1000)
             {
@@ -79,10 +81,12 @@ namespace OpenAI.Images
         /// The image to edit. Must be a valid PNG file, less than 4MB, and square.
         /// If mask is not provided, image must have transparency, which will be used as the mask.
         /// </param>
+        /// <param name="imageName">Name of the image file.</param>
         /// <param name="mask">
         /// An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where image should be edited.
         /// Must be a valid PNG file, less than 4MB, and have the same dimensions as image.
         /// </param>
+        /// <param name="maskName">Name of the mask file.</param>
         /// <param name="prompt">
         /// A text description of the desired image(s). The maximum length is 1000 characters.
         /// </param>
@@ -95,10 +99,12 @@ namespace OpenAI.Images
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
-        public ImageEditRequest(Stream image, Stream mask, string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null)
+        public ImageEditRequest(Stream image, string imageName, Stream mask, string maskName, string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null)
         {
             Image = image;
+            ImageName = imageName;
             Mask = mask;
+            MaskName = maskName;
 
             if (prompt.Length > 1000)
             {
@@ -140,12 +146,18 @@ namespace OpenAI.Images
         [JsonIgnore]
         public Stream Image { get; }
 
+        [JsonIgnore]
+        public string ImageName { get; }
+
         /// <summary>
         /// An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where image should be edited.
         /// Must be a valid PNG file, less than 4MB, and have the same dimensions as image.
         /// </summary>
         [JsonIgnore]
         public Stream Mask { get; }
+
+        [JsonIgnore]
+        public string MaskName { get; }
 
         /// <summary>
         /// A text description of the desired image(s). The maximum length is 1000 characters.

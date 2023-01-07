@@ -32,6 +32,7 @@ namespace OpenAI.Images
             }
 
             Image = File.OpenRead(imagePath);
+            ImageName = Path.GetFileName(imagePath);
 
             if (numberOfResults is > 10 or < 1)
             {
@@ -62,6 +63,9 @@ namespace OpenAI.Images
         /// </summary>
         [JsonIgnore]
         public Stream Image { get; }
+
+        [JsonIgnore]
+        public string ImageName { get; }
 
         /// <summary>
         /// The number of images to generate. Must be between 1 and 10.

@@ -84,7 +84,7 @@ You can save the key directly into a scriptable object that is located in the re
 
 You can create a new one by using the context menu of the project pane and creating a new `OpenAIConfigurationSettings` scriptable object.
 
-![Create new OpenAIConfigurationSettings](OpenAI\Packages\com.openai.unity\Documentation~\images\create-scriptable-object.png)
+![Create new OpenAIConfigurationSettings](OpenAI/Packages/com.openai.unity/Documentation~/images/create-scriptable-object.png)
 
 #### Use System Environment Variables
 
@@ -178,9 +178,13 @@ await foreach (var token in api.CompletionEndpoint.StreamCompletionEnumerableAsy
 
 Given a prompt and an instruction, the model will return an edited version of the prompt.
 
-#### [Create edit](https://beta.openai.com/docs/api-reference/edits/create)
+The Edits API is accessed via `OpenAIClient.EditsEndpoint`.
+
+#### [Create Edit](https://beta.openai.com/docs/api-reference/edits/create)
 
 Creates a new edit for the provided input, instruction, and parameters using the provided input and instruction.
+
+The Create Edit API is accessed via `OpenAIClient.ImagesEndpoint.CreateEditAsync()`.
 
 ```csharp
 var api = new OpenAIClient();
@@ -194,12 +198,17 @@ Get a vector representation of a given input that can be easily consumed by mach
 
 Related guide: [Embeddings](https://beta.openai.com/docs/guides/embeddings)
 
+The Edits API is accessed via `OpenAIClient.EmbeddingsEndpoint`.
+
 #### [Create Embeddings](https://beta.openai.com/docs/api-reference/embeddings/create)
 
 Creates an embedding vector representing the input text.
 
-```csharp
+The Create Embedding API is accessed via `OpenAIClient.EmbeddingsEndpoint.CreateEmbeddingAsync()`.
 
+```csharp
+var api = new OpenAIClient();
+var result = await api.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was delicious and the waiter...");
 ```
 
 ### [Images](https://beta.openai.com/docs/api-reference/images)
