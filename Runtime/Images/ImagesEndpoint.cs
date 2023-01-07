@@ -4,6 +4,7 @@ using System;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -44,10 +45,10 @@ namespace OpenAI.Images
         public async Task<IReadOnlyDictionary<string, Texture2D>> GenerateImageAsync(ImageGenerationRequest request)
         {
             var jsonContent = JsonConvert.SerializeObject(request, Api.JsonSerializationOptions);
-            var response = await Api.Client.PostAsync($"{GetEndpoint()}generations", jsonContent.ToJsonStringContent());
+            var response = await Api.Client.PostAsync($"{GetEndpoint()}generations", jsonContent.ToJsonStringContent()).ConfigureAwait(true);
 
             return response.IsSuccessStatusCode
-                ? await DeserializeResponseAsync(response).ConfigureAwait(false)
+                ? await DeserializeResponseAsync(response).ConfigureAwait(true)
                 : throw new HttpRequestException(
                     $"{nameof(GenerateImageAsync)} Failed!  HTTP status code: {response.StatusCode}. Request body: {jsonContent}");
         }
@@ -87,9 +88,12 @@ namespace OpenAI.Images
         public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageEditAsync(ImageEditRequest request)
         {
             using var content = new MultipartFormDataContent();
-            content.Headers.ContentType = new MediaTypeHeaderValue("multipart/form-data");
-            content.Add(new StreamContent(request.Image), "image");
-            content.Add(new StreamContent(request.Mask), "mask");
+            using var imageData = new MemoryStream();
+            await request.Image.CopyToAsync(imageData).ConfigureAwait(true);
+            content.Add(new ByteArrayContent(imageData.ToArray()), "image", request.ImageName);
+            using var maskData = new MemoryStream();
+            await request.Mask.CopyToAsync(maskData).ConfigureAwait(true);
+            content.Add(new ByteArrayContent(maskData.ToArray()), "mask", request.MaskName);
             content.Add(new StringContent(request.Prompt), "prompt");
             content.Add(new StringContent(request.Number.ToString()), "n");
             content.Add(new StringContent(request.Size), "size");
@@ -99,17 +103,13 @@ namespace OpenAI.Images
                 content.Add(new StringContent(request.User), "user");
             }
 
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"{GetEndpoint()}edits")
-            {
-                Content = content
-            };
-
-            var response = await Api.Client.SendAsync(httpRequest).ConfigureAwait(false);
+            var response = await Api.Client.PostAsync($"{GetEndpoint()}edits", content).ConfigureAwait(true);
+            var responseAsString = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
 
             return response.IsSuccessStatusCode
-                ? await DeserializeResponseAsync(response).ConfigureAwait(false)
+                ? await DeserializeResponseAsync(response).ConfigureAwait(true)
                 : throw new HttpRequestException(
-                    $"{nameof(CreateImageEditAsync)} Failed!  HTTP status code: {response.StatusCode}. Request body: {httpRequest}");
+                    $"{nameof(CreateImageEditAsync)} Failed!  HTTP status code: {response.StatusCode}. Response: {responseAsString}");
         }
 
         /// <summary>
@@ -141,8 +141,9 @@ namespace OpenAI.Images
         public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageVariationAsync(ImageVariationRequest request)
         {
             using var content = new MultipartFormDataContent();
-            content.Headers.ContentType = new MediaTypeHeaderValue("multipart/form-data");
-            content.Add(new StreamContent(request.Image), "image");
+            using var imageData = new MemoryStream();
+            await request.Image.CopyToAsync(imageData).ConfigureAwait(true);
+            content.Add(new ByteArrayContent(imageData.ToArray()), "image", request.ImageName);
             content.Add(new StringContent(request.Number.ToString()), "n");
             content.Add(new StringContent(request.Size), "size");
 
@@ -151,33 +152,19 @@ namespace OpenAI.Images
                 content.Add(new StringContent(request.User), "user");
             }
 
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"{GetEndpoint()}variations")
-            {
-                Content = content
-            };
-
-            HttpResponseMessage response;
-
-            try
-            {
-                response = await Api.Client.SendAsync(httpRequest).ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
-                throw;
-            }
+            var response = await Api.Client.PostAsync($"{GetEndpoint()}variations", content).ConfigureAwait(true);
+            var responseAsString = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
 
             return response.IsSuccessStatusCode
-                ? await DeserializeResponseAsync(response).ConfigureAwait(false)
+                ? await DeserializeResponseAsync(response).ConfigureAwait(true)
                 : throw new HttpRequestException(
-                    $"{nameof(CreateImageVariationAsync)} Failed!  HTTP status code: {response.StatusCode}. Request body: {httpRequest}");
+                    $"{nameof(CreateImageVariationAsync)} Failed!  HTTP status code: {response.StatusCode}. Response: {responseAsString}");
         }
 
         private async Task<IReadOnlyDictionary<string, Texture2D>> DeserializeResponseAsync(HttpResponseMessage response)
         {
             Debug.Assert(response.IsSuccessStatusCode);
-            var resultAsString = await response.Content.ReadAsStringAsync();
+            var resultAsString = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
             var imagesResponse = JsonConvert.DeserializeObject<ImagesResponse>(resultAsString, Api.JsonSerializationOptions);
 
             if (imagesResponse?.Data == null || imagesResponse.Data.Count == 0)
@@ -190,11 +177,11 @@ namespace OpenAI.Images
             var images = new ConcurrentDictionary<string, Texture2D>();
             var downloads = imagesResponse.Data.Select(DownloadAsync).ToList();
 
-            await Task.WhenAll(downloads);
+            await Task.WhenAll(downloads).ConfigureAwait(true);
 
             async Task DownloadAsync(ImageResult result)
             {
-                var texture = await Rest.DownloadTextureAsync(result.Url);
+                var texture = await Rest.DownloadTextureAsync(result.Url).ConfigureAwait(true);
 
                 if (Rest.TryGetDownloadCacheItem(result.Url, out var localFilePath))
                 {

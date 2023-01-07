@@ -9,7 +9,7 @@ namespace OpenAI.Tests
     internal class TestFixture_05_Embeddings
     {
         [UnityTest]
-        public IEnumerator Test_1_GetBasicEdit()
+        public IEnumerator Test_1_CreateEmbedding()
         {
             yield return AwaitTestUtilities.Await(async () =>
             {
