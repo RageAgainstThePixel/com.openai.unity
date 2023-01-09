@@ -63,8 +63,8 @@ There are 4 ways to provide your API keys, in order of precedence:
 
 1. [Pass keys directly with constructor](#pass-keys-directly-with-constructor)
 2. [Unity Scriptable Object](#unity-scriptable-object)
-3. [Use System Environment Variables](#use-system-environment-variables)
-4. [Load key from configuration file](#load-key-from-configuration-file)
+3. [Load key from configuration file](#load-key-from-configuration-file)
+4. [Use System Environment Variables](#use-system-environment-variables)
 
 You use the `OpenAIAuthentication` when you initialize the API as shown:
 
@@ -88,14 +88,6 @@ You can create a new one by using the context menu of the project pane and creat
 
 ![Create new OpenAIConfigurationSettings](https://github.com/RageAgainstThePixel/com.openai.unity/blob/4760b8625dbf0c91f20418f1907042d144400149/OpenAI/Packages/com.openai.unity/Documentation~/images/create-scriptable-object.png)
 
-#### Use System Environment Variables
-
-> Use `OPENAI_KEY` or `OPENAI_SECRET_KEY` specify a key defined in the system's local environment:
-
-```csharp
-OpenAI api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
-```
-
 #### Load key from configuration file
 
 Attempts to load api keys from a configuration file, by default `.openai` in the current directory, optionally traversing up the directory tree or in the user's home directory.
@@ -109,7 +101,15 @@ OPENAI_KEY=sk-aaaabbbbbccccddddd
 You can also load the file directly with known path by calling a static method in Authentication:
 
 ```csharp
-OpenAI api = new OpenAIClient(OpenAIAuthentication.LoadFromDirectory("C:\\Path\\To\\.openai"));;
+var api = new OpenAIClient(OpenAIAuthentication.LoadFromDirectory("C:\\Path\\To\\.openai"));;
+```
+
+#### Use System Environment Variables
+
+> Use `OPENAI_KEY` or `OPENAI_SECRET_KEY` specify a key defined in the system's local environment:
+
+```csharp
+var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
 ```
 
 ### [Models](https://beta.openai.com/docs/api-reference/models)
@@ -138,11 +138,11 @@ var model = await api.ModelsEndpoint.GetModelDetailsAsync("text-davinci-003");
 
 ### [Completions](https://beta.openai.com/docs/api-reference/completions)
 
-The Completion API is accessed via `OpenAIClient.CompletionEndpoint`:
+The Completion API is accessed via `OpenAIClient.CompletionsEndpoint`:
 
 ```csharp
-OpenAI api = new OpenAIClient();
-var result = await api.CompletionEndpoint.CreateCompletionAsync("One Two Three One Two", temperature: 0.1, model: Model.Davinci);
+var api = new OpenAIClient();
+var result = await api.CompletionsEndpoint.CreateCompletionAsync("One Two Three One Two", temperature: 0.1, model: Model.Davinci);
 Debug.Log(result);
 ```
 
@@ -155,7 +155,7 @@ Streaming allows you to get results are they are generated, which can help your 
 ```csharp
 var api = new OpenAIClient();
 
-await api.CompletionEndpoint.StreamCompletionAsync(result =>
+await api.CompletionsEndpoint.StreamCompletionAsync(result =>
 {
     foreach (var choice in result.Completions)
     {
@@ -170,7 +170,7 @@ Or if using [`IAsyncEnumerable{T}`](https://docs.microsoft.com/en-us/dotnet/api/
 
 ```csharp
 var api = new OpenAIClient();
-await foreach (var token in api.CompletionEndpoint.StreamCompletionEnumerableAsync("My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", max_tokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci))
+await foreach (var token in api.CompletionsEndpoint.StreamCompletionEnumerableAsync("My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", max_tokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci))
 {
   Debug.Log(token);
 }

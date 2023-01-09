@@ -2,6 +2,7 @@
 
 using System.IO;
 using UnityEditor;
+using UnityEngine;
 
 namespace OpenAI.Editor
 {
@@ -11,6 +12,7 @@ namespace OpenAI.Editor
         private void OnEnable()
         {
             var update = false;
+            var instance = target as OpenAIConfigurationSettings;
             var currentPath = AssetDatabase.GetAssetPath(target);
 
             if (string.IsNullOrWhiteSpace(currentPath))
@@ -26,8 +28,21 @@ namespace OpenAI.Editor
 
             if (!currentPath.Contains("Resources"))
             {
-                File.Move(Path.GetFullPath(currentPath), Path.GetFullPath($"Assets/Resources/{target.name}.asset"));
-                File.Move(Path.GetFullPath($"{currentPath}.meta"), Path.GetFullPath($"Assets/Resources/{target.name}.asset.meta"));
+                var newPath = $"Assets/Resources/{instance!.name}.asset";
+
+                if (!File.Exists(newPath))
+                {
+                    File.Move(Path.GetFullPath(currentPath), Path.GetFullPath(newPath));
+                    File.Move(Path.GetFullPath($"{currentPath}.meta"), Path.GetFullPath($"{newPath}.meta"));
+                }
+                else
+                {
+                    AssetDatabase.DeleteAsset(currentPath);
+                    var instances = AssetDatabase.FindAssets($"t:{nameof(OpenAIConfigurationSettings)}");
+                    var path = AssetDatabase.GUIDToAssetPath(instances[0]);
+                    instance = AssetDatabase.LoadAssetAtPath<OpenAIConfigurationSettings>(path);
+                }
+
                 update = true;
             }
 
@@ -36,7 +51,7 @@ namespace OpenAI.Editor
                 EditorApplication.delayCall += () =>
                 {
                     AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
-                    EditorGUIUtility.PingObject(target);
+                    EditorGUIUtility.PingObject(instance);
                 };
             }
         }

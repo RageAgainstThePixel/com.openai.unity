@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace OpenAI.Embeddings
 {
-    public class Datum
+    public sealed class Datum
     {
         [JsonProperty("object")]
         public string Object { get; set; }

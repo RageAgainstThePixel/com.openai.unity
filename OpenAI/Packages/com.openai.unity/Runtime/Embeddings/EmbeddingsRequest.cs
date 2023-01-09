@@ -6,7 +6,7 @@ using System;
 
 namespace OpenAI.Embeddings
 {
-    public class EmbeddingsRequest
+    public sealed class EmbeddingsRequest
     {
         /// <summary>
         /// Constructor.
