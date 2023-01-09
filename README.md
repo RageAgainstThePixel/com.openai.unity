@@ -138,11 +138,11 @@ var model = await api.ModelsEndpoint.GetModelDetailsAsync("text-davinci-003");
 
 ### [Completions](https://beta.openai.com/docs/api-reference/completions)
 
-The Completion API is accessed via `OpenAIClient.CompletionEndpoint`:
+The Completion API is accessed via `OpenAIClient.CompletionsEndpoint`:
 
 ```csharp
 var api = new OpenAIClient();
-var result = await api.CompletionEndpoint.CreateCompletionAsync("One Two Three One Two", temperature: 0.1, model: Model.Davinci);
+var result = await api.CompletionsEndpoint.CreateCompletionAsync("One Two Three One Two", temperature: 0.1, model: Model.Davinci);
 Debug.Log(result);
 ```
 
@@ -155,7 +155,7 @@ Streaming allows you to get results are they are generated, which can help your 
 ```csharp
 var api = new OpenAIClient();
 
-await api.CompletionEndpoint.StreamCompletionAsync(result =>
+await api.CompletionsEndpoint.StreamCompletionAsync(result =>
 {
     foreach (var choice in result.Completions)
     {
@@ -170,7 +170,7 @@ Or if using [`IAsyncEnumerable{T}`](https://docs.microsoft.com/en-us/dotnet/api/
 
 ```csharp
 var api = new OpenAIClient();
-await foreach (var token in api.CompletionEndpoint.StreamCompletionEnumerableAsync("My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", max_tokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci))
+await foreach (var token in api.CompletionsEndpoint.StreamCompletionEnumerableAsync("My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", max_tokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci))
 {
   Debug.Log(token);
 }
