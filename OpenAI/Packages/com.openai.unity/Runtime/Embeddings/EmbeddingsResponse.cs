@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace OpenAI.Embeddings
 {
-    public class EmbeddingsResponse : BaseResponse
+    public sealed class EmbeddingsResponse : BaseResponse
     {
         [JsonProperty("object")]
         public string Object { get; set; }

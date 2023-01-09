@@ -54,6 +54,7 @@ namespace OpenAI.Completions
         /// <summary>
         /// The suffix that comes after a completion of inserted text.
         /// </summary>
+        [JsonProperty("suffix")]
         public string Suffix { get; set; }
 
         /// <summary>
@@ -293,6 +294,5 @@ namespace OpenAI.Completions
             BestOf = bestOf ?? DefaultCompletionRequestArgs?.BestOf;
             User = user ?? DefaultCompletionRequestArgs?.User;
         }
-
     }
 }

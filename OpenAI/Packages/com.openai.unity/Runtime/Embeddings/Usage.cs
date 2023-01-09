@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace OpenAI.Embeddings
 {
-    public class Usage
+    public sealed class Usage
     {
         [JsonProperty("prompt_tokens")]
         public int PromptTokens { get; set; }

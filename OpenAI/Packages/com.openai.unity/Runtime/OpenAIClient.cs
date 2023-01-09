@@ -3,13 +3,13 @@
 using Newtonsoft.Json;
 using OpenAI.Completions;
 using OpenAI.Edits;
+using OpenAI.Embeddings;
 using OpenAI.Images;
 using OpenAI.Models;
 using OpenAI.Moderations;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
-using OpenAI.Embeddings;
 
 namespace OpenAI
 {
@@ -48,14 +48,18 @@ namespace OpenAI
             Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", OpenAIAuthentication.ApiKey);
             Client.DefaultRequestHeaders.Add("User-Agent", "dotnet_openai_api");
             Version = 1;
-            JsonSerializationOptions = new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore };
-
+            JsonSerializationOptions = new JsonSerializerSettings
+            {
+                DefaultValueHandling = DefaultValueHandling.Ignore
+            };
             DefaultModel = model ?? Model.Default;
             ModelsEndpoint = new ModelsEndpoint(this);
             CompletionsEndpoint = new CompletionsEndpoint(this);
             EditsEndpoint = new EditsEndpoint(this);
-            EmbeddingsEndpoint = new EmbeddingsEndpoint(this);
             ImagesEndPoint = new ImagesEndpoint(this);
+            EmbeddingsEndpoint = new EmbeddingsEndpoint(this);
+            //TODO FilesEndpoint
+            //TODO File-tunes
             ModerationsEndpoint = new ModerationsEndpoint(this);
         }
 
@@ -120,14 +124,14 @@ namespace OpenAI
         public EditsEndpoint EditsEndpoint { get; }
 
         /// <summary>
-        /// Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.
-        /// </summary>
-        public EmbeddingsEndpoint EmbeddingsEndpoint { get; }
-
-        /// <summary>
         /// Given a prompt and/or an input image, the model will generate a new image.
         /// </summary>
         public ImagesEndpoint ImagesEndPoint { get; }
+
+        /// <summary>
+        /// Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.
+        /// </summary>
+        public EmbeddingsEndpoint EmbeddingsEndpoint { get; }
 
         /// <summary>
         /// The moderation endpoint is a tool you can use to check whether content complies with OpenAI's content policy. Developers can thus identify content that our content policy prohibits and take action, for instance by filtering it.

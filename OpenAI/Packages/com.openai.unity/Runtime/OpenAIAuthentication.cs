@@ -12,6 +12,10 @@ namespace OpenAI
     /// </summary>
     public sealed class OpenAIAuthentication
     {
+        private const string OPENAI_KEY = "OPENAI_KEY";
+        private const string OPENAI_SECRET_KEY = "OPENAI_SECRET_KEY";
+        private const string TEST_OPENAI_SECRET_KEY = "TEST_OPENAI_SECRET_KEY";
+
         /// <summary>
         /// The API key, required to access the API endpoint.
         /// </summary>
@@ -29,7 +33,7 @@ namespace OpenAI
         /// <param name="apiKey">The API key, required to access the API endpoint.</param>
         public OpenAIAuthentication(string apiKey) => ApiKey = apiKey;
 
-        private static OpenAIAuthentication cachedDefault = null;
+        private static OpenAIAuthentication cachedDefault;
 
         /// <summary>
         /// The default authentication to use when no other auth is specified.  This can be set manually, or automatically loaded via environment variables or a config file.  <seealso cref="LoadFromEnv"/><seealso cref="LoadFromDirectory"/>
@@ -65,19 +69,19 @@ namespace OpenAI
         /// <returns>Returns the loaded <see cref="OpenAIAuthentication"/> any api keys were found, or <see langword="null"/> if there were no matching environment vars.</returns>
         public static OpenAIAuthentication LoadFromEnv()
         {
-            var key = Environment.GetEnvironmentVariable("OPENAI_KEY");
+            var apiKey = Environment.GetEnvironmentVariable(OPENAI_KEY);
 
-            if (string.IsNullOrWhiteSpace(key))
+            if (string.IsNullOrWhiteSpace(apiKey))
             {
-                key = Environment.GetEnvironmentVariable("OPENAI_SECRET_KEY");
+                apiKey = Environment.GetEnvironmentVariable(OPENAI_SECRET_KEY);
             }
 
-            if (string.IsNullOrWhiteSpace(key))
+            if (string.IsNullOrWhiteSpace(apiKey))
             {
-                key = Environment.GetEnvironmentVariable("TEST_OPENAI_SECRET_KEY");
+                apiKey = Environment.GetEnvironmentVariable(TEST_OPENAI_SECRET_KEY);
             }
 
-            return string.IsNullOrEmpty(key) ? null : new OpenAIAuthentication(key);
+            return string.IsNullOrEmpty(apiKey) ? null : new OpenAIAuthentication(apiKey);
         }
 
         /// <summary>
@@ -89,7 +93,7 @@ namespace OpenAI
         /// <returns>Returns the loaded <see cref="OpenAIAuthentication"/> any api keys were found, or <see langword="null"/> if it was not successful in finding a config (or if the config file didn't contain correctly formatted API keys)</returns>
         public static OpenAIAuthentication LoadFromDirectory(string directory = null, string filename = ".openai", bool searchUp = true)
         {
-            directory = directory ?? (directory = Environment.CurrentDirectory);
+            directory ??= Environment.CurrentDirectory;
 
             string key = null;
             var curDirectory = new DirectoryInfo(directory);
@@ -99,17 +103,22 @@ namespace OpenAI
                 if (File.Exists(Path.Combine(curDirectory.FullName, filename)))
                 {
                     var lines = File.ReadAllLines(Path.Combine(curDirectory.FullName, filename));
+
                     foreach (var l in lines)
                     {
                         var parts = l.Split('=', ':');
+
                         if (parts.Length == 2)
                         {
                             switch (parts[0].ToUpper())
                             {
-                                case "OPENAI_KEY":
+                                case OPENAI_KEY:
                                     key = parts[1].Trim();
                                     break;
-                                case "OPENAI_SECRET_KEY":
+                                case OPENAI_SECRET_KEY:
+                                    key = parts[1].Trim();
+                                    break;
+                                case TEST_OPENAI_SECRET_KEY:
                                     key = parts[1].Trim();
                                     break;
                             }
