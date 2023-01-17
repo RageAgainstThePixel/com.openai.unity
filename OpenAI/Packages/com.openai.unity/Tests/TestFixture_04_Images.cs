@@ -28,6 +28,7 @@ namespace OpenAI.Tests
                 foreach (var result in results)
                 {
                     Debug.Log(result.Key);
+                    Assert.IsNotNull(result.Value);
                 }
             });
         }
@@ -49,6 +50,7 @@ namespace OpenAI.Tests
                 foreach (var result in results)
                 {
                     Debug.Log(result.Key);
+                    Assert.IsNotNull(result.Value);
                 }
             });
         }
@@ -69,6 +71,7 @@ namespace OpenAI.Tests
                 foreach (var result in results)
                 {
                     Debug.Log(result.Key);
+                    Assert.IsNotNull(result.Value);
                 }
             });
         }
