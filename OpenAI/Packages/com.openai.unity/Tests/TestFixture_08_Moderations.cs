@@ -14,8 +14,11 @@ namespace OpenAI.Tests
             yield return AwaitTestUtilities.Await(async () =>
             {
                 var api = new OpenAIClient();
-                var response = await api.ModerationsEndpoint.GetModerationAsync("I want to kill them.");
-                Assert.IsTrue(response);
+                var violationResponse = await api.ModerationsEndpoint.GetModerationAsync("I want to kill them.");
+                Assert.IsTrue(violationResponse);
+
+                var response = await api.ModerationsEndpoint.GetModerationAsync("I love you");
+                Assert.IsFalse(response);
             });
         }
     }
