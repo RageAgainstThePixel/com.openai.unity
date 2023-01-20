@@ -82,7 +82,7 @@ var api = new OpenAIClient(new OpenAIAuthentication("sk-secretkey"));
 
 #### Unity Scriptable Object
 
-You can save the key directly into a scriptable object that is located in the resources folder.
+You can save the key directly into a scriptable object that is located in the `Assets/Resources` folder.
 
 You can create a new one by using the context menu of the project pane and creating a new `OpenAIConfigurationSettings` scriptable object.
 
@@ -94,8 +94,22 @@ Attempts to load api keys from a configuration file, by default `.openai` in the
 
 To create a configuration file, create a new text file named `.openai` and containing the line:
 
+> Organization entry is optional.
+
+##### Json format
+
+```json
+{
+  "openai_key":"sk-aaaabbbbbccccddddd",
+  "organization":"org-yourOrganizationId"
+}
+```
+
+##### Deprecated format
+
 ```shell
 OPENAI_KEY=sk-aaaabbbbbccccddddd
+ORGANIZATION=org-yourOrganizationId
 ```
 
 You can also load the file directly with known path by calling a static method in Authentication:
@@ -114,7 +128,7 @@ var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
 
 ### [Models](https://beta.openai.com/docs/api-reference/models)
 
-List and describe the various models available in the API. You can refer to the Models documentation to understand what models are available and the differences between them.
+List and describe the various models available in the API. You can refer to the [Models documentation](https://beta.openai.com/docs/models) to understand what models are available and the differences between them.
 
 The Models API is accessed via `OpenAIClient.ModelsEndpoint`.
 
@@ -163,8 +177,6 @@ await api.CompletionsEndpoint.StreamCompletionAsync(result =>
     }
 }, "My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", max_tokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci);
 ```
-
-The result.Completions
 
 Or if using [`IAsyncEnumerable{T}`](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=net-5.0) ([C# 8.0+](https://docs.microsoft.com/en-us/archive/msdn-magazine/2019/november/csharp-iterating-with-async-enumerables-in-csharp-8))
 
