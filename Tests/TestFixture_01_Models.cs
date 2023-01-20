@@ -16,7 +16,7 @@ namespace OpenAI.Tests
         {
             yield return AwaitTestUtilities.Await(async () =>
             {
-                var api = new OpenAIClient(Model.Davinci);
+                var api = new OpenAIClient();
                 Assert.IsNotNull(api.ModelsEndpoint);
                 var results = await api.ModelsEndpoint.GetModelsAsync();
                 Assert.IsNotNull(results);
@@ -45,7 +45,7 @@ namespace OpenAI.Tests
                     }
                     catch (Exception e)
                     {
-                        Debug.LogWarning($"Failed to retrieve engine data for {model.Id}\n{e}");
+                        Debug.LogWarning($"No Model details found for {model.Id}\n{e}");
                     }
                 }
             });
