@@ -1,7 +1,10 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using NUnit.Framework;
+using System;
 using System.IO;
+using System.Security.Authentication;
+using UnityEngine;
 
 namespace OpenAI.Tests
 {
@@ -10,16 +13,25 @@ namespace OpenAI.Tests
         [SetUp]
         public void Setup()
         {
-            File.WriteAllText(".openai", "OPENAI_KEY=pk-test12");
+            var authJson = new AuthInfo("sk-test12", "org-testOrg");
+            var authText = JsonUtility.ToJson(authJson, true);
+            File.WriteAllText(".openai", authText);
         }
 
         [Test]
-        public void Test_001_GetAuthFromEnv()
+        public void Test_01_GetAuthFromEnv()
         {
             var auth = OpenAIAuthentication.LoadFromEnv();
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.ApiKey);
             Assert.IsNotEmpty(auth.ApiKey);
+
+            auth = OpenAIAuthentication.LoadFromEnv("org-testOrg");
+            Assert.IsNotNull(auth);
+            Assert.IsNotNull(auth.ApiKey);
+            Assert.IsNotEmpty(auth.ApiKey);
+            Assert.IsNotNull(auth.Organization);
+            Assert.IsNotEmpty(auth.Organization);
         }
 
         [Test]
@@ -28,7 +40,9 @@ namespace OpenAI.Tests
             var auth = OpenAIAuthentication.LoadFromDirectory();
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.ApiKey);
-            Assert.AreEqual("pk-test12", auth.ApiKey);
+            Assert.AreEqual("sk-test12", auth.ApiKey);
+            Assert.IsNotNull(auth.Organization);
+            Assert.AreEqual("org-testOrg", auth.Organization);
         }
 
         [Test]
@@ -39,30 +53,41 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public void Test_04_GetDefault()
+        public void Test_04_GetAuthFromConfiguration()
         {
+            var config = ScriptableObject.CreateInstance<OpenAIConfigurationSettings>();
+            config.apiKey = "sk-test12";
+            config.organization = "org-testOrg";
+
             var auth = OpenAIAuthentication.Default;
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.ApiKey);
+            Assert.AreEqual("sk-test12", auth.ApiKey);
+            Assert.IsNotNull(auth.Organization);
+            Assert.AreEqual("org-testOrg", auth.Organization);
         }
 
         [Test]
         public void Test_05_Authentication()
         {
             var defaultAuth = OpenAIAuthentication.Default;
-            var manualAuth = new OpenAIAuthentication("pk-testAA");
+            var manualAuth = new OpenAIAuthentication("sk-testAA", "org-testAA");
             var api = new OpenAIClient();
             var shouldBeDefaultAuth = api.OpenAIAuthentication;
             Assert.IsNotNull(shouldBeDefaultAuth);
             Assert.IsNotNull(shouldBeDefaultAuth.ApiKey);
+            Assert.IsNotNull(shouldBeDefaultAuth.Organization);
             Assert.AreEqual(defaultAuth.ApiKey, shouldBeDefaultAuth.ApiKey);
+            Assert.AreEqual(defaultAuth.Organization, shouldBeDefaultAuth.Organization);
 
-            OpenAIAuthentication.Default = new OpenAIAuthentication("pk-testAA");
+            OpenAIAuthentication.Default = new OpenAIAuthentication("sk-testAA", "org-testAA");
             api = new OpenAIClient();
             var shouldBeManualAuth = api.OpenAIAuthentication;
             Assert.IsNotNull(shouldBeManualAuth);
             Assert.IsNotNull(shouldBeManualAuth.ApiKey);
+            Assert.IsNotNull(shouldBeManualAuth.Organization);
             Assert.AreEqual(manualAuth.ApiKey, shouldBeManualAuth.ApiKey);
+            Assert.AreEqual(manualAuth.Organization, shouldBeManualAuth.Organization);
 
             OpenAIAuthentication.Default = defaultAuth;
         }
@@ -70,24 +95,70 @@ namespace OpenAI.Tests
         [Test]
         public void Test_06_GetKey()
         {
-            var auth = new OpenAIAuthentication("pk-testAA");
+            var auth = new OpenAIAuthentication("sk-testAA");
             Assert.IsNotNull(auth.ApiKey);
-            Assert.AreEqual("pk-testAA", auth.ApiKey);
+            Assert.AreEqual("sk-testAA", auth.ApiKey);
         }
 
         [Test]
-        public void Test_07_ParseKey()
+        public void Test_07_GetKeyFailed()
         {
-            var auth = new OpenAIAuthentication("pk-testAA");
+            OpenAIAuthentication auth = null;
+
+            try
+            {
+                auth = new OpenAIAuthentication("fail-key");
+            }
+            catch (InvalidCredentialException)
+            {
+                Assert.IsNull(auth);
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(false, $"Expected exception {nameof(InvalidCredentialException)} but got {e.GetType().Name}");
+            }
+        }
+
+        [Test]
+        public void Test_08_ParseKey()
+        {
+            var auth = new OpenAIAuthentication("sk-testAA");
             Assert.IsNotNull(auth.ApiKey);
-            Assert.AreEqual("pk-testAA", auth.ApiKey);
-            auth = "pk-testCC";
+            Assert.AreEqual("sk-testAA", auth.ApiKey);
+            auth = "sk-testCC";
             Assert.IsNotNull(auth.ApiKey);
-            Assert.AreEqual("pk-testCC", auth.ApiKey);
+            Assert.AreEqual("sk-testCC", auth.ApiKey);
 
             auth = new OpenAIAuthentication("sk-testBB");
             Assert.IsNotNull(auth.ApiKey);
             Assert.AreEqual("sk-testBB", auth.ApiKey);
+        }
+
+        [Test]
+        public void Test_09_GetOrganization()
+        {
+            var auth = new OpenAIAuthentication("sk-testAA", "org-testAA");
+            Assert.IsNotNull(auth.Organization);
+            Assert.AreEqual("org-testAA", auth.Organization);
+        }
+
+        [Test]
+        public void Test_10_GetOrgFailed()
+        {
+            OpenAIAuthentication auth = null;
+
+            try
+            {
+                auth = new OpenAIAuthentication("sk-testAA", "fail-org");
+            }
+            catch (InvalidCredentialException)
+            {
+                Assert.IsNull(auth);
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(false, $"Expected exception {nameof(InvalidCredentialException)} but got {e.GetType().Name}");
+            }
         }
 
         [TearDown]

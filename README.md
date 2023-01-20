@@ -3,9 +3,11 @@
 [![Discord](https://img.shields.io/discord/855294214065487932.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/xQgMW9ufN4)
 [![openupm](https://img.shields.io/npm/v/com.openai.unity?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.openai.unity/)
 
-A [OpenAI](https://openai.com/) package for the [Unity](https://unity.com/) Game Engine.
-
 Based on [OpenAI-DotNet](https://github.com/RageAgainstThePixel/OpenAI-DotNet)
+
+A [OpenAI](https://openai.com/) package for the [Unity](https://unity.com/) Game Engine to use with GPT-3 API (currently in beta).  Independently developed, this is not an official library and I am not affiliated with OpenAI.  An OpenAI API account is required.
+
+> This repository is available to transfer to the OpenAI organization if they so choose to accept it.
 
 ## Installing
 
@@ -82,7 +84,7 @@ var api = new OpenAIClient(new OpenAIAuthentication("sk-secretkey"));
 
 #### Unity Scriptable Object
 
-You can save the key directly into a scriptable object that is located in the resources folder.
+You can save the key directly into a scriptable object that is located in the `Assets/Resources` folder.
 
 You can create a new one by using the context menu of the project pane and creating a new `OpenAIConfigurationSettings` scriptable object.
 
@@ -94,8 +96,22 @@ Attempts to load api keys from a configuration file, by default `.openai` in the
 
 To create a configuration file, create a new text file named `.openai` and containing the line:
 
+> Organization entry is optional.
+
+##### Json format
+
+```json
+{
+  "openai_key":"sk-aaaabbbbbccccddddd",
+  "organization":"org-yourOrganizationId"
+}
+```
+
+##### Deprecated format
+
 ```shell
 OPENAI_KEY=sk-aaaabbbbbccccddddd
+ORGANIZATION=org-yourOrganizationId
 ```
 
 You can also load the file directly with known path by calling a static method in Authentication:
@@ -114,7 +130,7 @@ var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
 
 ### [Models](https://beta.openai.com/docs/api-reference/models)
 
-List and describe the various models available in the API. You can refer to the Models documentation to understand what models are available and the differences between them.
+List and describe the various models available in the API. You can refer to the [Models documentation](https://beta.openai.com/docs/models) to understand what models are available and the differences between them.
 
 The Models API is accessed via `OpenAIClient.ModelsEndpoint`.
 
@@ -163,8 +179,6 @@ await api.CompletionsEndpoint.StreamCompletionAsync(result =>
     }
 }, "My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", max_tokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci);
 ```
-
-The result.Completions
 
 Or if using [`IAsyncEnumerable{T}`](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=net-5.0) ([C# 8.0+](https://docs.microsoft.com/en-us/archive/msdn-magazine/2019/november/csharp-iterating-with-async-enumerables-in-csharp-8))
 
@@ -227,9 +241,13 @@ The Create Image API is accessed via `OpenAIClient.ImagesEndpoint.GenerateImageA
 
 ```csharp
 var api = new OpenAIClient();
-var results = await api.ImageGenerationEndPoint.GenerateImageAsync("A house riding a velociraptor", 1, ImageSize.Small);
-var image = results[0];
-// result == Texture2D generated image
+var results = await api.ImagesEndPoint.GenerateImageAsync("A house riding a velociraptor", 1, ImageSize.Small);
+foreach (var result in results)
+{
+    Debug.Log(result.Key);
+}
+// result.Key == file://path/to/image.png
+// result.Value == Texture2D
 ```
 
 #### [Edit Image](https://beta.openai.com/docs/api-reference/images/create-edit)
@@ -241,7 +259,8 @@ The Edit Image API is accessed via `OpenAIClient.ImagesEndPoint.CreateImageEditA
 ```csharp
 var api = new OpenAIClient();
 var results = await api.ImagesEndPoint.CreateImageEditAsync(Path.GetFullPath(imageAssetPath), Path.GetFullPath(maskAssetPath), "A sunlit indoor lounge area with a pool containing a flamingo", 1, ImageSize.Small);
-// results == file://path/to/image.png | Texture2D
+// result.Key == file://path/to/image.png
+// result.Value == Texture2D
 ```
 
 #### [Create Image Variation](https://beta.openai.com/docs/api-reference/images/create-variation)
@@ -253,7 +272,8 @@ The Edit Image API is accessed via `OpenAIClient.ImagesEndPoint.CreateImageVaria
 ```csharp
 var api = new OpenAIClient();
 var results = await api.ImagesEndPoint.CreateImageVariationAsync(Path.GetFullPath(imageAssetPath), 1, ImageSize.Small);
-// results == file://path/to/image.png | Texture2D
+// result.Key == file://path/to/image.png
+// result.Value == Texture2D
 ```
 
 ### [Moderations](https://beta.openai.com/docs/api-reference/moderations)
