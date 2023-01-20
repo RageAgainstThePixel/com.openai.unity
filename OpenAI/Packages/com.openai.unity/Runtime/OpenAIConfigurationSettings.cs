@@ -9,11 +9,21 @@ namespace OpenAI
     {
         [SerializeField]
         [Tooltip("The OpenAI api key.")]
-        private string apiKey;
+        internal string apiKey;
 
         /// <summary>
         /// The OpenAI api key.
         /// </summary>
         public string ApiKey => apiKey;
+
+        [SerializeField]
+        [Tooltip("For users who belong to multiple organizations, you can pass a header to specify which organization is used for an API request. Usage from these API requests will count against the specified organization's subscription quota.")]
+        internal string organization;
+
+        /// <summary>
+        /// For users who belong to multiple organizations, you can pass a header to specify which organization is used for an API request.
+        /// Usage from these API requests will count against the specified organization's subscription quota.
+        /// </summary>
+        public string Organization => organization;
     }
 }
