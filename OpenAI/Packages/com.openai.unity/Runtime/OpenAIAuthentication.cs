@@ -12,7 +12,6 @@ namespace OpenAI
     /// </summary>
     public sealed class OpenAIAuthentication
     {
-
         private const string OPENAI_KEY = "OPENAI_KEY";
         private const string OPENAI_API_KEY = "OPENAI_API_KEY";
         private const string OPENAI_SECRET_KEY = "OPENAI_SECRET_KEY";
