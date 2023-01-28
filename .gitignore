@@ -75,7 +75,5 @@ artifacts/
 ThirdParty/
 ThirdParty.meta
 --Version/
-
-# ====================== #
-# Project Symbolic Links #
-# ====================== #
+OpenAIConfigurationSettings.asset
+OpenAIConfigurationSettings.asset.meta
