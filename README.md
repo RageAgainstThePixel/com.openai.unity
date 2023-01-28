@@ -313,9 +313,10 @@ Returns a list of files that belong to the user's organization.
 ```csharp
 var api = new OpenAIClient();
 var files = await api.FilesEndpoint.ListFilesAsync();
+
 foreach (var file in result)
 {
-    Console.WriteLine($"{file.Id} -> {file.Object}: {file.FileName} | {file.Size} bytes");
+    Debug.Log($"{file.Id} -> {file.Object}: {file.FileName} | {file.Size} bytes");
 }
 ```
 
@@ -419,7 +420,7 @@ var fineTuneEvents = await api.FineTuningEndpoint.ListFineTuneEventsAsync(fineTu
 var api = new OpenAIClient();
 await api.FineTuningEndpoint.StreamFineTuneEventsAsync(fineTuneJob, fineTuneEvent =>
 {
-    Console.WriteLine($"  {fineTuneEvent.CreatedAt} [{fineTuneEvent.Level}] {fineTuneEvent.Message}");
+    Debug.Log($"  {fineTuneEvent.CreatedAt} [{fineTuneEvent.Level}] {fineTuneEvent.Message}");
 });
 ```
 
@@ -429,8 +430,7 @@ Or if using [`IAsyncEnumerable{T}`](https://docs.microsoft.com/en-us/dotnet/api/
 var api = new OpenAIClient();
 await foreach (var fineTuneEvent in api.FineTuningEndpoint.StreamFineTuneEventsEnumerableAsync(fineTuneJob))
 {
-    Console.WriteLine($"  {fineTuneEvent.CreatedAt} [{fineTuneEvent.Level}] {fineTuneEvent.Message}");
-    cancellationTokenSource.Cancel();
+    Debug.Log($"  {fineTuneEvent.CreatedAt} [{fineTuneEvent.Level}] {fineTuneEvent.Message}");
 }
 ```
 
