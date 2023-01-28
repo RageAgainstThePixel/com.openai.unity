@@ -22,6 +22,12 @@ namespace OpenAI.Editor
 
         private static void OnPreferencesGui(string searchContext)
         {
+            if (EditorApplication.isPlaying ||
+                EditorApplication.isCompiling)
+            {
+                return;
+            }
+
             var instance = GetOrCreateInstance();
             var instanceEditor = CreateEditor(instance);
             instanceEditor.OnInspectorGUI();
