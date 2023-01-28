@@ -1,7 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using NUnit.Framework;
-using OpenAI.Models;
 using System;
 using System.Collections;
 using UnityEngine;
@@ -16,7 +15,7 @@ namespace OpenAI.Tests
         {
             yield return AwaitTestUtilities.Await(async () =>
             {
-                var api = new OpenAIClient();
+                var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
                 Assert.IsNotNull(api.ModelsEndpoint);
                 var results = await api.ModelsEndpoint.GetModelsAsync();
                 Assert.IsNotNull(results);
@@ -29,7 +28,7 @@ namespace OpenAI.Tests
         {
             yield return AwaitTestUtilities.Await(async () =>
             {
-                var api = new OpenAIClient();
+                var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
                 Assert.IsNotNull(api.ModelsEndpoint);
                 var models = await api.ModelsEndpoint.GetModelsAsync();
                 Assert.IsNotEmpty(models);

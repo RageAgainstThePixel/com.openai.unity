@@ -1,6 +1,6 @@
 {
     "name": "OpenAI",
-    "rootNamespace": "",
+    "rootNamespace": "OpenAI",
     "references": [
         "GUID:7958db66189566541a6363568aee1575"
     ],

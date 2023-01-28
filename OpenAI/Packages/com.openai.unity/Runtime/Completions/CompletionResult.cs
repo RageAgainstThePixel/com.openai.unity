@@ -26,7 +26,9 @@ namespace OpenAI.Completions
         [JsonProperty("created")]
         public int CreatedUnixTime { get; set; }
 
+        /// <summary>
         /// The time when the result was generated
+        /// </summary>
         [JsonIgnore]
         public DateTime Created => DateTimeOffset.FromUnixTimeSeconds(CreatedUnixTime).DateTime;
 

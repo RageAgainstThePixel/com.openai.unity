@@ -73,8 +73,7 @@ namespace OpenAI.Completions
             int? logProbabilities = null,
             bool? echo = null,
             string[] stopSequences = null,
-            Model model = null
-            )
+            Model model = null)
         {
             var request = new CompletionRequest(
                 model ?? Api.DefaultModel,
@@ -200,7 +199,7 @@ namespace OpenAI.Completions
         {
             completionRequest.Stream = true;
             var jsonContent = JsonConvert.SerializeObject(completionRequest, Api.JsonSerializationOptions);
-            var request = new HttpRequestMessage(HttpMethod.Post, GetEndpoint())
+            using var request = new HttpRequestMessage(HttpMethod.Post, GetEndpoint())
             {
                 Content = jsonContent.ToJsonStringContent()
             };
@@ -215,7 +214,7 @@ namespace OpenAI.Completions
                 {
                     if (line.StartsWith("data: "))
                     {
-                        line = line[5..].Trim();
+                        line = line["data: ".Length..];
                     }
 
                     if (line == "[DONE]")
@@ -225,7 +224,7 @@ namespace OpenAI.Completions
 
                     if (!string.IsNullOrWhiteSpace(line))
                     {
-                        resultHandler(DeserializeResult(response, line));
+                        resultHandler(DeserializeResult(response, line.Trim()));
                     }
                 }
             }
@@ -317,7 +316,7 @@ namespace OpenAI.Completions
         {
             completionRequest.Stream = true;
             var jsonContent = JsonConvert.SerializeObject(completionRequest, Api.JsonSerializationOptions);
-            var request = new HttpRequestMessage(HttpMethod.Post, GetEndpoint())
+            using var request = new HttpRequestMessage(HttpMethod.Post, GetEndpoint())
             {
                 Content = jsonContent.ToJsonStringContent()
             };
@@ -332,7 +331,7 @@ namespace OpenAI.Completions
                 {
                     if (line.StartsWith("data: "))
                     {
-                        line = line[5..].Trim();
+                        line = line["data: ".Length..];
                     }
 
                     if (line == "[DONE]")

@@ -101,6 +101,8 @@ namespace OpenAI.Images
                 content.Add(new StringContent(request.User), "user");
             }
 
+            request.Dispose();
+
             var response = await Api.Client.PostAsync($"{GetEndpoint()}edits", content).ConfigureAwait(true);
             var responseAsString = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
 
@@ -149,6 +151,8 @@ namespace OpenAI.Images
             {
                 content.Add(new StringContent(request.User), "user");
             }
+
+            request.Dispose();
 
             var response = await Api.Client.PostAsync($"{GetEndpoint()}variations", content).ConfigureAwait(true);
             var responseAsString = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
