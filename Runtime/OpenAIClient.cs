@@ -4,6 +4,8 @@ using Newtonsoft.Json;
 using OpenAI.Completions;
 using OpenAI.Edits;
 using OpenAI.Embeddings;
+using OpenAI.Files;
+using OpenAI.FineTuning;
 using OpenAI.Images;
 using OpenAI.Models;
 using OpenAI.Moderations;
@@ -41,7 +43,7 @@ namespace OpenAI
 
             if (OpenAIAuthentication?.ApiKey is null)
             {
-                throw new AuthenticationException("You must provide API authentication.  Please refer to https://github.com/StephenHodgson/OpenAI-DotNet#authentication for details.");
+                throw new AuthenticationException("You must provide API authentication.  Please refer to https://github.com/RageAgainstThePixel/com.openai.unity#authentication for details.");
             }
 
             Client = new HttpClient();
@@ -64,8 +66,8 @@ namespace OpenAI
             EditsEndpoint = new EditsEndpoint(this);
             ImagesEndPoint = new ImagesEndpoint(this);
             EmbeddingsEndpoint = new EmbeddingsEndpoint(this);
-            //TODO FilesEndpoint
-            //TODO File-tunes
+            FilesEndpoint = new FilesEndpoint(this);
+            FineTuningEndpoint = new FineTuningEndpoint(this);
             ModerationsEndpoint = new ModerationsEndpoint(this);
         }
 
@@ -73,6 +75,11 @@ namespace OpenAI
         /// <see cref="HttpClient"/> to use when making calls to the API.
         /// </summary>
         internal HttpClient Client { get; }
+
+        /// <summary>
+        /// The <see cref="JsonSerializationOptions"/> to use when making calls to the API.
+        /// </summary>
+        internal JsonSerializerSettings JsonSerializationOptions { get; }
 
         /// <summary>
         /// The API authentication information to use for API calls
@@ -105,11 +112,6 @@ namespace OpenAI
         internal string BaseUrl { get; private set; }
 
         /// <summary>
-        /// The <see cref="JsonSerializationOptions"/> to use when making calls to the API.
-        /// </summary>
-        internal JsonSerializerSettings JsonSerializationOptions { get; }
-
-        /// <summary>
         /// List and describe the various models available in the API.
         /// </summary>
         public ModelsEndpoint ModelsEndpoint { get; }
@@ -138,6 +140,16 @@ namespace OpenAI
         /// Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.
         /// </summary>
         public EmbeddingsEndpoint EmbeddingsEndpoint { get; }
+
+        /// <summary>
+        /// Files are used to upload documents that can be used with features like Fine-tuning.
+        /// </summary>
+        public FilesEndpoint FilesEndpoint { get; }
+
+        /// <summary>
+        /// Manage fine-tuning jobs to tailor a model to your specific training data.
+        /// </summary>
+        public FineTuningEndpoint FineTuningEndpoint { get; }
 
         /// <summary>
         /// The moderation endpoint is a tool you can use to check whether content complies with OpenAI's content policy. Developers can thus identify content that our content policy prohibits and take action, for instance by filtering it.
