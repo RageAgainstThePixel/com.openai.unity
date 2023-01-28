@@ -15,7 +15,7 @@ namespace OpenAI.Tests
         {
             yield return AwaitTestUtilities.Await(async () =>
             {
-                var api = new OpenAIClient();
+                var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
                 Assert.IsNotNull(api.EditsEndpoint);
                 var request = new EditRequest("What day of the wek is it?", "Fix the spelling mistakes");
                 var result = await api.EditsEndpoint.CreateEditAsync(request);

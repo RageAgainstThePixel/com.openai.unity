@@ -6,7 +6,7 @@ using System.IO;
 
 namespace OpenAI.Images
 {
-    public sealed class ImageEditRequest
+    public sealed class ImageEditRequest : IDisposable
     {
         /// <summary>
         /// Constructor.
@@ -131,13 +131,7 @@ namespace OpenAI.Images
             User = user;
         }
 
-        ~ImageEditRequest()
-        {
-            Image?.Close();
-            Image?.Dispose();
-            Mask?.Close();
-            Mask?.Dispose();
-        }
+        ~ImageEditRequest() => Dispose(false);
 
         /// <summary>
         /// The image to edit. Must be a valid PNG file, less than 4MB, and square.
@@ -182,5 +176,22 @@ namespace OpenAI.Images
         /// </summary>
         [JsonProperty("user")]
         public string User { get; }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Image?.Close();
+                Image?.Dispose();
+                Mask?.Dispose();
+                Mask?.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

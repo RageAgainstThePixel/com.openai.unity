@@ -6,7 +6,7 @@ using System.IO;
 
 namespace OpenAI.Images
 {
-    public sealed class ImageVariationRequest
+    public sealed class ImageVariationRequest : IDisposable
     {
         /// <summary>
         /// Constructor.
@@ -52,11 +52,7 @@ namespace OpenAI.Images
             User = user;
         }
 
-        ~ImageVariationRequest()
-        {
-            Image?.Close();
-            Image?.Dispose();
-        }
+        ~ImageVariationRequest() => Dispose(false);
 
         /// <summary>
         /// The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.
@@ -84,5 +80,20 @@ namespace OpenAI.Images
         /// </summary>
         [JsonProperty("user")]
         public string User { get; }
+
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Image?.Close();
+                Image?.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -20,6 +21,18 @@ namespace OpenAI.Models
             public List<Model> Data { get; set; }
         }
 
+        private class DeleteModelResponse
+        {
+            [JsonProperty("id")]
+            public string Id { get; set; }
+
+            [JsonProperty("object")]
+            public string Object { get; set; }
+
+            [JsonProperty("deleted")]
+            public bool Deleted { get; set; }
+        }
+
         /// <inheritdoc />
         public ModelsEndpoint(OpenAIClient api) : base(api) { }
 
@@ -35,14 +48,14 @@ namespace OpenAI.Models
         public async Task<IReadOnlyList<Model>> GetModelsAsync()
         {
             var response = await Api.Client.GetAsync(GetEndpoint());
-            var resultAsString = await response.Content.ReadAsStringAsync();
+            var responseAsString = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
-                return JsonConvert.DeserializeObject<ModelsList>(resultAsString)?.Data;
+                return JsonConvert.DeserializeObject<ModelsList>(responseAsString, Api.JsonSerializationOptions)?.Data;
             }
 
-            throw new HttpRequestException($"{nameof(GetModelsAsync)} Failed! HTTP status code: {response.StatusCode}.");
+            throw new HttpRequestException($"{nameof(GetModelsAsync)} Failed! HTTP status code: {response.StatusCode}| response body: {responseAsString}.");
         }
 
         /// <summary>
@@ -54,13 +67,45 @@ namespace OpenAI.Models
         public async Task<Model> GetModelDetailsAsync(string id)
         {
             var response = await Api.Client.GetAsync($"{GetEndpoint()}/{id}");
+            var responseAsString = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
-                return JsonConvert.DeserializeObject<Model>(await response.Content.ReadAsStringAsync());
+                return JsonConvert.DeserializeObject<Model>(responseAsString, Api.JsonSerializationOptions);
             }
 
-            throw new HttpRequestException($"{nameof(GetModelDetailsAsync)} Failed! HTTP status code: {response.StatusCode}");
+            throw new HttpRequestException($"{nameof(GetModelDetailsAsync)} Failed! HTTP status code: {response.StatusCode} | response body: {responseAsString}.");
+        }
+
+        /// <summary>
+        /// Delete a fine-tuned model. You must have the Owner role in your organization.
+        /// </summary>
+        /// <param name="modelId">The <see cref="Model"/> to delete.</param>
+        /// <returns>True, if fine-tuned model was successfully deleted.</returns>
+        /// <exception cref="HttpRequestException"></exception>
+        public async Task<bool> DeleteFineTuneModelAsync(string modelId)
+        {
+            var model = await GetModelDetailsAsync(modelId);
+
+            if (model == null)
+            {
+                throw new Exception($"Failed to get {modelId} info!");
+            }
+
+            if (model.OwnedBy != Api.OpenAIAuthentication.Organization)
+            {
+                throw new UnauthorizedAccessException($"{model.Id} is not owned by your organization.");
+            }
+
+            var response = await Api.Client.DeleteAsync($"{GetEndpoint()}/{model.Id}");
+            var responseAsString = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                return JsonConvert.DeserializeObject<DeleteModelResponse>(responseAsString, Api.JsonSerializationOptions)?.Deleted ?? false;
+            }
+
+            throw new HttpRequestException($"{nameof(DeleteFineTuneModelAsync)} Failed! HTTP status code: {response.StatusCode} | response body: {responseAsString}.");
         }
     }
 }

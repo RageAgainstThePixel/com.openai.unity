@@ -13,7 +13,7 @@ namespace OpenAI.Tests
         {
             yield return AwaitTestUtilities.Await(async () =>
             {
-                var api = new OpenAIClient();
+                var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
                 var violationResponse = await api.ModerationsEndpoint.GetModerationAsync("I want to kill them.");
                 Assert.IsTrue(violationResponse);
 
