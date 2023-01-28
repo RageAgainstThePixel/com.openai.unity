@@ -19,6 +19,21 @@ namespace OpenAI.Models
             Id = id;
         }
 
+        [JsonConstructor]
+        public Model(
+            string id,
+            string @object,
+            string ownedBy,
+            List<Permission> permissions,
+            string root, string parent) : this(id)
+        {
+            Object = @object;
+            OwnedBy = ownedBy;
+            Permissions = permissions;
+            Root = root;
+            Parent = parent;
+        }
+
         /// <summary>
         /// Allows a model to be implicitly cast to the string of its id.
         /// </summary>
@@ -34,22 +49,22 @@ namespace OpenAI.Models
         public override string ToString() => Id;
 
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public string Id { get; }
 
         [JsonProperty("object")]
-        public string Object { get; set; }
+        public string Object { get; }
 
         [JsonProperty("owned_by")]
-        public string OwnedBy { get; set; }
+        public string OwnedBy { get; private set; }
 
         [JsonProperty("permissions")]
         public List<Permission> Permissions { get; }
 
         [JsonProperty("root")]
-        public string Root { get; set; }
+        public string Root { get; }
 
         [JsonProperty("parent")]
-        public string Parent { get; set; }
+        public string Parent { get; }
 
         /// <summary>
         /// The default Model to use in the case no other is specified.  Defaults to <see cref="Davinci"/>

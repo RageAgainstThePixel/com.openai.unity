@@ -43,7 +43,7 @@ namespace OpenAI
 
             if (OpenAIAuthentication?.ApiKey is null)
             {
-                throw new AuthenticationException("You must provide API authentication.  Please refer to https://github.com/StephenHodgson/OpenAI-DotNet#authentication for details.");
+                throw new AuthenticationException("You must provide API authentication.  Please refer to https://github.com/RageAgainstThePixel/com.openai.unity#authentication for details.");
             }
 
             Client = new HttpClient();
@@ -77,6 +77,11 @@ namespace OpenAI
         internal HttpClient Client { get; }
 
         /// <summary>
+        /// The <see cref="JsonSerializationOptions"/> to use when making calls to the API.
+        /// </summary>
+        internal JsonSerializerSettings JsonSerializationOptions { get; }
+
+        /// <summary>
         /// The API authentication information to use for API calls
         /// </summary>
         public OpenAIAuthentication OpenAIAuthentication { get; }
@@ -105,11 +110,6 @@ namespace OpenAI
         /// The base url to use when making calls to the API.
         /// </summary>
         internal string BaseUrl { get; private set; }
-
-        /// <summary>
-        /// The <see cref="JsonSerializationOptions"/> to use when making calls to the API.
-        /// </summary>
-        internal JsonSerializerSettings JsonSerializationOptions { get; }
 
         /// <summary>
         /// List and describe the various models available in the API.

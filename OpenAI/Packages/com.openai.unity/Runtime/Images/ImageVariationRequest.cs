@@ -1,6 +1,5 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using Newtonsoft.Json;
 using System;
 using System.IO;
 
@@ -57,28 +56,23 @@ namespace OpenAI.Images
         /// <summary>
         /// The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.
         /// </summary>
-        [JsonIgnore]
         public Stream Image { get; }
 
-        [JsonIgnore]
         public string ImageName { get; }
 
         /// <summary>
         /// The number of images to generate. Must be between 1 and 10.
         /// </summary>
-        [JsonProperty("n")]
         public int Number { get; }
 
         /// <summary>
         /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
         /// </summary>
-        [JsonProperty("size")]
         public string Size { get; }
 
         /// <summary>
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </summary>
-        [JsonProperty("user")]
         public string User { get; }
 
         private void Dispose(bool disposing)
