@@ -21,7 +21,7 @@ namespace OpenAI.Editor.FineTuning
 
         private static readonly List<Model> organizationModels = new List<Model>();
 
-        private static OpenAIClient OpenAIClient;
+        private static OpenAIClient openAI;
 
         private static GUIStyle boldCenteredHeaderStyle;
 
@@ -72,13 +72,11 @@ namespace OpenAI.Editor.FineTuning
 
             try
             {
-                OpenAIClient = new OpenAIClient();
-                var allModels = await OpenAIClient.ModelsEndpoint.GetModelsAsync().ConfigureAwait(false);
+                openAI = new OpenAIClient();
+                var allModels = await openAI.ModelsEndpoint.GetModelsAsync().ConfigureAwait(false);
                 openAiModels.Clear();
                 openAiModels.AddRange(allModels.Where(model => model.OwnedBy.Contains("openai")));
-
-                organizationModels.AddRange(allModels.Where(model =>
-                    !model.OwnedBy.Contains("openai") && !model.OwnedBy.Contains("system")));
+                organizationModels.AddRange(allModels.Where(model => !model.OwnedBy.Contains("openai") && !model.OwnedBy.Contains("system")));
 
                 modelOptions = new GUIContent[openAiModels.Count];
 
@@ -111,7 +109,7 @@ namespace OpenAI.Editor.FineTuning
         {
             GatherTrainingDataSets();
 
-            if (OpenAIClient == null || modelOptions == null)
+            if (openAI == null || modelOptions == null)
             {
                 FetchModels();
             }
@@ -130,8 +128,8 @@ namespace OpenAI.Editor.FineTuning
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space();
 
-            if (OpenAIClient != null &&
-                string.IsNullOrWhiteSpace(OpenAIClient.OpenAIAuthentication.Organization))
+            if (openAI != null &&
+                string.IsNullOrWhiteSpace(openAI.OpenAIAuthentication.Organization))
             {
                 EditorGUILayout.HelpBox($"No Organization has been identified in {nameof(OpenAIAuthentication)}. This tool requires that you set it in your configuration.", MessageType.Error);
             }
@@ -217,7 +215,7 @@ namespace OpenAI.Editor.FineTuning
                     EditorGUI.indentLevel--;
                 }
 
-                if (OpenAIClient != null &&
+                if (openAI != null &&
                     jobId.stringValue.Contains("pending"))
                 {
                     if (GUILayout.Button("Begin Training Model"))
@@ -254,14 +252,14 @@ namespace OpenAI.Editor.FineTuning
                 var lines = fineTuneDataSet.TrainingData.Select(trainingData => trainingData.ToString()).ToList();
                 var tempFilePath = Path.Combine(tempDir, $"{fineTuneDataSet.name}.jsonl");
                 await File.WriteAllLinesAsync(tempFilePath, lines);
-                var fileData = await OpenAIClient.FilesEndpoint.UploadFileAsync(tempFilePath, "fine-tune").ConfigureAwait(true);
+                var fileData = await openAI.FilesEndpoint.UploadFileAsync(tempFilePath, "fine-tune").ConfigureAwait(true);
                 File.Delete(tempFilePath);
 
                 var jobRequest = new CreateFineTuneJobRequest(
                     trainingFileId: fileData.Id,
                     model: fineTuneDataSet.BaseModel,
                     suffix: fineTuneDataSet.ModelSuffix);
-                var job = await OpenAIClient.FineTuningEndpoint.CreateFineTuneJobAsync(jobRequest).ConfigureAwait(true);
+                var job = await openAI.FineTuningEndpoint.CreateFineTuneJobAsync(jobRequest).ConfigureAwait(true);
                 fineTuneDataSet.FineTuneJob = job;
             }
             catch (Exception e)
