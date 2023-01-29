@@ -28,6 +28,8 @@ namespace OpenAI.FineTuning
                 UpdatedAtUnixTime = jobResponse.UpdatedAtUnixTime
             };
 
+        public static implicit operator string(FineTuneJobResponse jobResponse) => jobResponse.Id;
+
         [JsonProperty("id")]
         public string Id { get; set; }
 

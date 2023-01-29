@@ -53,5 +53,7 @@ namespace OpenAI.FineTuning
 
         [JsonIgnore]
         public DateTime UpdatedAt => DateTimeOffset.FromUnixTimeSeconds(UpdatedAtUnixTime).DateTime;
+
+        public static implicit operator string(FineTuneJob job) => job.Id;
     }
 }
