@@ -374,7 +374,7 @@ Response includes details of the enqueued job including job status and the name 
 ```csharp
 var api = new OpenAIClient();
 var request = new CreateFineTuneRequest(fileData);
-var fineTuneResponse = await api.FineTuningEndpoint.CreateFineTuneAsync(request);
+var fineTuneResponse = await api.FineTuningEndpoint.CreateFineTuneJobAsync(request);
 ```
 
 #### [List Fine Tune Jobs](https://beta.openai.com/docs/api-reference/fine-tunes/list)
@@ -401,7 +401,7 @@ Immediately cancel a fine-tune job.
 
 ```csharp
 var api = new OpenAIClient();
-var result = await api.FineTuningEndpoint.CancelFineTuneJob(job);
+var result = await api.FineTuningEndpoint.CancelFineTuneJobAsync(job);
 // result = true
 ```
 

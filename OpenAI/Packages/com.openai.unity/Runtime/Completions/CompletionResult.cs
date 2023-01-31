@@ -11,20 +11,30 @@ namespace OpenAI.Completions
     /// </summary>
     public sealed class CompletionResult : BaseResponse
     {
+        [JsonConstructor]
+        public CompletionResult(string id, string @object, int createdUnixTime, string model, List<Choice> completions)
+        {
+            Id = id;
+            Object = @object;
+            CreatedUnixTime = createdUnixTime;
+            Model = model;
+            Completions = completions;
+        }
+
         /// <summary>
         /// The identifier of the result, which may be used during troubleshooting
         /// </summary>
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public string Id { get; }
 
         [JsonProperty("object")]
-        public string Object { get; set; }
+        public string Object { get; }
 
         /// <summary>
         /// The time when the result was generated in unix epoch format
         /// </summary>
         [JsonProperty("created")]
-        public int CreatedUnixTime { get; set; }
+        public int CreatedUnixTime { get; }
 
         /// <summary>
         /// The time when the result was generated
@@ -33,13 +43,13 @@ namespace OpenAI.Completions
         public DateTime Created => DateTimeOffset.FromUnixTimeSeconds(CreatedUnixTime).DateTime;
 
         [JsonProperty("model")]
-        public string Model { get; set; }
+        public string Model { get; }
 
         /// <summary>
         /// The completions returned by the API.  Depending on your request, there may be 1 or many choices.
         /// </summary>
         [JsonProperty("choices")]
-        public List<Choice> Completions { get; set; }
+        public List<Choice> Completions { get; }
 
         /// <summary>
         /// Gets the text of the first completion, representing the main result
