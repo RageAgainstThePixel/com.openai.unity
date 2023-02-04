@@ -15,16 +15,26 @@ namespace OpenAI.FineTuning
             {
                 trainingData.Add(new FineTuningTrainingData("<prompt text>", "<ideal generated text>"));
             }
+
+            id = "pending";
+            status = "not started";
+            fineTuneJob = null;
         }
 
         [SerializeField]
         [HideInInspector]
         private string id = "pending";
 
-        public string Id
+        public string Id => id;
+
+        [SerializeField]
+        [HideInInspector]
+        private string status = "not started";
+
+        public string Status
         {
-            get => id;
-            internal set => id = value;
+            get => status;
+            internal set => status = value;
         }
 
         [SerializeField]
@@ -99,7 +109,8 @@ namespace OpenAI.FineTuning
             get => fineTuneJob;
             set
             {
-                id = fineTuneJob.Id;
+                id = value.Id;
+                status = value.Status;
                 fineTuneJob = value;
             }
         }
