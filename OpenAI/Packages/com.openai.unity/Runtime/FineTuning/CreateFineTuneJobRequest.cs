@@ -1,7 +1,7 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System.Collections.Generic;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace OpenAI.FineTuning
 {
@@ -12,13 +12,13 @@ namespace OpenAI.FineTuning
             string validationFileId = null,
             string model = null,
             uint epochs = 4,
-            double? batchSize = null,
+            int? batchSize = null,
             double? learningRateMultiplier = null,
             double promptLossWeight = 0.01d,
             bool computeClassificationMetrics = false,
             int? classificationNClasses = null,
             string classificationPositiveClasses = null,
-            List<double> classificationBetas = null,
+            IReadOnlyList<double> classificationBetas = null,
             string suffix = null)
         {
             TrainingFileId = trainingFileId;
@@ -48,7 +48,7 @@ namespace OpenAI.FineTuning
         public int Epochs { get; set; }
 
         [JsonProperty("batch_size")]
-        public double? BatchSize { get; set; }
+        public int? BatchSize { get; set; }
 
         [JsonProperty("learning_rate_multiplier")]
         public double? LearningRateMultiplier { get; set; }
@@ -66,7 +66,7 @@ namespace OpenAI.FineTuning
         public string ClassificationPositiveClasses { get; set; }
 
         [JsonProperty("classification_betas")]
-        public List<double> ClassificationBetas { get; set; }
+        public IReadOnlyList<double> ClassificationBetas { get; set; }
 
         [JsonProperty("suffix")]
         public string Suffix { get; set; }

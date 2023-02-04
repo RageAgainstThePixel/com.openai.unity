@@ -78,7 +78,7 @@ namespace OpenAI
                 cachedDefault = auth;
                 return auth;
             }
-            set => cachedDefault = value;
+            internal set => cachedDefault = value;
         }
 
         private static OpenAIAuthentication LoadFromAsset()
@@ -148,11 +148,13 @@ namespace OpenAI
 
             while (authInfo == null && currentDirectory.Parent != null)
             {
-                if (File.Exists(Path.Combine(currentDirectory.FullName, filename)))
+                var filePath = Path.Combine(currentDirectory.FullName, filename);
+
+                if (File.Exists(filePath))
                 {
                     try
                     {
-                        authInfo = JsonUtility.FromJson<AuthInfo>(File.ReadAllText(filename));
+                        authInfo = JsonUtility.FromJson<AuthInfo>(File.ReadAllText(filePath));
                         break;
                     }
                     catch (Exception)
@@ -160,7 +162,7 @@ namespace OpenAI
                         // try to parse the old way for backwards support.
                     }
 
-                    var lines = File.ReadAllLines(Path.Combine(currentDirectory.FullName, filename));
+                    var lines = File.ReadAllLines(filePath);
                     string apiKey = null;
                     string organization = null;
 

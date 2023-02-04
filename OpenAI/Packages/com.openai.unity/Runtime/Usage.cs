@@ -10,8 +10,7 @@ namespace OpenAI
         public Usage(
             int promptTokens,
             int completionTokens,
-            int totalTokens
-        )
+            int totalTokens)
         {
             PromptTokens = promptTokens;
             CompletionTokens = completionTokens;

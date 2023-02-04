@@ -3,7 +3,7 @@
   "displayName": "OpenAI",
   "description": "An OpenAI package for the Unity Game Engine.",
   "keywords": [],
-  "version": "2.1.0",
+  "version": "2.2.0",
   "unity": "2021.3",
   "license": "MIT",
   "repository": {
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "3.0.2",
-    "com.utilities.rest": "1.0.2"
+    "com.utilities.rest": "1.1.0"
   },
   "publishConfig": {
     "registry": "https://package.openupm.com"

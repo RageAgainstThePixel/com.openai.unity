@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace OpenAI
 {
-    [CreateAssetMenu(fileName = nameof(OpenAIConfigurationSettings), menuName = "OpenAI/" + nameof(OpenAIConfigurationSettings))]
+    [CreateAssetMenu(fileName = nameof(OpenAIConfigurationSettings), menuName = "OpenAI/" + nameof(OpenAIConfigurationSettings), order = 0)]
     internal class OpenAIConfigurationSettings : ScriptableObject
     {
         [SerializeField]

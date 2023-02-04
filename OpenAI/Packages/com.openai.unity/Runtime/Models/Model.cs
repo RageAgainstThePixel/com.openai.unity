@@ -24,7 +24,7 @@ namespace OpenAI.Models
             string id,
             string @object,
             string ownedBy,
-            List<Permission> permissions,
+            IReadOnlyList<Permission> permissions,
             string root, string parent) : this(id)
         {
             Object = @object;
@@ -58,7 +58,7 @@ namespace OpenAI.Models
         public string OwnedBy { get; private set; }
 
         [JsonProperty("permissions")]
-        public List<Permission> Permissions { get; }
+        public IReadOnlyList<Permission> Permissions { get; }
 
         [JsonProperty("root")]
         public string Root { get; }

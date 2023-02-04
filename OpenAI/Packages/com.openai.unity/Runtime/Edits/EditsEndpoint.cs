@@ -61,23 +61,16 @@ namespace OpenAI.Edits
         {
             var jsonContent = JsonConvert.SerializeObject(request, Api.JsonSerializationOptions);
             var response = await Api.Client.PostAsync(GetEndpoint(), jsonContent.ToJsonStringContent());
+            var resultAsString = await response.ReadAsStringAsync();
+            var editResponse = JsonConvert.DeserializeObject<EditResponse>(resultAsString, Api.JsonSerializationOptions);
+            editResponse.SetResponseData(response.Headers);
 
-            if (response.IsSuccessStatusCode)
+            if (editResponse == null)
             {
-                var resultAsString = await response.Content.ReadAsStringAsync();
-                var editResponse = JsonConvert.DeserializeObject<EditResponse>(resultAsString, Api.JsonSerializationOptions);
-
-                if (editResponse == null)
-                {
-                    throw new HttpRequestException($"{nameof(CreateEditAsync)} returned no results!  HTTP status code: {response.StatusCode}. Response body: {resultAsString}");
-                }
-
-                editResponse.SetResponseData(response.Headers);
-
-                return editResponse;
+                throw new HttpRequestException($"{nameof(CreateEditAsync)} returned no results!  HTTP status code: {response.StatusCode}. Response body: {resultAsString}");
             }
 
-            throw new HttpRequestException($"{nameof(CreateEditAsync)} Failed!  HTTP status code: {response.StatusCode}. Request body: {jsonContent}");
+            return editResponse;
         }
     }
 }

@@ -7,29 +7,41 @@ namespace OpenAI.Files
 {
     public sealed class FileData
     {
+        [JsonConstructor]
+        public FileData(string id, string @object, int size, int createdUnixTime, string fileName, string purpose, string status)
+        {
+            Id = id;
+            Object = @object;
+            Size = size;
+            CreatedUnixTime = createdUnixTime;
+            FileName = fileName;
+            Purpose = purpose;
+            Status = status;
+        }
+
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public string Id { get; }
 
         [JsonProperty("object")]
-        public string Object { get; set; }
+        public string Object { get; }
 
         [JsonProperty("bytes")]
-        public int Size { get; set; }
+        public int Size { get; }
 
         [JsonProperty("created_at")]
-        public int CreatedUnixTime { get; set; }
+        public int CreatedUnixTime { get; }
 
         [JsonIgnore]
         public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedUnixTime).DateTime;
 
         [JsonProperty("filename")]
-        public string FileName { get; set; }
+        public string FileName { get; }
 
         [JsonProperty("purpose")]
-        public string Purpose { get; set; }
+        public string Purpose { get; }
 
         [JsonProperty("status")]
-        public string Status { get; set; }
+        public string Status { get; }
 
         public static implicit operator string(FileData fileData) => fileData.Id;
     }
