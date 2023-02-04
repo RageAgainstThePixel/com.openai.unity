@@ -39,7 +39,7 @@ namespace OpenAI.FineTuning
 
         [SerializeField]
         [HideInInspector]
-        private string baseModel = Models.Model.Curie;
+        private string baseModel = "davinci";
 
         public string BaseModel => baseModel;
 
