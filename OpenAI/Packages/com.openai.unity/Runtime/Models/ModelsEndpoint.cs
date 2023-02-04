@@ -56,14 +56,8 @@ namespace OpenAI.Models
         public async Task<IReadOnlyList<Model>> GetModelsAsync()
         {
             var response = await Api.Client.GetAsync(GetEndpoint());
-            var responseAsString = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                return JsonConvert.DeserializeObject<ModelsList>(responseAsString, Api.JsonSerializationOptions)?.Data;
-            }
-
-            throw new HttpRequestException($"{nameof(GetModelsAsync)} Failed! HTTP status code: {response.StatusCode}| response body: {responseAsString}.");
+            var responseAsString = await response.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<ModelsList>(responseAsString, Api.JsonSerializationOptions)?.Data;
         }
 
         /// <summary>
@@ -75,14 +69,8 @@ namespace OpenAI.Models
         public async Task<Model> GetModelDetailsAsync(string id)
         {
             var response = await Api.Client.GetAsync($"{GetEndpoint()}/{id}");
-            var responseAsString = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                return JsonConvert.DeserializeObject<Model>(responseAsString, Api.JsonSerializationOptions);
-            }
-
-            throw new HttpRequestException($"{nameof(GetModelDetailsAsync)} Failed! HTTP status code: {response.StatusCode} | response body: {responseAsString}.");
+            var responseAsString = await response.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<Model>(responseAsString, Api.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -106,14 +94,8 @@ namespace OpenAI.Models
             }
 
             var response = await Api.Client.DeleteAsync($"{GetEndpoint()}/{model.Id}");
-            var responseAsString = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                return JsonConvert.DeserializeObject<DeleteModelResponse>(responseAsString, Api.JsonSerializationOptions)?.Deleted ?? false;
-            }
-
-            throw new HttpRequestException($"{nameof(DeleteFineTuneModelAsync)} Failed! HTTP status code: {response.StatusCode} | response body: {responseAsString}.");
+            var responseAsString = await response.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<DeleteModelResponse>(responseAsString, Api.JsonSerializationOptions)?.Deleted ?? false;
         }
     }
 }

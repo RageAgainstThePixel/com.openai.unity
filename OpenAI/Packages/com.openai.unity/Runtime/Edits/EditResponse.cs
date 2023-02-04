@@ -9,7 +9,11 @@ namespace OpenAI.Edits
     public sealed class EditResponse : BaseResponse
     {
         [JsonConstructor]
-        public EditResponse(string @object, int createdUnixTime, List<Choice> choices, Usage usage)
+        public EditResponse(
+            string @object,
+            int createdUnixTime,
+            IReadOnlyList<Choice> choices,
+            Usage usage)
         {
             Object = @object;
             CreatedUnixTime = createdUnixTime;
@@ -31,7 +35,7 @@ namespace OpenAI.Edits
         public DateTime Created => DateTimeOffset.FromUnixTimeSeconds(CreatedUnixTime).DateTime;
 
         [JsonProperty("choices")]
-        public List<Choice> Choices { get; }
+        public IReadOnlyList<Choice> Choices { get; }
 
         [JsonProperty("usage")]
         public Usage Usage { get; }

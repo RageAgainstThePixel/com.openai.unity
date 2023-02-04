@@ -52,13 +52,7 @@ namespace OpenAI.FineTuning
         {
             var jsonContent = JsonConvert.SerializeObject(jobRequest, Api.JsonSerializationOptions);
             var response = await Api.Client.PostAsync(GetEndpoint(), jsonContent.ToJsonStringContent());
-            var responseAsString = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new HttpRequestException($"{nameof(CreateFineTuneJobAsync)} Failed! HTTP status code: {response.StatusCode}. Request body: {responseAsString}");
-            }
-
+            var responseAsString = await response.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<FineTuneJobResponse>(responseAsString, Api.JsonSerializationOptions);
             result.SetResponseData(response.Headers);
             return result;
@@ -72,13 +66,7 @@ namespace OpenAI.FineTuning
         public async Task<IReadOnlyList<FineTuneJob>> ListFineTuneJobsAsync()
         {
             var response = await Api.Client.GetAsync(GetEndpoint());
-            var responseAsString = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new HttpRequestException($"{nameof(ListFineTuneJobsAsync)} Failed! HTTP status code: {response.StatusCode}. Request body: {responseAsString}");
-            }
-
+            var responseAsString = await response.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<FineTuneList>(responseAsString, Api.JsonSerializationOptions)?.Data.OrderBy(job => job.CreatedAtUnixTime).ToArray();
         }
 
@@ -91,13 +79,7 @@ namespace OpenAI.FineTuning
         public async Task<FineTuneJob> RetrieveFineTuneJobInfoAsync(string jobId)
         {
             var response = await Api.Client.GetAsync($"{GetEndpoint()}/{jobId}");
-            var responseAsString = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new HttpRequestException($"{nameof(RetrieveFineTuneJobInfoAsync)} Failed! HTTP status code: {response.StatusCode}. Request body: {responseAsString}");
-            }
-
+            var responseAsString = await response.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<FineTuneJobResponse>(responseAsString, Api.JsonSerializationOptions);
             result.SetResponseData(response.Headers);
             return result;
@@ -111,14 +93,8 @@ namespace OpenAI.FineTuning
         /// <exception cref="HttpRequestException"></exception>
         public async Task<bool> CancelFineTuneJobAsync(string jobId)
         {
-            var response = await Api.Client.PostAsync($"{GetEndpoint()}/{jobId}/cancel", null);
-            var responseAsString = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new HttpRequestException($"{nameof(CancelFineTuneJobAsync)} Failed! HTTP status code: {response.StatusCode}. Request body: {responseAsString}");
-            }
-
+            var response = await Api.Client.PostAsync($"{GetEndpoint()}/{jobId}/cancel", null!);
+            var responseAsString = await response.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<FineTuneJobResponse>(responseAsString, Api.JsonSerializationOptions);
             result.SetResponseData(response.Headers);
             return result.Status == "cancelled";
@@ -128,18 +104,13 @@ namespace OpenAI.FineTuning
         /// Get fine-grained status updates for a fine-tune job.
         /// </summary>
         /// <param name="jobId"><see cref="FineTuneJob.Id"/>.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>List of events for <see cref="FineTuneJob"/>.</returns>
         /// <exception cref="HttpRequestException"></exception>
-        public async Task<IReadOnlyList<Event>> ListFineTuneEventsAsync(string jobId)
+        public async Task<IReadOnlyList<Event>> ListFineTuneEventsAsync(string jobId, CancellationToken cancellationToken = default)
         {
-            var response = await Api.Client.GetAsync($"{GetEndpoint()}/{jobId}/events");
-            var responseAsString = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new HttpRequestException($"{nameof(ListFineTuneEventsAsync)} Failed! HTTP status code: {response.StatusCode}. Request body: {responseAsString}");
-            }
-
+            var response = await Api.Client.GetAsync($"{GetEndpoint()}/{jobId}/events", cancellationToken);
+            var responseAsString = await response.ReadAsStringAsync(cancellationToken);
             return JsonConvert.DeserializeObject<FineTuneEventList>(responseAsString, Api.JsonSerializationOptions)?.Data.OrderBy(@event => @event.CreatedAtUnixTime).ToArray();
         }
 
@@ -154,45 +125,37 @@ namespace OpenAI.FineTuning
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, $"{GetEndpoint()}/{jobId}/events?stream=true");
             var response = await Api.Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            await response.CheckResponseAsync(cancellationToken);
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            using var reader = new StreamReader(stream);
 
-            if (response.IsSuccessStatusCode)
+            while (await reader.ReadLineAsync() is { } line &&
+                   !cancellationToken.IsCancellationRequested)
             {
-                await using var stream = await response.Content.ReadAsStreamAsync();
-                using var reader = new StreamReader(stream);
-
-                while (await reader.ReadLineAsync() is { } line &&
-                       !cancellationToken.IsCancellationRequested)
+                if (line.StartsWith("data: "))
                 {
-                    if (line.StartsWith("data: "))
-                    {
-                        line = line["data: ".Length..];
-                    }
-
-                    if (line == "[DONE]")
-                    {
-                        return;
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(line))
-                    {
-                        fineTuneEventCallback(JsonConvert.DeserializeObject<Event>(line.Trim(), Api.JsonSerializationOptions));
-                    }
+                    line = line["data: ".Length..];
                 }
 
-                if (cancellationToken.IsCancellationRequested)
+                if (line == "[DONE]")
                 {
-                    var result = await CancelFineTuneJobAsync(jobId);
+                    return;
+                }
 
-                    if (!result)
-                    {
-                        throw new Exception($"Failed to cancel {jobId}");
-                    }
+                if (!string.IsNullOrWhiteSpace(line))
+                {
+                    fineTuneEventCallback(JsonConvert.DeserializeObject<Event>(line.Trim(), Api.JsonSerializationOptions));
                 }
             }
-            else
+
+            if (cancellationToken.IsCancellationRequested)
             {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                throw new HttpRequestException($"{nameof(StreamFineTuneEventsAsync)} Failed! HTTP status code: {response.StatusCode}. Request body: {responseBody}");
+                var result = await CancelFineTuneJobAsync(jobId);
+
+                if (!result)
+                {
+                    throw new Exception($"Failed to cancel {jobId}");
+                }
             }
         }
 
@@ -206,45 +169,37 @@ namespace OpenAI.FineTuning
         {
             using var request = new HttpRequestMessage(HttpMethod.Get, $"{GetEndpoint()}/{jobId}/events?stream=true");
             var response = await Api.Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            await response.CheckResponseAsync(cancellationToken);
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            using var reader = new StreamReader(stream);
 
-            if (response.IsSuccessStatusCode)
+            while (await reader.ReadLineAsync() is { } line &&
+                   !cancellationToken.IsCancellationRequested)
             {
-                await using var stream = await response.Content.ReadAsStreamAsync();
-                using var reader = new StreamReader(stream);
-
-                while (await reader.ReadLineAsync() is { } line &&
-                       !cancellationToken.IsCancellationRequested)
+                if (line.StartsWith("data: "))
                 {
-                    if (line.StartsWith("data: "))
-                    {
-                        line = line["data: ".Length..];
-                    }
-
-                    if (line == "[DONE]")
-                    {
-                        yield break;
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(line))
-                    {
-                        yield return JsonConvert.DeserializeObject<Event>(line.Trim(), Api.JsonSerializationOptions);
-                    }
+                    line = line["data: ".Length..];
                 }
 
-                if (cancellationToken.IsCancellationRequested)
+                if (line == "[DONE]")
                 {
-                    var result = await CancelFineTuneJobAsync(jobId);
+                    yield break;
+                }
 
-                    if (!result)
-                    {
-                        throw new Exception($"Failed to cancel {jobId}");
-                    }
+                if (!string.IsNullOrWhiteSpace(line))
+                {
+                    yield return JsonConvert.DeserializeObject<Event>(line.Trim(), Api.JsonSerializationOptions);
                 }
             }
-            else
+
+            if (cancellationToken.IsCancellationRequested)
             {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                throw new HttpRequestException($"{nameof(StreamFineTuneEventsEnumerableAsync)} Failed! HTTP status code: {response.StatusCode}. Request body: {responseBody}");
+                var result = await CancelFineTuneJobAsync(jobId);
+
+                if (!result)
+                {
+                    throw new Exception($"Failed to cancel {jobId}");
+                }
             }
         }
     }

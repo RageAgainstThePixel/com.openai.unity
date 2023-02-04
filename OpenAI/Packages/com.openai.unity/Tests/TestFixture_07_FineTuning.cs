@@ -178,7 +178,7 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(jobInfo);
                 Debug.Log($"{jobInfo.Id} -> {jobInfo.Status}");
                 Assert.IsTrue(jobInfo.Status == "cancelled");
-                var result = await api.FilesEndpoint.DeleteFileAsync(fileData);
+                var result = await api.FilesEndpoint.DeleteFileAsync(fileData, CancellationToken.None);
                 Assert.IsTrue(result);
             });
         }
@@ -212,7 +212,7 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(jobInfo);
                 Debug.Log($"{jobInfo.Id} -> {jobInfo.Status}");
                 Assert.IsTrue(jobInfo.Status == "cancelled");
-                var result = await api.FilesEndpoint.DeleteFileAsync(fileData);
+                var result = await api.FilesEndpoint.DeleteFileAsync(fileData, CancellationToken.None);
                 Assert.IsTrue(result);
             });
         }

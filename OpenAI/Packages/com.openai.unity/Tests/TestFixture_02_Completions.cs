@@ -25,7 +25,7 @@ namespace OpenAI.Tests
                 var result = await api.CompletionsEndpoint.CreateCompletionAsync(
                     completionPrompts,
                     temperature: 0.1,
-                    max_tokens: 5,
+                    maxTokens: 5,
                     numOutputs: 5,
                     model: Model.Davinci);
                 Assert.IsNotNull(result);
@@ -56,7 +56,7 @@ namespace OpenAI.Tests
                     {
                         Debug.Log(choice);
                     }
-                }, completionPrompts, temperature: 0.1, max_tokens: 5, numOutputs: 5);
+                }, completionPrompts, temperature: 0.1, maxTokens: 5, numOutputs: 5);
 
                 Assert.That(allCompletions.Any(c => c.Text.Trim().ToLower().StartsWith("nine")));
             });
