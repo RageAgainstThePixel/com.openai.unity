@@ -115,10 +115,11 @@ namespace OpenAI.Editor.FineTuning
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space();
 
-            if (openAI != null &&
-                string.IsNullOrWhiteSpace(openAI.OpenAIAuthentication.Organization))
+            if (openAI == null ||
+                string.IsNullOrWhiteSpace(openAI.OpenAIAuthentication.ApiKey))
             {
-                EditorGUILayout.HelpBox($"No Organization has been identified in {nameof(OpenAIAuthentication)}. This tool requires that you set it in your configuration.", MessageType.Error);
+                EditorGUILayout.HelpBox($"No valid {nameof(OpenAIConfigurationSettings)} was found. This tool requires that you set your API key.", MessageType.Error);
+                return;
             }
 
             tab = GUILayout.Toolbar(tab, tabTitles);
@@ -163,8 +164,7 @@ namespace OpenAI.Editor.FineTuning
 
             foreach (var dataSet in fineTuningTrainingDataSets)
             {
-                if (dataSet == null ||
-                    dataSet.targetObject is not FineTuningTrainingDataSet fineTuneDataSet)
+                if (dataSet is not { targetObject: FineTuningTrainingDataSet })
                 {
                     continue;
                 }
@@ -315,7 +315,6 @@ namespace OpenAI.Editor.FineTuning
                                     var downloadPath = await openAI.FilesEndpoint.DownloadFileAsync(trainingFile, progress).ConfigureAwait(true);
                                     EditorUtility.ClearProgressBar();
                                     EditorUtility.RevealInFinder(downloadPath);
-
                                 }
                                 catch (Exception e)
                                 {
