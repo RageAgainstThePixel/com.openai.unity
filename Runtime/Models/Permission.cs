@@ -1,17 +1,18 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 
 namespace OpenAI.Models
 {
     public sealed class Permission
     {
         [JsonConstructor]
-        public Permission(string id, string @object, int created, bool allowCreateEngine, bool allowSampling, bool allowLogprobs, bool allowSearchIndices, bool allowView, bool allowFineTuning, string organization, object group, bool isBlocking)
+        public Permission(string id, string @object, int createdAtUnixTime, bool allowCreateEngine, bool allowSampling, bool allowLogprobs, bool allowSearchIndices, bool allowView, bool allowFineTuning, string organization, object group, bool isBlocking)
         {
             Id = id;
             Object = @object;
-            Created = created;
+            CreatedAtUnixTime = createdAtUnixTime;
             AllowCreateEngine = allowCreateEngine;
             AllowSampling = allowSampling;
             AllowLogprobs = allowLogprobs;
@@ -30,7 +31,10 @@ namespace OpenAI.Models
         public string Object { get; }
 
         [JsonProperty("created")]
-        public int Created { get; }
+        public int CreatedAtUnixTime { get; }
+
+        [JsonIgnore]
+        public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTime).DateTime;
 
         [JsonProperty("allow_create_engine")]
         public bool AllowCreateEngine { get; }

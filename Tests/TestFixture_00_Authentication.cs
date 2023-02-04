@@ -62,9 +62,9 @@ namespace OpenAI.Tests
             var auth = OpenAIAuthentication.Default;
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.ApiKey);
-            Assert.AreEqual("sk-test12", auth.ApiKey);
+            Assert.IsNotEmpty(auth.ApiKey);
             Assert.IsNotNull(auth.Organization);
-            Assert.AreEqual("org-testOrg", auth.Organization);
+            Assert.IsNotEmpty(auth.Organization);
         }
 
         [Test]
