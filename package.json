@@ -1,7 +1,7 @@
 {
   "name": "com.openai.unity",
   "displayName": "OpenAI",
-  "description": "An OpenAI package for the Unity Game Engine.",
+  "description": "An OpenAI Rest Client for Unity (UPM)",
   "keywords": [],
   "version": "2.2.1",
   "unity": "2021.3",
