@@ -11,6 +11,8 @@ A [OpenAI](https://openai.com/) package for the [Unity](https://unity.com/) Game
 
 ## Installing
 
+Requires Unity 2021.3 LTS or higher.
+
 ### Via Unity Package Manager and OpenUPM
 
 - Open your Unity project settings
