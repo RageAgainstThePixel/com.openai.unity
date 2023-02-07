@@ -2,7 +2,6 @@
 
 using NUnit.Framework;
 using OpenAI.FineTuning;
-using System;
 using System.Collections;
 using System.IO;
 using UnityEngine;
@@ -20,7 +19,7 @@ namespace OpenAI.Tests
                 var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
                 Assert.IsNotNull(api.FilesEndpoint);
 
-                File.WriteAllText("test.jsonl", new FineTuningTrainingData("I'm a", "learning language model"));
+                await File.WriteAllTextAsync("test.jsonl", new FineTuningTrainingData("I'm a", "learning language model"));
                 Assert.IsTrue(File.Exists("test.jsonl"));
                 var result = await api.FilesEndpoint.UploadFileAsync("test.jsonl", "fine-tune");
 
@@ -51,8 +50,7 @@ namespace OpenAI.Tests
                     var fileInfo = await api.FilesEndpoint.GetFileInfoAsync(file);
                     Assert.IsNotNull(fileInfo);
 
-                    Debug.Log(
-                        $"{fileInfo.Id} -> {fileInfo.Object}: {fileInfo.FileName} | {fileInfo.Size} bytes");
+                    Debug.Log($"{fileInfo.Id} -> {fileInfo.Object}: {fileInfo.FileName} | {fileInfo.Size} bytes");
                 }
             });
         }
