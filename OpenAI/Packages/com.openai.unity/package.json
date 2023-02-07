@@ -1,10 +1,12 @@
 {
   "name": "com.openai.unity",
   "displayName": "OpenAI",
-  "description": "An OpenAI Rest Client for Unity (UPM)",
+  "description": "A OpenAI package for the Unity Game Engine to use GPT-3 and Dall-E though their RESTful API (currently in beta).\n\nIndependently developed, this is not an official library and I am not affiliated with OpenAI.\n\nAn OpenAI API account is required.",
   "keywords": [],
-  "version": "2.2.1",
+  "version": "2.2.2",
   "unity": "2021.3",
+  "documentationUrl": "https://github.com/RageAgainstThePixel/com.openai.unity#documentation",
+  "changelogUrl": "https://github.com/RageAgainstThePixel/com.openai.unity/releases",
   "license": "MIT",
   "repository": {
     "type": "git",

@@ -85,7 +85,7 @@ namespace OpenAI
             => Resources.LoadAll<OpenAIConfigurationSettings>(string.Empty)
                 .Where(asset => asset != null)
                 .Where(asset => !string.IsNullOrWhiteSpace(asset.ApiKey))
-                .Select(asset => new OpenAIAuthentication(asset.ApiKey, asset.Organization)).FirstOrDefault();
+                .Select(asset => new OpenAIAuthentication(asset.ApiKey, asset.OrganizationId)).FirstOrDefault();
 
         /// <summary>
         /// Attempts to load api keys from environment variables, as "OPENAI_KEY" (or "OPENAI_SECRET_KEY", for backwards compatibility)

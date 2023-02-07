@@ -2,6 +2,7 @@
 
 using NUnit.Framework;
 using System.Collections;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace OpenAI.Tests
@@ -18,6 +19,7 @@ namespace OpenAI.Tests
                 var result = await api.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was delicious and the waiter...");
                 Assert.IsNotNull(result);
                 Assert.IsNotEmpty(result.Data);
+                Debug.Log(result);
             });
         }
     }

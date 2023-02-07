@@ -13,7 +13,7 @@ namespace OpenAI
         {
             if (!apiKey.Contains("sk-"))
             {
-                throw new InvalidCredentialException($"{apiKey} parameter must start with 'sk-'");
+                throw new InvalidCredentialException($"{apiKey} must start with 'sk-'");
             }
 
             this.apiKey = apiKey;
@@ -22,7 +22,7 @@ namespace OpenAI
             {
                 if (!organization.Contains("org-"))
                 {
-                    throw new InvalidCredentialException($"{nameof(organization)} parameter must start with 'org-'");
+                    throw new InvalidCredentialException($"{nameof(organization)} must start with 'org-'");
                 }
 
                 this.organization = organization;

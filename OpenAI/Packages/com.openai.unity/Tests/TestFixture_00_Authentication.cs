@@ -57,7 +57,7 @@ namespace OpenAI.Tests
         {
             var config = ScriptableObject.CreateInstance<OpenAIConfigurationSettings>();
             config.apiKey = "sk-test12";
-            config.organization = "org-testOrg";
+            config.organizationId = "org-testOrg";
 
             var auth = OpenAIAuthentication.Default;
             Assert.IsNotNull(auth);
