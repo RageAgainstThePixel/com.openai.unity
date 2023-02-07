@@ -75,5 +75,5 @@ artifacts/
 ThirdParty/
 ThirdParty.meta
 --Version/
-OpenAIConfigurationSettings.asset
-OpenAIConfigurationSettings.asset.meta
+OpenAI/Assets/Resources/
+OpenAI/Assets/Resources.meta

@@ -9,6 +9,11 @@ namespace OpenAI.Editor
     [CustomEditor(typeof(OpenAIConfigurationSettings))]
     internal class OpenAIConfigurationSettingsInspector : UnityEditor.Editor
     {
+        private SerializedProperty apiKey;
+        private SerializedProperty organizationId;
+
+        #region Project Settings Window
+
         [SettingsProvider]
         private static SettingsProvider Preferences()
         {
@@ -33,14 +38,15 @@ namespace OpenAI.Editor
             instanceEditor.OnInspectorGUI();
         }
 
-        private static SerializedProperty apiKey;
-        private static SerializedProperty organization;
+        #endregion Project Settings Window
+
+        #region Inspector Window
 
         private void OnEnable()
         {
             GetOrCreateInstance(target);
             apiKey = serializedObject.FindProperty(nameof(apiKey));
-            organization = serializedObject.FindProperty(nameof(organization));
+            organizationId = serializedObject.FindProperty(nameof(organizationId));
         }
 
         public override void OnInspectorGUI()
@@ -48,11 +54,34 @@ namespace OpenAI.Editor
             serializedObject.Update();
             EditorGUILayout.Space();
             EditorGUI.indentLevel++;
-            EditorGUILayout.PropertyField(apiKey);
-            EditorGUILayout.PropertyField(organization);
+
+            var apiKeyContent = new GUIContent(apiKey.displayName, apiKey.tooltip);
+            apiKey.stringValue = EditorGUILayout.TextField(apiKeyContent, apiKey.stringValue);
+
+            if (!string.IsNullOrWhiteSpace(apiKey.stringValue))
+            {
+                if (!apiKey.stringValue.StartsWith("sk-"))
+                {
+                    EditorGUILayout.HelpBox($"{nameof(apiKey)} must start with 'sk-'", MessageType.Error);
+                }
+            }
+
+            var organizationContent = new GUIContent(organizationId.displayName, organizationId.tooltip);
+            organizationId.stringValue = EditorGUILayout.TextField(organizationContent, organizationId.stringValue);
+
+            if (!string.IsNullOrWhiteSpace(organizationId.stringValue))
+            {
+                if (!organizationId.stringValue.StartsWith("org-"))
+                {
+                    EditorGUILayout.HelpBox($"{nameof(organizationId)} must start with 'org-'", MessageType.Error);
+                }
+            }
+
             EditorGUI.indentLevel--;
             serializedObject.ApplyModifiedProperties();
         }
+
+        #endregion Inspector Window
 
         private static OpenAIConfigurationSettings GetOrCreateInstance(Object target = null)
         {

@@ -1,6 +1,7 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace OpenAI
 {
@@ -17,13 +18,15 @@ namespace OpenAI
         public string ApiKey => apiKey;
 
         [SerializeField]
-        [Tooltip("For users who belong to multiple organizations, you can pass a header to specify which organization is used for an API request. Usage from these API requests will count against the specified organization's subscription quota.")]
-        internal string organization;
+        [FormerlySerializedAs("organization")]
+        [Tooltip("For users who belong to multiple organizations, you can pass a header to specify which organization is used for an API request.\n\n" +
+                 "Usage from these API requests will count against the specified organization's subscription quota.")]
+        internal string organizationId;
 
         /// <summary>
         /// For users who belong to multiple organizations, you can pass a header to specify which organization is used for an API request.
         /// Usage from these API requests will count against the specified organization's subscription quota.
         /// </summary>
-        public string Organization => organization;
+        public string OrganizationId => organizationId;
     }
 }

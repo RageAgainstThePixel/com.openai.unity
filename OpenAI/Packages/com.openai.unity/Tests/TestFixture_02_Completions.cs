@@ -20,7 +20,7 @@ namespace OpenAI.Tests
         {
             yield return AwaitTestUtilities.Await(async () =>
             {
-                var api = new OpenAIClient();
+                var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
                 Assert.IsNotNull(api.CompletionsEndpoint);
                 var result = await api.CompletionsEndpoint.CreateCompletionAsync(
                     completionPrompts,
@@ -41,7 +41,7 @@ namespace OpenAI.Tests
         {
             yield return AwaitTestUtilities.Await(async () =>
             {
-                var api = new OpenAIClient();
+                var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
                 Assert.IsNotNull(api.CompletionsEndpoint);
                 var allCompletions = new List<Choice>();
 
