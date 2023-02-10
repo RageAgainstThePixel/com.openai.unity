@@ -3,13 +3,14 @@
 using System;
 using System.Security.Authentication;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace OpenAI
 {
     [Serializable]
     internal class AuthInfo
     {
-        public AuthInfo(string apiKey, string organization = null)
+        public AuthInfo(string apiKey, string organizationId = null)
         {
             if (!apiKey.Contains("sk-"))
             {
@@ -18,14 +19,14 @@ namespace OpenAI
 
             this.apiKey = apiKey;
 
-            if (organization != null)
+            if (organizationId != null)
             {
-                if (!organization.Contains("org-"))
+                if (!organizationId.Contains("org-"))
                 {
-                    throw new InvalidCredentialException($"{nameof(organization)} must start with 'org-'");
+                    throw new InvalidCredentialException($"{nameof(organizationId)} must start with 'org-'");
                 }
 
-                this.organization = organization;
+                this.organizationId = organizationId;
             }
         }
 
@@ -35,8 +36,9 @@ namespace OpenAI
         public string ApiKey => apiKey;
 
         [SerializeField]
-        private string organization;
+        [FormerlySerializedAs("organization")]
+        private string organizationId;
 
-        public string Organization => organization;
+        public string OrganizationId => organizationId;
     }
 }

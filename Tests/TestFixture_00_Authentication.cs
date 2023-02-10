@@ -30,8 +30,8 @@ namespace OpenAI.Tests
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.ApiKey);
             Assert.IsNotEmpty(auth.ApiKey);
-            Assert.IsNotNull(auth.Organization);
-            Assert.IsNotEmpty(auth.Organization);
+            Assert.IsNotNull(auth.OrganizationId);
+            Assert.IsNotEmpty(auth.OrganizationId);
         }
 
         [Test]
@@ -41,8 +41,8 @@ namespace OpenAI.Tests
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.ApiKey);
             Assert.AreEqual("sk-test12", auth.ApiKey);
-            Assert.IsNotNull(auth.Organization);
-            Assert.AreEqual("org-testOrg", auth.Organization);
+            Assert.IsNotNull(auth.OrganizationId);
+            Assert.AreEqual("org-testOrg", auth.OrganizationId);
         }
 
         [Test]
@@ -63,8 +63,8 @@ namespace OpenAI.Tests
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.ApiKey);
             Assert.IsNotEmpty(auth.ApiKey);
-            Assert.IsNotNull(auth.Organization);
-            Assert.IsNotEmpty(auth.Organization);
+            Assert.IsNotNull(auth.OrganizationId);
+            Assert.IsNotEmpty(auth.OrganizationId);
         }
 
         [Test]
@@ -76,18 +76,18 @@ namespace OpenAI.Tests
             var shouldBeDefaultAuth = api.OpenAIAuthentication;
             Assert.IsNotNull(shouldBeDefaultAuth);
             Assert.IsNotNull(shouldBeDefaultAuth.ApiKey);
-            Assert.IsNotNull(shouldBeDefaultAuth.Organization);
+            Assert.IsNotNull(shouldBeDefaultAuth.OrganizationId);
             Assert.AreEqual(defaultAuth.ApiKey, shouldBeDefaultAuth.ApiKey);
-            Assert.AreEqual(defaultAuth.Organization, shouldBeDefaultAuth.Organization);
+            Assert.AreEqual(defaultAuth.OrganizationId, shouldBeDefaultAuth.OrganizationId);
 
             OpenAIAuthentication.Default = new OpenAIAuthentication("sk-testAA", "org-testAA");
             api = new OpenAIClient();
             var shouldBeManualAuth = api.OpenAIAuthentication;
             Assert.IsNotNull(shouldBeManualAuth);
             Assert.IsNotNull(shouldBeManualAuth.ApiKey);
-            Assert.IsNotNull(shouldBeManualAuth.Organization);
+            Assert.IsNotNull(shouldBeManualAuth.OrganizationId);
             Assert.AreEqual(manualAuth.ApiKey, shouldBeManualAuth.ApiKey);
-            Assert.AreEqual(manualAuth.Organization, shouldBeManualAuth.Organization);
+            Assert.AreEqual(manualAuth.OrganizationId, shouldBeManualAuth.OrganizationId);
 
             OpenAIAuthentication.Default = defaultAuth;
         }
@@ -138,8 +138,8 @@ namespace OpenAI.Tests
         public void Test_09_GetOrganization()
         {
             var auth = new OpenAIAuthentication("sk-testAA", "org-testAA");
-            Assert.IsNotNull(auth.Organization);
-            Assert.AreEqual("org-testAA", auth.Organization);
+            Assert.IsNotNull(auth.OrganizationId);
+            Assert.AreEqual("org-testAA", auth.OrganizationId);
         }
 
         [Test]
