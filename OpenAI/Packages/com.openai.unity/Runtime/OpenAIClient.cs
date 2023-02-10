@@ -50,9 +50,9 @@ namespace OpenAI
             Client.DefaultRequestHeaders.Add("User-Agent", "com.openai.unity");
             Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", OpenAIAuthentication.ApiKey);
 
-            if (!string.IsNullOrWhiteSpace(OpenAIAuthentication.Organization))
+            if (!string.IsNullOrWhiteSpace(OpenAIAuthentication.OrganizationId))
             {
-                Client.DefaultRequestHeaders.Add("OpenAI-Organization", OpenAIAuthentication.Organization);
+                Client.DefaultRequestHeaders.Add("OpenAI-Organization", OpenAIAuthentication.OrganizationId);
             }
 
             Version = 1;
