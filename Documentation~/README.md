@@ -137,11 +137,21 @@ var api = new OpenAIClient(OpenAIAuthentication.LoadFromDirectory("your/path/to/
 
 #### Use System Environment Variables
 
-> Use `OPENAI_KEY` or `OPENAI_SECRET_KEY` specify a key defined in the system's local environment:
+Use your system's environment variables specify an api key and organization to use.
+
+- Use `OPENAI_API_KEY` for your api key.
+- Use `OPEN_AI_ORGANIZATION_ID` to specify an organization.
 
 ```csharp
 var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
 ```
+
+or
+
+```csharp
+var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv("org-yourOrganizationId"));
+```
+
 
 ### [Models](https://beta.openai.com/docs/api-reference/models)
 
@@ -208,14 +218,14 @@ await api.CompletionsEndpoint.StreamCompletionAsync(result =>
     {
         Debug.Log(choice);
     }
-}, "My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", max_tokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci);
+}, "My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", maxTokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci);
 ```
 
 Or if using [`IAsyncEnumerable{T}`](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=net-5.0) ([C# 8.0+](https://docs.microsoft.com/en-us/archive/msdn-magazine/2019/november/csharp-iterating-with-async-enumerables-in-csharp-8))
 
 ```csharp
 var api = new OpenAIClient();
-await foreach (var token in api.CompletionsEndpoint.StreamCompletionEnumerableAsync("My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", max_tokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci))
+await foreach (var token in api.CompletionsEndpoint.StreamCompletionEnumerableAsync("My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", maxTokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci))
 {
   Debug.Log(token);
 }
