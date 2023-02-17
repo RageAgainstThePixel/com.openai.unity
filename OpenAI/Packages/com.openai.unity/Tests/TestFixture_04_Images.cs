@@ -25,10 +25,10 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(results);
                 Assert.NotZero(results.Count);
 
-                foreach (var result in results)
+                foreach (var (path, texture) in results)
                 {
-                    Debug.Log(result.Key);
-                    Assert.IsNotNull(result.Value);
+                    Debug.Log(path);
+                    Assert.IsNotNull(texture);
                 }
             });
         }
@@ -47,10 +47,10 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(results);
                 Assert.NotZero(results.Count);
 
-                foreach (var result in results)
+                foreach (var (path, texture) in results)
                 {
-                    Debug.Log(result.Key);
-                    Assert.IsNotNull(result.Value);
+                    Debug.Log(path);
+                    Assert.IsNotNull(texture);
                 }
             });
         }
@@ -71,10 +71,10 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(results);
                 Assert.NotZero(results.Count);
 
-                foreach (var result in results)
+                foreach (var (path, texture) in results)
                 {
-                    Debug.Log(result.Key);
-                    Assert.IsNotNull(result.Value);
+                    Debug.Log(path);
+                    Assert.IsNotNull(texture);
                 }
             });
         }
@@ -93,10 +93,10 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(results);
                 Assert.NotZero(results.Count);
 
-                foreach (var result in results)
+                foreach (var (path, texture) in results)
                 {
-                    Debug.Log(result.Key);
-                    Assert.IsNotNull(result.Value);
+                    Debug.Log(path);
+                    Assert.IsNotNull(texture);
                 }
             });
         }
@@ -114,10 +114,10 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(results);
                 Assert.NotZero(results.Count);
 
-                foreach (var result in results)
+                foreach (var (path, texture) in results)
                 {
-                    Debug.Log(result.Key);
-                    Assert.IsNotNull(result.Value);
+                    Debug.Log(path);
+                    Assert.IsNotNull(texture);
                 }
             });
         }
@@ -136,10 +136,10 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(results);
                 Assert.NotZero(results.Count);
 
-                foreach (var result in results)
+                foreach (var (path, texture) in results)
                 {
-                    Debug.Log(result.Key);
-                    Assert.IsNotNull(result.Value);
+                    Debug.Log(path);
+                    Assert.IsNotNull(texture);
                 }
             });
         }

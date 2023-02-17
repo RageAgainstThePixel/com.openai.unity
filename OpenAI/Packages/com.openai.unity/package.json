@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "3.0.2",
-    "com.utilities.rest": "1.2.1"
+    "com.utilities.rest": "1.2.2"
   },
   "publishConfig": {
     "registry": "https://package.openupm.com"
