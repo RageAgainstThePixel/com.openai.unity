@@ -81,6 +81,33 @@ namespace OpenAI.Images
         /// <summary>
         /// Creates an edited or extended image given an original image and a prompt.
         /// </summary>
+        /// <param name="image">
+        /// The image to edit. Must be a valid PNG file, less than 4MB, and square.
+        /// If mask is not provided, image must have transparency, which will be used as the mask.
+        /// </param>
+        /// <param name="mask">
+        /// An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where image should be edited.
+        /// Must be a valid PNG file, less than 4MB, and have the same dimensions as image.
+        /// </param>
+        /// <param name="prompt">
+        /// A text description of the desired image(s). The maximum length is 1000 characters.
+        /// </param>
+        /// <param name="numberOfResults">
+        /// The number of images to generate. Must be between 1 and 10.
+        /// </param>
+        /// <param name="size">
+        /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
+        /// </param>
+        /// <param name="user">A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
+        /// <exception cref="HttpRequestException"></exception>
+        public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageEditAsync(Texture2D image, Texture2D mask, string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null, CancellationToken cancellationToken = default)
+            => await CreateImageEditAsync(new ImageEditRequest(image, mask, prompt, numberOfResults, size, user), cancellationToken);
+
+        /// <summary>
+        /// Creates an edited or extended image given an original image and a prompt.
+        /// </summary>
         /// <param name="request"><see cref="ImageEditRequest"/></param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
@@ -129,6 +156,27 @@ namespace OpenAI.Images
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
         /// <exception cref="HttpRequestException"></exception>
         public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageVariationAsync(string imagePath, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null, CancellationToken cancellationToken = default)
+            => await CreateImageVariationAsync(new ImageVariationRequest(imagePath, numberOfResults, size, user), cancellationToken);
+
+        /// <summary>
+        /// Creates a variation of a given image.
+        /// </summary>
+        /// <param name="imagePath">
+        /// The image to edit. Must be a valid PNG file, less than 4MB, and square.
+        /// </param>
+        /// <param name="numberOfResults">
+        /// The number of images to generate. Must be between 1 and 10.
+        /// </param>
+        /// <param name="size">
+        /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
+        /// </param>
+        /// <param name="user">
+        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
+        /// </param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
+        /// <exception cref="HttpRequestException"></exception>
+        public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageVariationAsync(Texture2D imagePath, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null, CancellationToken cancellationToken = default)
             => await CreateImageVariationAsync(new ImageVariationRequest(imagePath, numberOfResults, size, user), cancellationToken);
 
         /// <summary>
