@@ -103,7 +103,7 @@ You can save the key directly into a scriptable object that is located in the `A
 
 You can create a new one by using the context menu of the project pane and creating a new `OpenAIConfigurationSettings` scriptable object.
 
-![Create new OpenAIConfigurationSettings](images/create-scriptable-object.png)
+![Create new OpenAIConfigurationSettings](OpenAI\Packages\com.openai.unity\Documentation~\images\create-scriptable-object.png)
 
 #### Load key from configuration file
 
