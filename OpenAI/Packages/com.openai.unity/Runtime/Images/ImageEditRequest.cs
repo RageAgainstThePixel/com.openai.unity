@@ -32,7 +32,15 @@ namespace OpenAI.Images
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
         public ImageEditRequest(string imagePath, string maskPath, string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null)
-            : this(File.OpenRead(imagePath), Path.GetFileName(imagePath), File.OpenRead(maskPath), Path.GetFileName(maskPath), prompt, numberOfResults, size, user)
+            : this(
+                File.OpenRead(imagePath),
+                Path.GetFileName(imagePath),
+                string.IsNullOrWhiteSpace(maskPath) ? null : File.OpenRead(maskPath),
+                string.IsNullOrWhiteSpace(maskPath) ? null : Path.GetFileName(maskPath),
+                prompt,
+                numberOfResults,
+                size,
+                user)
         {
         }
 
@@ -60,7 +68,15 @@ namespace OpenAI.Images
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
         public ImageEditRequest(Texture2D texture, Texture2D mask, string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null)
-            : this(new MemoryStream(texture.EncodeToPNG()), $"{texture.name}.png", new MemoryStream(mask.EncodeToPNG()), $"{mask.name}.png", prompt, numberOfResults, size, user)
+            : this(
+                new MemoryStream(texture.EncodeToPNG()),
+                $"{texture.name}.png",
+                mask != null ? new MemoryStream(mask.EncodeToPNG()) : null,
+                mask != null ? $"{mask.name}.png" : null,
+                prompt,
+                numberOfResults,
+                size,
+                user)
         {
         }
 
@@ -99,14 +115,18 @@ namespace OpenAI.Images
             }
 
             ImageName = imageName;
-            Mask = mask;
 
-            if (string.IsNullOrWhiteSpace(maskName))
+            if (mask != null)
             {
-                maskName = "mask.png";
-            }
+                Mask = mask;
 
-            MaskName = maskName;
+                if (string.IsNullOrWhiteSpace(maskName))
+                {
+                    maskName = "mask.png";
+                }
+
+                MaskName = maskName;
+            }
 
             if (prompt.Length > 1000)
             {

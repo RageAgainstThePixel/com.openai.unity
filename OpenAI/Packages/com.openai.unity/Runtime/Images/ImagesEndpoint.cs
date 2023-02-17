@@ -118,9 +118,14 @@ namespace OpenAI.Images
             using var imageData = new MemoryStream();
             await request.Image.CopyToAsync(imageData, cancellationToken);
             content.Add(new ByteArrayContent(imageData.ToArray()), "image", request.ImageName);
-            using var maskData = new MemoryStream();
-            await request.Mask.CopyToAsync(maskData, cancellationToken);
-            content.Add(new ByteArrayContent(maskData.ToArray()), "mask", request.MaskName);
+
+            if (request.Mask != null)
+            {
+                using var maskData = new MemoryStream();
+                await request.Mask.CopyToAsync(maskData, cancellationToken);
+                content.Add(new ByteArrayContent(maskData.ToArray()), "mask", request.MaskName);
+            }
+
             content.Add(new StringContent(request.Prompt), "prompt");
             content.Add(new StringContent(request.Number.ToString()), "n");
             content.Add(new StringContent(request.Size), "size");
@@ -141,7 +146,6 @@ namespace OpenAI.Images
         /// </summary>
         /// <param name="imagePath">
         /// The image to edit. Must be a valid PNG file, less than 4MB, and square.
-        /// If mask is not provided, image must have transparency, which will be used as the mask.
         /// </param>
         /// <param name="numberOfResults">
         /// The number of images to generate. Must be between 1 and 10.
