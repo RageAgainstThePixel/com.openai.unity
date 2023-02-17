@@ -12,14 +12,15 @@ namespace OpenAI
     {
         public AuthInfo(string apiKey, string organizationId = null)
         {
-            if (!apiKey.Contains("sk-"))
+            if (string.IsNullOrWhiteSpace(apiKey) ||
+                !apiKey.Contains("sk-"))
             {
                 throw new InvalidCredentialException($"{apiKey} must start with 'sk-'");
             }
 
             this.apiKey = apiKey;
 
-            if (organizationId != null)
+            if (!string.IsNullOrWhiteSpace(organizationId))
             {
                 if (!organizationId.Contains("org-"))
                 {
