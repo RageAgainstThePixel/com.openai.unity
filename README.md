@@ -25,7 +25,7 @@ The recommended installation method is though the unity package manager and [Ope
     - `com.openai`
     - `com.utilities`
 
-![scoped-registries](https://github.com/RageAgainstThePixel/com.openai.unity/raw/main/OpenAI/Packages/com.openai.unity/Documentation~/images/package-manager-scopes.png)
+![scoped-registries](OpenAI/Packages/com.openai.unity/Documentation~/images/package-manager-scopes.png)
 
 - Open the Unity Package Manager window
 - Change the Registry from Unity to `My Registries`
@@ -88,13 +88,13 @@ There are 4 ways to provide your API keys, in order of precedence:
 #### Pass keys directly with constructor
 
 ```csharp
-var api = new OpenAIClient("sk-mykeyhere");
+var api = new OpenAIClient("sk-apiKey");
 ```
 
 Or create a `OpenAIAuthentication` object manually
 
 ```csharp
-var api = new OpenAIClient(new OpenAIAuthentication("sk-secretkey"));
+var api = new OpenAIClient(new OpenAIAuthentication("sk-apiKey", "org-yourOrganizationId"));
 ```
 
 #### Unity Scriptable Object
@@ -103,7 +103,7 @@ You can save the key directly into a scriptable object that is located in the `A
 
 You can create a new one by using the context menu of the project pane and creating a new `OpenAIConfigurationSettings` scriptable object.
 
-![Create new OpenAIConfigurationSettings](https://github.com/RageAgainstThePixel/com.openai.unity/raw/main/OpenAI/Packages/com.openai.unity/Documentation~/images/create-scriptable-object.png)
+![Create new OpenAIConfigurationSettings](images/create-scriptable-object.png)
 
 #### Load key from configuration file
 
@@ -140,18 +140,11 @@ var api = new OpenAIClient(OpenAIAuthentication.LoadFromDirectory("your/path/to/
 Use your system's environment variables specify an api key and organization to use.
 
 - Use `OPENAI_API_KEY` for your api key.
-- Use `OPEN_AI_ORGANIZATION_ID` to specify an organization.
+- Use `OPENAI_ORGANIZATION_ID` to specify an organization.
 
 ```csharp
 var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
 ```
-
-or
-
-```csharp
-var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv("org-yourOrganizationId"));
-```
-
 
 ### [Models](https://beta.openai.com/docs/api-reference/models)
 
@@ -280,12 +273,12 @@ Creates an image given a prompt.
 var api = new OpenAIClient();
 var results = await api.ImagesEndPoint.GenerateImageAsync("A house riding a velociraptor", 1, ImageSize.Small);
 
-foreach (var result in results)
+foreach (var (path, texture) in results)
 {
-    Debug.Log(result.Key);
-    // result.Key == file://path/to/image.png
-    Assert.IsNotNull(result.Value);
-    // result.Value == The preloaded Texture2D
+    Debug.Log(path);
+    // path == file://path/to/image.png
+    Assert.IsNotNull(texture);
+    // texture == The preloaded Texture2D
 }
 ```
 
@@ -297,12 +290,12 @@ Creates an edited or extended image given an original image and a prompt.
 var api = new OpenAIClient();
 var results = await api.ImagesEndPoint.CreateImageEditAsync(Path.GetFullPath(imageAssetPath), Path.GetFullPath(maskAssetPath), "A sunlit indoor lounge area with a pool containing a flamingo", 1, ImageSize.Small);
 
-foreach (var result in results)
+foreach (var (path, texture) in results)
 {
-    Debug.Log(result.Key);
-    // result.Key == file://path/to/image.png
-    Assert.IsNotNull(result.Value);
-    // result.Value == Texture2D
+    Debug.Log(path);
+    // path == file://path/to/image.png
+    Assert.IsNotNull(texture);
+    // texture == The preloaded Texture2D
 }
 ```
 
@@ -314,12 +307,12 @@ Creates a variation of a given image.
 var api = new OpenAIClient();
 var results = await api.ImagesEndPoint.CreateImageVariationAsync(Path.GetFullPath(imageAssetPath), 1, ImageSize.Small);
 
-foreach (var result in results)
+foreach (var (path, texture) in results)
 {
-    Debug.Log(result.Key);
-    // result.Key == file://path/to/image.png
-    Assert.IsNotNull(result.Value);
-    // result.Value == Texture2D
+    Debug.Log(path);
+    // path == file://path/to/image.png
+    Assert.IsNotNull(texture);
+    // texture == The preloaded Texture2D
 }
 ```
 
