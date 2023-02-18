@@ -32,7 +32,7 @@ namespace OpenAI.Images
         /// Constructor.
         /// </summary>
         /// <param name="texture">
-        /// The image to edit. Must be a valid PNG file, less than 4MB, and square.
+        /// The texture to edit. Must be a valid PNG file, less than 4MB, and square. Read/Write should be enabled and Compression set to None.
         /// </param>
         /// <param name="numberOfResults">
         /// The number of images to generate. Must be between 1 and 10.

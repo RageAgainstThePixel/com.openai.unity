@@ -165,8 +165,8 @@ namespace OpenAI.Images
         /// <summary>
         /// Creates a variation of a given image.
         /// </summary>
-        /// <param name="imagePath">
-        /// The image to edit. Must be a valid PNG file, less than 4MB, and square.
+        /// <param name="texture">
+        /// The texture to edit. Must be a valid PNG file, less than 4MB, and square. Read/Write should be enabled and Compression set to None.
         /// </param>
         /// <param name="numberOfResults">
         /// The number of images to generate. Must be between 1 and 10.
@@ -180,8 +180,8 @@ namespace OpenAI.Images
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
         /// <exception cref="HttpRequestException"></exception>
-        public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageVariationAsync(Texture2D imagePath, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null, CancellationToken cancellationToken = default)
-            => await CreateImageVariationAsync(new ImageVariationRequest(imagePath, numberOfResults, size, user), cancellationToken);
+        public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageVariationAsync(Texture2D texture, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null, CancellationToken cancellationToken = default)
+            => await CreateImageVariationAsync(new ImageVariationRequest(texture, numberOfResults, size, user), cancellationToken);
 
         /// <summary>
         /// Creates a variation of a given image.

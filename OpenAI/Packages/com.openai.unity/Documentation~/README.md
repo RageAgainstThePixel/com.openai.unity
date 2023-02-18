@@ -316,6 +316,22 @@ foreach (var (path, texture) in results)
 }
 ```
 
+Alternatively, the endpoint can directly take a Texture2D with Read/Write enabled and Compression set to None. 
+
+```csharp
+var api = new OpenAIClient();
+var results = await api.ImagesEndPoint.CreateImageVariationAsync(imageTexture, 1, ImageSize.Small);
+// imageTexture is of type Texture2D 
+foreach (var (path, texture) in results)
+{
+    Debug.Log(path);
+    // path == file://path/to/image.png
+    Assert.IsNotNull(texture);
+    // texture == The preloaded Texture2D
+}
+```
+
+
 ### [Files](https://beta.openai.com/docs/api-reference/files)
 
 Files are used to upload documents that can be used with features like [Fine-tuning](#fine-tuning).
