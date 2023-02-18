@@ -331,7 +331,6 @@ foreach (var (path, texture) in results)
 }
 ```
 
-
 ### [Files](https://beta.openai.com/docs/api-reference/files)
 
 Files are used to upload documents that can be used with features like [Fine-tuning](#fine-tuning).
