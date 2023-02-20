@@ -7,6 +7,8 @@ Based on [OpenAI-DotNet](https://github.com/RageAgainstThePixel/OpenAI-DotNet)
 
 A [OpenAI](https://openai.com/) package for the [Unity](https://unity.com/) Game Engine to use GPT-3 and Dall-E though their RESTful API (currently in beta).  Independently developed, this is not an official library and I am not affiliated with OpenAI.  An OpenAI API account is required.
 
+***All copyrights, trademarks, logos, and assets are the property of their respective owners.***
+
 > This repository is available to transfer to the OpenAI organization if they so choose to accept it.
 
 ## Installing
@@ -316,12 +318,12 @@ foreach (var (path, texture) in results)
 }
 ```
 
-Alternatively, the endpoint can directly take a Texture2D with Read/Write enabled and Compression set to None. 
+Alternatively, the endpoint can directly take a Texture2D with Read/Write enabled and Compression set to None.
 
 ```csharp
 var api = new OpenAIClient();
 var results = await api.ImagesEndPoint.CreateImageVariationAsync(imageTexture, 1, ImageSize.Small);
-// imageTexture is of type Texture2D 
+// imageTexture is of type Texture2D
 foreach (var (path, texture) in results)
 {
     Debug.Log(path);
