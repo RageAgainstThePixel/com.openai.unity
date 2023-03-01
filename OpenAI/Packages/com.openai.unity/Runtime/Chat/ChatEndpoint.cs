@@ -1,5 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using Newtonsoft.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OpenAI.Chat
@@ -14,9 +16,15 @@ namespace OpenAI.Chat
         /// <summary>
         /// Creates a completion for the chat message
         /// </summary>
-        public async Task GetCompletionAsync()
+        /// <param name="chatRequest"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<ChatResponse> GetCompletionAsync(ChatRequest chatRequest, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
+            var payload = JsonConvert.SerializeObject(chatRequest).ToJsonStringContent();
+            var result = await Api.Client.PostAsync($"{GetEndpoint()}/completions", payload, cancellationToken);
+            var resultAsString = await result.ReadAsStringAsync(true);
+            return JsonConvert.DeserializeObject<ChatResponse>(resultAsString, Api.JsonSerializationOptions);
         }
     }
 }
