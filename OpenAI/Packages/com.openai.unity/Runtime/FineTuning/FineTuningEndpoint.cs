@@ -110,7 +110,7 @@ namespace OpenAI.FineTuning
         public async Task<IReadOnlyList<Event>> ListFineTuneEventsAsync(string jobId, CancellationToken cancellationToken = default)
         {
             var response = await Api.Client.GetAsync($"{GetEndpoint()}/{jobId}/events", cancellationToken);
-            var responseAsString = await response.ReadAsStringAsync(cancellationToken);
+            var responseAsString = await response.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<FineTuneEventList>(responseAsString, Api.JsonSerializationOptions)?.Data.OrderBy(@event => @event.CreatedAtUnixTime).ToArray();
         }
 

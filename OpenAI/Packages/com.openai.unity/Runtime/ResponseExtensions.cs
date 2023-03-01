@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace OpenAI
 {
@@ -23,13 +24,18 @@ namespace OpenAI
             response.ProcessingTime = TimeSpan.FromMilliseconds(int.Parse(headers.GetValues(ProcessingTime).First()));
         }
 
-        internal static async Task<string> ReadAsStringAsync(this HttpResponseMessage response, CancellationToken cancellationToken = default, [CallerMemberName] string methodName = null)
+        internal static async Task<string> ReadAsStringAsync(this HttpResponseMessage response, bool debug = false, [CallerMemberName] string methodName = null)
         {
             var responseAsString = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
             {
                 throw new HttpRequestException($"{methodName} Failed! HTTP status code: {response.StatusCode} | Response body: {responseAsString}");
+            }
+
+            if (debug)
+            {
+                Debug.Log(responseAsString);
             }
 
             return responseAsString;

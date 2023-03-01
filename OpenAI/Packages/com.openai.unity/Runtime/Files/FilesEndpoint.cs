@@ -87,7 +87,7 @@ namespace OpenAI.Files
             request.Dispose();
 
             var response = await Api.Client.PostAsync(GetEndpoint(), content, cancellationToken);
-            var responseAsString = await response.ReadAsStringAsync(cancellationToken);
+            var responseAsString = await response.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<FileData>(responseAsString, Api.JsonSerializationOptions);
         }
 
