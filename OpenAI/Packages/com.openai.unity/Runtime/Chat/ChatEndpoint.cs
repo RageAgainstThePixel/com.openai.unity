@@ -16,9 +16,9 @@ namespace OpenAI.Chat
         /// <summary>
         /// Creates a completion for the chat message
         /// </summary>
-        /// <param name="chatRequest"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <param name="chatRequest">The chat request which contains the message content.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="ChatResponse"/>.</returns>
         public async Task<ChatResponse> GetCompletionAsync(ChatRequest chatRequest, CancellationToken cancellationToken = default)
         {
             var payload = JsonConvert.SerializeObject(chatRequest, Api.JsonSerializationOptions).ToJsonStringContent();
@@ -26,5 +26,7 @@ namespace OpenAI.Chat
             var resultAsString = await result.ReadAsStringAsync(true);
             return JsonConvert.DeserializeObject<ChatResponse>(resultAsString, Api.JsonSerializationOptions);
         }
+
+        // TODO Streaming endpoints
     }
 }
