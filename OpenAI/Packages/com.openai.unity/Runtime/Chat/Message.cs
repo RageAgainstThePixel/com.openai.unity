@@ -1,3 +1,5 @@
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
 using Newtonsoft.Json;
 
 namespace OpenAI.Chat
@@ -7,8 +9,7 @@ namespace OpenAI.Chat
         [JsonConstructor]
         public Message(
             [JsonProperty("role")] string role,
-            [JsonProperty("content")] string content
-        )
+            [JsonProperty("content")] string content)
         {
             Role = role;
             Content = content;
@@ -19,5 +20,9 @@ namespace OpenAI.Chat
 
         [JsonProperty("content")]
         public string Content { get; }
+
+        public override string ToString() => Content;
+
+        public static implicit operator string(Message message) => message.Content;
     }
 }

@@ -3,7 +3,6 @@
 using Newtonsoft.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenAI.Models;
 
 namespace OpenAI.Chat
 {
@@ -20,9 +19,9 @@ namespace OpenAI.Chat
         /// <param name="chatRequest"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task<ChatResponse> GetCompletionAsync(ChatRequest chatRequest CancellationToken cancellationToken = default)
+        public async Task<ChatResponse> GetCompletionAsync(ChatRequest chatRequest, CancellationToken cancellationToken = default)
         {
-            var payload = JsonConvert.SerializeObject(chatRequest).ToJsonStringContent();
+            var payload = JsonConvert.SerializeObject(chatRequest, Api.JsonSerializationOptions).ToJsonStringContent();
             var result = await Api.Client.PostAsync($"{GetEndpoint()}/completions", payload, cancellationToken);
             var resultAsString = await result.ReadAsStringAsync(true);
             return JsonConvert.DeserializeObject<ChatResponse>(resultAsString, Api.JsonSerializationOptions);

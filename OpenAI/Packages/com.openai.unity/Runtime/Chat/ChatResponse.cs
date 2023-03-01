@@ -1,5 +1,8 @@
-using System.Collections.Generic;
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenAI.Chat
 {
@@ -40,5 +43,10 @@ namespace OpenAI.Chat
 
         [JsonProperty("choices")]
         public IReadOnlyList<Choice> Choices { get; }
+
+        [JsonIgnore]
+        public Choice FirstChoice => Choices.FirstOrDefault();
+
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }
