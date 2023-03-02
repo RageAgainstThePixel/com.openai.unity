@@ -129,7 +129,7 @@ namespace OpenAI
         public CompletionsEndpoint CompletionsEndpoint { get; }
 
         /// <summary>
-        /// 
+        /// Given a chat conversation, the model will return a chat completion response.
         /// </summary>
         public ChatEndpoint ChatEndpoint { get; }
 
