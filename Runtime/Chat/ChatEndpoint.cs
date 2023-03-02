@@ -23,7 +23,7 @@ namespace OpenAI.Chat
         {
             var payload = JsonConvert.SerializeObject(chatRequest, Api.JsonSerializationOptions).ToJsonStringContent();
             var result = await Api.Client.PostAsync($"{GetEndpoint()}/completions", payload, cancellationToken);
-            var resultAsString = await result.ReadAsStringAsync(true);
+            var resultAsString = await result.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<ChatResponse>(resultAsString, Api.JsonSerializationOptions);
         }
 
