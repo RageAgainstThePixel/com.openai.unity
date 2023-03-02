@@ -44,7 +44,7 @@ namespace OpenAI.Chat
         /// ID of the model to use. Currently, only gpt-3.5-turbo and gpt-3.5-turbo-0301 are supported.
         /// </summary>
         [JsonProperty("model")]
-        private string Model { get; }
+        public string Model { get; }
 
         /// <summary>
         /// The messages to generate chat completions for, in the chat format.
