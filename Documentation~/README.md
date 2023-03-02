@@ -248,7 +248,7 @@ new ChatPrompt("user", "Where was it played?"),
 };
 var chatRequest = new ChatRequest(chatPrompts);
 var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
-Debug.Log(result.Fi
+Debug.Log(result.FirstChoice);
 ```
 
 ##### [Chat Streaming](https://platform.openai.com/docs/api-reference/chat/create#chat/create-stream)
