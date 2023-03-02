@@ -33,6 +33,12 @@ namespace OpenAI.Embeddings
 
             Input = input;
             Model = model ?? new Model("text-embedding-ada-002");
+
+            if (!Model.Contains("text-embedding"))
+            {
+                throw new ArgumentException(nameof(model), $"{Model} does not support text-embedding");
+            }
+
             User = user;
         }
 

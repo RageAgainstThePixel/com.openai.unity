@@ -111,7 +111,7 @@ namespace OpenAI.Completions
             completionRequest.Stream = false;
             var jsonContent = JsonConvert.SerializeObject(completionRequest, Api.JsonSerializationOptions);
             var response = await Api.Client.PostAsync(GetEndpoint(), jsonContent.ToJsonStringContent(), cancellationToken);
-            var responseAsString = await response.ReadAsStringAsync(cancellationToken);
+            var responseAsString = await response.ReadAsStringAsync();
             return DeserializeResult(response, responseAsString);
         }
 

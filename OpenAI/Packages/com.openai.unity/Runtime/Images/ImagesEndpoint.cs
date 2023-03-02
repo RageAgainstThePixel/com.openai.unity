@@ -212,7 +212,7 @@ namespace OpenAI.Images
 
         private async Task<IReadOnlyDictionary<string, Texture2D>> DeserializeResponseAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
         {
-            var resultAsString = await response.ReadAsStringAsync(cancellationToken);
+            var resultAsString = await response.ReadAsStringAsync();
             var imagesResponse = JsonConvert.DeserializeObject<ImagesResponse>(resultAsString, Api.JsonSerializationOptions);
 
             if (imagesResponse?.Data == null || imagesResponse.Data.Count == 0)
