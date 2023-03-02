@@ -18,6 +18,7 @@ namespace OpenAI.Chat
             double? topP = null,
             int? number = null,
             string[] stops = null,
+            int? maxTokens = null,
             double? presencePenalty = null,
             double? frequencyPenalty = null,
             string user = null)
@@ -76,7 +77,7 @@ namespace OpenAI.Chat
         /// How many chat completion choices to generate for each input message.<br/>
         /// Defaults to 1
         /// </summary>
-        [JsonProperty("number")]
+        [JsonProperty("n")]
         public int? Number { get; }
 
         /// <summary>
@@ -92,6 +93,13 @@ namespace OpenAI.Chat
         /// </summary>
         [JsonProperty("stop")]
         public string[] Stops { get; }
+
+        /// <summary>
+        /// The maximum number of tokens allowed for the generated answer.
+        /// By default, the number of tokens the model can return will be (4096 - prompt tokens).
+        /// </summary>
+        [JsonProperty("max_tokens")]
+        public int? MaxTokens { get; }
 
         /// <summary>
         /// Number between -2.0 and 2.0.
