@@ -36,6 +36,7 @@ namespace OpenAI.Chat
             TopP = topP;
             Number = number;
             Stops = stops;
+            MaxTokens = maxTokens;
             PresencePenalty = presencePenalty;
             FrequencyPenalty = frequencyPenalty;
             User = user;
