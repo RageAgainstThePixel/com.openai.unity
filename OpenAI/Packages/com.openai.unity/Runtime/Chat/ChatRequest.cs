@@ -10,19 +10,18 @@ namespace OpenAI.Chat
 {
     public sealed class ChatRequest
     {
-        [JsonConstructor]
         public ChatRequest(
-            [JsonProperty("messages")] IEnumerable<ChatPrompt> messages,
-            [JsonProperty("model")] Model model = null,
-            [JsonProperty("temperature")] double? temperature = null,
-            [JsonProperty("top_p")] double? topP = null,
-            [JsonProperty("n")] int? number = null,
-            [JsonProperty("stop")] string[] stops = null,
-            [JsonProperty("max_tokens")] int? maxTokens = null,
-            [JsonProperty("presence_penalty")] double? presencePenalty = null,
-            [JsonProperty("frequency_penalty")] double? frequencyPenalty = null,
-            [JsonProperty("logit_bias")] Dictionary<string, double> logitBias = null,
-            [JsonProperty("user")] string user = null)
+            IEnumerable<ChatPrompt> messages,
+            Model model = null,
+            double? temperature = null,
+            double? topP = null,
+            int? number = null,
+            string[] stops = null,
+            int? maxTokens = null,
+            double? presencePenalty = null,
+            double? frequencyPenalty = null,
+            Dictionary<string, double> logitBias = null,
+            string user = null)
         {
             const string defaultModel = "gpt-3.5-turbo";
             Model = model ?? new Model(defaultModel);
@@ -32,7 +31,13 @@ namespace OpenAI.Chat
                 throw new ArgumentException(nameof(model), $"{Model} not supported");
             }
 
-            Messages = messages.ToList();
+            Messages = messages?.ToList();
+
+            if (Messages?.Count == 0)
+            {
+                throw new ArgumentNullException(nameof(messages), $"Missing required {nameof(messages)} parameter");
+            }
+
             Temperature = temperature;
             TopP = topP;
             Number = number;
