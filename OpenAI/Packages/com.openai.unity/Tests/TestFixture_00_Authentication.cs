@@ -4,6 +4,7 @@ using NUnit.Framework;
 using System;
 using System.IO;
 using System.Security.Authentication;
+using UnityEditor;
 using UnityEngine;
 
 namespace OpenAI.Tests
@@ -58,13 +59,26 @@ namespace OpenAI.Tests
             var config = ScriptableObject.CreateInstance<OpenAIConfigurationSettings>();
             config.apiKey = "sk-test12";
             config.organizationId = "org-testOrg";
+            Debug.Log(Application.dataPath);
 
+            if (!Directory.Exists($"{Application.dataPath}/Resources"))
+            {
+                Directory.CreateDirectory($"{Application.dataPath}/Resources");
+            }
+
+            AssetDatabase.CreateAsset(config, "Assets/Resources/OpenAIConfigurationSettings-Test.asset");
+
+            var configPath = AssetDatabase.GetAssetPath(config);
             var auth = OpenAIAuthentication.Default;
+
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.ApiKey);
             Assert.IsNotEmpty(auth.ApiKey);
+            Assert.AreEqual(auth.ApiKey, config.ApiKey);
             Assert.IsNotNull(auth.OrganizationId);
             Assert.IsNotEmpty(auth.OrganizationId);
+            Assert.AreEqual(auth.OrganizationId, config.OrganizationId);
+            AssetDatabase.DeleteAsset(configPath);
         }
 
         [Test]
