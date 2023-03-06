@@ -14,14 +14,15 @@ namespace OpenAI.Chat
         public ChatRequest(
             [JsonProperty("messages")] IEnumerable<ChatPrompt> messages,
             [JsonProperty("model")] Model model = null,
-            double? temperature = null,
-            double? topP = null,
-            int? number = null,
-            string[] stops = null,
-            int? maxTokens = null,
-            double? presencePenalty = null,
-            double? frequencyPenalty = null,
-            string user = null)
+            [JsonProperty("temperature")] double? temperature = null,
+            [JsonProperty("top_p")] double? topP = null,
+            [JsonProperty("n")] int? number = null,
+            [JsonProperty("stop")] string[] stops = null,
+            [JsonProperty("max_tokens")] int? maxTokens = null,
+            [JsonProperty("presence_penalty")] double? presencePenalty = null,
+            [JsonProperty("frequency_penalty")] double? frequencyPenalty = null,
+            [JsonProperty("logit_bias")] Dictionary<string, double> logitBias = null,
+            [JsonProperty("user")] string user = null)
         {
             const string defaultModel = "gpt-3.5-turbo";
             Model = model ?? new Model(defaultModel);
@@ -39,6 +40,7 @@ namespace OpenAI.Chat
             MaxTokens = maxTokens;
             PresencePenalty = presencePenalty;
             FrequencyPenalty = frequencyPenalty;
+            LogitBias = logitBias;
             User = user;
         }
 
@@ -129,7 +131,7 @@ namespace OpenAI.Chat
         /// Defaults to null
         /// </summary>
         [JsonProperty("logit_bias")]
-        public Dictionary<string, double> LogitBias { get; set; }
+        public IReadOnlyDictionary<string, double> LogitBias { get; set; }
 
         /// <summary>
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
