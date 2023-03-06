@@ -2,6 +2,7 @@
 
 using NUnit.Framework;
 using OpenAI.Chat;
+using OpenAI.Models;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -25,7 +26,7 @@ namespace OpenAI.Tests
                     new ChatPrompt("assistant", "The Los Angeles Dodgers won the World Series in 2020."),
                     new ChatPrompt("user", "Where was it played?"),
                 };
-                var chatRequest = new ChatRequest(chatPrompts);
+                var chatRequest = new ChatRequest(chatPrompts, Model.GPT3_5_Turbo);
                 var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
                 Assert.IsNotNull(result);
                 Assert.NotNull(result.Choices);

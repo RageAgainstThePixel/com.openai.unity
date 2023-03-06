@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using OpenAI.Models;
+using System;
 
 namespace OpenAI.Edits
 {
@@ -34,6 +35,12 @@ namespace OpenAI.Edits
             Model model = null)
         {
             Model = model ?? new Model("text-davinci-edit-001");
+
+            if (!Model.Contains("-edit-"))
+            {
+                throw new ArgumentException(nameof(model), $"{Model} does not support editing");
+            }
+
             Input = input;
             Instruction = instruction;
             EditCount = editCount;
