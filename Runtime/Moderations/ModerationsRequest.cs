@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using OpenAI.Models;
+using System;
 
 namespace OpenAI.Moderations
 {
@@ -26,6 +27,11 @@ namespace OpenAI.Moderations
         {
             Input = input;
             Model = model ?? new Model("text-moderation-latest");
+
+            if (!Model.Contains("text-moderation"))
+            {
+                throw new ArgumentException(nameof(model), $"{Model} is not supported.");
+            }
         }
 
         [JsonProperty("input")]
