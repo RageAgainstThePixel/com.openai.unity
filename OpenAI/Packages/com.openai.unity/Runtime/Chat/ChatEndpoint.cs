@@ -8,8 +8,10 @@ namespace OpenAI.Chat
 {
     public sealed class ChatEndpoint : BaseEndPoint
     {
+        /// <inheritdoc />
         public ChatEndpoint(OpenAIClient api) : base(api) { }
 
+        /// <inheritdoc />
         protected override string GetEndpoint()
             => $"{Api.BaseUrl}chat";
 
