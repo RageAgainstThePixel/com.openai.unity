@@ -1,8 +1,9 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using OpenAI.Completions;
+using OpenAI.Audio;
 using OpenAI.Chat;
+using OpenAI.Completions;
 using OpenAI.Edits;
 using OpenAI.Embeddings;
 using OpenAI.Files;
@@ -13,7 +14,6 @@ using OpenAI.Moderations;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
-using OpenAI.Audio;
 
 namespace OpenAI
 {
