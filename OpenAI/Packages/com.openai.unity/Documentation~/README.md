@@ -61,6 +61,9 @@ The recommended installation method is though the unity package manager and [Ope
   - [Create Edit](#create-edit)
 - [Embeddings](#embeddings)
   - [Create Embedding](#create-embeddings)
+- [Audio](#audio)
+  - [Create Transcription](#create-transcription)
+  - [Create Translation](#create-translation)
 - [Images](#images)
   - [Create Image](#create-image)
   - [Edit Image](#edit-image)
@@ -289,6 +292,32 @@ Creates an embedding vector representing the input text.
 ```csharp
 var api = new OpenAIClient();
 var result = await api.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was delicious and the waiter...");
+Debug.Log(result);
+```
+
+### [Audio](https://beta.openai.com/docs/api-reference/audio)
+
+Converts audio into text.
+
+#### [Create Transcription](https://platform.openai.com/docs/api-reference/audio/create)
+
+Transcribes audio into the input language.
+
+```csharp
+var api = new OpenAIClient();
+var request = new AudioTranscriptionRequest(audioClip, language: "en");
+var result = await api.AudioEndpoint.CreateTranscriptionAsync(request);
+Debug.Log(result);
+```
+
+#### [Create Translation](https://platform.openai.com/docs/api-reference/audio/create)
+
+Translates audio into into English.
+
+```csharp
+var api = new OpenAIClient();
+var request = new AudioTranslationRequest(audioClip);
+var result = await api.AudioEndpoint.CreateTranslationAsync(request);
 Debug.Log(result);
 ```
 
