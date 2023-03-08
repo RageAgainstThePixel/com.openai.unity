@@ -1,8 +1,11 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System.Collections;
-using System.Threading.Tasks;
 using NUnit.Framework;
+using OpenAI.Audio;
+using System.Collections;
+using System.IO;
+using UnityEditor;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace OpenAI.Tests
@@ -16,7 +19,11 @@ namespace OpenAI.Tests
             {
                 var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
                 Assert.IsNotNull(api.AudioEndpoint);
-                await Task.CompletedTask;
+                var transcriptionAudio = AssetDatabase.GUIDToAssetPath("259eaa73cab84284eac307d3134c3ade");
+                var request = new AudioTranscriptionRequest(Path.GetFullPath(transcriptionAudio), language: "en");
+                var result = await api.AudioEndpoint.CreateTranscriptionAsync(request);
+                Assert.IsNotNull(result);
+                Debug.Log(result);
             });
         }
 
@@ -27,7 +34,11 @@ namespace OpenAI.Tests
             {
                 var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
                 Assert.IsNotNull(api.AudioEndpoint);
-                await Task.CompletedTask;
+                var translationAudio = AssetDatabase.GUIDToAssetPath("3ab176222366dc241894506c315c6fa4");
+                var request = new AudioTranslationRequest(Path.GetFullPath(translationAudio));
+                var result = await api.AudioEndpoint.CreateTranslationAsync(request);
+                Assert.IsNotNull(result);
+                Debug.Log(result);
             });
         }
     }
