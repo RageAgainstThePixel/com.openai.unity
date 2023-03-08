@@ -13,7 +13,7 @@ using UnityEngine.TestTools;
 
 namespace OpenAI.Tests
 {
-    internal class TestFixture_07_FineTuning
+    internal class TestFixture_09_FineTuning
     {
         private async Task<FileData> CreateTestTrainingDataAsync(OpenAIClient api)
         {

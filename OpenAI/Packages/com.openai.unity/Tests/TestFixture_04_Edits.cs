@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 
 namespace OpenAI.Tests
 {
-    internal class TestFixture_03_Edits
+    internal class TestFixture_04_Edits
     {
         [UnityTest]
         public IEnumerator Test_1_GetBasicEdit()

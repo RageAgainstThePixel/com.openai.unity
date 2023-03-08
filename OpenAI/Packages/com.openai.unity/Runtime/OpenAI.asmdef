@@ -2,7 +2,9 @@
     "name": "OpenAI",
     "rootNamespace": "OpenAI",
     "references": [
-        "GUID:7958db66189566541a6363568aee1575"
+        "GUID:7958db66189566541a6363568aee1575",
+        "GUID:a6609af893242c7438d701ddd4cce46a",
+        "GUID:f7a0d77b5e1d79742a738fb859ee2f28"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

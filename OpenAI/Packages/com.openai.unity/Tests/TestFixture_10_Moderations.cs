@@ -6,7 +6,7 @@ using UnityEngine.TestTools;
 
 namespace OpenAI.Tests
 {
-    internal class TestFixture_08_Moderations
+    internal class TestFixture_10_Moderations
     {
         [UnityTest]
         public IEnumerator Test_1_Moderate()

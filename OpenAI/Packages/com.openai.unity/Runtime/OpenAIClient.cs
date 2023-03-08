@@ -1,8 +1,9 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using OpenAI.Completions;
+using OpenAI.Audio;
 using OpenAI.Chat;
+using OpenAI.Completions;
 using OpenAI.Edits;
 using OpenAI.Embeddings;
 using OpenAI.Files;
@@ -64,13 +65,14 @@ namespace OpenAI
             DefaultModel = model ?? Model.Default;
             ModelsEndpoint = new ModelsEndpoint(this);
             CompletionsEndpoint = new CompletionsEndpoint(this);
+            ChatEndpoint = new ChatEndpoint(this);
             EditsEndpoint = new EditsEndpoint(this);
             ImagesEndPoint = new ImagesEndpoint(this);
             EmbeddingsEndpoint = new EmbeddingsEndpoint(this);
+            AudioEndpoint = new AudioEndpoint(this);
             FilesEndpoint = new FilesEndpoint(this);
             FineTuningEndpoint = new FineTuningEndpoint(this);
             ModerationsEndpoint = new ModerationsEndpoint(this);
-            ChatEndpoint = new ChatEndpoint(this);
         }
 
         /// <summary>
@@ -147,6 +149,11 @@ namespace OpenAI
         /// Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.
         /// </summary>
         public EmbeddingsEndpoint EmbeddingsEndpoint { get; }
+
+        /// <summary>
+        /// Converts audio into text.
+        /// </summary>
+        public AudioEndpoint AudioEndpoint { get; set; }
 
         /// <summary>
         /// Files are used to upload documents that can be used with features like Fine-tuning.
