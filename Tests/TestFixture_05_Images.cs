@@ -10,7 +10,7 @@ using UnityEngine.TestTools;
 
 namespace OpenAI.Tests
 {
-    internal class TestFixture_04_Images
+    internal class TestFixture_05_Images
     {
         [UnityTest]
         public IEnumerator Test_1_GenerateImages()
