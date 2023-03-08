@@ -7,7 +7,7 @@ using UnityEngine.TestTools;
 
 namespace OpenAI.Tests
 {
-    internal class TestFixture_05_Embeddings
+    internal class TestFixture_06_Embeddings
     {
         [UnityTest]
         public IEnumerator Test_1_CreateEmbedding()

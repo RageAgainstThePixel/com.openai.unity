@@ -13,6 +13,7 @@ using OpenAI.Moderations;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
+using OpenAI.Audio;
 
 namespace OpenAI
 {
@@ -64,13 +65,14 @@ namespace OpenAI
             DefaultModel = model ?? Model.Default;
             ModelsEndpoint = new ModelsEndpoint(this);
             CompletionsEndpoint = new CompletionsEndpoint(this);
+            ChatEndpoint = new ChatEndpoint(this);
             EditsEndpoint = new EditsEndpoint(this);
             ImagesEndPoint = new ImagesEndpoint(this);
             EmbeddingsEndpoint = new EmbeddingsEndpoint(this);
+            AudioEndpoint = new AudioEndpoint(this);
             FilesEndpoint = new FilesEndpoint(this);
             FineTuningEndpoint = new FineTuningEndpoint(this);
             ModerationsEndpoint = new ModerationsEndpoint(this);
-            ChatEndpoint = new ChatEndpoint(this);
         }
 
         /// <summary>
@@ -147,6 +149,11 @@ namespace OpenAI
         /// Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.
         /// </summary>
         public EmbeddingsEndpoint EmbeddingsEndpoint { get; }
+
+        /// <summary>
+        /// Converts audio into text.
+        /// </summary>
+        public AudioEndpoint AudioEndpoint { get; set; }
 
         /// <summary>
         /// Files are used to upload documents that can be used with features like Fine-tuning.

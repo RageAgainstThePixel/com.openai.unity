@@ -9,7 +9,7 @@ using UnityEngine.TestTools;
 
 namespace OpenAI.Tests
 {
-    internal class TestFixture_06_Files
+    internal class TestFixture_08_Files
     {
         [UnityTest]
         public IEnumerator Test_01_UploadFile()
