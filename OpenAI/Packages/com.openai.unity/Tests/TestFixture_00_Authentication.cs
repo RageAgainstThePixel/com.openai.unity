@@ -59,11 +59,12 @@ namespace OpenAI.Tests
             var config = ScriptableObject.CreateInstance<OpenAIConfigurationSettings>();
             config.apiKey = "sk-test12";
             config.organizationId = "org-testOrg";
-            Debug.Log(Application.dataPath);
+            var cleanup = false;
 
             if (!Directory.Exists($"{Application.dataPath}/Resources"))
             {
                 Directory.CreateDirectory($"{Application.dataPath}/Resources");
+                cleanup = true;
             }
 
             AssetDatabase.CreateAsset(config, "Assets/Resources/OpenAIConfigurationSettings-Test.asset");
@@ -79,6 +80,11 @@ namespace OpenAI.Tests
             Assert.IsNotEmpty(auth.OrganizationId);
             Assert.AreEqual(auth.OrganizationId, config.OrganizationId);
             AssetDatabase.DeleteAsset(configPath);
+
+            if (cleanup)
+            {
+                AssetDatabase.DeleteAsset("Assets/Resources");
+            }
         }
 
         [Test]

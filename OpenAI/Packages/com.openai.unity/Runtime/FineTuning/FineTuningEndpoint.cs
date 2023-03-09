@@ -53,9 +53,7 @@ namespace OpenAI.FineTuning
             var jsonContent = JsonConvert.SerializeObject(jobRequest, Api.JsonSerializationOptions);
             var response = await Api.Client.PostAsync(GetEndpoint(), jsonContent.ToJsonStringContent());
             var responseAsString = await response.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<FineTuneJobResponse>(responseAsString, Api.JsonSerializationOptions);
-            result.SetResponseData(response.Headers);
-            return result;
+            return response.DeserializeResponse<FineTuneJobResponse>(responseAsString, Api.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -80,9 +78,7 @@ namespace OpenAI.FineTuning
         {
             var response = await Api.Client.GetAsync($"{GetEndpoint()}/{jobId}");
             var responseAsString = await response.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<FineTuneJobResponse>(responseAsString, Api.JsonSerializationOptions);
-            result.SetResponseData(response.Headers);
-            return result;
+            return response.DeserializeResponse<FineTuneJobResponse>(responseAsString, Api.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -95,8 +91,7 @@ namespace OpenAI.FineTuning
         {
             var response = await Api.Client.PostAsync($"{GetEndpoint()}/{jobId}/cancel", null!);
             var responseAsString = await response.ReadAsStringAsync();
-            var result = JsonConvert.DeserializeObject<FineTuneJobResponse>(responseAsString, Api.JsonSerializationOptions);
-            result.SetResponseData(response.Headers);
+            var result = response.DeserializeResponse<FineTuneJobResponse>(responseAsString, Api.JsonSerializationOptions);
             return result.Status == "cancelled";
         }
 
