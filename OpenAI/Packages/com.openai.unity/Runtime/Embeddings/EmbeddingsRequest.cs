@@ -62,7 +62,9 @@ namespace OpenAI.Embeddings
 
             Model = model ?? new Model("text-embedding-ada-002");
 
-            if (!Model.Contains("text-embedding"))
+            if (!Model.Contains("embedding") ||
+                !Model.Contains("search") ||
+                !Model.Contains("similarity"))
             {
                 throw new ArgumentException($"{Model} is not supported", nameof(model));
             }
