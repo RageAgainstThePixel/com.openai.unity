@@ -113,5 +113,10 @@ namespace OpenAI.Models
         /// The default model for <see cref="Audio.AudioEndpoint"/>.
         /// </summary>
         public static Model Whisper1 { get; } = new Model("whisper-1") { OwnedBy = "openai" };
+
+        /// <summary>
+        /// The default model for <see cref="Moderations.ModerationsEndpoint"/>.
+        /// </summary>
+        public static Model Moderation_Latest { get; } = new Model("text-moderation-latest") { OwnedBy = "openai" };
     }
 }
