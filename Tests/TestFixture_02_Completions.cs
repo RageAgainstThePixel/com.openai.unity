@@ -13,7 +13,7 @@ namespace OpenAI.Tests
 {
     internal class TestFixture_02_Completions
     {
-        private readonly string completionPrompts = "One Two Three Four Five Six Seven Eight Nine One Two Three Four Five Six Seven Eight";
+        private const string CompletionPrompts = "One Two Three Four Five Six Seven Eight Nine One Two Three Four Five Six Seven Eight";
 
         [UnityTest]
         public IEnumerator Test_1_GetBasicCompletion()
@@ -23,7 +23,7 @@ namespace OpenAI.Tests
                 var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
                 Assert.IsNotNull(api.CompletionsEndpoint);
                 var result = await api.CompletionsEndpoint.CreateCompletionAsync(
-                    completionPrompts,
+                    CompletionPrompts,
                     temperature: 0.1,
                     maxTokens: 5,
                     numOutputs: 5,
@@ -51,14 +51,37 @@ namespace OpenAI.Tests
                     Assert.NotNull(result.Completions);
                     Assert.NotZero(result.Completions.Count);
                     allCompletions.AddRange(result.Completions);
-
-                    foreach (var choice in result.Completions)
-                    {
-                        Debug.Log(choice);
-                    }
-                }, completionPrompts, temperature: 0.1, maxTokens: 5, numOutputs: 5);
+                }, CompletionPrompts, temperature: 0.1, maxTokens: 5, numOutputs: 5);
 
                 Assert.That(allCompletions.Any(c => c.Text.Trim().ToLower().StartsWith("nine")));
+                Debug.Log(allCompletions.FirstOrDefault());
+            });
+        }
+
+        [UnityTest]
+        public IEnumerator Test_3_GetStreamingCompletionEnumerableAsync()
+        {
+            yield return AwaitTestUtilities.Await(async () =>
+            {
+                var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+                Assert.IsNotNull(api.CompletionsEndpoint);
+                var allCompletions = new List<Choice>();
+
+                await foreach (var result in api.CompletionsEndpoint.StreamCompletionEnumerableAsync(
+                                   CompletionPrompts,
+                                   temperature: 0.1,
+                                   maxTokens: 5,
+                                   numOutputs: 5,
+                                   model: Model.Davinci))
+                {
+                    Assert.IsNotNull(result);
+                    Assert.NotNull(result.Completions);
+                    Assert.NotZero(result.Completions.Count);
+                    allCompletions.AddRange(result.Completions);
+                }
+
+                Assert.That(allCompletions.Any(c => c.Text.Trim().ToLower().StartsWith("nine")));
+                Debug.Log(allCompletions.FirstOrDefault());
             });
         }
     }

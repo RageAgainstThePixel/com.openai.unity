@@ -44,8 +44,8 @@ namespace OpenAI.Embeddings
         /// Each input must not exceed 8192 tokens in length.
         /// </param>
         /// <param name="model">
-        /// The <see cref="OpenAI.Models.Model"/> to use.
-        /// Defaults to: text-embedding-ada-002
+        /// The <see cref="OpenAI.Models.Model"/> to use.<br/>
+        /// Defaults to: <see cref="Models.Model.Embedding_Ada_002"/>
         /// </param>
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
@@ -60,11 +60,13 @@ namespace OpenAI.Embeddings
                 throw new ArgumentNullException(nameof(input), $"Missing required {nameof(input)} parameter");
             }
 
-            Model = model ?? new Model("text-embedding-ada-002");
+            Model = model ?? Models.Model.Embedding_Ada_002;
 
-            if (!Model.Contains("text-embedding"))
+            if (!Model.Contains("embedding") &&
+                !Model.Contains("search") &&
+                !Model.Contains("similarity"))
             {
-                throw new ArgumentException(nameof(model), $"{Model} is not supported for embedding.");
+                throw new ArgumentException($"{Model} is not supported", nameof(model));
             }
 
             User = user;
