@@ -56,18 +56,10 @@ namespace OpenAI.Moderations
         /// <exception cref="HttpRequestException">Raised when the HTTP request fails</exception>
         public async Task<ModerationsResponse> CreateModerationAsync(ModerationsRequest request)
         {
-            var jsonContent = JsonConvert.SerializeObject(request, Api.JsonSerializationOptions);
-            var response = await Api.Client.PostAsync(GetEndpoint(), jsonContent.ToJsonStringContent());
+            var jsonContent = JsonConvert.SerializeObject(request, Api.JsonSerializationOptions).ToJsonStringContent();
+            var response = await Api.Client.PostAsync(GetEndpoint(), jsonContent);
             var resultAsString = await response.ReadAsStringAsync();
-            var moderationResponse = JsonConvert.DeserializeObject<ModerationsResponse>(resultAsString, Api.JsonSerializationOptions);
-
-            if (moderationResponse == null)
-            {
-                throw new HttpRequestException($"{nameof(CreateModerationAsync)} returned no results!  HTTP status code: {response.StatusCode}. Response body: {resultAsString}");
-            }
-
-            moderationResponse.SetResponseData(response.Headers);
-            return moderationResponse;
+            return response.DeserializeResponse<ModerationsResponse>(resultAsString, Api.JsonSerializationOptions);
         }
     }
 }

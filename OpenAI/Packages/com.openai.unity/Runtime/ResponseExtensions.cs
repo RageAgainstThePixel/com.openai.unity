@@ -1,5 +1,6 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Net.Http;
@@ -48,6 +49,13 @@ namespace OpenAI
                 var responseAsString = await response.Content.ReadAsStringAsync();
                 throw new HttpRequestException($"{methodName} Failed! HTTP status code: {response.StatusCode} | Response body: {responseAsString}");
             }
+        }
+
+        internal static T DeserializeResponse<T>(this HttpResponseMessage response, string json, JsonSerializerSettings settings) where T : BaseResponse
+        {
+            var result = JsonConvert.DeserializeObject<T>(json, settings);
+            result.SetResponseData(response.Headers);
+            return result;
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace OpenAI.Chat
 {
-    public sealed class ChatResponse
+    public sealed class ChatResponse : BaseResponse
     {
         [JsonConstructor]
         public ChatResponse(

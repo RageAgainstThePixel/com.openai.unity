@@ -1,9 +1,8 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using System.Net.Http;
-using System.Threading.Tasks;
 using OpenAI.Models;
+using System.Threading.Tasks;
 
 namespace OpenAI.Edits
 {
@@ -53,24 +52,16 @@ namespace OpenAI.Edits
         }
 
         /// <summary>
-        /// Creates a new edit for the provided input, instruction, and parameters
+        /// Creates a new edit for the provided input, instruction, and parameters.
         /// </summary>
-        /// <param name="request"><see cref="EditRequest"/></param>
-        /// <returns><see cref="EditResponse"/></returns>
+        /// <param name="request"><see cref="EditRequest"/>.</param>
+        /// <returns><see cref="EditResponse"/>.</returns>
         public async Task<EditResponse> CreateEditAsync(EditRequest request)
         {
             var jsonContent = JsonConvert.SerializeObject(request, Api.JsonSerializationOptions);
             var response = await Api.Client.PostAsync(GetEndpoint(), jsonContent.ToJsonStringContent());
             var resultAsString = await response.ReadAsStringAsync();
-            var editResponse = JsonConvert.DeserializeObject<EditResponse>(resultAsString, Api.JsonSerializationOptions);
-            editResponse.SetResponseData(response.Headers);
-
-            if (editResponse == null)
-            {
-                throw new HttpRequestException($"{nameof(CreateEditAsync)} returned no results!  HTTP status code: {response.StatusCode}. Response body: {resultAsString}");
-            }
-
-            return editResponse;
+            return response.DeserializeResponse<EditResponse>(resultAsString, Api.JsonSerializationOptions);
         }
     }
 }
