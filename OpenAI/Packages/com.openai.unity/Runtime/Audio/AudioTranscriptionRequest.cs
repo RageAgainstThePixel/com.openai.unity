@@ -149,7 +149,7 @@ namespace OpenAI.Audio
 
             AudioName = audioName;
 
-            Model = model ?? new Model("whisper-1");
+            Model = model ?? Models.Model.Whisper1;
 
             if (!Model.Contains("whisper"))
             {
