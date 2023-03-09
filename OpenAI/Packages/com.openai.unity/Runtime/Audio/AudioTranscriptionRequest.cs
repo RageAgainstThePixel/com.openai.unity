@@ -153,7 +153,7 @@ namespace OpenAI.Audio
 
             if (!Model.Contains("whisper"))
             {
-                throw new ArgumentException(nameof(model), $"{Model} is not supported.");
+                throw new ArgumentException($"{Model} is not supported", nameof(model));
             }
 
             Prompt = prompt;
