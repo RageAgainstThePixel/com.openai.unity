@@ -15,8 +15,7 @@ namespace OpenAI.Chat
             [JsonProperty("created")] int created,
             [JsonProperty("model")] string model,
             [JsonProperty("usage")] Usage usage,
-            [JsonProperty("choices")] List<Choice> choices
-        )
+            [JsonProperty("choices")] List<Choice> choices)
         {
             Id = id;
             Object = @object;
