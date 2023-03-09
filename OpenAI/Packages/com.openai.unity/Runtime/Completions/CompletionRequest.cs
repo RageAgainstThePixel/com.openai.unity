@@ -284,6 +284,7 @@ namespace OpenAI.Completions
 
             if (!Model.Contains("davinci") ||
                 !Model.Contains("curie") ||
+                !Model.Contains("cushman") ||
                 !Model.Contains("babbage") ||
                 !Model.Contains("ada"))
             {
