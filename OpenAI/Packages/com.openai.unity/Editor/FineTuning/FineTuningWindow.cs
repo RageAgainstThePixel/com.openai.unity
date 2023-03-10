@@ -622,19 +622,20 @@ namespace OpenAI.Editor.FineTuning
                         try
                         {
                             var wasDeleted = await openAI.ModelsEndpoint.DeleteFineTuneModelAsync(model);
-                            var message = wasDeleted ? $"{model} was successfully deleted" : "Your model was **NOT** deleted.";
+
+                            var message = wasDeleted
+                                ? $"{model} was successfully deleted"
+                                : "Your model was **NOT** deleted.";
+
                             EditorUtility.DisplayDialog("Delete Fine Tuned Model Result", message, "Ok");
+                        }
+                        catch (UnauthorizedAccessException)
+                        {
+                            EditorUtility.DisplayDialog("Unauthorized", "You do not have permissions to delete models for this organization.", "Ok");
                         }
                         catch (Exception e)
                         {
-                            if (e.Message.Contains("api.delete"))
-                            {
-                                EditorUtility.DisplayDialog("Unauthorized", "You do not have permissions to delete models for this organization.", "Ok");
-                            }
-                            else
-                            {
-                                Debug.LogError(e);
-                            }
+                            Debug.LogError(e);
                         }
                     };
                 }
