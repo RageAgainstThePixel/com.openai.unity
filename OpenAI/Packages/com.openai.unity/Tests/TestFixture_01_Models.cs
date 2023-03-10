@@ -2,52 +2,45 @@
 
 using NUnit.Framework;
 using System;
-using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace OpenAI.Tests
 {
     internal class TestFixture_01_Models
     {
-        [UnityTest]
-        public IEnumerator Test_1_GetModels()
+        [Test]
+        public async Task Test_1_GetModels()
         {
-            yield return AwaitTestUtilities.Await(async () =>
-            {
-                var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
-                Assert.IsNotNull(api.ModelsEndpoint);
-                var results = await api.ModelsEndpoint.GetModelsAsync();
-                Assert.IsNotNull(results);
-                Assert.NotZero(results.Count);
-            });
+            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            Assert.IsNotNull(api.ModelsEndpoint);
+            var results = await api.ModelsEndpoint.GetModelsAsync();
+            Assert.IsNotNull(results);
+            Assert.NotZero(results.Count);
         }
 
-        [UnityTest]
-        public IEnumerator Test_2_RetrieveModelDetails()
+        [Test]
+        public async Task Test_2_RetrieveModelDetails()
         {
-            yield return AwaitTestUtilities.Await(async () =>
+            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            Assert.IsNotNull(api.ModelsEndpoint);
+            var models = await api.ModelsEndpoint.GetModelsAsync();
+            Assert.IsNotEmpty(models);
+
+            foreach (var model in models)
             {
-                var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
-                Assert.IsNotNull(api.ModelsEndpoint);
-                var models = await api.ModelsEndpoint.GetModelsAsync();
-                Assert.IsNotEmpty(models);
+                Debug.Log(model.ToString());
 
-                foreach (var model in models)
+                try
                 {
-                    Debug.Log(model.ToString());
-
-                    try
-                    {
-                        var result = await api.ModelsEndpoint.GetModelDetailsAsync(model.Id);
-                        Assert.IsNotNull(result);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogWarning($"No Model details found for {model.Id}\n{e}");
-                    }
+                    var result = await api.ModelsEndpoint.GetModelDetailsAsync(model.Id);
+                    Assert.IsNotNull(result);
                 }
-            });
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"No Model details found for {model.Id}\n{e}");
+                }
+            }
         }
     }
 }

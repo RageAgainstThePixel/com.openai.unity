@@ -3,11 +3,10 @@
 using NUnit.Framework;
 using OpenAI.Completions;
 using OpenAI.Models;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 namespace OpenAI.Tests
 {
@@ -15,74 +14,65 @@ namespace OpenAI.Tests
     {
         private const string CompletionPrompts = "One Two Three Four Five Six Seven Eight Nine One Two Three Four Five Six Seven Eight";
 
-        [UnityTest]
-        public IEnumerator Test_1_GetBasicCompletion()
+        [Test]
+        public async Task Test_1_GetBasicCompletion()
         {
-            yield return AwaitTestUtilities.Await(async () =>
+            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            Assert.IsNotNull(api.CompletionsEndpoint);
+            var result = await api.CompletionsEndpoint.CreateCompletionAsync(
+                CompletionPrompts,
+                temperature: 0.1,
+                maxTokens: 5,
+                numOutputs: 5,
+                model: Model.Davinci);
+            Assert.IsNotNull(result);
+            Assert.NotNull(result.Completions);
+            Assert.NotZero(result.Completions.Count);
+            Assert.That(result.Completions.Any(c => c.Text.Trim().ToLower().StartsWith("nine")));
+            Debug.Log(result);
+        }
+
+        [Test]
+        public async Task Test_2_GetStreamingCompletion()
+        {
+            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            Assert.IsNotNull(api.CompletionsEndpoint);
+            var allCompletions = new List<Choice>();
+
+            await api.CompletionsEndpoint.StreamCompletionAsync(result =>
             {
-                var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
-                Assert.IsNotNull(api.CompletionsEndpoint);
-                var result = await api.CompletionsEndpoint.CreateCompletionAsync(
-                    CompletionPrompts,
-                    temperature: 0.1,
-                    maxTokens: 5,
-                    numOutputs: 5,
-                    model: Model.Davinci);
                 Assert.IsNotNull(result);
                 Assert.NotNull(result.Completions);
                 Assert.NotZero(result.Completions.Count);
-                Assert.That(result.Completions.Any(c => c.Text.Trim().ToLower().StartsWith("nine")));
-                Debug.Log(result);
-            });
+                allCompletions.AddRange(result.Completions);
+            }, CompletionPrompts, temperature: 0.1, maxTokens: 5, numOutputs: 5);
+
+            Assert.That(allCompletions.Any(c => c.Text.Trim().ToLower().StartsWith("nine")));
+            Debug.Log(allCompletions.FirstOrDefault());
         }
 
-        [UnityTest]
-        public IEnumerator Test_2_GetStreamingCompletion()
+        [Test]
+        public async Task Test_3_GetStreamingCompletionEnumerableAsync()
         {
-            yield return AwaitTestUtilities.Await(async () =>
+            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            Assert.IsNotNull(api.CompletionsEndpoint);
+            var allCompletions = new List<Choice>();
+
+            await foreach (var result in api.CompletionsEndpoint.StreamCompletionEnumerableAsync(
+                               CompletionPrompts,
+                               temperature: 0.1,
+                               maxTokens: 5,
+                               numOutputs: 5,
+                               model: Model.Davinci))
             {
-                var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
-                Assert.IsNotNull(api.CompletionsEndpoint);
-                var allCompletions = new List<Choice>();
+                Assert.IsNotNull(result);
+                Assert.NotNull(result.Completions);
+                Assert.NotZero(result.Completions.Count);
+                allCompletions.AddRange(result.Completions);
+            }
 
-                await api.CompletionsEndpoint.StreamCompletionAsync(result =>
-                {
-                    Assert.IsNotNull(result);
-                    Assert.NotNull(result.Completions);
-                    Assert.NotZero(result.Completions.Count);
-                    allCompletions.AddRange(result.Completions);
-                }, CompletionPrompts, temperature: 0.1, maxTokens: 5, numOutputs: 5);
-
-                Assert.That(allCompletions.Any(c => c.Text.Trim().ToLower().StartsWith("nine")));
-                Debug.Log(allCompletions.FirstOrDefault());
-            });
-        }
-
-        [UnityTest]
-        public IEnumerator Test_3_GetStreamingCompletionEnumerableAsync()
-        {
-            yield return AwaitTestUtilities.Await(async () =>
-            {
-                var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
-                Assert.IsNotNull(api.CompletionsEndpoint);
-                var allCompletions = new List<Choice>();
-
-                await foreach (var result in api.CompletionsEndpoint.StreamCompletionEnumerableAsync(
-                                   CompletionPrompts,
-                                   temperature: 0.1,
-                                   maxTokens: 5,
-                                   numOutputs: 5,
-                                   model: Model.Davinci))
-                {
-                    Assert.IsNotNull(result);
-                    Assert.NotNull(result.Completions);
-                    Assert.NotZero(result.Completions.Count);
-                    allCompletions.AddRange(result.Completions);
-                }
-
-                Assert.That(allCompletions.Any(c => c.Text.Trim().ToLower().StartsWith("nine")));
-                Debug.Log(allCompletions.FirstOrDefault());
-            });
+            Assert.That(allCompletions.Any(c => c.Text.Trim().ToLower().StartsWith("nine")));
+            Debug.Log(allCompletions.FirstOrDefault());
         }
     }
 }
