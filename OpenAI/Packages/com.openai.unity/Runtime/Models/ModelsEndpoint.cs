@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace OpenAI.Models
 {
@@ -88,9 +89,26 @@ namespace OpenAI.Models
                 throw new Exception($"Failed to get {modelId} info!");
             }
 
-            var response = await Api.Client.DeleteAsync($"{GetEndpoint()}/{model.Id}");
-            var responseAsString = await response.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<DeleteModelResponse>(responseAsString, Api.JsonSerializationOptions)?.Deleted ?? false;
+            if (model.OwnedBy is "openai" or "system" or "openai-dev")
+            {
+                throw new UnauthorizedAccessException($"{model.Id} is not owned by your organization.");
+            }
+
+            try
+            {
+                var response = await Api.Client.DeleteAsync($"{GetEndpoint()}/{model.Id}");
+                var responseAsString = await response.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<DeleteModelResponse>(responseAsString, Api.JsonSerializationOptions)?.Deleted ?? false;
+            }
+            catch (Exception e)
+            {
+                if (e.Message.Contains("api.delete"))
+                {
+                    throw new UnauthorizedAccessException("You do not have permissions to delete models for this organization.");
+                }
+
+                throw;
+            }
         }
     }
 }
