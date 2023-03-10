@@ -88,6 +88,11 @@ namespace OpenAI.Models
                 throw new Exception($"Failed to get {modelId} info!");
             }
 
+            if (model.OwnedBy == "openai")
+            {
+                throw new UnauthorizedAccessException($"{model.Id} is not owned by your organization.");
+            }
+
             var response = await Api.Client.DeleteAsync($"{GetEndpoint()}/{model.Id}");
             var responseAsString = await response.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<DeleteModelResponse>(responseAsString, Api.JsonSerializationOptions)?.Deleted ?? false;

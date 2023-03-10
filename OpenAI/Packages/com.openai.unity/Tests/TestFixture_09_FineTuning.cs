@@ -3,8 +3,10 @@
 using NUnit.Framework;
 using OpenAI.Files;
 using OpenAI.FineTuning;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -204,16 +206,13 @@ namespace OpenAI.Tests
             Assert.IsNotNull(models);
             Assert.IsNotEmpty(models);
 
-            foreach (var model in models)
+            foreach (var model in models.Where(model => model.OwnedBy != "openai"))
             {
-                if (model.OwnedBy == api.OpenAIAuthentication.OrganizationId)
-                {
-                    Debug.Log(model);
-                    var result = await api.ModelsEndpoint.DeleteFineTuneModelAsync(model);
-                    Assert.IsNotNull(result);
-                    Assert.IsTrue(result);
-                    Debug.Log($"{model.Id} -> deleted");
-                }
+                Console.WriteLine(model);
+                var result = await api.ModelsEndpoint.DeleteFineTuneModelAsync(model);
+                Assert.IsNotNull(result);
+                Assert.IsTrue(result);
+                Console.WriteLine($"{model.Id} -> deleted");
             }
         }
     }
