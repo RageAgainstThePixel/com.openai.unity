@@ -17,8 +17,7 @@ namespace OpenAI.Embeddings
         public EmbeddingsEndpoint(OpenAIClient api) : base(api) { }
 
         /// <inheritdoc />
-        protected override string GetEndpoint()
-            => $"{Api.BaseUrl}embeddings";
+        protected override string Root => "embeddings";
 
         /// <summary>
         /// Creates an embedding vector representing the input text.
@@ -64,8 +63,8 @@ namespace OpenAI.Embeddings
         /// <returns><see cref="EmbeddingsResponse"/></returns>
         public async Task<EmbeddingsResponse> CreateEmbeddingAsync(EmbeddingsRequest request)
         {
-            var jsonContent = JsonConvert.SerializeObject(request, Api.JsonSerializationOptions);
-            var response = await Api.Client.PostAsync(GetEndpoint(), jsonContent.ToJsonStringContent());
+            var jsonContent = JsonConvert.SerializeObject(request, Api.JsonSerializationOptions).ToJsonStringContent();
+            var response = await Api.Client.PostAsync(GetUrl(), jsonContent);
             var responseAsString = await response.ReadAsStringAsync();
             return response.DeserializeResponse<EmbeddingsResponse>(responseAsString, Api.JsonSerializationOptions);
         }

@@ -22,7 +22,7 @@ namespace OpenAI.Images
         internal ImagesEndpoint(OpenAIClient api) : base(api) { }
 
         /// <inheritdoc />
-        protected override string GetEndpoint() => $"{Api.BaseUrl}images/";
+        protected override string Root => "images";
 
         /// <summary>
         /// Creates an image given a prompt.
@@ -46,8 +46,8 @@ namespace OpenAI.Images
         /// <exception cref="HttpRequestException"></exception>
         public async Task<IReadOnlyDictionary<string, Texture2D>> GenerateImageAsync(ImageGenerationRequest request, CancellationToken cancellationToken = default)
         {
-            var jsonContent = JsonConvert.SerializeObject(request, Api.JsonSerializationOptions);
-            var response = await Api.Client.PostAsync($"{GetEndpoint()}generations", jsonContent.ToJsonStringContent(), cancellationToken);
+            var jsonContent = JsonConvert.SerializeObject(request, Api.JsonSerializationOptions).ToJsonStringContent();
+            var response = await Api.Client.PostAsync(GetUrl("/generations"), jsonContent, cancellationToken);
             return await DeserializeResponseAsync(response, cancellationToken);
         }
 
@@ -137,7 +137,7 @@ namespace OpenAI.Images
 
             request.Dispose();
 
-            var response = await Api.Client.PostAsync($"{GetEndpoint()}edits", content, cancellationToken);
+            var response = await Api.Client.PostAsync(GetUrl("/edits"), content, cancellationToken);
             return await DeserializeResponseAsync(response, cancellationToken);
         }
 
@@ -206,7 +206,7 @@ namespace OpenAI.Images
 
             request.Dispose();
 
-            var response = await Api.Client.PostAsync($"{GetEndpoint()}variations", content, cancellationToken);
+            var response = await Api.Client.PostAsync(GetUrl("/variations"), content, cancellationToken);
             return await DeserializeResponseAsync(response, cancellationToken);
         }
 

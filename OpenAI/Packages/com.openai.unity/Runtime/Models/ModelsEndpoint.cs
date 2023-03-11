@@ -46,8 +46,7 @@ namespace OpenAI.Models
         public ModelsEndpoint(OpenAIClient api) : base(api) { }
 
         /// <inheritdoc />
-        protected override string GetEndpoint()
-            => $"{Api.BaseUrl}models";
+        protected override string Root => "models";
 
         /// <summary>
         /// List all models via the API
@@ -56,7 +55,7 @@ namespace OpenAI.Models
         /// <exception cref="HttpRequestException">Raised when the HTTP request fails</exception>
         public async Task<IReadOnlyList<Model>> GetModelsAsync()
         {
-            var response = await Api.Client.GetAsync(GetEndpoint());
+            var response = await Api.Client.GetAsync(GetUrl());
             var responseAsString = await response.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<ModelsList>(responseAsString, Api.JsonSerializationOptions)?.Data;
         }
@@ -69,7 +68,7 @@ namespace OpenAI.Models
         /// <exception cref="HttpRequestException">Raised when the HTTP request fails</exception>
         public async Task<Model> GetModelDetailsAsync(string id)
         {
-            var response = await Api.Client.GetAsync($"{GetEndpoint()}/{id}");
+            var response = await Api.Client.GetAsync(GetUrl($"/{id}"));
             var responseAsString = await response.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<Model>(responseAsString, Api.JsonSerializationOptions);
         }
@@ -96,7 +95,7 @@ namespace OpenAI.Models
 
             try
             {
-                var response = await Api.Client.DeleteAsync($"{GetEndpoint()}/{model.Id}");
+                var response = await Api.Client.DeleteAsync(GetUrl($"/{model.Id}"));
                 var responseAsString = await response.ReadAsStringAsync();
                 return JsonConvert.DeserializeObject<DeleteModelResponse>(responseAsString, Api.JsonSerializationOptions)?.Deleted ?? false;
             }
