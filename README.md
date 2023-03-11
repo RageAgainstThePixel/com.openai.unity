@@ -50,6 +50,7 @@ The recommended installation method is though the unity package manager and [Ope
 ### Table of Contents
 
 - [Authentication](#authentication)
+- [Azure OpenAI](#azure-openai)
 - [Models](#models)
   - [List Models](#list-models)
   - [Retrieve Models](#retrieve-model)
@@ -154,6 +155,17 @@ Use your system's environment variables specify an api key and organization to u
 
 ```csharp
 var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+```
+
+### [Azure OpenAI](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/)
+
+You can also choose to use Microsoft's Azure OpenAI deployments as well.
+To setup the client to use your deployment, you'll need to pass in `OpenAIClientSettings` into the client constructor.
+
+```csharp
+var auth = new OpenAIAuthentication("sk-apiKey");
+var settings = new OpenAIClientSettings("your-resource", "your-deployment-id");
+var api = new OpenAIClient(auth, settings);
 ```
 
 ### [Models](https://beta.openai.com/docs/api-reference/models)

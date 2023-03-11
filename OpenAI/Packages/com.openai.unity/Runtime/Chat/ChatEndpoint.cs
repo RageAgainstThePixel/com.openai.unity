@@ -17,8 +17,7 @@ namespace OpenAI.Chat
         public ChatEndpoint(OpenAIClient api) : base(api) { }
 
         /// <inheritdoc />
-        protected override string GetEndpoint()
-            => $"{Api.BaseUrl}chat";
+        protected override string Root => "chat";
 
         /// <summary>
         /// Creates a completion for the chat message.
@@ -29,8 +28,8 @@ namespace OpenAI.Chat
         /// <exception cref="HttpRequestException">Raised when the HTTP request fails</exception>
         public async Task<ChatResponse> GetCompletionAsync(ChatRequest chatRequest, CancellationToken cancellationToken = default)
         {
-            var payload = JsonConvert.SerializeObject(chatRequest, Api.JsonSerializationOptions).ToJsonStringContent();
-            var response = await Api.Client.PostAsync($"{GetEndpoint()}/completions", payload, cancellationToken);
+            var jsonContent = JsonConvert.SerializeObject(chatRequest, Api.JsonSerializationOptions).ToJsonStringContent();
+            var response = await Api.Client.PostAsync(GetUrl("/completions"), jsonContent, cancellationToken).ConfigureAwait(false);
             var responseAsString = await response.ReadAsStringAsync();
             return response.DeserializeResponse<ChatResponse>(responseAsString, Api.JsonSerializationOptions);
         }
@@ -46,10 +45,10 @@ namespace OpenAI.Chat
         public async Task StreamCompletionAsync(ChatRequest chatRequest, Action<ChatResponse> resultHandler, CancellationToken cancellationToken = default)
         {
             chatRequest.Stream = true;
-            var jsonContent = JsonConvert.SerializeObject(chatRequest, Api.JsonSerializationOptions);
-            using var request = new HttpRequestMessage(HttpMethod.Post, $"{GetEndpoint()}/completions")
+            var jsonContent = JsonConvert.SerializeObject(chatRequest, Api.JsonSerializationOptions).ToJsonStringContent();
+            using var request = new HttpRequestMessage(HttpMethod.Post, GetUrl("/completions"))
             {
-                Content = jsonContent.ToJsonStringContent()
+                Content = jsonContent
             };
             var response = await Api.Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             await response.CheckResponseAsync(cancellationToken);
@@ -87,10 +86,10 @@ namespace OpenAI.Chat
         public async IAsyncEnumerable<ChatResponse> StreamCompletionEnumerableAsync(ChatRequest chatRequest, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             chatRequest.Stream = true;
-            var jsonContent = JsonConvert.SerializeObject(chatRequest, Api.JsonSerializationOptions);
-            using var request = new HttpRequestMessage(HttpMethod.Post, $"{GetEndpoint()}/completions")
+            var jsonContent = JsonConvert.SerializeObject(chatRequest, Api.JsonSerializationOptions).ToJsonStringContent();
+            using var request = new HttpRequestMessage(HttpMethod.Post, GetUrl("/completions"))
             {
-                Content = jsonContent.ToJsonStringContent()
+                Content = jsonContent
             };
             var response = await Api.Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             await response.CheckResponseAsync(cancellationToken);

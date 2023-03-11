@@ -16,8 +16,7 @@ namespace OpenAI.Edits
         public EditsEndpoint(OpenAIClient api) : base(api) { }
 
         /// <inheritdoc />
-        protected override string GetEndpoint()
-            => $"{Api.BaseUrl}edits";
+        protected override string Root => "edits";
 
         /// <summary>
         /// Creates a new edit for the provided input, instruction, and parameters
@@ -58,8 +57,8 @@ namespace OpenAI.Edits
         /// <returns><see cref="EditResponse"/>.</returns>
         public async Task<EditResponse> CreateEditAsync(EditRequest request)
         {
-            var jsonContent = JsonConvert.SerializeObject(request, Api.JsonSerializationOptions);
-            var response = await Api.Client.PostAsync(GetEndpoint(), jsonContent.ToJsonStringContent());
+            var jsonContent = JsonConvert.SerializeObject(request, Api.JsonSerializationOptions).ToJsonStringContent();
+            var response = await Api.Client.PostAsync(GetUrl(), jsonContent);
             var resultAsString = await response.ReadAsStringAsync();
             return response.DeserializeResponse<EditResponse>(resultAsString, Api.JsonSerializationOptions);
         }
