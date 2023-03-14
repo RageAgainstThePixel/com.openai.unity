@@ -1,7 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 
 namespace OpenAI.Models
@@ -67,12 +66,6 @@ namespace OpenAI.Models
 
         [JsonProperty("parent")]
         public string Parent { get; }
-
-        /// <summary>
-        /// The default Model to use in the case no other is specified.  Defaults to <see cref="Davinci"/>
-        /// </summary>
-        [Obsolete("Will be removed in next major release.")]
-        public static Model Default => Davinci;
 
         /// <summary>
         /// More capable than any GPT-3.5 model, able to do more complex tasks, and optimized for chat. Will be updated with our latest model iteration.
