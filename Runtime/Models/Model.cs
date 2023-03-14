@@ -1,7 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 
 namespace OpenAI.Models
@@ -69,10 +68,14 @@ namespace OpenAI.Models
         public string Parent { get; }
 
         /// <summary>
-        /// The default Model to use in the case no other is specified.  Defaults to <see cref="Davinci"/>
+        /// More capable than any GPT-3.5 model, able to do more complex tasks, and optimized for chat. Will be updated with our latest model iteration.
         /// </summary>
-        [Obsolete("Will be removed in next major release.")]
-        public static Model Default => Davinci;
+        public static Model GPT4 { get; } = new Model("gpt-4") { OwnedBy = "openai" };
+
+        /// <summary>
+        /// Same capabilities as the base gpt-4 mode but with 4x the context length. Will be updated with our latest model iteration.
+        /// </summary>
+        public static Model GPT4_32K { get; } = new Model("gpt-4-32k") { OwnedBy = "openai" };
 
         /// <summary>
         /// Because gpt-3.5-turbo performs at a similar capability to text-davinci-003 but at 10%
