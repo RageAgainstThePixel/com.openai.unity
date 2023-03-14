@@ -5,7 +5,7 @@
 
 Based on [OpenAI-DotNet](https://github.com/RageAgainstThePixel/OpenAI-DotNet)
 
-A [OpenAI](https://openai.com/) package for the [Unity](https://unity.com/) Game Engine to use GPT-3 and Dall-E though their RESTful API (currently in beta).  Independently developed, this is not an official library and I am not affiliated with OpenAI.  An OpenAI API account is required.
+A [OpenAI](https://openai.com/) package for the [Unity](https://unity.com/) Game Engine to use chat-gpt, GPT-4, GPT-3.5-Turbo and Dall-E though their RESTful API (currently in beta).  Independently developed, this is not an official library and I am not affiliated with OpenAI.  An OpenAI API account is required.
 
 ***All copyrights, trademarks, logos, and assets are the property of their respective owners.***
 
