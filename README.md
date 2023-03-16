@@ -165,7 +165,7 @@ To setup the client to use your deployment, you'll need to pass in `OpenAIClient
 
 ```csharp
 var auth = new OpenAIAuthentication("sk-apiKey");
-var settings = new OpenAIClientSettings("your-resource", "your-deployment-id");
+var settings = new OpenAIClientSettings(resourceName: "your-resource", deploymentId: "your-deployment-id");
 var api = new OpenAIClient(auth, settings);
 ```
 
