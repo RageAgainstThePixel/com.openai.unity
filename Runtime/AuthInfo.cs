@@ -10,21 +10,26 @@ namespace OpenAI
     [Serializable]
     internal class AuthInfo
     {
+        private const string SecretKeyPrefix = "sk-";
+        private const string SessionKeyPrefix = "sess-";
+        private const string OrganizationPrefix = "org-";
+
         public AuthInfo(string apiKey, string organizationId = null)
         {
             if (string.IsNullOrWhiteSpace(apiKey) ||
-                !apiKey.Contains("sk-"))
+                (!apiKey.Contains(SecretKeyPrefix) &&
+                 !apiKey.Contains(SessionKeyPrefix)))
             {
-                throw new InvalidCredentialException($"{apiKey} must start with 'sk-'");
+                throw new InvalidCredentialException($"{apiKey} must start with '{SecretKeyPrefix}'");
             }
 
             this.apiKey = apiKey;
 
             if (!string.IsNullOrWhiteSpace(organizationId))
             {
-                if (!organizationId.Contains("org-"))
+                if (!organizationId.Contains(OrganizationPrefix))
                 {
-                    throw new InvalidCredentialException($"{nameof(organizationId)} must start with 'org-'");
+                    throw new InvalidCredentialException($"{nameof(organizationId)} must start with '{OrganizationPrefix}'");
                 }
 
                 this.organizationId = organizationId;
