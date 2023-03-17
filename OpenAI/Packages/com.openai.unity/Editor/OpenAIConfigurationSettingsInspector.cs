@@ -62,7 +62,7 @@ namespace OpenAI.Editor
             {
                 if (!apiKey.stringValue.StartsWith("sk-"))
                 {
-                    EditorGUILayout.HelpBox($"{nameof(apiKey)} must start with 'sk-'", MessageType.Error);
+                    EditorGUILayout.HelpBox($"{nameof(apiKey)} must start with 'sk-' unless using Azure OpenAI", MessageType.Warning);
                 }
             }
 
