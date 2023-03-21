@@ -9,7 +9,7 @@ namespace OpenAI
     internal class OpenAIConfigurationSettings : ScriptableObject
     {
         [SerializeField]
-        [Tooltip("The OpenAI api key.")]
+        [Tooltip("The OpenAI or Azure api key.")]
         internal string apiKey;
 
         /// <summary>
@@ -28,5 +28,35 @@ namespace OpenAI
         /// Usage from these API requests will count against the specified organization's subscription quota.
         /// </summary>
         public string OrganizationId => organizationId;
+
+        [SerializeField]
+        [Tooltip("Check this box if you're using OpenAI on Azure.")]
+        private bool useAzureOpenAI;
+
+        public bool UseAzureOpenAI => useAzureOpenAI;
+
+        [SerializeField]
+        [Tooltip("Optional proxy domain to make requests though.")]
+        private string proxyDomain;
+
+        public string ProxyDomain => proxyDomain;
+
+        [SerializeField]
+        [Tooltip("The name of your Azure OpenAI Resource.")]
+        private string resourceName;
+
+        public string ResourceName => resourceName;
+
+        [SerializeField]
+        [Tooltip("The name of your model deployment. You're required to first deploy a model before you can make calls.")]
+        private string deploymentId;
+
+        public string DeploymentId => deploymentId;
+
+        [SerializeField]
+        [Tooltip("The api version, Defaults to v1 for OpenAI, and 2022-12-01 for Azure")]
+        private string apiVersion;
+
+        public string ApiVersion => apiVersion;
     }
 }

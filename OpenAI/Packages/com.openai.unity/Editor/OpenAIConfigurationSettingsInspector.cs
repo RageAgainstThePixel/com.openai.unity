@@ -11,6 +11,11 @@ namespace OpenAI.Editor
     {
         private SerializedProperty apiKey;
         private SerializedProperty organizationId;
+        private SerializedProperty useAzureOpenAI;
+        private SerializedProperty proxyDomain;
+        private SerializedProperty resourceName;
+        private SerializedProperty deploymentId;
+        private SerializedProperty apiVersion;
 
         #region Project Settings Window
 
@@ -47,6 +52,11 @@ namespace OpenAI.Editor
             GetOrCreateInstance(target);
             apiKey = serializedObject.FindProperty(nameof(apiKey));
             organizationId = serializedObject.FindProperty(nameof(organizationId));
+            useAzureOpenAI = serializedObject.FindProperty(nameof(useAzureOpenAI));
+            proxyDomain = serializedObject.FindProperty(nameof(proxyDomain));
+            resourceName = serializedObject.FindProperty(nameof(resourceName));
+            deploymentId = serializedObject.FindProperty(nameof(deploymentId));
+            apiVersion = serializedObject.FindProperty(nameof(apiVersion));
         }
 
         public override void OnInspectorGUI()
@@ -55,27 +65,60 @@ namespace OpenAI.Editor
             EditorGUILayout.Space();
             EditorGUI.indentLevel++;
 
-            var apiKeyContent = new GUIContent(apiKey.displayName, apiKey.tooltip);
-            apiKey.stringValue = EditorGUILayout.TextField(apiKeyContent, apiKey.stringValue);
+            EditorGUI.BeginChangeCheck();
+            var useAzureOpenAIContent = new GUIContent(useAzureOpenAI.displayName, useAzureOpenAI.tooltip);
+            useAzureOpenAI.boolValue = EditorGUILayout.ToggleLeft(useAzureOpenAIContent, useAzureOpenAI.boolValue);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                apiVersion.stringValue = useAzureOpenAI.boolValue ?
+                    OpenAIClientSettings.DefaultAzureApiVersion :
+                    OpenAIClientSettings.DefaultOpenAIApiVersion;
+            }
+
+            EditorGUILayout.PropertyField(apiKey);
 
             if (!string.IsNullOrWhiteSpace(apiKey.stringValue))
             {
-                if (!apiKey.stringValue.StartsWith("sk-"))
+                if (!useAzureOpenAI.boolValue)
                 {
-                    EditorGUILayout.HelpBox($"{nameof(apiKey)} must start with 'sk-' unless using Azure OpenAI", MessageType.Warning);
+                    if (!apiKey.stringValue.StartsWith(AuthInfo.SecretKeyPrefix))
+                    {
+                        EditorGUILayout.HelpBox($"{nameof(apiKey)} must start with '{AuthInfo.SecretKeyPrefix}' unless using Azure OpenAI", MessageType.Error);
+                    }
+                }
+                else
+                {
+                    if (apiKey.stringValue.StartsWith(AuthInfo.SecretKeyPrefix))
+                    {
+                        EditorGUILayout.HelpBox($"{nameof(apiKey)} must not start with '{AuthInfo.SecretKeyPrefix}' when using Azure OpenAI", MessageType.Error);
+                    }
                 }
             }
 
-            var organizationContent = new GUIContent(organizationId.displayName, organizationId.tooltip);
-            organizationId.stringValue = EditorGUILayout.TextField(organizationContent, organizationId.stringValue);
-
-            if (!string.IsNullOrWhiteSpace(organizationId.stringValue))
+            if (!useAzureOpenAI.boolValue)
             {
-                if (!organizationId.stringValue.StartsWith("org-"))
+                EditorGUILayout.PropertyField(organizationId);
+
+                if (!string.IsNullOrWhiteSpace(organizationId.stringValue))
                 {
-                    EditorGUILayout.HelpBox($"{nameof(organizationId)} must start with 'org-'", MessageType.Error);
+                    if (!organizationId.stringValue.StartsWith(AuthInfo.OrganizationPrefix))
+                    {
+                        EditorGUILayout.HelpBox($"{nameof(organizationId)} must start with '{AuthInfo.OrganizationPrefix}'", MessageType.Error);
+                    }
                 }
+
+                EditorGUILayout.PropertyField(proxyDomain);
             }
+            else
+            {
+                EditorGUILayout.PropertyField(resourceName);
+                EditorGUILayout.PropertyField(deploymentId);
+            }
+
+            GUI.enabled = useAzureOpenAI.boolValue;
+            EditorGUILayout.PropertyField(apiVersion);
+            GUI.enabled = true;
 
             EditorGUI.indentLevel--;
             serializedObject.ApplyModifiedProperties();

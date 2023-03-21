@@ -8,9 +8,14 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Utilities.Async;
 
 namespace OpenAI.Chat
 {
+    /// <summary>
+    /// Given a chat conversation, the model will return a chat completion response.<br/>
+    /// <see href="https://platform.openai.com/docs/api-reference/chat"/>
+    /// </summary>
     public sealed class ChatEndpoint : BaseEndPoint
     {
         /// <inheritdoc />
@@ -69,6 +74,8 @@ namespace OpenAI.Chat
 
                 if (!string.IsNullOrWhiteSpace(line))
                 {
+                    // Always raise event callbacks on main thread
+                    await Awaiters.UnityMainThread;
                     resultHandler(response.DeserializeResponse<ChatResponse>(line.Trim(), Api.JsonSerializationOptions));
                 }
             }

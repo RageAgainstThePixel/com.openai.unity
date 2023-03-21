@@ -9,7 +9,8 @@ using System.Threading.Tasks;
 namespace OpenAI.Audio
 {
     /// <summary>
-    /// Speech to text.
+    /// Transforms audio into text.<br/>
+    /// <see href="https://platform.openai.com/docs/api-reference/audio"/>
     /// </summary>
     public sealed class AudioEndpoint : BaseEndPoint
     {

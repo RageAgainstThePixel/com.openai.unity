@@ -9,11 +9,12 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Utilities.Async;
 
 namespace OpenAI.FineTuning
 {
     /// <summary>
-    /// Manage fine-tuning jobs to tailor a model to your specific training data.
+    /// Manage fine-tuning jobs to tailor a model to your specific training data.<br/>
     /// <see href="https://beta.openai.com/docs/guides/fine-tuning"/>
     /// </summary>
     public class FineTuningEndpoint : BaseEndPoint
@@ -138,6 +139,8 @@ namespace OpenAI.FineTuning
 
                 if (!string.IsNullOrWhiteSpace(line))
                 {
+                    // Always raise event callbacks on main thread
+                    await Awaiters.UnityMainThread;
                     fineTuneEventCallback(JsonConvert.DeserializeObject<Event>(line.Trim(), Api.JsonSerializationOptions));
                 }
             }
