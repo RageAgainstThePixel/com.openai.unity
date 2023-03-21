@@ -2,6 +2,7 @@
 
 using NUnit.Framework;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -27,7 +28,7 @@ namespace OpenAI.Tests
             var models = await api.ModelsEndpoint.GetModelsAsync();
             Assert.IsNotEmpty(models);
 
-            foreach (var model in models)
+            foreach (var model in models.OrderBy(model => model.Id))
             {
                 Debug.Log(model.ToString());
 

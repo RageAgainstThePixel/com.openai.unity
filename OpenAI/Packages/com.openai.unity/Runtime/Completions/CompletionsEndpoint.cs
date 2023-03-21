@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Utilities.Async;
 
 namespace OpenAI.Completions
 {
@@ -17,7 +18,7 @@ namespace OpenAI.Completions
     /// The way you “program” the API to do a task is by simply describing the task in plain english or providing
     /// a few written examples. This simple approach works for a wide range of use cases, including summarization,
     /// translation, grammar correction, question answering, chatbots, composing emails, and much more
-    /// (see the prompt library for inspiration).
+    /// (see the prompt library for inspiration).<br/>
     /// <see href="https://beta.openai.com/docs/api-reference/completions"/>
     /// </summary>
     public sealed class CompletionsEndpoint : BaseEndPoint
@@ -223,6 +224,8 @@ namespace OpenAI.Completions
 
                 if (!string.IsNullOrWhiteSpace(line))
                 {
+                    // Always raise event callbacks on main thread
+                    await Awaiters.UnityMainThread;
                     resultHandler(response.DeserializeResponse<CompletionResult>(line.Trim(), Api.JsonSerializationOptions));
                 }
             }
