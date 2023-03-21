@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "3.0.2",
-    "com.utilities.rest": "1.2.3",
+    "com.utilities.rest": "1.2.4",
     "com.utilities.encoder.wav": "1.0.1"
   },
   "publishConfig": {
