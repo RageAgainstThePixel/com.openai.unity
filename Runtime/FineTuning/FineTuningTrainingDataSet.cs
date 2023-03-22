@@ -7,7 +7,7 @@ using UnityEngine;
 namespace OpenAI.FineTuning
 {
     [CreateAssetMenu(fileName = "FineTuningTrainingDataSet", menuName = "OpenAI/Fine Tuning/new training data set...", order = 99)]
-    public class FineTuningTrainingDataSet : ScriptableObject
+    public sealed class FineTuningTrainingDataSet : ScriptableObject
     {
         private void Awake()
         {
