@@ -17,6 +17,7 @@ namespace OpenAI.Editor
         private SerializedProperty proxyDomain;
         private SerializedProperty resourceName;
         private SerializedProperty deploymentId;
+        private SerializedProperty useAzureActiveDirectory;
         private SerializedProperty apiVersion;
 
         private static bool itemsUpdated;
@@ -73,6 +74,7 @@ namespace OpenAI.Editor
                 proxyDomain = serializedObject.FindProperty(nameof(proxyDomain));
                 resourceName = serializedObject.FindProperty(nameof(resourceName));
                 deploymentId = serializedObject.FindProperty(nameof(deploymentId));
+                useAzureActiveDirectory = serializedObject.FindProperty(nameof(useAzureActiveDirectory));
                 apiVersion = serializedObject.FindProperty(nameof(apiVersion));
             }
             catch (Exception)
@@ -147,6 +149,8 @@ namespace OpenAI.Editor
             {
                 EditorGUILayout.PropertyField(resourceName);
                 EditorGUILayout.PropertyField(deploymentId);
+                var useAzureActiveDirectoryContent = new GUIContent(useAzureActiveDirectory.displayName, useAzureActiveDirectory.tooltip);
+                useAzureActiveDirectory.boolValue = EditorGUILayout.ToggleLeft(useAzureActiveDirectoryContent, useAzureActiveDirectory.boolValue);
             }
 
             GUI.enabled = useAzureOpenAI.boolValue;
