@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using OpenAI.Models;
+using System;
 using System.Threading.Tasks;
 
 namespace OpenAI.Edits
@@ -10,6 +11,7 @@ namespace OpenAI.Edits
     /// Given a prompt and an instruction, the model will return an edited version of the prompt.
     /// <see href="https://beta.openai.com/docs/api-reference/edits"/>
     /// </summary>
+    [Obsolete("Models removed by OpenAI")]
     public sealed class EditsEndpoint : BaseEndPoint
     {
         /// <inheritdoc />

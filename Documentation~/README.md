@@ -62,8 +62,8 @@ The recommended installation method is though the unity package manager and [Ope
 - [Chat](#chat)
   - [Chat Completions](#chat-completions)
   - [Streaming](#chat-streaming)
-- [Edits](#edits)
-  - [Create Edit](#create-edit)
+- [Edits](#edits) :warning:
+  - [Create Edit](#create-edit) :warning:
 - [Embeddings](#embeddings)
   - [Create Embedding](#create-embeddings)
 - [Audio](#audio)
@@ -399,6 +399,10 @@ await foreach (var result in api.ChatEndpoint.StreamCompletionEnumerableAsync(ch
 ```
 
 ### [Edits](https://beta.openai.com/docs/api-reference/edits)
+
+> :warning: The models for this endpoint have been removed making it no longer usable.
+>
+> [See forum post for more details](https://community.openai.com/t/the-model-text-davinci-edit-001-does-not-exist/116144).
 
 Given a prompt and an instruction, the model will return an edited version of the prompt.
 
