@@ -31,7 +31,7 @@ namespace OpenAI
         /// potentially loading from environment vars or from a config file.
         /// </param>
         /// <param name="clientSettings">
-        /// Optional, <see cref="OpenAIClientSettings"/> for specifying OpenAI deployments to Azure.
+        /// Optional, <see cref="OpenAIClientSettings"/> for specifying OpenAI deployments to Azure or proxy domain.
         /// </param>
         /// <param name="client">A <see cref="HttpClient"/>.</param>
         /// <exception cref="AuthenticationException">Raised when authentication details are missing or invalid.</exception>
@@ -47,7 +47,9 @@ namespace OpenAI
         /// <param name="openAIAuthentication">The API authentication information to use for API calls,
         /// or <see langword="null"/> to attempt to use the <see cref="OpenAI.OpenAIAuthentication.Default"/>,
         /// potentially loading from environment vars or from a config file.</param>
-        /// <param name="clientSettings">Optional, <see cref="OpenAIClientSettings"/> for specifying OpenAI deployments to Azure.</param>
+        /// <param name="clientSettings">
+        /// Optional, <see cref="OpenAIClientSettings"/> for specifying OpenAI deployments to Azure or proxy domain.
+        /// </param>
         /// <exception cref="AuthenticationException">Raised when authentication details are missing or invalid.</exception>
         public OpenAIClient(OpenAIAuthentication openAIAuthentication = null, OpenAIClientSettings clientSettings = null)
         {

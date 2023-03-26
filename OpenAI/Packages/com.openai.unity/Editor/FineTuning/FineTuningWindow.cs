@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
+using Progress = Utilities.WebRequestRest.Progress;
 
 namespace OpenAI.Editor.FineTuning
 {
@@ -311,8 +312,8 @@ namespace OpenAI.Editor.FineTuning
                             {
                                 try
                                 {
-                                    var progress = new Progress<float>(f => EditorUtility.DisplayProgressBar($"Downloading {trainingFile}", $"Downloading {trainingFile}", f));
-                                    var downloadPath = await openAI.FilesEndpoint.DownloadFileAsync(trainingFile, progress).ConfigureAwait(true);
+                                    void ProgressHandler(Progress report) => EditorUtility.DisplayProgressBar($"Downloading {trainingFile}", $"Downloading {trainingFile} @ {report.Speed} {report.Unit}/s", report.Percentage * 0.01f);
+                                    var downloadPath = await openAI.FilesEndpoint.DownloadFileAsync(trainingFile, new Progress<Progress>(ProgressHandler)).ConfigureAwait(true);
                                     EditorUtility.ClearProgressBar();
                                     EditorUtility.RevealInFinder(downloadPath);
                                 }
