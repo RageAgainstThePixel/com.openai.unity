@@ -92,7 +92,15 @@ namespace OpenAI.Editor.FineTuning
         {
             GatherTrainingDataSets();
 
-            openAI ??= new OpenAIClient();
+            try
+            {
+                openAI ??= new OpenAIClient();
+            }
+            catch (Exception)
+            {
+                // Ignored
+                return;
+            }
 
             if (!hasFetchedModels)
             {
@@ -120,6 +128,7 @@ namespace OpenAI.Editor.FineTuning
                 string.IsNullOrWhiteSpace(openAI.OpenAIAuthentication.ApiKey))
             {
                 EditorGUILayout.HelpBox($"No valid {nameof(OpenAIConfigurationSettings)} was found. This tool requires that you set your API key.", MessageType.Error);
+                EditorGUILayout.EndVertical();
                 return;
             }
 
@@ -650,7 +659,7 @@ namespace OpenAI.Editor.FineTuning
 
         private static async void FetchAllModels()
         {
-            if (isFetchingModels) { return; }
+            if (isFetchingModels || openAI == null) { return; }
             isFetchingModels = true;
 
             try
