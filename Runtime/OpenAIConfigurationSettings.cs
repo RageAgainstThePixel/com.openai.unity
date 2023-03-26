@@ -54,6 +54,12 @@ namespace OpenAI
         public string DeploymentId => deploymentId;
 
         [SerializeField]
+        [Tooltip("Authenticate an API call using an Azure Active Directory token.")]
+        private bool useAzureActiveDirectory;
+
+        public bool UseAzureActiveDirectory => useAzureActiveDirectory;
+
+        [SerializeField]
         [Tooltip("The api version, Defaults to v1 for OpenAI, and 2022-12-01 for Azure")]
         private string apiVersion;
 
