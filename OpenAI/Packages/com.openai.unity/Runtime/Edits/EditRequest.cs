@@ -6,6 +6,7 @@ using System;
 
 namespace OpenAI.Edits
 {
+    [Obsolete]
     public sealed class EditRequest
     {
         /// <summary>
