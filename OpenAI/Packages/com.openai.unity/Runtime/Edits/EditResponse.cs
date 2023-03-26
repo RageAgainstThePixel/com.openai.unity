@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 namespace OpenAI.Edits
 {
+    [Obsolete]
     public sealed class EditResponse : BaseResponse
     {
         [JsonConstructor]
