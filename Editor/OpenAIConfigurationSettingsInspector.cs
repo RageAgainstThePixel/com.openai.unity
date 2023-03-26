@@ -1,8 +1,10 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace OpenAI.Editor
 {
@@ -17,17 +19,29 @@ namespace OpenAI.Editor
         private SerializedProperty deploymentId;
         private SerializedProperty apiVersion;
 
+        private static bool itemsUpdated;
+
         #region Project Settings Window
 
         [SettingsProvider]
         private static SettingsProvider Preferences()
         {
-            return new SettingsProvider("Project/OpenAI", SettingsScope.Project, new[] { "OpenAI" })
+            return new SettingsProvider($"Project/{nameof(OpenAI)}", SettingsScope.Project, new[] { nameof(OpenAI) })
             {
-                label = "OpenAI",
+                label = nameof(OpenAI),
                 guiHandler = OnPreferencesGui,
-                keywords = new[] { "OpenAI" }
+                keywords = new[] { nameof(OpenAI) },
+                deactivateHandler = DeactivateHandler
             };
+        }
+
+        private static void DeactivateHandler()
+        {
+            if (itemsUpdated)
+            {
+                itemsUpdated = false;
+                EditorUtility.RequestScriptReload();
+            }
         }
 
         private static void OnPreferencesGui(string searchContext)
@@ -50,13 +64,30 @@ namespace OpenAI.Editor
         private void OnEnable()
         {
             GetOrCreateInstance(target);
-            apiKey = serializedObject.FindProperty(nameof(apiKey));
-            organizationId = serializedObject.FindProperty(nameof(organizationId));
-            useAzureOpenAI = serializedObject.FindProperty(nameof(useAzureOpenAI));
-            proxyDomain = serializedObject.FindProperty(nameof(proxyDomain));
-            resourceName = serializedObject.FindProperty(nameof(resourceName));
-            deploymentId = serializedObject.FindProperty(nameof(deploymentId));
-            apiVersion = serializedObject.FindProperty(nameof(apiVersion));
+
+            try
+            {
+                apiKey = serializedObject.FindProperty(nameof(apiKey));
+                organizationId = serializedObject.FindProperty(nameof(organizationId));
+                useAzureOpenAI = serializedObject.FindProperty(nameof(useAzureOpenAI));
+                proxyDomain = serializedObject.FindProperty(nameof(proxyDomain));
+                resourceName = serializedObject.FindProperty(nameof(resourceName));
+                deploymentId = serializedObject.FindProperty(nameof(deploymentId));
+                apiVersion = serializedObject.FindProperty(nameof(apiVersion));
+            }
+            catch (Exception)
+            {
+                // Ignored
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (itemsUpdated)
+            {
+                itemsUpdated = false;
+                EditorUtility.RequestScriptReload();
+            }
         }
 
         public override void OnInspectorGUI()
@@ -71,11 +102,13 @@ namespace OpenAI.Editor
 
             if (EditorGUI.EndChangeCheck())
             {
+                itemsUpdated = true;
                 apiVersion.stringValue = useAzureOpenAI.boolValue ?
                     OpenAIClientSettings.DefaultAzureApiVersion :
                     OpenAIClientSettings.DefaultOpenAIApiVersion;
             }
 
+            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(apiKey);
 
             if (!string.IsNullOrWhiteSpace(apiKey.stringValue))
@@ -119,6 +152,11 @@ namespace OpenAI.Editor
             GUI.enabled = useAzureOpenAI.boolValue;
             EditorGUILayout.PropertyField(apiVersion);
             GUI.enabled = true;
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                itemsUpdated = true;
+            }
 
             EditorGUI.indentLevel--;
             serializedObject.ApplyModifiedProperties();

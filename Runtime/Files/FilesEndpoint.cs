@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Utilities.WebRequestRest;
+using Progress = Utilities.WebRequestRest.Progress;
 
 namespace OpenAI.Files
 {
@@ -143,11 +144,42 @@ namespace OpenAI.Files
         /// <param name="progress">Optional, progress callback.</param>
         /// <returns>The path to the downloaded file.</returns>
         /// <exception cref="HttpRequestException">.</exception>
-        public async Task<string> DownloadFileAsync(string fileId, IProgress<float> progress = null)
+        [Obsolete("Use DownloadFileAsync(string fileId, IProgress<Progress> progress = null)")]
+        public async Task<string> DownloadFileAsync(string fileId, IProgress<float> progress)
+        {
+            var headers = Api.Client.DefaultRequestHeaders.ToDictionary(item => item.Key, pair => string.Join(";", pair.Value));
+            var fileData = await GetFileInfoAsync(fileId);
+            Progress<Progress> restProgress = null;
+
+            if (progress != null)
+            {
+                restProgress = new Progress<Progress>(report => { progress.Report(report.Percentage); });
+            }
+
+            return await Rest.DownloadFileAsync(GetUrl($"/{fileData.Id}/content"), fileData.FileName, headers, restProgress);
+        }
+
+        /// <summary>
+        /// Downloads the specified file.
+        /// </summary>
+        /// <param name="fileId">The file id to download.</param>
+        /// <param name="progress">Optional, progress callback.</param>
+        /// <returns>The path to the downloaded file.</returns>
+        /// <exception cref="HttpRequestException">.</exception>
+        public async Task<string> DownloadFileAsync(string fileId, IProgress<Progress> progress)
         {
             var headers = Api.Client.DefaultRequestHeaders.ToDictionary(item => item.Key, pair => string.Join(";", pair.Value));
             var fileData = await GetFileInfoAsync(fileId);
             return await Rest.DownloadFileAsync(GetUrl($"/{fileData.Id}/content"), fileData.FileName, headers, progress);
         }
+
+        /// <summary>
+        /// Downloads the specified file.
+        /// </summary>
+        /// <param name="fileId">The file id to download.</param>
+        /// <returns>The path to the downloaded file.</returns>
+        /// <exception cref="HttpRequestException">.</exception>
+        public async Task<string> DownloadFileAsync(string fileId)
+            => await DownloadFileAsync(fileId, null as IProgress<Progress>);
     }
 }

@@ -2,7 +2,8 @@
     "name": "OpenAI.Editor",
     "rootNamespace": "OpenAI.Editor",
     "references": [
-        "GUID:3248779d86bd31747b5d2214f30b01ac"
+        "GUID:3248779d86bd31747b5d2214f30b01ac",
+        "GUID:7958db66189566541a6363568aee1575"
     ],
     "includePlatforms": [
         "Editor"

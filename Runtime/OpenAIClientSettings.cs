@@ -40,8 +40,8 @@ namespace OpenAI
                 domain = OpenAIDomain;
             }
 
-            if (!domain.Contains(".") &&
-                !domain.Contains(":"))
+            if (!domain.Contains('.') &&
+                !domain.Contains(':'))
             {
                 throw new ArgumentException($"You're attempting to pass a \"resourceName\" parameter to \"{nameof(domain)}\". Please specify \"resourceName:\" for this parameter in constructor.");
             }
@@ -78,8 +78,8 @@ namespace OpenAI
                 throw new ArgumentNullException(nameof(resourceName));
             }
 
-            if (resourceName.Contains(".") ||
-                resourceName.Contains(":"))
+            if (resourceName.Contains('.') ||
+                resourceName.Contains(':'))
             {
                 throw new ArgumentException($"You're attempting to pass a \"domain\" parameter to \"{nameof(resourceName)}\". Please specify \"domain:\" for this parameter in constructor.");
             }
