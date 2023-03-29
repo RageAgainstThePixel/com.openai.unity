@@ -19,16 +19,12 @@ namespace OpenAI
 
         internal static void SetResponseData(this BaseResponse response, HttpResponseHeaders headers)
         {
-            if (headers.Contains(Organization)) // OpenAI
+            if (headers.Contains(Organization))
             {
                 response.Organization = headers.GetValues(Organization).FirstOrDefault();
-                response.ProcessingTime = TimeSpan.FromMilliseconds(int.Parse(headers.GetValues(ProcessingTime).First()));
             }
-            else // Azure
-            {
-                response.ProcessingTime = TimeSpan.FromMilliseconds(double.Parse(headers.GetValues(ProcessingTime).First()));
-            }
-
+            
+            response.ProcessingTime = TimeSpan.FromMilliseconds(double.Parse(headers.GetValues(ProcessingTime).First()));
             response.RequestId = headers.GetValues(RequestId).FirstOrDefault();
         }
 
