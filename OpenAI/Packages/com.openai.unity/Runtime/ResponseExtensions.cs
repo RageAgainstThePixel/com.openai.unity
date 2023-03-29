@@ -19,9 +19,13 @@ namespace OpenAI
 
         internal static void SetResponseData(this BaseResponse response, HttpResponseHeaders headers)
         {
-            response.Organization = headers.GetValues(Organization).FirstOrDefault();
+            if (headers.Contains(Organization))
+            {
+                response.Organization = headers.GetValues(Organization).FirstOrDefault();
+            }
+            
+            response.ProcessingTime = TimeSpan.FromMilliseconds(double.Parse(headers.GetValues(ProcessingTime).First()));
             response.RequestId = headers.GetValues(RequestId).FirstOrDefault();
-            response.ProcessingTime = TimeSpan.FromMilliseconds(int.Parse(headers.GetValues(ProcessingTime).First()));
         }
 
         internal static async Task<string> ReadAsStringAsync(this HttpResponseMessage response, bool debug = false, [CallerMemberName] string methodName = null)
