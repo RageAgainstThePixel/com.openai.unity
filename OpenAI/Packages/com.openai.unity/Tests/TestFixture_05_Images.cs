@@ -2,6 +2,7 @@
 
 using NUnit.Framework;
 using OpenAI.Images;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEditor;
@@ -30,7 +31,24 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_2_CreateImageEdit_Path()
+        public async Task Test_2_GenerateImages_B64_Json()
+        {
+            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            Assert.IsNotNull(api.ImagesEndPoint);
+
+            var results = await api.ImagesEndPoint.GenerateImageAsync("A house riding a velociraptor", 1, ImageSize.Small, responseFormat: ResponseFormat.B64_Json);
+
+            Assert.IsNotNull(results);
+            Assert.NotZero(results.Count);
+
+            foreach (var result in results)
+            {
+                Console.WriteLine(result);
+            }
+        }
+
+        [Test]
+        public async Task Test_3_CreateImageEdit_Path()
         {
             var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
             Assert.IsNotNull(api.ImagesEndPoint);
@@ -49,7 +67,7 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_3_CreateImageEdit_Texture()
+        public async Task Test_4_CreateImageEdit_Texture()
         {
             var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
             Assert.IsNotNull(api.ImagesEndPoint);
@@ -70,7 +88,28 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_4_CreateImageEdit_MaskAsTransparency()
+        public async Task Test_5_CreateImageEdit_Texture_B64_Json()
+        {
+            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            Assert.IsNotNull(api.ImagesEndPoint);
+            var imageAssetPath = AssetDatabase.GUIDToAssetPath("230fd778637d3d84d81355c8c13b1999");
+            var image = AssetDatabase.LoadAssetAtPath<Texture2D>(imageAssetPath);
+            var maskAssetPath = AssetDatabase.GUIDToAssetPath("0be6be2fad590cc47930495d2ca37dd6");
+            var mask = AssetDatabase.LoadAssetAtPath<Texture2D>(maskAssetPath);
+            var results = await api.ImagesEndPoint.CreateImageEditAsync(image, mask, "A sunlit indoor lounge area with a pool containing a flamingo", 1, ImageSize.Small, responseFormat: ResponseFormat.B64_Json);
+
+            Assert.IsNotNull(results);
+            Assert.NotZero(results.Count);
+
+            foreach (var (path, texture) in results)
+            {
+                Debug.Log(path);
+                Assert.IsNotNull(texture);
+            }
+        }
+
+        [Test]
+        public async Task Test_6_CreateImageEdit_MaskAsTransparency()
         {
             var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
             Assert.IsNotNull(api.ImagesEndPoint);
@@ -89,7 +128,7 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_5_CreateImageVariation_Path()
+        public async Task Test_7_CreateImageVariation_Path()
         {
             var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
             Assert.IsNotNull(api.ImagesEndPoint);
@@ -107,13 +146,32 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_6_CreateImageVariation_Texture()
+        public async Task Test_8_CreateImageVariation_Texture()
         {
             var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
             Assert.IsNotNull(api.ImagesEndPoint);
             var imageAssetPath = AssetDatabase.GUIDToAssetPath("230fd778637d3d84d81355c8c13b1999");
             var image = AssetDatabase.LoadAssetAtPath<Texture2D>(imageAssetPath);
             var results = await api.ImagesEndPoint.CreateImageVariationAsync(image, 1, ImageSize.Small);
+
+            Assert.IsNotNull(results);
+            Assert.NotZero(results.Count);
+
+            foreach (var (path, texture) in results)
+            {
+                Debug.Log(path);
+                Assert.IsNotNull(texture);
+            }
+        }
+
+        [Test]
+        public async Task Test_9_CreateImageVariation_Texture_B64_Json()
+        {
+            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            Assert.IsNotNull(api.ImagesEndPoint);
+            var imageAssetPath = AssetDatabase.GUIDToAssetPath("230fd778637d3d84d81355c8c13b1999");
+            var image = AssetDatabase.LoadAssetAtPath<Texture2D>(imageAssetPath);
+            var results = await api.ImagesEndPoint.CreateImageVariationAsync(image, 1, ImageSize.Small, responseFormat: ResponseFormat.B64_Json);
 
             Assert.IsNotNull(results);
             Assert.NotZero(results.Count);

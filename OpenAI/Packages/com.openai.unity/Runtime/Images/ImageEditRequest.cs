@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace OpenAI.Images
 {
-    public sealed class ImageEditRequest : IDisposable
+    public sealed class ImageEditRequest : AbstractBaseImageRequest, IDisposable
     {
         /// <summary>
         /// Constructor.
@@ -27,8 +27,18 @@ namespace OpenAI.Images
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
-        public ImageEditRequest(string imagePath, string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null)
-            : this(imagePath, null, prompt, numberOfResults, size, user)
+        /// <param name="responseFormat">
+        /// The format in which the generated images are returned.
+        /// Must be one of url or b64_json.
+        /// <para/> Defaults to <see cref="Images.ResponseFormat.Url"/>
+        /// </param>
+        public ImageEditRequest(
+            string imagePath,
+            string prompt,
+            int numberOfResults = 1,
+            ImageSize size = ImageSize.Large,
+            string user = null, ResponseFormat responseFormat = Images.ResponseFormat.Url)
+            : this(imagePath, null, prompt, numberOfResults, size, user, responseFormat)
         {
         }
 
@@ -55,7 +65,19 @@ namespace OpenAI.Images
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
-        public ImageEditRequest(string imagePath, string maskPath, string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null)
+        /// <param name="responseFormat">
+        /// The format in which the generated images are returned.
+        /// Must be one of url or b64_json.
+        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
+        /// </param>
+        public ImageEditRequest(
+            string imagePath,
+            string maskPath,
+            string prompt,
+            int numberOfResults = 1,
+            ImageSize size = ImageSize.Large,
+            string user = null,
+            ResponseFormat responseFormat = Images.ResponseFormat.Url)
             : this(
                 File.OpenRead(imagePath),
                 Path.GetFileName(imagePath),
@@ -64,7 +86,8 @@ namespace OpenAI.Images
                 prompt,
                 numberOfResults,
                 size,
-                user)
+                user,
+                responseFormat)
         {
         }
 
@@ -87,8 +110,19 @@ namespace OpenAI.Images
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
-        public ImageEditRequest(Texture2D texture, string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null)
-            : this(texture, null, prompt, numberOfResults, size, user)
+        /// <param name="responseFormat">
+        /// The format in which the generated images are returned.
+        /// Must be one of url or b64_json.
+        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
+        /// </param>
+        public ImageEditRequest(
+            Texture2D texture,
+            string prompt,
+            int numberOfResults = 1,
+            ImageSize size = ImageSize.Large,
+            string user = null,
+            ResponseFormat responseFormat = Images.ResponseFormat.Url)
+            : this(texture, null, prompt, numberOfResults, size, user, responseFormat)
         {
         }
 
@@ -115,16 +149,29 @@ namespace OpenAI.Images
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
-        public ImageEditRequest(Texture2D texture, Texture2D mask, string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null)
+        /// <param name="responseFormat">
+        /// The format in which the generated images are returned.
+        /// Must be one of url or b64_json.
+        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
+        /// </param>
+        public ImageEditRequest(
+            Texture2D texture,
+            Texture2D mask,
+            string prompt,
+            int numberOfResults = 1,
+            ImageSize size = ImageSize.Large,
+            string user = null,
+            ResponseFormat responseFormat = Images.ResponseFormat.Url)
             : this(
                 new MemoryStream(texture.EncodeToPNG()),
-                $"{texture.name}.png",
+                !string.IsNullOrWhiteSpace(texture.name) ? $"{texture.name}.png" : null,
                 mask != null ? new MemoryStream(mask.EncodeToPNG()) : null,
-                mask != null ? $"{mask.name}.png" : null,
+                mask != null ? !string.IsNullOrWhiteSpace(mask.name) ? $"{mask.name}.png" : null : null,
                 prompt,
                 numberOfResults,
                 size,
-                user)
+                user,
+                responseFormat)
         {
         }
 
@@ -148,8 +195,20 @@ namespace OpenAI.Images
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
-        public ImageEditRequest(Stream image, string imageName, string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null)
-            : this(image, imageName, null, null, prompt, numberOfResults, size, user)
+        /// <param name="responseFormat">
+        /// The format in which the generated images are returned.
+        /// Must be one of url or b64_json.
+        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
+        /// </param>
+        public ImageEditRequest(
+            Stream image,
+            string imageName,
+            string prompt,
+            int numberOfResults = 1,
+            ImageSize size = ImageSize.Large,
+            string user = null,
+            ResponseFormat responseFormat = Images.ResponseFormat.Url)
+            : this(image, imageName, null, null, prompt, numberOfResults, size, user, responseFormat)
         {
         }
 
@@ -178,13 +237,29 @@ namespace OpenAI.Images
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
-        public ImageEditRequest(Stream image, string imageName, Stream mask, string maskName, string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null)
+        /// <param name="responseFormat">
+        /// The format in which the generated images are returned.
+        /// Must be one of url or b64_json.
+        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
+        /// </param>
+        public ImageEditRequest(
+            Stream image,
+            string imageName,
+            Stream mask,
+            string maskName,
+            string prompt,
+            int numberOfResults = 1,
+            ImageSize size = ImageSize.Large,
+            string user = null,
+            ResponseFormat responseFormat = Images.ResponseFormat.Url)
+            : base(numberOfResults, size, responseFormat, user)
         {
             Image = image;
 
             if (string.IsNullOrWhiteSpace(imageName))
             {
-                imageName = "image.png";
+                const string defaultImageName = "image.png";
+                imageName = defaultImageName;
             }
 
             ImageName = imageName;
@@ -195,7 +270,8 @@ namespace OpenAI.Images
 
                 if (string.IsNullOrWhiteSpace(maskName))
                 {
-                    maskName = "mask.png";
+                    const string defaultMaskName = "mask.png";
+                    maskName = defaultMaskName;
                 }
 
                 MaskName = maskName;
@@ -212,18 +288,6 @@ namespace OpenAI.Images
             {
                 throw new ArgumentOutOfRangeException(nameof(numberOfResults), "The number of results must be between 1 and 10");
             }
-
-            Number = numberOfResults;
-
-            Size = size switch
-            {
-                ImageSize.Small => "256x256",
-                ImageSize.Medium => "512x512",
-                ImageSize.Large => "1024x1024",
-                _ => throw new ArgumentOutOfRangeException(nameof(size), size, null)
-            };
-
-            User = user;
         }
 
         ~ImageEditRequest() => Dispose(false);
@@ -248,21 +312,6 @@ namespace OpenAI.Images
         /// A text description of the desired image(s). The maximum length is 1000 characters.
         /// </summary>
         public string Prompt { get; }
-
-        /// <summary>
-        /// The number of images to generate. Must be between 1 and 10.
-        /// </summary>
-        public int Number { get; }
-
-        /// <summary>
-        /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
-        /// </summary>
-        public string Size { get; }
-
-        /// <summary>
-        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
-        /// </summary>
-        public string User { get; }
 
         private void Dispose(bool disposing)
         {

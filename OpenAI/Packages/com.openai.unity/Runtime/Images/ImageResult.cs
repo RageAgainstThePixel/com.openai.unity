@@ -7,12 +7,18 @@ namespace OpenAI.Images
     internal class ImageResult
     {
         [JsonConstructor]
-        public ImageResult(string url)
+        public ImageResult(
+            [JsonProperty("url")] string url,
+            [JsonProperty("b64_json")] string b64_json)
         {
             Url = url;
+            B64_Json = b64_json;
         }
 
         [JsonProperty("url")]
         public string Url { get; }
+
+        [JsonProperty("b64_json")]
+        public string B64_Json { get; private set; }
     }
 }

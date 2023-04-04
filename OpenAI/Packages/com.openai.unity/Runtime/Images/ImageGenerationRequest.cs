@@ -8,17 +8,31 @@ namespace OpenAI.Images
     /// <summary>
     /// Creates an image given a prompt.
     /// </summary>
-    public sealed class ImageGenerationRequest
+    public sealed class ImageGenerationRequest : AbstractBaseImageRequest
     {
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="prompt">A text description of the desired image(s). The maximum length is 1000 characters.</param>
-        /// <param name="numberOfResults">The number of images to generate. Must be between 1 and 10.</param>
-        /// <param name="size">The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.</param>
-        /// <param name="user">A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.</param>
+        /// <param name="prompt">
+        /// A text description of the desired image(s). The maximum length is 1000 characters.
+        /// </param>
+        /// <param name="numberOfResults">
+        /// The number of images to generate. Must be between 1 and 10.
+        /// </param>
+        /// <param name="size">
+        /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
+        /// </param>
+        /// <param name="user">
+        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
+        /// </param>
+        /// <param name="responseFormat">
+        /// The format in which the generated images are returned.
+        /// Must be one of url or b64_json.
+        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
+        /// </param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public ImageGenerationRequest(string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null)
+        public ImageGenerationRequest(string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null, ResponseFormat responseFormat = Images.ResponseFormat.Url)
+            : base(numberOfResults, size, responseFormat, user)
         {
             if (prompt.Length > 1000)
             {
@@ -31,18 +45,6 @@ namespace OpenAI.Images
             {
                 throw new ArgumentOutOfRangeException(nameof(numberOfResults), "The number of results must be between 1 and 10");
             }
-
-            Number = numberOfResults;
-
-            Size = size switch
-            {
-                ImageSize.Small => "256x256",
-                ImageSize.Medium => "512x512",
-                ImageSize.Large => "1024x1024",
-                _ => throw new ArgumentOutOfRangeException(nameof(size), size, null)
-            };
-
-            User = user;
         }
 
         /// <summary>
@@ -50,23 +52,5 @@ namespace OpenAI.Images
         /// </summary>
         [JsonProperty("prompt")]
         public string Prompt { get; }
-
-        /// <summary>
-        /// The number of images to generate. Must be between 1 and 10.
-        /// </summary>
-        [JsonProperty("n")]
-        public int Number { get; }
-
-        /// <summary>
-        /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
-        /// </summary>
-        [JsonProperty("size")]
-        public string Size { get; }
-
-        /// <summary>
-        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
-        /// </summary>
-        [JsonProperty("user")]
-        public string User { get; }
     }
 }
