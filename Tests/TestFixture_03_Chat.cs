@@ -16,14 +16,14 @@ namespace OpenAI.Tests
         {
             var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
             Assert.IsNotNull(api.ChatEndpoint);
-            var chatPrompts = new List<ChatPrompt>
+            var messages = new List<Message>
             {
-                new ChatPrompt("system", "You are a helpful assistant."),
-                new ChatPrompt("user", "Who won the world series in 2020?"),
-                new ChatPrompt("assistant", "The Los Angeles Dodgers won the World Series in 2020."),
-                new ChatPrompt("user", "Where was it played?"),
+                new Message(Role.System, "You are a helpful assistant."),
+                new Message(Role.User, "Who won the world series in 2020?"),
+                new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
+                new Message(Role.User, "Where was it played?"),
             };
-            var chatRequest = new ChatRequest(chatPrompts, Model.GPT3_5_Turbo);
+            var chatRequest = new ChatRequest(messages, Model.GPT3_5_Turbo);
             var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(result);
             Assert.NotNull(result.Choices);
@@ -36,14 +36,14 @@ namespace OpenAI.Tests
         {
             var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
             Assert.IsNotNull(api.ChatEndpoint);
-            var chatPrompts = new List<ChatPrompt>
+            var messages = new List<Message>
             {
-                new ChatPrompt("system", "You are a helpful assistant."),
-                new ChatPrompt("user", "Who won the world series in 2020?"),
-                new ChatPrompt("assistant", "The Los Angeles Dodgers won the World Series in 2020."),
-                new ChatPrompt("user", "Where was it played?"),
+                new Message(Role.System, "You are a helpful assistant."),
+                new Message(Role.User, "Who won the world series in 2020?"),
+                new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
+                new Message(Role.User, "Where was it played?"),
             };
-            var chatRequest = new ChatRequest(chatPrompts, Model.GPT3_5_Turbo);
+            var chatRequest = new ChatRequest(messages, Model.GPT3_5_Turbo);
             var allContent = new List<string>();
 
             await api.ChatEndpoint.StreamCompletionAsync(chatRequest, result =>
@@ -54,7 +54,7 @@ namespace OpenAI.Tests
                 allContent.Add(result.FirstChoice);
             });
 
-            Debug.Log(string.Join("", allContent));
+            Debug.Log(string.Join(string.Empty, allContent));
         }
 
         [Test]
@@ -62,14 +62,14 @@ namespace OpenAI.Tests
         {
             var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
             Assert.IsNotNull(api.ChatEndpoint);
-            var chatPrompts = new List<ChatPrompt>
+            var messages = new List<Message>
             {
-                new ChatPrompt("system", "You are a helpful assistant."),
-                new ChatPrompt("user", "Who won the world series in 2020?"),
-                new ChatPrompt("assistant", "The Los Angeles Dodgers won the World Series in 2020."),
-                new ChatPrompt("user", "Where was it played?"),
+                new Message(Role.System, "You are a helpful assistant."),
+                new Message(Role.User, "Who won the world series in 2020?"),
+                new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
+                new Message(Role.User, "Where was it played?"),
             };
-            var chatRequest = new ChatRequest(chatPrompts, Model.GPT3_5_Turbo);
+            var chatRequest = new ChatRequest(messages, Model.GPT3_5_Turbo);
             var allContent = new List<string>();
 
             await foreach (var result in api.ChatEndpoint.StreamCompletionEnumerableAsync(chatRequest))
@@ -80,7 +80,7 @@ namespace OpenAI.Tests
                 allContent.Add(result.FirstChoice);
             }
 
-            Debug.Log(string.Join("", allContent));
+            Debug.Log(string.Join(string.Empty, allContent));
         }
     }
 }
