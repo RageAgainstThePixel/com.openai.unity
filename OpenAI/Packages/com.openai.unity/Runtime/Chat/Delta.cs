@@ -8,7 +8,7 @@ namespace OpenAI.Chat
     {
         [JsonConstructor]
         public Delta(
-            [JsonProperty("role")] string role,
+            [JsonProperty("role")] Role role,
             [JsonProperty("content")] string content)
         {
             Role = role;
@@ -16,9 +16,11 @@ namespace OpenAI.Chat
         }
 
         [JsonProperty("role")]
-        public string Role { get; }
+        public Role Role { get; }
 
         [JsonProperty("content")]
         public string Content { get; }
+
+        public override string ToString() => Content;
     }
 }
