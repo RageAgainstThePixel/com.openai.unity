@@ -22,6 +22,7 @@ namespace OpenAI.Chat
         }
 
         [JsonConstructor]
+        [Obsolete("Use OpenAI.Chat.Message instead")]
         public ChatPrompt(
             [JsonProperty("role")] Role role,
             [JsonProperty("content")] string content)
