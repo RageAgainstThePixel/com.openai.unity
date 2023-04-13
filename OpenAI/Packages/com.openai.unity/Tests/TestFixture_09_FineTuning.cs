@@ -151,11 +151,22 @@ namespace OpenAI.Tests
             Debug.Log($"{fineTuneJob.Id} ->");
             var cancellationTokenSource = new CancellationTokenSource();
 
-            await api.FineTuningEndpoint.StreamFineTuneEventsAsync(fineTuneJob, fineTuneEvent =>
+            try
             {
-                Debug.Log($"  {fineTuneEvent.CreatedAt} [{fineTuneEvent.Level}] {fineTuneEvent.Message}");
-                cancellationTokenSource.Cancel();
-            }, cancellationTokenSource.Token);
+                await api.FineTuningEndpoint.StreamFineTuneEventsAsync(fineTuneJob, fineTuneEvent =>
+                {
+                    Debug.Log($"  {fineTuneEvent.CreatedAt} [{fineTuneEvent.Level}] {fineTuneEvent.Message}");
+                    cancellationTokenSource.Cancel();
+                }, cancellationTokenSource.Token);
+            }
+            catch (TaskCanceledException)
+            {
+                // Ignore
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+            }
 
             var jobInfo = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(fineTuneJob);
             Assert.IsNotNull(jobInfo);
@@ -181,11 +192,22 @@ namespace OpenAI.Tests
             Debug.Log($"{fineTuneJob.Id} ->");
             var cancellationTokenSource = new CancellationTokenSource();
 
-            await foreach (var fineTuneEvent in api.FineTuningEndpoint.StreamFineTuneEventsEnumerableAsync(
-                               fineTuneJob, cancellationTokenSource.Token))
+            try
             {
-                Debug.Log($"  {fineTuneEvent.CreatedAt} [{fineTuneEvent.Level}] {fineTuneEvent.Message}");
-                cancellationTokenSource.Cancel();
+                await foreach (var fineTuneEvent in api.FineTuningEndpoint.StreamFineTuneEventsEnumerableAsync(
+                                   fineTuneJob, cancellationTokenSource.Token))
+                {
+                    Debug.Log($"  {fineTuneEvent.CreatedAt} [{fineTuneEvent.Level}] {fineTuneEvent.Message}");
+                    cancellationTokenSource.Cancel();
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                // Ignore
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
             }
 
             var jobInfo = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(fineTuneJob);
