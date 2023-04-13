@@ -129,6 +129,11 @@ namespace OpenAI
                 organizationId = Environment.GetEnvironmentVariable(OPENAI_ORGANIZATION_ID);
             }
 
+            if (string.IsNullOrWhiteSpace(organizationId))
+            {
+                organizationId = Environment.GetEnvironmentVariable(ORGANIZATION);
+            }
+
             return string.IsNullOrEmpty(apiKey) ? null : new OpenAIAuthentication(apiKey, organizationId);
         }
 
@@ -182,7 +187,7 @@ namespace OpenAI
                     {
                         var parts = line.Split('=', ':');
 
-                        for (var i = 0; i < parts.Length; i++)
+                        for (var i = 0; i < parts.Length - 1; i++)
                         {
                             var part = parts[i];
                             var nextPart = parts[i + 1];
@@ -196,6 +201,8 @@ namespace OpenAI
                                     apiKey = nextPart.Trim();
                                     break;
                                 case ORGANIZATION:
+                                case OPEN_AI_ORGANIZATION_ID:
+                                case OPENAI_ORGANIZATION_ID:
                                     organization = nextPart.Trim();
                                     break;
                             }

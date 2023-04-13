@@ -62,6 +62,8 @@ namespace OpenAI.Chat
 
             while (await reader.ReadLineAsync() is { } line)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 if (line.StartsWith("data: "))
                 {
                     line = line["data: ".Length..];
@@ -103,9 +105,10 @@ namespace OpenAI.Chat
             await using var stream = await response.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream);
 
-            while (await reader.ReadLineAsync() is { } line &&
-                   !cancellationToken.IsCancellationRequested)
+            while (await reader.ReadLineAsync() is { } line)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 if (line.StartsWith("data: "))
                 {
                     line = line["data: ".Length..];
