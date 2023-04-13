@@ -153,6 +153,8 @@ namespace OpenAI.FineTuning
                 {
                     throw new Exception($"Failed to cancel {jobId}");
                 }
+
+                throw new TaskCanceledException();
             }
         }
 
@@ -197,6 +199,8 @@ namespace OpenAI.FineTuning
                 {
                     throw new Exception($"Failed to cancel {jobId}");
                 }
+
+                throw new TaskCanceledException();
             }
         }
     }

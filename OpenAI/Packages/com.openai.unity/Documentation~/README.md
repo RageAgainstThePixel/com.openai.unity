@@ -5,7 +5,7 @@
 
 Based on [OpenAI-DotNet](https://github.com/RageAgainstThePixel/OpenAI-DotNet)
 
-A [OpenAI](https://openai.com/) package for the [Unity](https://unity.com/) Game Engine to use GPT-3 and Dall-E though their RESTful API (currently in beta).  Independently developed, this is not an official library and I am not affiliated with OpenAI.  An OpenAI API account is required.
+A [OpenAI](https://openai.com/) package for the [Unity](https://unity.com/) Game Engine to use chat-gpt, GPT-4, GPT-3.5-Turbo and Dall-E though their RESTful API (currently in beta).  Independently developed, this is not an official library and I am not affiliated with OpenAI.  An OpenAI API account is required.
 
 ***All copyrights, trademarks, logos, and assets are the property of their respective owners.***
 
@@ -100,6 +100,8 @@ There are 4 ways to provide your API keys, in order of precedence:
 
 #### Pass keys directly with constructor
 
+:warning: We recommended using the environment variables to load the API key instead of having it hard coded in your source. It is not recommended use this method in production, but only for accepting user credentials, local testing and quick start scenarios.
+
 ```csharp
 var api = new OpenAIClient("sk-apiKey");
 ```
@@ -115,6 +117,8 @@ var api = new OpenAIClient(new OpenAIAuthentication("sk-apiKey", "org-yourOrgani
 You can save the key directly into a scriptable object that is located in the `Assets/Resources` folder.
 
 You can create a new one by using the context menu of the project pane and creating a new `OpenAIConfigurationSettings` scriptable object.
+
+:warning: Beware checking this file into source control, as other people will be able to see your API key. It is recommended to use the [OpenAI-DotNet-Proxy](#openai-api-proxy) and authenticate users with your preferred OAuth provider.
 
 ![Create new OpenAIConfigurationSettings](images/create-scriptable-object.png)
 
