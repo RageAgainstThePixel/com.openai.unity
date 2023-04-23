@@ -38,7 +38,7 @@ namespace OpenAI.Tests
         [Test]
         public void Test_02_GetAuthFromFile()
         {
-            var auth = OpenAIAuthentication.LoadFromDirectory();
+            var auth = OpenAIAuthentication.LoadFromPath(Path.GetFullPath(".openai"));
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.ApiKey);
             Assert.AreEqual("sk-test12", auth.ApiKey);

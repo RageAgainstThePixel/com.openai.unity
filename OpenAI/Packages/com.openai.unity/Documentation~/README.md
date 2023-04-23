@@ -21,9 +21,9 @@ The recommended installation method is though the unity package manager and [Ope
 
 - Open your Unity project settings
 - Add the OpenUPM package registry:
-  - `Name: OpenUPM`
-  - `URL: https://package.openupm.com`
-  - `Scope(s):`
+  - Name: `OpenUPM`
+  - URL: `https://package.openupm.com`
+  - Scope(s):
     - `com.openai`
     - `com.utilities`
 
@@ -146,10 +146,18 @@ OPENAI_KEY=sk-aaaabbbbbccccddddd
 ORGANIZATION=org-yourOrganizationId
 ```
 
-You can also load the file directly with known path by calling a static method in Authentication:
+You can also load the configuration file directly with known path by calling static methods in `OpenAIAuthentication`:
+
+- Loads the default `.openai` config in the specified directory:
 
 ```csharp
-var api = new OpenAIClient(OpenAIAuthentication.LoadFromDirectory("your/path/to/.openai"));;
+var api = new OpenAIClient(OpenAIAuthentication.LoadFromDirectory("path/to/your/directory"));
+```
+
+- Loads the configuration file from a specific path. File does not need to be named `.openai` as long as it conforms to the json format:
+
+```csharp
+var api = new OpenAIClient(OpenAIAuthentication.LoadFromPath("path/to/your/file.json"));;
 ```
 
 #### Use System Environment Variables
@@ -199,7 +207,7 @@ var settings = new OpenAIClientSettings(resourceName: "your-resource", deploymen
 var api = new OpenAIClient(auth, settings);
 ```
 
-### OpenAI API Proxy
+### [OpenAI API Proxy](https://github.com/RageAgainstThePixel/OpenAI-DotNet/blob/main/OpenAI-DotNet-Proxy/Readme.md)
 
 [![NuGet version (OpenAI-DotNet-Proxy)](https://img.shields.io/nuget/v/OpenAI-DotNet-Proxy.svg?label=OpenAI-DotNet-Proxy&logo=nuget)](https://www.nuget.org/packages/OpenAI-DotNet-Proxy/)
 
@@ -386,7 +394,7 @@ var chatPrompts = new List<ChatPrompt>
     new ChatPrompt("assistant", "The Los Angeles Dodgers won the World Series in 2020."),
     new ChatPrompt("user", "Where was it played?"),
 };
-var chatRequest = new ChatRequest(chatPrompts, Model.GPT3_5_Turbo);
+var chatRequest = new ChatRequest(chatPrompts, Model.GPT4);
 
 await api.ChatEndpoint.StreamCompletionAsync(chatRequest, result =>
 {
@@ -444,7 +452,7 @@ Creates an embedding vector representing the input text.
 
 ```csharp
 var api = new OpenAIClient();
-var result = await api.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was delicious and the waiter...");
+var result = await api.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was delicious and the waiter...", Models.Embedding_Ada_002);
 Debug.Log(result);
 ```
 
