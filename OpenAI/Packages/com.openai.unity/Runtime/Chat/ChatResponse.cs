@@ -44,6 +44,10 @@ namespace OpenAI.Chat
         public IReadOnlyList<Choice> Choices { get; }
 
         [JsonIgnore]
-        public Choice FirstChoice => Choices.FirstOrDefault();
+        public Choice FirstChoice => Choices[0];
+
+        public override string ToString() => FirstChoice.ToString();
+
+        public static implicit operator string(ChatResponse response) => response.ToString();
     }
 }
