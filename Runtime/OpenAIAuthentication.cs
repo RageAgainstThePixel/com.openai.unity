@@ -138,6 +138,18 @@ namespace OpenAI
         }
 
         /// <summary>
+        /// Attempts to load api keys from a specified configuration file.
+        /// </summary>
+        /// <param name="path">The specified path to the configuration file.</param>
+        /// <returns>
+        /// Returns the loaded <see cref="OpenAIAuthentication"/> any api keys were found,
+        /// or <see langword="null"/> if it was not successful in finding a config
+        /// (or if the config file didn't contain correctly formatted API keys)
+        /// </returns>
+        public static OpenAIAuthentication LoadFromPath(string path)
+            => LoadFromDirectory(Path.GetDirectoryName(path), Path.GetFileName(path), false);
+
+        /// <summary>
         /// Attempts to load api keys from a configuration file, by default ".openai" in the current directory,
         /// optionally traversing up the directory tree.
         /// </summary>
