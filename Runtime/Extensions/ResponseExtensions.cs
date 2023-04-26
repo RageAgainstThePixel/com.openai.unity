@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace OpenAI
+namespace OpenAI.Extensions
 {
     internal static class ResponseExtensions
     {
@@ -23,7 +23,7 @@ namespace OpenAI
             {
                 response.Organization = headers.GetValues(Organization).FirstOrDefault();
             }
-            
+
             response.ProcessingTime = TimeSpan.FromMilliseconds(double.Parse(headers.GetValues(ProcessingTime).First()));
             response.RequestId = headers.GetValues(RequestId).FirstOrDefault();
         }
