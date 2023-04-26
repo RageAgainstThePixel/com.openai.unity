@@ -8,6 +8,7 @@ using OpenAI.Chat;
 using OpenAI.Completions;
 using OpenAI.Edits;
 using OpenAI.Embeddings;
+using OpenAI.Extensions;
 using OpenAI.Files;
 using OpenAI.FineTuning;
 using OpenAI.Images;
@@ -67,11 +68,13 @@ namespace OpenAI
             Client = SetupClient();
             JsonSerializationOptions = new JsonSerializerSettings
             {
+                NullValueHandling = NullValueHandling.Ignore,
                 DefaultValueHandling = DefaultValueHandling.Ignore,
                 Converters = new List<JsonConverter>
                 {
                     new StringEnumConverter(new CamelCaseNamingStrategy())
-                }
+                },
+                ContractResolver = new EmptyToNullStringContractResolver()
             };
             ModelsEndpoint = new ModelsEndpoint(this);
             CompletionsEndpoint = new CompletionsEndpoint(this);

@@ -3,7 +3,7 @@
 using System.Net.Http;
 using System.Text;
 
-namespace OpenAI
+namespace OpenAI.Extensions
 {
     internal static class StringExtensions
     {

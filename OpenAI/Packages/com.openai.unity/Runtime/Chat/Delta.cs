@@ -14,6 +14,7 @@ namespace OpenAI.Chat
         {
             Role = role;
             Content = content;
+            Name = name;
         }
 
         [JsonProperty("role")]
