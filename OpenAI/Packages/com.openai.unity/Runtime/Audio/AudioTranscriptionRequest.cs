@@ -8,7 +8,7 @@ using Utilities.Encoding.Wav;
 
 namespace OpenAI.Audio
 {
-    public sealed class AudioTranscriptionRequest
+    public sealed class AudioTranscriptionRequest : IDisposable
     {
         /// <summary>
         /// Constructor.
