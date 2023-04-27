@@ -25,7 +25,10 @@ namespace OpenAI.Models
         private class DeleteModelResponse
         {
             [JsonConstructor]
-            public DeleteModelResponse(string id, string @object, bool deleted)
+            public DeleteModelResponse(
+                [JsonProperty("id")] string id,
+                [JsonProperty("object")] string @object,
+                [JsonProperty("deleted")] bool deleted)
             {
                 Id = id;
                 Object = @object;
