@@ -30,7 +30,7 @@ namespace OpenAI.Tests
 
             foreach (var model in models.OrderBy(model => model.Id))
             {
-                Debug.Log(model.ToString());
+                Debug.Log($"{model.Id} | Owner: {model.OwnedBy} | Created: {model.CreatedAt}");
 
                 try
                 {

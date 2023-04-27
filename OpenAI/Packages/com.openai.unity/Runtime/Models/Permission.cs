@@ -8,7 +8,19 @@ namespace OpenAI.Models
     public sealed class Permission
     {
         [JsonConstructor]
-        public Permission(string id, string @object, int createdAtUnixTime, bool allowCreateEngine, bool allowSampling, bool allowLogprobs, bool allowSearchIndices, bool allowView, bool allowFineTuning, string organization, object group, bool isBlocking)
+        public Permission(
+            [JsonProperty("id")] string id,
+            [JsonProperty("object")] string @object,
+            [JsonProperty("created")] int createdAtUnixTime,
+            [JsonProperty("allow_create_engine")] bool allowCreateEngine,
+            [JsonProperty("allow_sampling")] bool allowSampling,
+            [JsonProperty("allow_logprobs")] bool allowLogprobs,
+            [JsonProperty("allow_search_indices")] bool allowSearchIndices,
+            [JsonProperty("allow_view")] bool allowView,
+            [JsonProperty("allow_fine_tuning")] bool allowFineTuning,
+            [JsonProperty("organization")] string organization,
+            [JsonProperty("group")] object group,
+            [JsonProperty("is_blocking")] bool isBlocking)
         {
             Id = id;
             Object = @object;
