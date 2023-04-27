@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace OpenAI.Models
@@ -22,14 +23,18 @@ namespace OpenAI.Models
 
         [JsonConstructor]
         public Model(
-            string id,
-            string @object,
-            string ownedBy,
-            IReadOnlyList<Permission> permissions,
-            string root, string parent) : this(id)
+            [JsonProperty("id")] string id,
+            [JsonProperty("object")] string @object,
+            [JsonProperty("created")] int createdAtUnixTimeSeconds,
+            [JsonProperty("owned_by")] string ownedBy,
+            [JsonProperty("permission")] IReadOnlyList<Permission> permissions,
+            [JsonProperty("root")] string root,
+            [JsonProperty("parent")] string parent)
+            : this(id)
         {
             Object = @object;
             OwnedBy = ownedBy;
+            CreatedAtUnixTimeSeconds = createdAtUnixTimeSeconds;
             Permissions = permissions;
             Root = root;
             Parent = parent;
@@ -55,10 +60,16 @@ namespace OpenAI.Models
         [JsonProperty("object")]
         public string Object { get; }
 
+        [JsonProperty("created")]
+        public int CreatedAtUnixTimeSeconds { get; }
+
+        [JsonIgnore]
+        public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTimeSeconds).DateTime;
+
         [JsonProperty("owned_by")]
         public string OwnedBy { get; private set; }
 
-        [JsonProperty("permissions")]
+        [JsonProperty("permission")]
         public IReadOnlyList<Permission> Permissions { get; }
 
         [JsonProperty("root")]
