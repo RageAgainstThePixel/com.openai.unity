@@ -20,7 +20,7 @@ namespace OpenAI.Chat
         }
 
         [JsonProperty("message")]
-        public Message Message { get; }
+        public Message Message { get; internal set; }
 
         [JsonProperty("delta")]
         public Delta Delta { get; }

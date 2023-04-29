@@ -211,25 +211,21 @@ namespace OpenAI.Completions
             await using var stream = await response.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream);
 
-            while (await reader.ReadLineAsync() is { } line)
+            while (await reader.ReadLineAsync() is { } streamData)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (line.StartsWith("data: "))
+                if (streamData.TryGetEventStreamData(out var eventData))
                 {
-                    line = line["data: ".Length..];
-                }
+                    if (string.IsNullOrWhiteSpace(eventData)) { continue; }
 
-                if (line == "[DONE]")
-                {
-                    return;
-                }
-
-                if (!string.IsNullOrWhiteSpace(line))
-                {
                     // Always raise event callbacks on main thread
                     await Awaiters.UnityMainThread;
-                    resultHandler(response.DeserializeResponse<CompletionResult>(line.Trim(), Api.JsonSerializationOptions));
+                    resultHandler(response.DeserializeResponse<CompletionResult>(eventData, Api.JsonSerializationOptions));
+                }
+                else
+                {
+                    break;
                 }
             }
         }
@@ -327,23 +323,18 @@ namespace OpenAI.Completions
             await using var stream = await response.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream);
 
-            while (await reader.ReadLineAsync() is { } line)
+            while (await reader.ReadLineAsync() is { } streamData)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if (line.StartsWith("data: "))
+                if (streamData.TryGetEventStreamData(out var eventData))
                 {
-                    line = line["data: ".Length..];
+                    if (string.IsNullOrWhiteSpace(eventData)) { continue; }
+                    yield return response.DeserializeResponse<CompletionResult>(eventData, Api.JsonSerializationOptions);
                 }
-
-                if (line == "[DONE]")
+                else
                 {
-                    yield break;
-                }
-
-                if (!string.IsNullOrWhiteSpace(line))
-                {
-                    yield return response.DeserializeResponse<CompletionResult>(line.Trim(), Api.JsonSerializationOptions);
+                    break;
                 }
             }
         }
