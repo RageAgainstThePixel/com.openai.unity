@@ -7,9 +7,6 @@ namespace OpenAI.Extensions
 {
     internal static class StringExtensions
     {
-        public const string StreamData = "data: ";
-        public const string StreamDone = "[DONE]";
-
         /// <summary>
         /// Attempts to get the event data from the string data.
         /// Returns false once the stream is done.
@@ -19,14 +16,16 @@ namespace OpenAI.Extensions
         /// <returns>True, if the stream is not done. False if stream is done.</returns>
         public static bool TryGetEventStreamData(this string streamData, out string eventData)
         {
+            const string dataTag = "data: ";
             eventData = string.Empty;
 
-            if (streamData.StartsWith(StreamData))
+            if (streamData.StartsWith(dataTag))
             {
-                eventData = streamData[StreamData.Length..].Trim();
+                eventData = streamData[dataTag.Length..].Trim();
             }
 
-            return eventData != StreamDone;
+            const string doneTag = "[DONE]";
+            return eventData != doneTag;
         }
 
         public static StringContent ToJsonStringContent(this string json)
