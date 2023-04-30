@@ -407,20 +407,36 @@ namespace OpenAI.Editor.FineTuning
                 return;
             }
 
-            await openAI.FineTuningEndpoint.StreamFineTuneEventsAsync(dataSet.FineTuneJob, async _ =>
+            try
             {
-                dataSet.FineTuneJob = await openAI.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(dataSet.FineTuneJob);
-
-                if (fineTuneJobs.TryGetValue(dataSet.FineTuneJob.Id, out var job))
+                await openAI.FineTuningEndpoint.StreamFineTuneEventsAsync(dataSet.FineTuneJob, async _ =>
                 {
-                    fineTuneJobs.TryUpdate(dataSet.FineTuneJob.Id, dataSet.FineTuneJob, job);
-                }
+                    dataSet.FineTuneJob = await openAI.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(dataSet.FineTuneJob);
 
-                if (dataSet.FineTuneJob.Status.Equals("succeeded"))
+                    if (fineTuneJobs.TryGetValue(dataSet.FineTuneJob.Id, out var job))
+                    {
+                        fineTuneJobs.TryUpdate(dataSet.FineTuneJob.Id, dataSet.FineTuneJob, job);
+                    }
+
+                    if (dataSet.FineTuneJob.Status.Equals("succeeded"))
+                    {
+                        FetchAllModels();
+                    }
+                });
+            }
+            catch (Exception e)
+            {
+                switch (e)
                 {
-                    FetchAllModels();
+                    case TaskCanceledException:
+                    case OperationCanceledException:
+                        // Ignored
+                        break;
+                    default:
+                        Debug.LogError(e);
+                        break;
                 }
-            });
+            }
         }
 
         private static void RenderJobStatus(SerializedObject serializedObject)
