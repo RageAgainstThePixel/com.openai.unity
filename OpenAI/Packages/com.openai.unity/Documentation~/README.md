@@ -386,7 +386,7 @@ var messages = new List<Message>
 };
 var chatRequest = new ChatRequest(messages, Model.GPT3_5_Turbo);
 var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
-Debug.Log(result.FirstChoice);
+Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content}");
 ```
 
 ##### [Chat Streaming](https://platform.openai.com/docs/api-reference/chat/create#chat/create-stream)
@@ -400,10 +400,20 @@ var messages = new List<Message>
     new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
     new Message(Role.User, "Where was it played?"),
 };
-var chatRequest = new ChatRequest(messages);
+var chatRequest = new ChatRequest(messages, Model.GPT3_5_Turbo, number: 2);
 await api.ChatEndpoint.StreamCompletionAsync(chatRequest, result =>
 {
-    Debug.Log(result.FirstChoice);
+    foreach (var choice in result.Choices.Where(choice => choice.Delta?.Content != null))
+    {
+        // Partial response content
+        Debug.Log(choice.Delta.Content);
+    }
+
+    foreach (var choice in result.Choices.Where(choice => choice.Message?.Content != null))
+    {
+        // Completed response content
+        Debug.Log($"{choice.Message.Role}: {choice.Message.Content}");
+    }
 });
 ```
 
@@ -418,10 +428,20 @@ var messages = new List<Message>
     new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
     new Message(Role.User, "Where was it played?"),
 };
-var chatRequest = new ChatRequest(messages);
+var chatRequest = new ChatRequest(messages, Model.GPT4); // gpt4 access required
 await foreach (var result in api.ChatEndpoint.StreamCompletionEnumerableAsync(chatRequest))
 {
-    Debug.Log(result.FirstChoice);
+    foreach (var choice in result.Choices.Where(choice => choice.Delta?.Content != null))
+    {
+        // Partial response content
+        Debug.Log(choice.Delta.Content);
+    }
+
+    foreach (var choice in result.Choices.Where(choice => choice.Message?.Content != null))
+    {
+        // Completed response content
+        Debug.Log($"{choice.Message.Role}: {choice.Message.Content}");
+    }
 }
 ```
 

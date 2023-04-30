@@ -24,12 +24,18 @@ namespace OpenAI.Tests
                 new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
                 new Message(Role.User, "Where was it played?"),
             };
-            var chatRequest = new ChatRequest(messages, Model.GPT3_5_Turbo);
+            var choiceCount = 2;
+            var chatRequest = new ChatRequest(messages, Model.GPT3_5_Turbo, number: choiceCount);
             var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(result);
             Assert.NotNull(result.Choices);
             Assert.NotZero(result.Choices.Count);
-            Debug.Log(result.FirstChoice);
+            Assert.IsTrue(result.Choices.Count == choiceCount);
+
+            foreach (var choice in result.Choices)
+            {
+                Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message.Content}");
+            }
         }
 
         [Test]
