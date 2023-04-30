@@ -12,7 +12,7 @@ namespace OpenAI.Completions
         public LogProbabilities(
             IReadOnlyList<string> tokens,
             IReadOnlyList<double> tokenLogProbabilities,
-            IList<IDictionary<string, double>> topLogProbabilities,
+            IReadOnlyList<IReadOnlyDictionary<string, double>> topLogProbabilities,
             IReadOnlyList<int> textOffsets)
         {
             Tokens = tokens;
@@ -28,7 +28,7 @@ namespace OpenAI.Completions
         public IReadOnlyList<double> TokenLogProbabilities { get; }
 
         [JsonProperty("top_logprobs")]
-        public IList<IDictionary<string, double>> TopLogProbabilities { get; }
+        public IReadOnlyList<IReadOnlyDictionary<string, double>> TopLogProbabilities { get; }
 
         [JsonProperty("text_offset")]
         public IReadOnlyList<int> TextOffsets { get; }
