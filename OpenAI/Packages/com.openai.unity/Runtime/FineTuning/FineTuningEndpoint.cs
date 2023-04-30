@@ -127,8 +127,8 @@ namespace OpenAI.FineTuning
             await using var stream = await response.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream);
 
-            while (await reader.ReadLineAsync() is { } streamData &&
-                   !cancellationToken.IsCancellationRequested)
+            while (!cancellationToken.IsCancellationRequested &&
+                   await reader.ReadLineAsync() is { } streamData)
             {
                 if (streamData.TryGetEventStreamData(out var eventData))
                 {
@@ -147,15 +147,15 @@ namespace OpenAI.FineTuning
 
             if (cancellationToken.IsCancellationRequested && cancelJob)
             {
-                var result = await CancelFineTuneJobAsync(jobId);
+                var isCancelled = await CancelFineTuneJobAsync(jobId);
 
-                if (!result)
+                if (!isCancelled)
                 {
                     throw new Exception($"Failed to cancel {jobId}");
                 }
-
-                throw new TaskCanceledException();
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
         /// <summary>
@@ -173,8 +173,8 @@ namespace OpenAI.FineTuning
             await using var stream = await response.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream);
 
-            while (await reader.ReadLineAsync() is { } streamData &&
-                   !cancellationToken.IsCancellationRequested)
+            while (!cancellationToken.IsCancellationRequested &&
+                   await reader.ReadLineAsync() is { } streamData)
             {
                 if (streamData.TryGetEventStreamData(out var eventData))
                 {
@@ -191,15 +191,15 @@ namespace OpenAI.FineTuning
 
             if (cancellationToken.IsCancellationRequested && cancelJob)
             {
-                var result = await CancelFineTuneJobAsync(jobId);
+                var isCancelled = await CancelFineTuneJobAsync(jobId);
 
-                if (!result)
+                if (!isCancelled)
                 {
                     throw new Exception($"Failed to cancel {jobId}");
                 }
-
-                throw new TaskCanceledException();
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
         }
     }
 }
