@@ -636,7 +636,7 @@ Downloads the specified file.
 
 ```csharp
 var api = new OpenAIClient();
-var downloadedFilePath = await api.FilesEndpoint.DownloadFileAsync(fileId, "path/to/your/save/directory");
+var downloadedFilePath = await api.FilesEndpoint.DownloadFileAsync(fileId);
 Debug.Log(downloadedFilePath);
 Assert.IsTrue(File.Exists(downloadedFilePath));
 ```
