@@ -10,7 +10,7 @@ namespace OpenAI.FineTuning
     /// To fine-tune a model, you'll need a set of training examples that each consist of a single input
     /// ("prompt") and its associated output ("completion"). This is notably different from using our base models,
     /// where you might input detailed instructions or multiple examples in a single prompt.
-    /// <see href="https://beta.openai.com/docs/guides/fine-tuning/specific-guidelines"/>
+    /// <see href="https://platform.openaienai.com/docs/guides/fine-tuning/specific-guidelines"/>
     /// </summary>
     [Serializable]
     public sealed class FineTuningTrainingData

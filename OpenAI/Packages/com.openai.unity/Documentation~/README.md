@@ -277,9 +277,9 @@ public partial class Program
 
 Once you have set up your proxy server, your end users can now make authenticated requests to your proxy api instead of directly to the OpenAI API. The proxy server will handle authentication and forward requests to the OpenAI API, ensuring that your API keys and other sensitive information remain secure.
 
-### [Models](https://beta.openai.com/docs/api-reference/models)
+### [Models](https://platform.openaienai.com/docs/api-reference/models)
 
-List and describe the various models available in the API. You can refer to the [Models documentation](https://beta.openai.com/docs/models) to understand what models are available and the differences between them.
+List and describe the various models available in the API. You can refer to the [Models documentation](https://platform.openaienai.com/docs/models) to understand what models are available and the differences between them.
 
 Also checkout [model endpoint compatibility](https://platform.openai.com/docs/models/model-endpoint-compatibility) to understand which models work with which endpoints.
 
@@ -291,7 +291,7 @@ var model = new Model("model-id");
 
 The Models API is accessed via `OpenAIClient.ModelsEndpoint`
 
-#### [List models](https://beta.openai.com/docs/api-reference/models/list)
+#### [List models](https://platform.openaienai.com/docs/api-reference/models/list)
 
 Lists the currently available models, and provides basic information about each one such as the owner and availability.
 
@@ -305,7 +305,7 @@ foreach (var model in models)
 }
 ```
 
-#### [Retrieve model](https://beta.openai.com/docs/api-reference/models/retrieve)
+#### [Retrieve model](https://platform.openaienai.com/docs/api-reference/models/retrieve)
 
 Retrieves a model instance, providing basic information about the model such as the owner and permissions.
 
@@ -315,7 +315,7 @@ var model = await api.ModelsEndpoint.GetModelDetailsAsync("text-davinci-003");
 Debug.Log(model.ToString());
 ```
 
-#### [Delete Fine Tuned Model](https://beta.openai.com/docs/api-reference/fine-tunes/delete-model)
+#### [Delete Fine Tuned Model](https://platform.openaienai.com/docs/api-reference/fine-tunes/delete-model)
 
 Delete a fine-tuned model. You must have the Owner role in your organization.
 
@@ -325,7 +325,7 @@ var result = await api.ModelsEndpoint.DeleteFineTuneModelAsync("your-fine-tuned-
 Assert.IsTrue(result);
 ```
 
-### [Completions](https://beta.openai.com/docs/api-reference/completions)
+### [Completions](https://platform.openaienai.com/docs/api-reference/completions)
 
 Given a prompt, the model will return one or more predicted completions, and can also return the probabilities of alternative tokens at each position.
 
@@ -445,13 +445,13 @@ await foreach (var result in api.ChatEndpoint.StreamCompletionEnumerableAsync(ch
 }
 ```
 
-### [Edits](https://beta.openai.com/docs/api-reference/edits)
+### [Edits](https://platform.openaienai.com/docs/api-reference/edits)
 
 Given a prompt and an instruction, the model will return an edited version of the prompt.
 
 The Edits API is accessed via `OpenAIClient.EditsEndpoint`
 
-#### [Create Edit](https://beta.openai.com/docs/api-reference/edits/create)
+#### [Create Edit](https://platform.openaienai.com/docs/api-reference/edits/create)
 
 Creates a new edit for the provided input, instruction, and parameters using the provided input and instruction.
 
@@ -462,15 +462,15 @@ var result = await api.EditsEndpoint.CreateEditAsync(request);
 Debug.Log(result);
 ```
 
-### [Embeddings](https://beta.openai.com/docs/api-reference/embeddings)
+### [Embeddings](https://platform.openaienai.com/docs/api-reference/embeddings)
 
 Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.
 
-Related guide: [Embeddings](https://beta.openai.com/docs/guides/embeddings)
+Related guide: [Embeddings](https://platform.openaienai.com/docs/guides/embeddings)
 
 The Edits API is accessed via `OpenAIClient.EmbeddingsEndpoint`
 
-#### [Create Embeddings](https://beta.openai.com/docs/api-reference/embeddings/create)
+#### [Create Embeddings](https://platform.openaienai.com/docs/api-reference/embeddings/create)
 
 Creates an embedding vector representing the input text.
 
@@ -480,7 +480,7 @@ var result = await api.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was del
 Debug.Log(result);
 ```
 
-### [Audio](https://beta.openai.com/docs/api-reference/audio)
+### [Audio](https://platform.openaienai.com/docs/api-reference/audio)
 
 Converts audio into text.
 
@@ -508,13 +508,13 @@ var result = await api.AudioEndpoint.CreateTranslationAsync(request);
 Debug.Log(result);
 ```
 
-### [Images](https://beta.openai.com/docs/api-reference/images)
+### [Images](https://platform.openaienai.com/docs/api-reference/images)
 
 Given a prompt and/or an input image, the model will generate a new image.
 
 The Images API is accessed via `OpenAIClient.ImagesEndpoint`
 
-#### [Create Image](https://beta.openai.com/docs/api-reference/images/create)
+#### [Create Image](https://platform.openaienai.com/docs/api-reference/images/create)
 
 Creates an image given a prompt.
 
@@ -531,7 +531,7 @@ foreach (var (path, texture) in results)
 }
 ```
 
-#### [Edit Image](https://beta.openai.com/docs/api-reference/images/create-edit)
+#### [Edit Image](https://platform.openaienai.com/docs/api-reference/images/create-edit)
 
 Creates an edited or extended image given an original image and a prompt.
 
@@ -548,7 +548,7 @@ foreach (var (path, texture) in results)
 }
 ```
 
-#### [Create Image Variation](https://beta.openai.com/docs/api-reference/images/create-variation)
+#### [Create Image Variation](https://platform.openaienai.com/docs/api-reference/images/create-variation)
 
 Creates a variation of a given image.
 
@@ -580,13 +580,13 @@ foreach (var (path, texture) in results)
 }
 ```
 
-### [Files](https://beta.openai.com/docs/api-reference/files)
+### [Files](https://platform.openaienai.com/docs/api-reference/files)
 
 Files are used to upload documents that can be used with features like [Fine-tuning](#fine-tuning).
 
 The Files API is accessed via `OpenAIClient.FilesEndpoint`
 
-#### [List Files](https://beta.openai.com/docs/api-reference/files/list)
+#### [List Files](https://platform.openaienai.com/docs/api-reference/files/list)
 
 Returns a list of files that belong to the user's organization.
 
@@ -600,7 +600,7 @@ foreach (var file in files)
 }
 ```
 
-#### [Upload File](https://beta.openai.com/docs/api-reference/files/upload)
+#### [Upload File](https://platform.openaienai.com/docs/api-reference/files/upload)
 
 Upload a file that contains document(s) to be used across various endpoints/features. Currently, the size of all the files uploaded by one organization can be up to 1 GB. Please contact us if you need to increase the storage limit.
 
@@ -610,7 +610,7 @@ var fileData = await api.FilesEndpoint.UploadFileAsync("path/to/your/file.jsonl"
 Debug.Log(fileData.Id);
 ```
 
-#### [Delete File](https://beta.openai.com/docs/api-reference/files/delete)
+#### [Delete File](https://platform.openaienai.com/docs/api-reference/files/delete)
 
 Delete a file.
 
@@ -620,7 +620,7 @@ var result = await api.FilesEndpoint.DeleteFileAsync(fileData);
 Assert.IsTrue(result);
 ```
 
-#### [Retrieve File Info](https://beta.openai.com/docs/api-reference/files/retrieve)
+#### [Retrieve File Info](https://platform.openaienai.com/docs/api-reference/files/retrieve)
 
 Returns information about a specific file.
 
@@ -630,7 +630,7 @@ var fileData = await GetFileInfoAsync(fileId);
 Debug.Log($"{fileData.Id} -> {fileData.Object}: {fileData.FileName} | {fileData.Size} bytes");
 ```
 
-#### [Download File Content](https://beta.openai.com/docs/api-reference/files/retrieve-content)
+#### [Download File Content](https://platform.openaienai.com/docs/api-reference/files/retrieve-content)
 
 Downloads the specified file.
 
@@ -641,15 +641,15 @@ Debug.Log(downloadedFilePath);
 Assert.IsTrue(File.Exists(downloadedFilePath));
 ```
 
-### [Fine Tuning](https://beta.openai.com/docs/api-reference/fine-tunes)
+### [Fine Tuning](https://platform.openaienai.com/docs/api-reference/fine-tunes)
 
 Manage fine-tuning jobs to tailor a model to your specific training data.
 
-Related guide: [Fine-tune models](https://beta.openai.com/docs/guides/fine-tuning)
+Related guide: [Fine-tune models](https://platform.openaienai.com/docs/guides/fine-tuning)
 
 The Files API is accessed via `OpenAIClient.FineTuningEndpoint`
 
-#### [Create Fine Tune Job](https://beta.openai.com/docs/api-reference/fine-tunes/create)
+#### [Create Fine Tune Job](https://platform.openaienai.com/docs/api-reference/fine-tunes/create)
 
 Creates a job that fine-tunes a specified model from a given dataset.
 
@@ -662,7 +662,7 @@ var fineTuneJob = await api.FineTuningEndpoint.CreateFineTuneJobAsync(request);
 Debug.Log(fineTuneJob.Id);
 ```
 
-#### [List Fine Tune Jobs](https://beta.openai.com/docs/api-reference/fine-tunes/list)
+#### [List Fine Tune Jobs](https://platform.openaienai.com/docs/api-reference/fine-tunes/list)
 
 List your organization's fine-tuning jobs.
 
@@ -676,7 +676,7 @@ foreach (var job in fineTuneJobs)
 }
 ```
 
-#### [Retrieve Fine Tune Job Info](https://beta.openai.com/docs/api-reference/fine-tunes/retrieve)
+#### [Retrieve Fine Tune Job Info](https://platform.openaienai.com/docs/api-reference/fine-tunes/retrieve)
 
 Gets info about the fine-tune job.
 
@@ -686,7 +686,7 @@ var result = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(fineTuneJ
 Debug.Log($"{result.Id} -> {result.Status}");
 ```
 
-#### [Cancel Fine Tune Job](https://beta.openai.com/docs/api-reference/fine-tunes/cancel)
+#### [Cancel Fine Tune Job](https://platform.openaienai.com/docs/api-reference/fine-tunes/cancel)
 
 Immediately cancel a fine-tune job.
 
@@ -696,7 +696,7 @@ var result = await api.FineTuningEndpoint.CancelFineTuneJobAsync(fineTuneJob);
 Assert.IsTrue(result);
 ```
 
-#### [List Fine Tune Events](https://beta.openai.com/docs/api-reference/fine-tunes/events)
+#### [List Fine Tune Events](https://platform.openaienai.com/docs/api-reference/fine-tunes/events)
 
 Get fine-grained status updates for a fine-tune job.
 
@@ -706,7 +706,7 @@ var fineTuneEvents = await api.FineTuningEndpoint.ListFineTuneEventsAsync(fineTu
 Debug.Log($"{fineTuneJob.Id} -> status: {fineTuneJob.Status} | event count: {fineTuneEvents.Count}");
 ```
 
-#### [Stream Fine Tune Events](https://beta.openai.com/docs/api-reference/fine-tunes/events#fine-tunes/events-stream)
+#### [Stream Fine Tune Events](https://platform.openaienai.com/docs/api-reference/fine-tunes/events#fine-tunes/events-stream)
 
 ```csharp
 var api = new OpenAIClient();
@@ -726,15 +726,15 @@ await foreach (var fineTuneEvent in api.FineTuningEndpoint.StreamFineTuneEventsE
 }
 ```
 
-### [Moderations](https://beta.openai.com/docs/api-reference/moderations)
+### [Moderations](https://platform.openaienai.com/docs/api-reference/moderations)
 
 Given a input text, outputs if the model classifies it as violating OpenAI's content policy.
 
-Related guide: [Moderations](https://beta.openai.com/docs/guides/moderation)
+Related guide: [Moderations](https://platform.openaienai.com/docs/guides/moderation)
 
 The Moderations API can be accessed via `OpenAIClient.ModerationsEndpoint`
 
-#### [Create Moderation](https://beta.openai.com/docs/api-reference/moderations/create)
+#### [Create Moderation](https://platform.openaienai.com/docs/api-reference/moderations/create)
 
 Classifies if text violates OpenAI's Content Policy.
 
