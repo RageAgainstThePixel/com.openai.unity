@@ -10,7 +10,7 @@ namespace OpenAI.Completions
 {
     /// <summary>
     /// Represents a request to the <see cref="CompletionsEndpoint"/>.  Mostly matches the parameters in
-    /// <see href="https://platform.openaienai.com/docs/api-reference/completions">the OpenAI docs</see>,
+    /// <see href="https://platform.openai.com/docs/api-reference/completions">the OpenAI docs</see>,
     /// although some have been renames or expanded into single/multiple properties for ease of use.
     /// </summary>
     public sealed class CompletionRequest
