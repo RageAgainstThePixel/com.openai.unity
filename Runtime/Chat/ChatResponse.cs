@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenAI.Chat
 {
@@ -25,27 +26,27 @@ namespace OpenAI.Chat
         }
 
         [JsonProperty("id")]
-        public string Id { get; }
+        public string Id { get; internal set; }
 
         [JsonProperty("object")]
-        public string Object { get; }
+        public string Object { get; internal set; }
 
         [JsonProperty("created")]
-        public int Created { get; }
+        public int Created { get; internal set; }
 
         [JsonProperty("model")]
-        public string Model { get; }
+        public string Model { get; internal set; }
 
         [JsonProperty("usage")]
-        public Usage Usage { get; }
+        public Usage Usage { get; internal set; }
 
         [JsonProperty("choices")]
         public IReadOnlyList<Choice> Choices { get; }
 
         [JsonIgnore]
-        public Choice FirstChoice => Choices[0];
+        public Choice FirstChoice => Choices?.FirstOrDefault(choice => choice.Index == 0);
 
-        public override string ToString() => FirstChoice.ToString();
+        public override string ToString() => FirstChoice?.ToString() ?? string.Empty;
 
         public static implicit operator string(ChatResponse response) => response.ToString();
     }

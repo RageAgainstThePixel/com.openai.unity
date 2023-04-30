@@ -141,7 +141,7 @@ namespace OpenAI
         /// <summary>
         /// List and describe the various models available in the API.
         /// You can refer to the Models documentation to understand which models are available for certain endpoints: <see href="https://platform.openai.com/docs/models/model-endpoint-compatibility"/>.<br/>
-        /// <see href="https://beta.openai.com/docs/api-reference/models"/>
+        /// <see href="https://platform.openai.com/docs/api-reference/models"/>
         /// </summary>
         public ModelsEndpoint ModelsEndpoint { get; }
 
@@ -151,7 +151,7 @@ namespace OpenAI
         /// a few written examples. This simple approach works for a wide range of use cases, including summarization,
         /// translation, grammar correction, question answering, chatbots, composing emails, and much more
         /// (see the prompt library for inspiration).<br/>
-        /// <see href="https://beta.openai.com/docs/api-reference/completions"/>
+        /// <see href="https://platform.openai.com/docs/api-reference/completions"/>
         /// </summary>
         public CompletionsEndpoint CompletionsEndpoint { get; }
 
@@ -163,7 +163,7 @@ namespace OpenAI
 
         /// <summary>
         /// Given a prompt and an instruction, the model will return an edited version of the prompt.<br/>
-        /// <see href="https://beta.openai.com/docs/api-reference/edits"/>
+        /// <see href="https://platform.openai.com/docs/api-reference/edits"/>
         /// </summary>
         public EditsEndpoint EditsEndpoint { get; }
 
@@ -175,7 +175,7 @@ namespace OpenAI
 
         /// <summary>
         /// Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.<br/>
-        /// <see href="https://beta.openai.com/docs/guides/embeddings"/>
+        /// <see href="https://platform.openai.com/docs/guides/embeddings"/>
         /// </summary>
         public EmbeddingsEndpoint EmbeddingsEndpoint { get; }
 
@@ -187,20 +187,20 @@ namespace OpenAI
 
         /// <summary>
         /// Files are used to upload documents that can be used with features like Fine-tuning.<br/>
-        /// <see href="https://beta.openai.com/docs/api-reference/fine-tunes"/>
+        /// <see href="https://platform.openai.com/docs/api-reference/fine-tunes"/>
         /// </summary>
         public FilesEndpoint FilesEndpoint { get; }
 
         /// <summary>
         /// Manage fine-tuning jobs to tailor a model to your specific training data.<br/>
-        /// <see href="https://beta.openai.com/docs/guides/fine-tuning"/>
+        /// <see href="https://platform.openai.com/docs/guides/fine-tuning"/>
         /// </summary>
         public FineTuningEndpoint FineTuningEndpoint { get; }
 
         /// <summary>
         /// The moderation endpoint is a tool you can use to check whether content complies with OpenAI's content policy.
         /// Developers can thus identify content that our content policy prohibits and take action, for instance by filtering it.<br/>
-        /// <see href="https://beta.openai.com/docs/api-reference/moderations"/>
+        /// <see href="https://platform.openai.com/docs/api-reference/moderations"/>
         /// </summary>
         public ModerationsEndpoint ModerationsEndpoint { get; }
     }
