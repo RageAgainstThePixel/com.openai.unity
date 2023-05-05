@@ -106,7 +106,13 @@ namespace OpenAI.Chat
                         finalChoices.Add(new Choice(new Message(Role.Assistant, partials[i].ToString()), null, "stop", i));
                     }
 
-                    var finalResponse = new ChatResponse(partialResponse.Id, partialResponse.Object, partialResponse.Created, partialResponse.Model, partialResponse.Usage, finalChoices);
+                    var finalResponse = new ChatResponse(
+                        partialResponse.Id,
+                        partialResponse.Object,
+                        partialResponse.Created,
+                        partialResponse.Model,
+                        partialResponse.Usage,
+                        finalChoices);
 
                     // Always raise event callbacks on main thread
                     await Awaiters.UnityMainThread;
@@ -181,7 +187,13 @@ namespace OpenAI.Chat
                         finalChoices.Add(new Choice(new Message(Role.Assistant, partials[i].ToString()), null, "stop", i));
                     }
 
-                    var finalResponse = new ChatResponse(partialResponse.Id, partialResponse.Object, partialResponse.Created, partialResponse.Model, partialResponse.Usage, finalChoices);
+                    var finalResponse = new ChatResponse(
+                        partialResponse.Id,
+                        partialResponse.Object,
+                        partialResponse.Created,
+                        partialResponse.Model,
+                        partialResponse.Usage,
+                        finalChoices);
                     yield return finalResponse;
                     yield break;
                 }

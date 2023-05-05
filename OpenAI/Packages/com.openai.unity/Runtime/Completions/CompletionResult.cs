@@ -3,6 +3,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenAI.Completions
 {
@@ -59,11 +60,11 @@ namespace OpenAI.Completions
         /// <summary>
         /// Gets the text of the first completion, representing the main result
         /// </summary>
-        public override string ToString()
+        public override string ToString() => Completions.Count switch
         {
-            return Completions is { Count: > 0 }
-                ? Completions[0]
-                : $"CompletionResult {Id} has no valid output";
-        }
+            0 => $"CompletionResult {Id} has no valid output",
+            1 => Completions[0].ToString(),
+            _ => Completions.FirstOrDefault(choice => choice.Index == 0)?.ToString()
+        };
     }
 }
