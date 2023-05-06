@@ -62,7 +62,7 @@ namespace OpenAI
 
             if (OpenAIAuthentication?.ApiKey is null)
             {
-                throw new AuthenticationException("You must provide API authentication.  Please refer to https://github.com/RageAgainstThePixel/OpenAI-DotNet#authentication for details.");
+                throw new AuthenticationException("You must provide API authentication.  Please refer to https://github.com/RageAgainstThePixel/com.openai.unity#authentication for details.");
             }
 
             Client = SetupClient();
@@ -93,10 +93,10 @@ namespace OpenAI
             client ??= new HttpClient();
             client.DefaultRequestHeaders.Add("User-Agent", "OpenAI-DotNet");
 
-            if (!OpenAIClientSettings.BaseRequestUrlFormat.Contains(OpenAIClientSettings.AzureOpenAIDomain)
-                && (string.IsNullOrWhiteSpace(OpenAIAuthentication.ApiKey) ||
-                    (!OpenAIAuthentication.ApiKey.Contains(AuthInfo.SecretKeyPrefix) &&
-                     !OpenAIAuthentication.ApiKey.Contains(AuthInfo.SessionKeyPrefix))))
+            if (!OpenAIClientSettings.BaseRequestUrlFormat.Contains(OpenAIClientSettings.AzureOpenAIDomain) &&
+                (string.IsNullOrWhiteSpace(OpenAIAuthentication.ApiKey) ||
+                (!OpenAIAuthentication.ApiKey.Contains(AuthInfo.SecretKeyPrefix) &&
+                !OpenAIAuthentication.ApiKey.Contains(AuthInfo.SessionKeyPrefix))))
             {
                 throw new InvalidCredentialException($"{OpenAIAuthentication.ApiKey} must start with '{AuthInfo.SecretKeyPrefix}'");
             }
