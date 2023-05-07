@@ -26,6 +26,6 @@ namespace OpenAI.Chat
         [JsonProperty("name")]
         public string Name { get; }
 
-        public override string ToString() => Content;
+        public override string ToString() => Content ?? string.Empty;
     }
 }
