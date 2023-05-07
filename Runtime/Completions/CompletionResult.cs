@@ -3,6 +3,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenAI.Completions
 {
@@ -56,14 +57,11 @@ namespace OpenAI.Completions
         [JsonProperty("choices")]
         public IReadOnlyList<Choice> Completions { get; }
 
-        /// <summary>
-        /// Gets the text of the first completion, representing the main result
-        /// </summary>
-        public override string ToString()
-        {
-            return Completions is { Count: > 0 }
-                ? Completions[0]
-                : $"CompletionResult {Id} has no valid output";
-        }
+        [JsonIgnore]
+        public Choice FirstChoice => Completions?.FirstOrDefault(choice => choice.Index == 0);
+
+        public override string ToString() => FirstChoice?.ToString() ?? string.Empty;
+
+        public static implicit operator string(CompletionResult response) => response.ToString();
     }
 }

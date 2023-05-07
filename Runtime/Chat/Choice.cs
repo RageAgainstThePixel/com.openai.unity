@@ -31,7 +31,7 @@ namespace OpenAI.Chat
         [JsonProperty("index")]
         public int Index { get; }
 
-        public override string ToString() => Message?.Content ?? Delta.Content;
+        public override string ToString() => Message?.Content ?? Delta?.Content ?? string.Empty;
 
         public static implicit operator string(Choice choice) => choice.ToString();
     }
