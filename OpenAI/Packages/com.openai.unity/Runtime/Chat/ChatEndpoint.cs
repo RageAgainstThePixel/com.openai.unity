@@ -88,7 +88,7 @@ namespace OpenAI.Chat
 
                     if (choice.Delta?.Content != null)
                     {
-                        partials[choice.Index].Append(choice.Delta.Content);
+                        partials[choice.Index].Append(choice.ToString());
                     }
 
                     // Always raise event callbacks on main thread
@@ -171,7 +171,7 @@ namespace OpenAI.Chat
 
                     if (choice.Delta?.Content != null)
                     {
-                        partials[choice.Index].Append(choice.Delta.Content);
+                        partials[choice.Index].Append(choice.ToString());
                     }
 
                     yield return partialResponse;
