@@ -10,7 +10,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine.Assertions;
 using Utilities.Async;
 
 namespace OpenAI.Chat
@@ -81,12 +80,7 @@ namespace OpenAI.Chat
 
                     partialResponse = response.DeserializeResponse<ChatResponse>(eventData, Api.JsonSerializationOptions);
 
-                    // it is assumed that one response contains at least
-                    // one single choice completion
-                    Assert.IsTrue(partialResponse.Choices.Count == 1);
-                    var choice = partialResponse.Choices[0];
-
-                    if (choice.Delta?.Content != null)
+                    foreach (var choice in partialResponse.Choices)
                     {
                         partials[choice.Index].Append(choice.ToString());
                     }
@@ -164,12 +158,7 @@ namespace OpenAI.Chat
 
                     partialResponse = response.DeserializeResponse<ChatResponse>(eventData, Api.JsonSerializationOptions);
 
-                    // it is assumed that one response contains at least
-                    // one single choice completion
-                    Assert.IsTrue(partialResponse.Choices.Count == 1);
-                    var choice = partialResponse.Choices[0];
-
-                    if (choice.Delta?.Content != null)
+                    foreach (var choice in partialResponse.Choices)
                     {
                         partials[choice.Index].Append(choice.ToString());
                     }
