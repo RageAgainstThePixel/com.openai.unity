@@ -44,8 +44,8 @@ namespace OpenAI.Embeddings
         /// Each input must not exceed 8192 tokens in length.
         /// </param>
         /// <param name="model">
-        /// The <see cref="OpenAI.Models.Model"/> to use.<br/>
-        /// Defaults to: <see cref="Models.Model.Embedding_Ada_002"/>
+        /// The <see cref="Models.Model"/> to use.<br/>
+        /// Defaults to: <see cref="Model.Embedding_Ada_002"/>
         /// </param>
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.

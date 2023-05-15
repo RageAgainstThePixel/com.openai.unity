@@ -20,27 +20,25 @@ namespace OpenAI.Editor
         private SerializedProperty useAzureActiveDirectory;
         private SerializedProperty apiVersion;
 
-        private static bool itemsUpdated;
+        private static bool triggerReload;
 
         #region Project Settings Window
 
         [SettingsProvider]
-        private static SettingsProvider Preferences()
-        {
-            return new SettingsProvider($"Project/{nameof(OpenAI)}", SettingsScope.Project, new[] { nameof(OpenAI) })
+        private static SettingsProvider Preferences() =>
+            new SettingsProvider($"Project/{nameof(OpenAI)}", SettingsScope.Project, new[] { nameof(OpenAI) })
             {
                 label = nameof(OpenAI),
                 guiHandler = OnPreferencesGui,
                 keywords = new[] { nameof(OpenAI) },
                 deactivateHandler = DeactivateHandler
             };
-        }
 
         private static void DeactivateHandler()
         {
-            if (itemsUpdated)
+            if (triggerReload)
             {
-                itemsUpdated = false;
+                triggerReload = false;
                 EditorUtility.RequestScriptReload();
             }
         }
@@ -85,9 +83,9 @@ namespace OpenAI.Editor
 
         private void OnDisable()
         {
-            if (itemsUpdated)
+            if (triggerReload)
             {
-                itemsUpdated = false;
+                triggerReload = false;
                 EditorUtility.RequestScriptReload();
             }
         }
@@ -104,10 +102,10 @@ namespace OpenAI.Editor
 
             if (EditorGUI.EndChangeCheck())
             {
-                itemsUpdated = true;
-                apiVersion.stringValue = useAzureOpenAI.boolValue ?
-                    OpenAIClientSettings.DefaultAzureApiVersion :
-                    OpenAIClientSettings.DefaultOpenAIApiVersion;
+                triggerReload = true;
+                apiVersion.stringValue = useAzureOpenAI.boolValue
+                    ? OpenAIClientSettings.DefaultAzureApiVersion
+                    : OpenAIClientSettings.DefaultOpenAIApiVersion;
             }
 
             EditorGUI.BeginChangeCheck();
@@ -159,7 +157,7 @@ namespace OpenAI.Editor
 
             if (EditorGUI.EndChangeCheck())
             {
-                itemsUpdated = true;
+                triggerReload = true;
             }
 
             EditorGUI.indentLevel--;
