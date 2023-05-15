@@ -197,9 +197,9 @@ namespace OpenAI.Editor.FineTuning
                 {
                     EditorGUI.indentLevel++;
 
-                    int modelIndex = -1;
+                    var modelIndex = -1;
 
-                    for (int i = 0; i < modelOptions.Length; i++)
+                    for (var i = 0; i < modelOptions.Length; i++)
                     {
                         if (modelOptions[i].text == baseModel.stringValue)
                         {
