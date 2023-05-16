@@ -22,12 +22,12 @@ namespace OpenAI.Tests
         [Test]
         public void Test_01_GetAuthFromEnv()
         {
-            var auth = (OpenAIAuthentication)new OpenAIAuthentication().LoadFromEnvironment();
+            var auth = OpenAIAuthentication.Default.LoadFromEnvironment();
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.Info.ApiKey);
             Assert.IsNotEmpty(auth.Info.ApiKey);
 
-            auth = (OpenAIAuthentication)new OpenAIAuthentication().LoadFromEnvironment();
+            auth = OpenAIAuthentication.Default.LoadFromEnvironment();
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.Info.ApiKey);
             Assert.IsNotEmpty(auth.Info.ApiKey);
@@ -38,7 +38,7 @@ namespace OpenAI.Tests
         [Test]
         public void Test_02_GetAuthFromFile()
         {
-            var auth = (OpenAIAuthentication)new OpenAIAuthentication().LoadFromPath(Path.GetFullPath(".openai"));
+            var auth = OpenAIAuthentication.Default.LoadFromPath(Path.GetFullPath(".openai"));
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.Info.ApiKey);
             Assert.AreEqual("sk-test12", auth.Info.ApiKey);
@@ -49,7 +49,7 @@ namespace OpenAI.Tests
         [Test]
         public void Test_03_GetAuthFromNonExistentFile()
         {
-            var auth = (OpenAIAuthentication)new OpenAIAuthentication().LoadFromDirectory(filename: "bad.config");
+            var auth = OpenAIAuthentication.Default.LoadFromDirectory(filename: "bad.config");
             Assert.IsNull(auth);
         }
 

@@ -7,7 +7,7 @@ using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI
 {
-    public class OpenAISettings : ISettings<OpenAISettingsInfo>
+    public sealed class OpenAISettings : ISettings<OpenAISettingsInfo>
     {
         /// <summary>
         /// Creates a new instance of <see cref="OpenAISettings"/> for use with OpenAI.

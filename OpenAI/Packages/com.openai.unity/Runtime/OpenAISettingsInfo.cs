@@ -5,7 +5,7 @@ using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI
 {
-    public class OpenAISettingsInfo : ISettingsInfo
+    public sealed class OpenAISettingsInfo : ISettingsInfo
     {
         internal const string OpenAIDomain = "api.openai.com";
         internal const string DefaultOpenAIApiVersion = "v1";

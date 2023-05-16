@@ -25,7 +25,11 @@ namespace OpenAI
         /// <param name="key">The API key to convert into a <see cref="OpenAIAuthentication"/>.</param>
         public static implicit operator OpenAIAuthentication(string key) => new OpenAIAuthentication(key);
 
-        private OpenAIAuthentication(OpenAIAuthInfo authInfo) => this.authInfo = authInfo;
+        /// <summary>
+        /// Instantiates a new Authentication object with the given <paramref name="authInfo"/>, which may be <see langword="null"/>.
+        /// </summary>
+        /// <param name="authInfo"></param>
+        public OpenAIAuthentication(OpenAIAuthInfo authInfo) => this.authInfo = authInfo;
 
         /// <summary>
         /// Instantiates a new Authentication object with the given <paramref name="apiKey"/>, which may be <see langword="null"/>.
