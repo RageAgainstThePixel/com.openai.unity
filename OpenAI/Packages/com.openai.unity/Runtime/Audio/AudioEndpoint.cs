@@ -1,11 +1,11 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using OpenAI.Extensions;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Utilities.Rest.Extensions;
 
 namespace OpenAI.Audio
 {
@@ -13,7 +13,7 @@ namespace OpenAI.Audio
     /// Transforms audio into text.<br/>
     /// <see href="https://platform.openai.com/docs/api-reference/audio"/>
     /// </summary>
-    public sealed class AudioEndpoint : BaseEndPoint
+    public sealed class AudioEndpoint : OpenAIBaseEndpoint
     {
         private class AudioResponse
         {
@@ -27,7 +27,7 @@ namespace OpenAI.Audio
         }
 
         /// <inheritdoc />
-        public AudioEndpoint(OpenAIClient api) : base(api) { }
+        public AudioEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
         protected override string Root => "audio";
@@ -66,7 +66,7 @@ namespace OpenAI.Audio
 
             request.Dispose();
 
-            var response = await Api.Client.PostAsync(GetUrl("/transcriptions"), content, cancellationToken);
+            var response = await client.Client.PostAsync(GetUrl("/transcriptions"), content, cancellationToken);
             var responseAsString = await response.ReadAsStringAsync();
 
             return responseFormat == AudioResponseFormat.Json
@@ -103,7 +103,7 @@ namespace OpenAI.Audio
 
             request.Dispose();
 
-            var response = await Api.Client.PostAsync(GetUrl("/translations"), content, cancellationToken);
+            var response = await client.Client.PostAsync(GetUrl("/translations"), content, cancellationToken);
             var responseAsString = await response.ReadAsStringAsync();
 
             return responseFormat == AudioResponseFormat.Json

@@ -5,6 +5,7 @@ using OpenAI.Extensions;
 using OpenAI.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Utilities.Rest.Extensions;
 
 namespace OpenAI.Embeddings
 {
@@ -12,10 +13,10 @@ namespace OpenAI.Embeddings
     /// Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.<br/>
     /// <see href="https://platform.openai.com/docs/guides/embeddings"/>
     /// </summary>
-    public sealed class EmbeddingsEndpoint : BaseEndPoint
+    public sealed class EmbeddingsEndpoint : OpenAIBaseEndpoint
     {
         /// <inheritdoc />
-        public EmbeddingsEndpoint(OpenAIClient api) : base(api) { }
+        public EmbeddingsEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
         protected override string Root => "embeddings";
@@ -64,10 +65,10 @@ namespace OpenAI.Embeddings
         /// <returns><see cref="EmbeddingsResponse"/></returns>
         public async Task<EmbeddingsResponse> CreateEmbeddingAsync(EmbeddingsRequest request)
         {
-            var jsonContent = JsonConvert.SerializeObject(request, Api.JsonSerializationOptions).ToJsonStringContent();
-            var response = await Api.Client.PostAsync(GetUrl(), jsonContent);
+            var jsonContent = JsonConvert.SerializeObject(request, client.JsonSerializationOptions).ToJsonStringContent();
+            var response = await client.Client.PostAsync(GetUrl(), jsonContent);
             var responseAsString = await response.ReadAsStringAsync();
-            return response.DeserializeResponse<EmbeddingsResponse>(responseAsString, Api.JsonSerializationOptions);
+            return response.DeserializeResponse<EmbeddingsResponse>(responseAsString, client.JsonSerializationOptions);
         }
     }
 }

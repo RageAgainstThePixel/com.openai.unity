@@ -8,8 +8,8 @@ using Object = UnityEngine.Object;
 
 namespace OpenAI.Editor
 {
-    [CustomEditor(typeof(OpenAIConfigurationSettings))]
-    internal class OpenAIConfigurationSettingsInspector : UnityEditor.Editor
+    [CustomEditor(typeof(OpenAIConfiguration))]
+    internal class OpenAIConfigurationInspector : UnityEditor.Editor
     {
         private SerializedProperty apiKey;
         private SerializedProperty organizationId;
@@ -104,8 +104,8 @@ namespace OpenAI.Editor
             {
                 triggerReload = true;
                 apiVersion.stringValue = useAzureOpenAI.boolValue
-                    ? OpenAIClientSettings.DefaultAzureApiVersion
-                    : OpenAIClientSettings.DefaultOpenAIApiVersion;
+                    ? OpenAISettingsInfo.DefaultAzureApiVersion
+                    : OpenAISettingsInfo.DefaultOpenAIApiVersion;
             }
 
             EditorGUI.BeginChangeCheck();
@@ -115,16 +115,16 @@ namespace OpenAI.Editor
             {
                 if (!useAzureOpenAI.boolValue)
                 {
-                    if (!apiKey.stringValue.StartsWith(AuthInfo.SecretKeyPrefix))
+                    if (!apiKey.stringValue.StartsWith(OpenAIAuthInfo.SecretKeyPrefix))
                     {
-                        EditorGUILayout.HelpBox($"{nameof(apiKey)} must start with '{AuthInfo.SecretKeyPrefix}' unless using Azure OpenAI", MessageType.Error);
+                        EditorGUILayout.HelpBox($"{nameof(apiKey)} must start with '{OpenAIAuthInfo.SecretKeyPrefix}' unless using Azure OpenAI", MessageType.Error);
                     }
                 }
                 else
                 {
-                    if (apiKey.stringValue.StartsWith(AuthInfo.SecretKeyPrefix))
+                    if (apiKey.stringValue.StartsWith(OpenAIAuthInfo.SecretKeyPrefix))
                     {
-                        EditorGUILayout.HelpBox($"{nameof(apiKey)} must not start with '{AuthInfo.SecretKeyPrefix}' when using Azure OpenAI", MessageType.Error);
+                        EditorGUILayout.HelpBox($"{nameof(apiKey)} must not start with '{OpenAIAuthInfo.SecretKeyPrefix}' when using Azure OpenAI", MessageType.Error);
                     }
                 }
             }
@@ -135,9 +135,9 @@ namespace OpenAI.Editor
 
                 if (!string.IsNullOrWhiteSpace(organizationId.stringValue))
                 {
-                    if (!organizationId.stringValue.StartsWith(AuthInfo.OrganizationPrefix))
+                    if (!organizationId.stringValue.StartsWith(OpenAIAuthInfo.OrganizationPrefix))
                     {
-                        EditorGUILayout.HelpBox($"{nameof(organizationId)} must start with '{AuthInfo.OrganizationPrefix}'", MessageType.Error);
+                        EditorGUILayout.HelpBox($"{nameof(organizationId)} must start with '{OpenAIAuthInfo.OrganizationPrefix}'", MessageType.Error);
                     }
                 }
 
@@ -166,10 +166,10 @@ namespace OpenAI.Editor
 
         #endregion Inspector Window
 
-        private static OpenAIConfigurationSettings GetOrCreateInstance(Object target = null)
+        internal static OpenAIConfiguration GetOrCreateInstance(Object target = null)
         {
             var update = false;
-            OpenAIConfigurationSettings instance;
+            OpenAIConfiguration instance;
 
             if (!Directory.Exists("Assets/Resources"))
             {
@@ -179,7 +179,7 @@ namespace OpenAI.Editor
 
             if (target != null)
             {
-                instance = target as OpenAIConfigurationSettings;
+                instance = target as OpenAIConfiguration;
 
                 var currentPath = AssetDatabase.GetAssetPath(instance);
 
@@ -200,9 +200,9 @@ namespace OpenAI.Editor
                     else
                     {
                         AssetDatabase.DeleteAsset(currentPath);
-                        var instances = AssetDatabase.FindAssets($"t:{nameof(OpenAIConfigurationSettings)}");
+                        var instances = AssetDatabase.FindAssets($"t:{nameof(OpenAIConfiguration)}");
                         var path = AssetDatabase.GUIDToAssetPath(instances[0]);
-                        instance = AssetDatabase.LoadAssetAtPath<OpenAIConfigurationSettings>(path);
+                        instance = AssetDatabase.LoadAssetAtPath<OpenAIConfiguration>(path);
                     }
 
                     update = true;
@@ -210,17 +210,17 @@ namespace OpenAI.Editor
             }
             else
             {
-                var instances = AssetDatabase.FindAssets($"t:{nameof(OpenAIConfigurationSettings)}");
+                var instances = AssetDatabase.FindAssets($"t:{nameof(OpenAIConfiguration)}");
 
                 if (instances.Length > 0)
                 {
                     var path = AssetDatabase.GUIDToAssetPath(instances[0]);
-                    instance = AssetDatabase.LoadAssetAtPath<OpenAIConfigurationSettings>(path);
+                    instance = AssetDatabase.LoadAssetAtPath<OpenAIConfiguration>(path);
                 }
                 else
                 {
-                    instance = CreateInstance<OpenAIConfigurationSettings>();
-                    AssetDatabase.CreateAsset(instance, $"Assets/Resources/{nameof(OpenAIConfigurationSettings)}.asset");
+                    instance = CreateInstance<OpenAIConfiguration>();
+                    AssetDatabase.CreateAsset(instance, $"Assets/Resources/{nameof(OpenAIConfiguration)}.asset");
                     update = true;
                 }
             }

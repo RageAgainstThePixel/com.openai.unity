@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Utilities.Async;
+using Utilities.Rest.Extensions;
 
 namespace OpenAI.Completions
 {
@@ -22,10 +23,10 @@ namespace OpenAI.Completions
     /// (see the prompt library for inspiration).<br/>
     /// <see href="https://platform.openai.com/docs/api-reference/completions"/>
     /// </summary>
-    public sealed class CompletionsEndpoint : BaseEndPoint
+    public sealed class CompletionsEndpoint : OpenAIBaseEndpoint
     {
         /// <inheritdoc />
-        internal CompletionsEndpoint(OpenAIClient api) : base(api) { }
+        internal CompletionsEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
         protected override string Root => "completions";
@@ -110,10 +111,10 @@ namespace OpenAI.Completions
         public async Task<CompletionResult> CreateCompletionAsync(CompletionRequest completionRequest, CancellationToken cancellationToken = default)
         {
             completionRequest.Stream = false;
-            var jsonContent = JsonConvert.SerializeObject(completionRequest, Api.JsonSerializationOptions).ToJsonStringContent();
-            var response = await Api.Client.PostAsync(GetUrl(), jsonContent, cancellationToken);
+            var jsonContent = JsonConvert.SerializeObject(completionRequest, client.JsonSerializationOptions).ToJsonStringContent();
+            var response = await client.Client.PostAsync(GetUrl(), jsonContent, cancellationToken);
             var responseAsString = await response.ReadAsStringAsync();
-            return response.DeserializeResponse<CompletionResult>(responseAsString, Api.JsonSerializationOptions);
+            return response.DeserializeResponse<CompletionResult>(responseAsString, client.JsonSerializationOptions);
         }
 
         #endregion Non-Streaming
@@ -201,12 +202,12 @@ namespace OpenAI.Completions
         public async Task StreamCompletionAsync(CompletionRequest completionRequest, Action<CompletionResult> resultHandler, CancellationToken cancellationToken = default)
         {
             completionRequest.Stream = true;
-            var jsonContent = JsonConvert.SerializeObject(completionRequest, Api.JsonSerializationOptions).ToJsonStringContent();
+            var jsonContent = JsonConvert.SerializeObject(completionRequest, client.JsonSerializationOptions).ToJsonStringContent();
             using var request = new HttpRequestMessage(HttpMethod.Post, GetUrl())
             {
                 Content = jsonContent
             };
-            var response = await Api.Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            var response = await client.Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             await response.CheckResponseAsync();
             await using var stream = await response.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream);
@@ -221,7 +222,7 @@ namespace OpenAI.Completions
 
                     // Always raise event callbacks on main thread
                     await Awaiters.UnityMainThread;
-                    resultHandler(response.DeserializeResponse<CompletionResult>(eventData, Api.JsonSerializationOptions));
+                    resultHandler(response.DeserializeResponse<CompletionResult>(eventData, client.JsonSerializationOptions));
                 }
                 else
                 {
@@ -313,12 +314,12 @@ namespace OpenAI.Completions
         public async IAsyncEnumerable<CompletionResult> StreamCompletionEnumerableAsync(CompletionRequest completionRequest, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             completionRequest.Stream = true;
-            var jsonContent = JsonConvert.SerializeObject(completionRequest, Api.JsonSerializationOptions).ToJsonStringContent();
+            var jsonContent = JsonConvert.SerializeObject(completionRequest, client.JsonSerializationOptions).ToJsonStringContent();
             using var request = new HttpRequestMessage(HttpMethod.Post, GetUrl())
             {
                 Content = jsonContent
             };
-            var response = await Api.Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            var response = await client.Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             await response.CheckResponseAsync();
             await using var stream = await response.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream);
@@ -330,7 +331,7 @@ namespace OpenAI.Completions
                 if (streamData.TryGetEventStreamData(out var eventData))
                 {
                     if (string.IsNullOrWhiteSpace(eventData)) { continue; }
-                    yield return response.DeserializeResponse<CompletionResult>(eventData, Api.JsonSerializationOptions);
+                    yield return response.DeserializeResponse<CompletionResult>(eventData, client.JsonSerializationOptions);
                 }
                 else
                 {

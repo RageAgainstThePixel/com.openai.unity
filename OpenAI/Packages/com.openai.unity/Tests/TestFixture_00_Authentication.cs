@@ -14,7 +14,7 @@ namespace OpenAI.Tests
         [SetUp]
         public void Setup()
         {
-            var authJson = new AuthInfo("sk-test12", "org-testOrg");
+            var authJson = new OpenAIAuthInfo("sk-test12", "org-testOrg");
             var authText = JsonUtility.ToJson(authJson, true);
             File.WriteAllText(".openai", authText);
         }
@@ -22,41 +22,41 @@ namespace OpenAI.Tests
         [Test]
         public void Test_01_GetAuthFromEnv()
         {
-            var auth = OpenAIAuthentication.LoadFromEnv();
+            var auth = (OpenAIAuthentication)new OpenAIAuthentication().LoadFromEnvironment();
             Assert.IsNotNull(auth);
-            Assert.IsNotNull(auth.ApiKey);
-            Assert.IsNotEmpty(auth.ApiKey);
+            Assert.IsNotNull(auth.Info.ApiKey);
+            Assert.IsNotEmpty(auth.Info.ApiKey);
 
-            auth = OpenAIAuthentication.LoadFromEnv("org-testOrg");
+            auth = (OpenAIAuthentication)new OpenAIAuthentication().LoadFromEnvironment();
             Assert.IsNotNull(auth);
-            Assert.IsNotNull(auth.ApiKey);
-            Assert.IsNotEmpty(auth.ApiKey);
-            Assert.IsNotNull(auth.OrganizationId);
-            Assert.IsNotEmpty(auth.OrganizationId);
+            Assert.IsNotNull(auth.Info.ApiKey);
+            Assert.IsNotEmpty(auth.Info.ApiKey);
+            Assert.IsNotNull(auth.Info.OrganizationId);
+            Assert.IsNotEmpty(auth.Info.OrganizationId);
         }
 
         [Test]
         public void Test_02_GetAuthFromFile()
         {
-            var auth = OpenAIAuthentication.LoadFromPath(Path.GetFullPath(".openai"));
+            var auth = (OpenAIAuthentication)new OpenAIAuthentication().LoadFromPath(Path.GetFullPath(".openai"));
             Assert.IsNotNull(auth);
-            Assert.IsNotNull(auth.ApiKey);
-            Assert.AreEqual("sk-test12", auth.ApiKey);
-            Assert.IsNotNull(auth.OrganizationId);
-            Assert.AreEqual("org-testOrg", auth.OrganizationId);
+            Assert.IsNotNull(auth.Info.ApiKey);
+            Assert.AreEqual("sk-test12", auth.Info.ApiKey);
+            Assert.IsNotNull(auth.Info.OrganizationId);
+            Assert.AreEqual("org-testOrg", auth.Info.OrganizationId);
         }
 
         [Test]
         public void Test_03_GetAuthFromNonExistentFile()
         {
-            var auth = OpenAIAuthentication.LoadFromDirectory(filename: "bad.config");
+            var auth = (OpenAIAuthentication)new OpenAIAuthentication().LoadFromDirectory(filename: "bad.config");
             Assert.IsNull(auth);
         }
 
         [Test]
         public void Test_04_GetAuthFromConfiguration()
         {
-            var config = ScriptableObject.CreateInstance<OpenAIConfigurationSettings>();
+            var config = ScriptableObject.CreateInstance<OpenAIConfiguration>();
             config.apiKey = "sk-test12";
             config.organizationId = "org-testOrg";
             var cleanup = false;
@@ -73,12 +73,12 @@ namespace OpenAI.Tests
             var auth = OpenAIAuthentication.Default;
 
             Assert.IsNotNull(auth);
-            Assert.IsNotNull(auth.ApiKey);
-            Assert.IsNotEmpty(auth.ApiKey);
-            Assert.AreEqual(auth.ApiKey, config.ApiKey);
-            Assert.IsNotNull(auth.OrganizationId);
-            Assert.IsNotEmpty(auth.OrganizationId);
-            Assert.AreEqual(auth.OrganizationId, config.OrganizationId);
+            Assert.IsNotNull(auth.Info.ApiKey);
+            Assert.IsNotEmpty(auth.Info.ApiKey);
+            Assert.AreEqual(auth.Info.ApiKey, config.ApiKey);
+            Assert.IsNotNull(auth.Info.OrganizationId);
+            Assert.IsNotEmpty(auth.Info.OrganizationId);
+            Assert.AreEqual(auth.Info.OrganizationId, config.OrganizationId);
             AssetDatabase.DeleteAsset(configPath);
 
             if (cleanup)
@@ -92,22 +92,19 @@ namespace OpenAI.Tests
         {
             var defaultAuth = OpenAIAuthentication.Default;
             var manualAuth = new OpenAIAuthentication("sk-testAA", "org-testAA");
-            var api = new OpenAIClient();
-            var shouldBeDefaultAuth = api.OpenAIAuthentication;
-            Assert.IsNotNull(shouldBeDefaultAuth);
-            Assert.IsNotNull(shouldBeDefaultAuth.ApiKey);
-            Assert.IsNotNull(shouldBeDefaultAuth.OrganizationId);
-            Assert.AreEqual(defaultAuth.ApiKey, shouldBeDefaultAuth.ApiKey);
-            Assert.AreEqual(defaultAuth.OrganizationId, shouldBeDefaultAuth.OrganizationId);
+
+            Assert.IsNotNull(defaultAuth);
+            Assert.IsNotNull(defaultAuth.Info.ApiKey);
+            Assert.IsNotNull(defaultAuth.Info.OrganizationId);
+            Assert.AreEqual(defaultAuth.Info.ApiKey, OpenAIAuthentication.Default.Info.ApiKey);
+            Assert.AreEqual(defaultAuth.Info.OrganizationId, OpenAIAuthentication.Default.Info.OrganizationId);
 
             OpenAIAuthentication.Default = new OpenAIAuthentication("sk-testAA", "org-testAA");
-            api = new OpenAIClient();
-            var shouldBeManualAuth = api.OpenAIAuthentication;
-            Assert.IsNotNull(shouldBeManualAuth);
-            Assert.IsNotNull(shouldBeManualAuth.ApiKey);
-            Assert.IsNotNull(shouldBeManualAuth.OrganizationId);
-            Assert.AreEqual(manualAuth.ApiKey, shouldBeManualAuth.ApiKey);
-            Assert.AreEqual(manualAuth.OrganizationId, shouldBeManualAuth.OrganizationId);
+            Assert.IsNotNull(manualAuth);
+            Assert.IsNotNull(manualAuth.Info.ApiKey);
+            Assert.IsNotNull(manualAuth.Info.OrganizationId);
+            Assert.AreEqual(manualAuth.Info.ApiKey, OpenAIAuthentication.Default.Info.ApiKey);
+            Assert.AreEqual(manualAuth.Info.OrganizationId, OpenAIAuthentication.Default.Info.OrganizationId);
 
             OpenAIAuthentication.Default = defaultAuth;
         }
@@ -116,8 +113,8 @@ namespace OpenAI.Tests
         public void Test_06_GetKey()
         {
             var auth = new OpenAIAuthentication("sk-testAA");
-            Assert.IsNotNull(auth.ApiKey);
-            Assert.AreEqual("sk-testAA", auth.ApiKey);
+            Assert.IsNotNull(auth.Info.ApiKey);
+            Assert.AreEqual("sk-testAA", auth.Info.ApiKey);
         }
 
         [Test]
@@ -143,23 +140,23 @@ namespace OpenAI.Tests
         public void Test_08_ParseKey()
         {
             var auth = new OpenAIAuthentication("sk-testAA");
-            Assert.IsNotNull(auth.ApiKey);
-            Assert.AreEqual("sk-testAA", auth.ApiKey);
+            Assert.IsNotNull(auth.Info.ApiKey);
+            Assert.AreEqual("sk-testAA", auth.Info.ApiKey);
             auth = "sk-testCC";
-            Assert.IsNotNull(auth.ApiKey);
-            Assert.AreEqual("sk-testCC", auth.ApiKey);
+            Assert.IsNotNull(auth.Info.ApiKey);
+            Assert.AreEqual("sk-testCC", auth.Info.ApiKey);
 
             auth = new OpenAIAuthentication("sk-testBB");
-            Assert.IsNotNull(auth.ApiKey);
-            Assert.AreEqual("sk-testBB", auth.ApiKey);
+            Assert.IsNotNull(auth.Info.ApiKey);
+            Assert.AreEqual("sk-testBB", auth.Info.ApiKey);
         }
 
         [Test]
         public void Test_09_GetOrganization()
         {
             var auth = new OpenAIAuthentication("sk-testAA", "org-testAA");
-            Assert.IsNotNull(auth.OrganizationId);
-            Assert.AreEqual("org-testAA", auth.OrganizationId);
+            Assert.IsNotNull(auth.Info.OrganizationId);
+            Assert.AreEqual("org-testAA", auth.Info.OrganizationId);
         }
 
         [Test]
@@ -185,20 +182,20 @@ namespace OpenAI.Tests
         public void Test_11_AzureConfigurationSettings()
         {
             var auth = new OpenAIAuthentication("testKeyAaBbCcDd");
-            var settings = new OpenAIClientSettings(resourceName: "test-resource", deploymentId: "deployment-id-test");
+            var settings = new OpenAISettings(resourceName: "test-resource", deploymentId: "deployment-id-test");
             var api = new OpenAIClient(auth, settings);
-            Console.WriteLine(api.OpenAIClientSettings.BaseRequest);
-            Console.WriteLine(api.OpenAIClientSettings.BaseRequestUrlFormat);
+            Console.WriteLine(api.Settings.Info.BaseRequest);
+            Console.WriteLine(api.Settings.Info.BaseRequestUrlFormat);
         }
 
         [Test]
         public void Test_12_CustomDomainConfigurationSettings()
         {
             var auth = new OpenAIAuthentication("sess-customIssuedToken");
-            var settings = new OpenAIClientSettings(domain: "api.your-custom-domain.com");
+            var settings = new OpenAISettings(domain: "api.your-custom-domain.com");
             var api = new OpenAIClient(auth, settings);
-            Console.WriteLine(api.OpenAIClientSettings.BaseRequest);
-            Console.WriteLine(api.OpenAIClientSettings.BaseRequestUrlFormat);
+            Console.WriteLine(api.Settings.Info.BaseRequest);
+            Console.WriteLine(api.Settings.Info.BaseRequestUrlFormat);
         }
 
         [TearDown]

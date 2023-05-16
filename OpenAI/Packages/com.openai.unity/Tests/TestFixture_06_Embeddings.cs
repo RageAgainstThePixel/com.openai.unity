@@ -11,7 +11,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_1_CreateEmbedding()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.EmbeddingsEndpoint);
             var result = await api.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was delicious and the waiter...");
             Assert.IsNotNull(result);
@@ -22,7 +22,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_2_CreateEmbeddingsWithMultipleInputs()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.EmbeddingsEndpoint);
             var embeddings = new[]
             {

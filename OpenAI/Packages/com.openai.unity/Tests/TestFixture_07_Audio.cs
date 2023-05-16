@@ -14,7 +14,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_1_Transcription_AudioClip()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.AudioEndpoint);
             var audioPath = AssetDatabase.GUIDToAssetPath("259eaa73cab84284eac307d3134c3ade");
             var audioClip = AssetDatabase.LoadAssetAtPath<AudioClip>(audioPath);
@@ -27,7 +27,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_1_Transcription_Path()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.AudioEndpoint);
             var audioPath = AssetDatabase.GUIDToAssetPath("259eaa73cab84284eac307d3134c3ade");
             using var request = new AudioTranscriptionRequest(Path.GetFullPath(audioPath), language: "en");
@@ -39,7 +39,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_2_Translation_AudioClip()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.AudioEndpoint);
             var audioPath = AssetDatabase.GUIDToAssetPath("3ab176222366dc241894506c315c6fa4");
             var audioClip = AssetDatabase.LoadAssetAtPath<AudioClip>(audioPath);
@@ -52,7 +52,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_2_Translation_Path()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.AudioEndpoint);
             var audioPath = AssetDatabase.GUIDToAssetPath("3ab176222366dc241894506c315c6fa4");
             using var request = new AudioTranslationRequest(Path.GetFullPath(audioPath));

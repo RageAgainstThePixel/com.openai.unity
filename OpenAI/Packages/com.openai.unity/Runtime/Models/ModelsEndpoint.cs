@@ -1,11 +1,11 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Utilities.Rest.Extensions;
 
 namespace OpenAI.Models
 {
@@ -14,7 +14,7 @@ namespace OpenAI.Models
     /// You can refer to the Models documentation to understand which models are available for certain endpoints: <see href="https://platform.openai.com/docs/models/model-endpoint-compatibility"/>.<br/>
     /// <see href="https://platform.openai.com/docs/api-reference/models"/>
     /// </summary>
-    public sealed class ModelsEndpoint : BaseEndPoint
+    public sealed class ModelsEndpoint : OpenAIBaseEndpoint
     {
         private class ModelsList
         {
@@ -46,7 +46,7 @@ namespace OpenAI.Models
         }
 
         /// <inheritdoc />
-        public ModelsEndpoint(OpenAIClient api) : base(api) { }
+        public ModelsEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
         protected override string Root => "models";
@@ -58,9 +58,9 @@ namespace OpenAI.Models
         /// <exception cref="HttpRequestException">Raised when the HTTP request fails</exception>
         public async Task<IReadOnlyList<Model>> GetModelsAsync()
         {
-            var response = await Api.Client.GetAsync(GetUrl());
+            var response = await client.Client.GetAsync(GetUrl());
             var responseAsString = await response.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<ModelsList>(responseAsString, Api.JsonSerializationOptions)?.Data;
+            return JsonConvert.DeserializeObject<ModelsList>(responseAsString, client.JsonSerializationOptions)?.Data;
         }
 
         /// <summary>
@@ -71,9 +71,9 @@ namespace OpenAI.Models
         /// <exception cref="HttpRequestException">Raised when the HTTP request fails</exception>
         public async Task<Model> GetModelDetailsAsync(string id)
         {
-            var response = await Api.Client.GetAsync(GetUrl($"/{id}"));
+            var response = await client.Client.GetAsync(GetUrl($"/{id}"));
             var responseAsString = await response.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<Model>(responseAsString, Api.JsonSerializationOptions);
+            return JsonConvert.DeserializeObject<Model>(responseAsString, client.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -98,9 +98,9 @@ namespace OpenAI.Models
 
             try
             {
-                var response = await Api.Client.DeleteAsync(GetUrl($"/{model.Id}"));
+                var response = await client.Client.DeleteAsync(GetUrl($"/{model.Id}"));
                 var responseAsString = await response.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<DeleteModelResponse>(responseAsString, Api.JsonSerializationOptions)?.Deleted ?? false;
+                return JsonConvert.DeserializeObject<DeleteModelResponse>(responseAsString, client.JsonSerializationOptions)?.Deleted ?? false;
             }
             catch (Exception e)
             {

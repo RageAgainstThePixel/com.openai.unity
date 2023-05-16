@@ -14,7 +14,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_1_GetChatCompletion()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.ChatEndpoint);
             var messages = new List<Message>
             {
@@ -38,7 +38,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_2_GetChatStreamingCompletion()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.ChatEndpoint);
             var messages = new List<Message>
             {
@@ -73,7 +73,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_3_GetChatStreamingCompletionEnumerableAsync()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.ChatEndpoint);
             var messages = new List<Message>
             {

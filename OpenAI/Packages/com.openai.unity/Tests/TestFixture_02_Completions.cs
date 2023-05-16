@@ -17,7 +17,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_1_GetBasicCompletion()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.CompletionsEndpoint);
             var result = await api.CompletionsEndpoint.CreateCompletionAsync(
                 CompletionPrompts,
@@ -35,7 +35,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_2_GetStreamingCompletion()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.CompletionsEndpoint);
             var allCompletions = new List<Choice>();
 
@@ -54,7 +54,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_3_GetStreamingCompletionEnumerableAsync()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.CompletionsEndpoint);
             var allCompletions = new List<Choice>();
 

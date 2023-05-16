@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using OpenAI.Extensions;
 using OpenAI.Models;
 using System.Threading.Tasks;
+using Utilities.Rest.Extensions;
 
 namespace OpenAI.Edits
 {
@@ -11,10 +12,10 @@ namespace OpenAI.Edits
     /// Given a prompt and an instruction, the model will return an edited version of the prompt.
     /// <see href="https://platform.openai.com/docs/api-reference/edits"/>
     /// </summary>
-    public sealed class EditsEndpoint : BaseEndPoint
+    public sealed class EditsEndpoint : OpenAIBaseEndpoint
     {
         /// <inheritdoc />
-        public EditsEndpoint(OpenAIClient api) : base(api) { }
+        public EditsEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
         protected override string Root => "edits";
@@ -58,10 +59,10 @@ namespace OpenAI.Edits
         /// <returns><see cref="EditResponse"/>.</returns>
         public async Task<EditResponse> CreateEditAsync(EditRequest request)
         {
-            var jsonContent = JsonConvert.SerializeObject(request, Api.JsonSerializationOptions).ToJsonStringContent();
-            var response = await Api.Client.PostAsync(GetUrl(), jsonContent);
+            var jsonContent = JsonConvert.SerializeObject(request, client.JsonSerializationOptions).ToJsonStringContent();
+            var response = await client.Client.PostAsync(GetUrl(), jsonContent);
             var resultAsString = await response.ReadAsStringAsync();
-            return response.DeserializeResponse<EditResponse>(resultAsString, Api.JsonSerializationOptions);
+            return response.DeserializeResponse<EditResponse>(resultAsString, client.JsonSerializationOptions);
         }
     }
 }

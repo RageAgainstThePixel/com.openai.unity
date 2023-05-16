@@ -124,10 +124,10 @@ namespace OpenAI.Editor.FineTuning
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space();
 
-            if (openAI == null ||
-                string.IsNullOrWhiteSpace(openAI.OpenAIAuthentication.ApiKey))
+            if (openAI is not { HasValidAuthentication: true })
             {
-                EditorGUILayout.HelpBox($"No valid {nameof(OpenAIConfigurationSettings)} was found. This tool requires that you set your API key.", MessageType.Error);
+
+                EditorGUILayout.HelpBox($"No valid {nameof(OpenAIConfiguration)} was found. This tool requires that you set your API key.", MessageType.Error);
                 EditorGUILayout.EndVertical();
                 return;
             }

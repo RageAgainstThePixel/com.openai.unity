@@ -8,7 +8,6 @@ using OpenAI.Chat;
 using OpenAI.Completions;
 using OpenAI.Edits;
 using OpenAI.Embeddings;
-using OpenAI.Extensions;
 using OpenAI.Files;
 using OpenAI.FineTuning;
 using OpenAI.Images;
@@ -18,54 +17,47 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Authentication;
+using Utilities.Rest.Extensions;
+using Utilities.WebRequestRest;
 
 namespace OpenAI
 {
     /// <summary>
     /// Entry point to the OpenAI API, handling auth and allowing access to the various API endpoints
     /// </summary>
-    public sealed class OpenAIClient
+    public sealed class OpenAIClient : BaseClient<OpenAIAuthentication, OpenAISettings>
     {
         /// <summary>
         /// Creates a new entry point to the OpenAPI API, handling auth and allowing access to the various API endpoints
         /// </summary>
-        /// <param name="openAIAuthentication">
+        /// <param name="authentication">
         /// The API authentication information to use for API calls,
-        /// or <see langword="null"/> to attempt to use the <see cref="OpenAI.OpenAIAuthentication.Default"/>,
+        /// or <see langword="null"/> to attempt to use the <see cref="OpenAIAuthentication.Default"/>,
         /// potentially loading from environment vars or from a config file.
         /// </param>
-        /// <param name="clientSettings">
+        /// <param name="settings">
         /// Optional, <see cref="OpenAIClientSettings"/> for specifying OpenAI deployments to Azure or proxy domain.
         /// </param>
-        /// <param name="client">A <see cref="HttpClient"/>.</param>
+        /// <param name="httpClient">A <see cref="HttpClient"/>.</param>
         /// <exception cref="AuthenticationException">Raised when authentication details are missing or invalid.</exception>
-        public OpenAIClient(OpenAIAuthentication openAIAuthentication, OpenAIClientSettings clientSettings, HttpClient client)
-            : this(openAIAuthentication, clientSettings)
+        public OpenAIClient(OpenAIAuthentication authentication, OpenAISettings settings, HttpClient httpClient)
+            : base(authentication, settings, httpClient)
         {
-            Client = SetupClient(client);
         }
 
         /// <summary>
         /// Creates a new entry point to the OpenAPI API, handling auth and allowing access to the various API endpoints
         /// </summary>
-        /// <param name="openAIAuthentication">The API authentication information to use for API calls,
+        /// <param name="authentication">The API authentication information to use for API calls,
         /// or <see langword="null"/> to attempt to use the <see cref="OpenAI.OpenAIAuthentication.Default"/>,
         /// potentially loading from environment vars or from a config file.</param>
-        /// <param name="clientSettings">
+        /// <param name="settings">
         /// Optional, <see cref="OpenAIClientSettings"/> for specifying OpenAI deployments to Azure or proxy domain.
         /// </param>
         /// <exception cref="AuthenticationException">Raised when authentication details are missing or invalid.</exception>
-        public OpenAIClient(OpenAIAuthentication openAIAuthentication = null, OpenAIClientSettings clientSettings = null)
+        public OpenAIClient(OpenAIAuthentication authentication = null, OpenAISettings settings = null)
+            : base(authentication ?? OpenAIAuthentication.Default, settings ?? OpenAISettings.Default)
         {
-            OpenAIAuthentication = openAIAuthentication ?? OpenAIAuthentication.Default;
-            OpenAIClientSettings = clientSettings ?? OpenAIClientSettings.Default;
-
-            if (OpenAIAuthentication?.ApiKey is null)
-            {
-                throw new AuthenticationException("You must provide API authentication.  Please refer to https://github.com/RageAgainstThePixel/com.openai.unity#authentication for details.");
-            }
-
-            Client = SetupClient();
             JsonSerializationOptions = new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore,
@@ -76,6 +68,7 @@ namespace OpenAI
                 },
                 ContractResolver = new EmptyToNullStringContractResolver()
             };
+
             ModelsEndpoint = new ModelsEndpoint(this);
             CompletionsEndpoint = new CompletionsEndpoint(this);
             ChatEndpoint = new ChatEndpoint(this);
@@ -88,55 +81,50 @@ namespace OpenAI
             ModerationsEndpoint = new ModerationsEndpoint(this);
         }
 
-        private HttpClient SetupClient(HttpClient client = null)
+        protected override HttpClient SetupClient(HttpClient client = null)
         {
             client ??= new HttpClient();
-            client.DefaultRequestHeaders.Add("User-Agent", "OpenAI-DotNet");
+            client.DefaultRequestHeaders.Add("User-Agent", "com.openai.unity");
 
-            if (!OpenAIClientSettings.BaseRequestUrlFormat.Contains(OpenAIClientSettings.AzureOpenAIDomain) &&
-                (string.IsNullOrWhiteSpace(OpenAIAuthentication.ApiKey) ||
-                 (!OpenAIAuthentication.ApiKey.Contains(AuthInfo.SecretKeyPrefix) &&
-                  !OpenAIAuthentication.ApiKey.Contains(AuthInfo.SessionKeyPrefix))))
+            if (!Settings.Info.BaseRequestUrlFormat.Contains(OpenAISettingsInfo.AzureOpenAIDomain) &&
+                (string.IsNullOrWhiteSpace(Authentication.Info.ApiKey) ||
+                 (!Authentication.Info.ApiKey.Contains(OpenAIAuthInfo.SecretKeyPrefix) &&
+                  !Authentication.Info.ApiKey.Contains(OpenAIAuthInfo.SessionKeyPrefix))))
             {
-                throw new InvalidCredentialException($"{OpenAIAuthentication.ApiKey} must start with '{AuthInfo.SecretKeyPrefix}'");
+                throw new InvalidCredentialException($"{Authentication.Info.ApiKey} must start with '{OpenAIAuthInfo.SecretKeyPrefix}'");
             }
 
-            if (OpenAIClientSettings.UseOAuthAuthentication)
+            if (Settings.Info.UseOAuthAuthentication)
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", OpenAIAuthentication.ApiKey);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Authentication.Info.ApiKey);
             }
             else
             {
-                client.DefaultRequestHeaders.Add("api-key", OpenAIAuthentication.ApiKey);
+                client.DefaultRequestHeaders.Add("api-key", Authentication.Info.ApiKey);
             }
 
-            if (!string.IsNullOrWhiteSpace(OpenAIAuthentication.OrganizationId))
+            if (!string.IsNullOrWhiteSpace(Authentication.Info.OrganizationId))
             {
-                client.DefaultRequestHeaders.Add("OpenAI-Organization", OpenAIAuthentication.OrganizationId);
+                client.DefaultRequestHeaders.Add("OpenAI-Organization", Authentication.Info.OrganizationId);
             }
 
             return client;
         }
 
-        /// <summary>
-        /// <see cref="HttpClient"/> to use when making calls to the API.
-        /// </summary>
-        internal HttpClient Client { get; private set; }
+        protected override void ValidateAuthentication()
+        {
+            if (!HasValidAuthentication)
+            {
+                throw new InvalidCredentialException($"Missing API key for {nameof(OpenAIClient)}");
+            }
+        }
+
+        public override bool HasValidAuthentication => !string.IsNullOrWhiteSpace(Authentication.Info.ApiKey);
 
         /// <summary>
         /// The <see cref="JsonSerializationOptions"/> to use when making calls to the API.
         /// </summary>
         internal JsonSerializerSettings JsonSerializationOptions { get; }
-
-        /// <summary>
-        /// The API authentication information to use for API calls
-        /// </summary>
-        public OpenAIAuthentication OpenAIAuthentication { get; }
-
-        /// <summary>
-        /// The client settings for configuring Azure OpenAI or custom domain.
-        /// </summary>
-        internal OpenAIClientSettings OpenAIClientSettings { get; }
 
         /// <summary>
         /// List and describe the various models available in the API.

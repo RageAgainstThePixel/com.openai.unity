@@ -6,6 +6,7 @@ using OpenAI.Models;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Utilities.Rest.Extensions;
 
 namespace OpenAI.Moderations
 {
@@ -14,10 +15,10 @@ namespace OpenAI.Moderations
     /// Developers can thus identify content that our content policy prohibits and take action, for instance by filtering it.
     /// <see href="https://platform.openai.com/docs/api-reference/moderations"/>
     /// </summary>
-    public sealed class ModerationsEndpoint : BaseEndPoint
+    public sealed class ModerationsEndpoint : OpenAIBaseEndpoint
     {
         /// <inheritdoc />
-        public ModerationsEndpoint(OpenAIClient api) : base(api) { }
+        public ModerationsEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
         protected override string Root => "moderations";
@@ -56,10 +57,10 @@ namespace OpenAI.Moderations
         /// <exception cref="HttpRequestException">Raised when the HTTP request fails</exception>
         public async Task<ModerationsResponse> CreateModerationAsync(ModerationsRequest request)
         {
-            var jsonContent = JsonConvert.SerializeObject(request, Api.JsonSerializationOptions).ToJsonStringContent();
-            var response = await Api.Client.PostAsync(GetUrl(), jsonContent);
+            var jsonContent = JsonConvert.SerializeObject(request, client.JsonSerializationOptions).ToJsonStringContent();
+            var response = await client.Client.PostAsync(GetUrl(), jsonContent);
             var resultAsString = await response.ReadAsStringAsync();
-            return response.DeserializeResponse<ModerationsResponse>(resultAsString, Api.JsonSerializationOptions);
+            return response.DeserializeResponse<ModerationsResponse>(resultAsString, client.JsonSerializationOptions);
         }
     }
 }

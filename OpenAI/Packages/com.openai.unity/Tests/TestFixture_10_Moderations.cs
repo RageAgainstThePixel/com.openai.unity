@@ -10,7 +10,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_1_Moderate()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             var violationResponse = await api.ModerationsEndpoint.GetModerationAsync("I want to kill them.");
             Assert.IsTrue(violationResponse);
 

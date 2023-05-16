@@ -34,7 +34,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_01_CreateFineTuneJob()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
             var fileData = await CreateTestTrainingDataAsync(api);
@@ -49,7 +49,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_02_ListFineTuneJobs()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
             var fineTuneJobs = await api.FineTuningEndpoint.ListFineTuneJobsAsync();
@@ -65,7 +65,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_03_RetrieveFineTuneJobInfo()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
             var fineTuneJobs = await api.FineTuningEndpoint.ListFineTuneJobsAsync();
@@ -83,7 +83,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_04_ListFineTuneEvents()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
             var fineTuneJobs = await api.FineTuningEndpoint.ListFineTuneJobsAsync();
@@ -113,7 +113,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_05_CancelFineTuneJob()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
             var fineTuneJobs = await api.FineTuningEndpoint.ListFineTuneJobsAsync();
@@ -135,7 +135,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_06_StreamFineTuneEvents()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
             var fileData = await CreateTestTrainingDataAsync(api);
@@ -181,7 +181,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_07_StreamFineTuneEventsEnumerable()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
             var fileData = await CreateTestTrainingDataAsync(api);
@@ -228,7 +228,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_08_DeleteFineTunedModel()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.ModelsEndpoint);
 
             var models = await api.ModelsEndpoint.GetModelsAsync();

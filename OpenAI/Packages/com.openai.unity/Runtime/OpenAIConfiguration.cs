@@ -2,11 +2,12 @@
 
 using UnityEngine;
 using UnityEngine.Serialization;
+using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI
 {
-    [CreateAssetMenu(fileName = nameof(OpenAIConfigurationSettings), menuName = "OpenAI/" + nameof(OpenAIConfigurationSettings), order = 0)]
-    internal class OpenAIConfigurationSettings : ScriptableObject
+    [CreateAssetMenu(fileName = nameof(OpenAIConfiguration), menuName = "OpenAI/" + nameof(OpenAIConfiguration), order = 0)]
+    public class OpenAIConfiguration : ScriptableObject, IConfiguration
     {
         [SerializeField]
         [Tooltip("The OpenAI or Azure api key.")]

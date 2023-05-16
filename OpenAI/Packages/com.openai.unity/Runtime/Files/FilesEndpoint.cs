@@ -1,7 +1,6 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Utilities.Rest.Extensions;
 using Utilities.WebRequestRest;
 using Progress = Utilities.WebRequestRest.Progress;
 
@@ -18,7 +18,7 @@ namespace OpenAI.Files
     /// Files are used to upload documents that can be used with features like Fine-tuning.<br/>
     /// <see href="https://platform.openai.com/docs/api-reference/fine-tunes"/>
     /// </summary>
-    public sealed class FilesEndpoint : BaseEndPoint
+    public sealed class FilesEndpoint : OpenAIBaseEndpoint
     {
         private class FilesList
         {
@@ -33,7 +33,7 @@ namespace OpenAI.Files
         }
 
         /// <inheritdoc />
-        public FilesEndpoint(OpenAIClient api) : base(api) { }
+        public FilesEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
         protected override string Root => "files";
@@ -45,9 +45,9 @@ namespace OpenAI.Files
         /// <exception cref="HttpRequestException"></exception>
         public async Task<IReadOnlyList<FileData>> ListFilesAsync()
         {
-            var response = await Api.Client.GetAsync(GetUrl());
+            var response = await client.Client.GetAsync(GetUrl());
             var resultAsString = await response.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<FilesList>(resultAsString, Api.JsonSerializationOptions)?.Data;
+            return JsonConvert.DeserializeObject<FilesList>(resultAsString, client.JsonSerializationOptions)?.Data;
         }
 
         /// <summary>
@@ -87,9 +87,9 @@ namespace OpenAI.Files
             content.Add(new ByteArrayContent(fileData.ToArray()), "file", request.FileName);
             request.Dispose();
 
-            var response = await Api.Client.PostAsync(GetUrl(), content, cancellationToken);
+            var response = await client.Client.PostAsync(GetUrl(), content, cancellationToken);
             var responseAsString = await response.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<FileData>(responseAsString, Api.JsonSerializationOptions);
+            return JsonConvert.DeserializeObject<FileData>(responseAsString, client.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace OpenAI.Files
 
             async Task<bool> InternalDeleteFileAsync(int attempt)
             {
-                var response = await Api.Client.DeleteAsync(GetUrl($"/{fileId}"), cancellationToken);
+                var response = await client.Client.DeleteAsync(GetUrl($"/{fileId}"), cancellationToken);
                 // We specifically don't use the extension method here bc we need to check if it's still processing the file.
                 var responseAsString = await response.Content.ReadAsStringAsync();
 
@@ -121,7 +121,7 @@ namespace OpenAI.Files
                     throw new HttpRequestException($"{nameof(DeleteFileAsync)} Failed!  HTTP status code: {response.StatusCode}. Response: {responseAsString}");
                 }
 
-                return JsonConvert.DeserializeObject<FileDeleteResponse>(responseAsString, Api.JsonSerializationOptions)?.Deleted ?? false;
+                return JsonConvert.DeserializeObject<FileDeleteResponse>(responseAsString, client.JsonSerializationOptions)?.Deleted ?? false;
             }
         }
 
@@ -133,9 +133,9 @@ namespace OpenAI.Files
         /// <exception cref="HttpRequestException"></exception>
         public async Task<FileData> GetFileInfoAsync(string fileId)
         {
-            var response = await Api.Client.GetAsync(GetUrl($"/{fileId}"));
+            var response = await client.Client.GetAsync(GetUrl($"/{fileId}"));
             var responseAsString = await response.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<FileData>(responseAsString, Api.JsonSerializationOptions);
+            return JsonConvert.DeserializeObject<FileData>(responseAsString, client.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace OpenAI.Files
         /// <exception cref="HttpRequestException">.</exception>
         public async Task<string> DownloadFileAsync(string fileId, IProgress<Progress> progress = null)
         {
-            var headers = Api.Client.DefaultRequestHeaders.ToDictionary(item => item.Key, pair => string.Join(";", pair.Value));
+            var headers = client.Client.DefaultRequestHeaders.ToDictionary(item => item.Key, pair => string.Join(";", pair.Value));
             var fileData = await GetFileInfoAsync(fileId);
             return await Rest.DownloadFileAsync(GetUrl($"/{fileData.Id}/content"), fileData.FileName, headers, progress);
         }
