@@ -126,7 +126,6 @@ namespace OpenAI.Editor.FineTuning
 
             if (openAI is not { HasValidAuthentication: true })
             {
-
                 EditorGUILayout.HelpBox($"No valid {nameof(OpenAIConfiguration)} was found. This tool requires that you set your API key.", MessageType.Error);
                 EditorGUILayout.EndVertical();
                 return;
