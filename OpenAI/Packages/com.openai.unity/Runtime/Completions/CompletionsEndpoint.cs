@@ -77,11 +77,11 @@ namespace OpenAI.Completions
             int? logProbabilities = null,
             bool? echo = null,
             IEnumerable<string> stopSequences = null,
-            Model model = null,
+            string model = null,
             CancellationToken cancellationToken = default)
         {
             var request = new CompletionRequest(
-                model ?? Model.Davinci,
+                model ?? Model.Davinci : model,
                 prompt,
                 prompts,
                 suffix,
@@ -169,11 +169,11 @@ namespace OpenAI.Completions
             int? logProbabilities = null,
             bool? echo = null,
             IEnumerable<string> stopSequences = null,
-            Model model = null,
+            string model = null,
             CancellationToken cancellationToken = default)
         {
             var request = new CompletionRequest(
-                model ?? Model.Davinci,
+                string.IsNullOrWhiteSpace(model) ? Model.Davinci : model,
                 prompt,
                 prompts,
                 suffix,
@@ -282,7 +282,7 @@ namespace OpenAI.Completions
             CancellationToken cancellationToken = default)
         {
             var request = new CompletionRequest(
-                model ?? Model.Davinci,
+                model ?? Model.Davinci : model,
                 prompt,
                 prompts,
                 suffix,
