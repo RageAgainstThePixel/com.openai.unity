@@ -87,7 +87,7 @@ namespace OpenAI.Audio
         /// </param>
         public AudioTranscriptionRequest(
             AudioClip audio,
-            Model model = null,
+            string model = null,
             string prompt = null,
             AudioResponseFormat responseFormat = AudioResponseFormat.Json,
             int? temperature = null,
