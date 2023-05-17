@@ -81,7 +81,7 @@ namespace OpenAI.Completions
             CancellationToken cancellationToken = default)
         {
             var request = new CompletionRequest(
-                model ?? Model.Davinci : model,
+                string.IsNullOrWhiteSpace(model) ? Model.Davinci : model,
                 prompt,
                 prompts,
                 suffix,
@@ -282,7 +282,7 @@ namespace OpenAI.Completions
             CancellationToken cancellationToken = default)
         {
             var request = new CompletionRequest(
-                model ?? Model.Davinci : model,
+                string.IsNullOrWhiteSpace(model) ? Model.Davinci : model,
                 prompt,
                 prompts,
                 suffix,
