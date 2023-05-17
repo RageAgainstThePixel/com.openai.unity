@@ -278,7 +278,7 @@ namespace OpenAI.Completions
             int? logProbabilities = null,
             bool? echo = null,
             IEnumerable<string> stopSequences = null,
-            Model model = null,
+            string model = null,
             CancellationToken cancellationToken = default)
         {
             var request = new CompletionRequest(
