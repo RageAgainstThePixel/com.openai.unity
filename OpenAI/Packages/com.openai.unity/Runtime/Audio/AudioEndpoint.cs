@@ -75,7 +75,7 @@ namespace OpenAI.Audio
         }
 
         /// <summary>
-        /// Translates audio into into English.
+        /// Translates audio into English.
         /// </summary>
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
