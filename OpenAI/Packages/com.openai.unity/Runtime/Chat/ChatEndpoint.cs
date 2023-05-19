@@ -64,10 +64,12 @@ namespace OpenAI.Chat
             using var reader = new StreamReader(stream);
             var choiceCount = chatRequest.Number ?? 1;
             ChatResponse partialResponse = null;
+            var finishReasons = new List<string>(choiceCount);
             var partials = new List<StringBuilder>(choiceCount);
 
             for (var i = 0; i < choiceCount; i++)
             {
+                finishReasons.Add(string.Empty);
                 partials.Add(new StringBuilder());
             }
 
@@ -84,6 +86,11 @@ namespace OpenAI.Chat
                     foreach (var choice in partialResponse.Choices)
                     {
                         partials[choice.Index].Append(choice.ToString());
+
+                        if (!string.IsNullOrWhiteSpace(choice.FinishReason))
+                        {
+                            finishReasons[choice.Index] = choice.FinishReason;
+                        }
                     }
 
                     // Always raise event callbacks on main thread
@@ -98,7 +105,7 @@ namespace OpenAI.Chat
 
                     for (var i = 0; i < choiceCount; i++)
                     {
-                        finalChoices.Add(new Choice(new Message(Role.Assistant, partials[i].ToString()), null, "stop", i));
+                        finalChoices.Add(new Choice(new Message(Role.Assistant, partials[i].ToString()), null, finishReasons[i], i));
                     }
 
                     var finalResponse = new ChatResponse(
@@ -142,10 +149,12 @@ namespace OpenAI.Chat
             using var reader = new StreamReader(stream);
             var choiceCount = chatRequest.Number ?? 1;
             ChatResponse partialResponse = null;
+            var finishReasons = new List<string>(choiceCount);
             var partials = new List<StringBuilder>(choiceCount);
 
             for (var i = 0; i < choiceCount; i++)
             {
+                finishReasons.Add(string.Empty);
                 partials.Add(new StringBuilder());
             }
 
@@ -162,6 +171,11 @@ namespace OpenAI.Chat
                     foreach (var choice in partialResponse.Choices)
                     {
                         partials[choice.Index].Append(choice.ToString());
+
+                        if (!string.IsNullOrWhiteSpace(choice.FinishReason))
+                        {
+                            finishReasons[choice.Index] = choice.FinishReason;
+                        }
                     }
 
                     yield return partialResponse;
@@ -174,7 +188,7 @@ namespace OpenAI.Chat
 
                     for (var i = 0; i < choiceCount; i++)
                     {
-                        finalChoices.Add(new Choice(new Message(Role.Assistant, partials[i].ToString()), null, "stop", i));
+                        finalChoices.Add(new Choice(new Message(Role.Assistant, partials[i].ToString()), null, finishReasons[i], i));
                     }
 
                     var finalResponse = new ChatResponse(
