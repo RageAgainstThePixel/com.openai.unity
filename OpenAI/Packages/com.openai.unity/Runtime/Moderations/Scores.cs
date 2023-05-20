@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System.Text;
 
 namespace OpenAI.Moderations
 {
@@ -38,5 +39,20 @@ namespace OpenAI.Moderations
 
         [JsonProperty("violence/graphic")]
         public double ViolenceGraphic { get; }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder()
+                .AppendLine($"{"Hate:".PadRight(10)}{Hate:0.00 E+00}")
+                .AppendLine($"{"Threat:".PadRight(10)}{HateThreatening:0.00 E+00}")
+                .AppendLine($"{"Violence:".PadRight(10)}{Violence:0.00 E+00}")
+                .AppendLine($"{"Graphic:".PadRight(10)}{ViolenceGraphic:0.00 E+00}")
+                .AppendLine($"{"SelfHarm:".PadRight(10)}{SelfHarm:0.00 E+00}")
+                .AppendLine($"{"Sexual:".PadRight(10)}{Sexual:0.00 E+00}")
+                .AppendLine($"{"Minors:".PadRight(10)}{SexualMinors:0.00 E+00}");
+            return sb.ToString();
+        }
+
+        public static implicit operator string(Scores scores) => scores.ToString();
     }
 }
