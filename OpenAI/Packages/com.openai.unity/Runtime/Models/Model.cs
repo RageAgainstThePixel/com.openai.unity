@@ -15,11 +15,12 @@ namespace OpenAI.Models
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">Model id.</param>
+        /// <param name="ownedBy">Optional, owned by id.</param>
         public Model(string id, string ownedBy = null)
         {
             if (string.IsNullOrWhiteSpace(id))
-            { 
+            {
                 throw new ArgumentNullException(nameof(id), "Missing the id of the specified model.");
             }
 
@@ -55,7 +56,7 @@ namespace OpenAI.Models
         /// <summary>
         /// Allows a string to be implicitly cast as a <see cref="Model"/>
         /// </summary>
-        public static implicit operator Model(string name) => new Model(name);
+        public static implicit operator Model(string name) => new(name);
 
         /// <inheritdoc />
         public override string ToString() => Id;
@@ -110,7 +111,7 @@ namespace OpenAI.Models
         /// For edit requests.
         /// </summary>
         public static Model DavinciEdit { get; } = new("text-davinci-edit-001", "openai");
-        
+
         /// <summary>
         /// The 2nd most powerful engine, a bit faster than <see cref="Davinci"/>, and a bit faster.<para/>
         /// Good at: Language translation, complex classification, text sentiment, summarization.
