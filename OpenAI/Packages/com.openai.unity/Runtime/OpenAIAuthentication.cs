@@ -13,13 +13,13 @@ namespace OpenAI
     /// </summary>
     public sealed class OpenAIAuthentication : AbstractAuthentication<OpenAIAuthentication, OpenAIAuthInfo>
     {
-        private const string OPENAI_KEY = "OPENAI_KEY";
-        private const string OPENAI_API_KEY = "OPENAI_API_KEY";
-        private const string OPENAI_SECRET_KEY = "OPENAI_SECRET_KEY";
-        private const string TEST_OPENAI_SECRET_KEY = "TEST_OPENAI_SECRET_KEY";
-        private const string OPENAI_ORGANIZATION_ID = "OPENAI_ORGANIZATION_ID";
-        private const string OPEN_AI_ORGANIZATION_ID = "OPEN_AI_ORGANIZATION_ID";
-        private const string ORGANIZATION = "ORGANIZATION";
+        private const string OPENAI_KEY = nameof(OPENAI_KEY);
+        private const string OPENAI_API_KEY = nameof(OPENAI_API_KEY);
+        private const string OPENAI_SECRET_KEY = nameof(OPENAI_SECRET_KEY);
+        private const string TEST_OPENAI_SECRET_KEY = nameof(TEST_OPENAI_SECRET_KEY);
+        private const string OPENAI_ORGANIZATION_ID = nameof(OPENAI_ORGANIZATION_ID);
+        private const string OPEN_AI_ORGANIZATION_ID = nameof(OPEN_AI_ORGANIZATION_ID);
+        private const string ORGANIZATION = nameof(ORGANIZATION);
 
         /// <summary>
         /// Allows implicit casting from a string, so that a simple string API key can be provided in place of an instance of <see cref="OpenAIAuthentication"/>.
@@ -28,10 +28,13 @@ namespace OpenAI
         public static implicit operator OpenAIAuthentication(string key) => new OpenAIAuthentication(key);
 
         /// <summary>
-        /// Instantiates a new Authentication object with the given <paramref name="authInfo"/>, which may be <see langword="null"/>.
+        /// Instantiates a new Authentication object that will load the default config.
         /// </summary>
-        /// <param name="authInfo"></param>
-        public OpenAIAuthentication(OpenAIAuthInfo authInfo) => this.authInfo = authInfo;
+        public OpenAIAuthentication()
+            => cachedDefault ??= (LoadFromAsset<OpenAIConfiguration>() ??
+                                  LoadFromDirectory()) ??
+                                 LoadFromDirectory(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)) ??
+                                 LoadFromEnvironment();
 
         /// <summary>
         /// Instantiates a new Authentication object with the given <paramref name="apiKey"/>, which may be <see langword="null"/>.
@@ -50,13 +53,15 @@ namespace OpenAI
         public OpenAIAuthentication(string apiKey, string organization) => authInfo = new OpenAIAuthInfo(apiKey, organization);
 
         /// <summary>
-        /// Instantiates a new Authentication object that will load the default config.
+        /// Instantiates a new Authentication object with the given <paramref name="authInfo"/>, which may be <see langword="null"/>.
         /// </summary>
-        public OpenAIAuthentication()
-            => cachedDefault ??= (LoadFromAsset<OpenAIConfiguration>() ??
-                                  LoadFromDirectory()) ??
-                                  LoadFromDirectory(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)) ??
-                                  LoadFromEnvironment();
+        /// <param name="authInfo"></param>
+        public OpenAIAuthentication(OpenAIAuthInfo authInfo) => this.authInfo = authInfo;
+
+        private readonly OpenAIAuthInfo authInfo;
+
+        /// <inheritdoc />
+        public override OpenAIAuthInfo Info => authInfo ?? Default.Info;
 
         private static OpenAIAuthentication cachedDefault;
 
@@ -70,11 +75,6 @@ namespace OpenAI
             get => cachedDefault ?? new OpenAIAuthentication();
             internal set => cachedDefault = value;
         }
-
-        private readonly OpenAIAuthInfo authInfo;
-
-        /// <inheritdoc />
-        public override OpenAIAuthInfo Info => authInfo ?? Default.Info;
 
         [Obsolete("Use OpenAIAuthentication.Info.ApiKey")]
         public string ApiKey => authInfo.ApiKey;
@@ -92,9 +92,6 @@ namespace OpenAI
                     ? new OpenAIAuthentication(config.ApiKey, config.OrganizationId)
                     : null)
                 .FirstOrDefault();
-
-        [Obsolete("use OpenAIAuthentication.Default.LoadFromEnvironment")]
-        public static OpenAIAuthentication LoadFromEnv() => Default.LoadFromEnvironment();
 
         /// <inheritdoc />
         public override OpenAIAuthentication LoadFromEnvironment()
@@ -130,10 +127,6 @@ namespace OpenAI
 
             return string.IsNullOrEmpty(apiKey) ? null : new OpenAIAuthentication(apiKey, organizationId);
         }
-
-        /// <inheritdoc />
-        public override OpenAIAuthentication LoadFromPath(string path)
-            => LoadFromDirectory(Path.GetDirectoryName(path), Path.GetFileName(path), false);
 
         /// <inheritdoc />
         /// ReSharper disable once OptionalParameterHierarchyMismatch
@@ -212,5 +205,8 @@ namespace OpenAI
 
             return new OpenAIAuthentication(tempAuth);
         }
+
+        [Obsolete("use OpenAIAuthentication.Default.LoadFromEnvironment")]
+        public static OpenAIAuthentication LoadFromEnv() => Default.LoadFromEnvironment();
     }
 }
