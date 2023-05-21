@@ -109,10 +109,10 @@ namespace OpenAI
 
         public string DeploymentId { get; }
 
-        internal string BaseRequest { get; }
+        public string BaseRequest { get; }
 
-        internal string BaseRequestUrlFormat { get; }
+        public string BaseRequestUrlFormat { get; }
 
-        internal bool UseOAuthAuthentication { get; }
+        public bool UseOAuthAuthentication { get; }
     }
 }

@@ -83,7 +83,7 @@ namespace OpenAI
         public string OrganizationId => authInfo.OrganizationId;
 
         /// <inheritdoc />
-        public sealed override OpenAIAuthentication LoadFromAsset<T>()
+        public override OpenAIAuthentication LoadFromAsset<T>()
             => Resources.LoadAll<T>(string.Empty)
                 .Where(asset => asset != null)
                 .Where(asset => asset is OpenAIConfiguration config &&
@@ -131,11 +131,12 @@ namespace OpenAI
             return string.IsNullOrEmpty(apiKey) ? null : new OpenAIAuthentication(apiKey, organizationId);
         }
 
+        /// <inheritdoc />
         public override OpenAIAuthentication LoadFromPath(string path)
             => LoadFromDirectory(Path.GetDirectoryName(path), Path.GetFileName(path), false);
 
-        // ReSharper disable once OptionalParameterHierarchyMismatch
         /// <inheritdoc />
+        /// ReSharper disable once OptionalParameterHierarchyMismatch
         public override OpenAIAuthentication LoadFromDirectory(string directory = null, string filename = ".openai", bool searchUp = true)
         {
             directory ??= Environment.CurrentDirectory;
