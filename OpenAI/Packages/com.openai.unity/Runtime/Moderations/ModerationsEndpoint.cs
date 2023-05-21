@@ -2,7 +2,6 @@
 
 using Newtonsoft.Json;
 using OpenAI.Extensions;
-using OpenAI.Models;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;

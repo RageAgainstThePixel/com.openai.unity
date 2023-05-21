@@ -2,7 +2,6 @@
 
 using System;
 using System.IO;
-using OpenAI.Models;
 using UnityEngine;
 using Utilities.Encoding.Wav;
 
