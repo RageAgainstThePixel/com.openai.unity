@@ -1,16 +1,17 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using System;
-using System.IO;
 using UnityEditor;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using Utilities.Rest.Editor;
 
 namespace OpenAI.Editor
 {
     [CustomEditor(typeof(OpenAIConfiguration))]
-    internal class OpenAIConfigurationInspector : UnityEditor.Editor
+    internal class OpenAIConfigurationInspector : BaseConfigurationInspector<OpenAIConfiguration>
     {
+        private static bool triggerReload;
+
         private SerializedProperty apiKey;
         private SerializedProperty organizationId;
         private SerializedProperty useAzureOpenAI;
@@ -20,41 +21,11 @@ namespace OpenAI.Editor
         private SerializedProperty useAzureActiveDirectory;
         private SerializedProperty apiVersion;
 
-        private static bool triggerReload;
-
         #region Project Settings Window
 
         [SettingsProvider]
-        private static SettingsProvider Preferences() =>
-            new SettingsProvider($"Project/{nameof(OpenAI)}", SettingsScope.Project, new[] { nameof(OpenAI) })
-            {
-                label = nameof(OpenAI),
-                guiHandler = OnPreferencesGui,
-                keywords = new[] { nameof(OpenAI) },
-                deactivateHandler = DeactivateHandler
-            };
-
-        private static void DeactivateHandler()
-        {
-            if (triggerReload)
-            {
-                triggerReload = false;
-                EditorUtility.RequestScriptReload();
-            }
-        }
-
-        private static void OnPreferencesGui(string searchContext)
-        {
-            if (EditorApplication.isPlaying ||
-                EditorApplication.isCompiling)
-            {
-                return;
-            }
-
-            var instance = GetOrCreateInstance();
-            var instanceEditor = CreateEditor(instance);
-            instanceEditor.OnInspectorGUI();
-        }
+        private static SettingsProvider Preferences()
+            => GetSettingsProvider(nameof(OpenAI), CheckReload);
 
         #endregion Project Settings Window
 
@@ -81,14 +52,7 @@ namespace OpenAI.Editor
             }
         }
 
-        private void OnDisable()
-        {
-            if (triggerReload)
-            {
-                triggerReload = false;
-                EditorUtility.RequestScriptReload();
-            }
-        }
+        private void OnDisable() => CheckReload();
 
         public override void OnInspectorGUI()
         {
@@ -166,75 +130,13 @@ namespace OpenAI.Editor
 
         #endregion Inspector Window
 
-        internal static OpenAIConfiguration GetOrCreateInstance(Object target = null)
+        private static void CheckReload()
         {
-            var update = false;
-            OpenAIConfiguration instance;
-
-            if (!Directory.Exists("Assets/Resources"))
+            if (triggerReload)
             {
-                Directory.CreateDirectory("Assets/Resources");
-                update = true;
+                triggerReload = false;
+                EditorUtility.RequestScriptReload();
             }
-
-            if (target != null)
-            {
-                instance = target as OpenAIConfiguration;
-
-                var currentPath = AssetDatabase.GetAssetPath(instance);
-
-                if (string.IsNullOrWhiteSpace(currentPath))
-                {
-                    return instance;
-                }
-
-                if (!currentPath.Contains("Resources"))
-                {
-                    var newPath = $"Assets/Resources/{instance!.name}.asset";
-
-                    if (!File.Exists(newPath))
-                    {
-                        File.Move(Path.GetFullPath(currentPath), Path.GetFullPath(newPath));
-                        File.Move(Path.GetFullPath($"{currentPath}.meta"), Path.GetFullPath($"{newPath}.meta"));
-                    }
-                    else
-                    {
-                        AssetDatabase.DeleteAsset(currentPath);
-                        var instances = AssetDatabase.FindAssets($"t:{nameof(OpenAIConfiguration)}");
-                        var path = AssetDatabase.GUIDToAssetPath(instances[0]);
-                        instance = AssetDatabase.LoadAssetAtPath<OpenAIConfiguration>(path);
-                    }
-
-                    update = true;
-                }
-            }
-            else
-            {
-                var instances = AssetDatabase.FindAssets($"t:{nameof(OpenAIConfiguration)}");
-
-                if (instances.Length > 0)
-                {
-                    var path = AssetDatabase.GUIDToAssetPath(instances[0]);
-                    instance = AssetDatabase.LoadAssetAtPath<OpenAIConfiguration>(path);
-                }
-                else
-                {
-                    instance = CreateInstance<OpenAIConfiguration>();
-                    AssetDatabase.CreateAsset(instance, $"Assets/Resources/{nameof(OpenAIConfiguration)}.asset");
-                    update = true;
-                }
-            }
-
-            if (update)
-            {
-                EditorApplication.delayCall += () =>
-                {
-                    AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
-                    EditorGUIUtility.PingObject(instance);
-                };
-            }
-
-            return instance;
         }
     }
 }
