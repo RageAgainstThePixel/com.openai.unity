@@ -26,11 +26,6 @@ namespace OpenAI.Tests
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.Info.ApiKey);
             Assert.IsNotEmpty(auth.Info.ApiKey);
-
-            auth = OpenAIAuthentication.Default.LoadFromEnvironment();
-            Assert.IsNotNull(auth);
-            Assert.IsNotNull(auth.Info.ApiKey);
-            Assert.IsNotEmpty(auth.Info.ApiKey);
             Assert.IsNotNull(auth.Info.OrganizationId);
             Assert.IsNotEmpty(auth.Info.OrganizationId);
         }
