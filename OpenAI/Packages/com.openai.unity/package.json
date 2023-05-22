@@ -17,8 +17,7 @@
     "url": "https://github.com/StephenHodgson"
   },
   "dependencies": {
-    "com.unity.nuget.newtonsoft-json": "3.2.0",
-    "com.utilities.rest": "1.4.3",
+    "com.utilities.rest": "1.4.4",
     "com.utilities.encoder.wav": "1.0.4"
   },
   "publishConfig": {
