@@ -13,6 +13,7 @@ namespace OpenAI
     /// </summary>
     public sealed class OpenAIAuthentication : AbstractAuthentication<OpenAIAuthentication, OpenAIAuthInfo>
     {
+        internal const string CONFIG_FILE = ".openai";
         private const string OPENAI_KEY = nameof(OPENAI_KEY);
         private const string OPENAI_API_KEY = nameof(OPENAI_API_KEY);
         private const string OPENAI_SECRET_KEY = nameof(OPENAI_SECRET_KEY);
@@ -130,7 +131,7 @@ namespace OpenAI
 
         /// <inheritdoc />
         /// ReSharper disable once OptionalParameterHierarchyMismatch
-        public override OpenAIAuthentication LoadFromDirectory(string directory = null, string filename = ".openai", bool searchUp = true)
+        public override OpenAIAuthentication LoadFromDirectory(string directory = null, string filename = CONFIG_FILE, bool searchUp = true)
         {
             directory ??= Environment.CurrentDirectory;
 

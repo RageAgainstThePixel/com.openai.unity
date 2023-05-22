@@ -16,7 +16,7 @@ namespace OpenAI.Tests
         {
             var authJson = new OpenAIAuthInfo("sk-test12", "org-testOrg");
             var authText = JsonUtility.ToJson(authJson, true);
-            File.WriteAllText(".openai", authText);
+            File.WriteAllText(OpenAIAuthentication.CONFIG_FILE, authText);
         }
 
         [Test]
@@ -38,7 +38,7 @@ namespace OpenAI.Tests
         [Test]
         public void Test_02_GetAuthFromFile()
         {
-            var auth = OpenAIAuthentication.Default.LoadFromPath(Path.GetFullPath(".openai"));
+            var auth = OpenAIAuthentication.Default.LoadFromPath(Path.GetFullPath(OpenAIAuthentication.CONFIG_FILE));
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.Info.ApiKey);
             Assert.AreEqual("sk-test12", auth.Info.ApiKey);
@@ -67,7 +67,7 @@ namespace OpenAI.Tests
                 cleanup = true;
             }
 
-            AssetDatabase.CreateAsset(config, "Assets/Resources/OpenAIConfigurationSettings-Test.asset");
+            AssetDatabase.CreateAsset(config, $"Assets/Resources/{nameof(OpenAIConfiguration)}-Test.asset");
 
             var configPath = AssetDatabase.GetAssetPath(config);
             var auth = OpenAIAuthentication.Default;
@@ -201,9 +201,9 @@ namespace OpenAI.Tests
         [TearDown]
         public void TearDown()
         {
-            if (File.Exists(".openai"))
+            if (File.Exists(OpenAIAuthentication.CONFIG_FILE))
             {
-                File.Delete(".openai");
+                File.Delete(OpenAIAuthentication.CONFIG_FILE);
             }
         }
     }
