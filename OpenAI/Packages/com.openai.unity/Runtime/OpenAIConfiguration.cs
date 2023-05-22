@@ -16,7 +16,11 @@ namespace OpenAI
         /// <summary>
         /// The OpenAI api key.
         /// </summary>
-        public string ApiKey => apiKey;
+        public string ApiKey
+        {
+            get => apiKey;
+            internal set => apiKey = value;
+        }
 
         [SerializeField]
         [FormerlySerializedAs("organization")]
@@ -28,7 +32,11 @@ namespace OpenAI
         /// For users who belong to multiple organizations, you can pass a header to specify which organization is used for an API request.
         /// Usage from these API requests will count against the specified organization's subscription quota.
         /// </summary>
-        public string OrganizationId => organizationId;
+        public string OrganizationId
+        {
+            get => organizationId;
+            internal set => organizationId = value;
+        }
 
         [SerializeField]
         [Tooltip("Check this box if you're using OpenAI on Azure.")]

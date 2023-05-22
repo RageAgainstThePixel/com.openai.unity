@@ -56,33 +56,35 @@ namespace OpenAI.Tests
         [Test]
         public void Test_04_GetAuthFromConfiguration()
         {
-            var config = ScriptableObject.CreateInstance<OpenAIConfiguration>();
-            config.apiKey = "sk-test12";
-            config.organizationId = "org-testOrg";
+            var configPath = $"Assets/Resources/{nameof(OpenAIConfiguration)}.asset";
             var cleanup = false;
 
-            if (!Directory.Exists($"{Application.dataPath}/Resources"))
+            if (!File.Exists(Path.GetFullPath(configPath)))
             {
-                Directory.CreateDirectory($"{Application.dataPath}/Resources");
+                if (!Directory.Exists($"{Application.dataPath}/Resources"))
+                {
+                    Directory.CreateDirectory($"{Application.dataPath}/Resources");
+                }
+
+                var instance = ScriptableObject.CreateInstance<OpenAIConfiguration>();
+                instance.ApiKey = "sk-test12";
+                instance.OrganizationId = "org-testOrg";
+                AssetDatabase.CreateAsset(instance, configPath);
                 cleanup = true;
             }
 
-            AssetDatabase.CreateAsset(config, $"Assets/Resources/{nameof(OpenAIConfiguration)}-Test.asset");
-
-            var configPath = AssetDatabase.GetAssetPath(config);
-            var auth = OpenAIAuthentication.Default;
+            var config = AssetDatabase.LoadAssetAtPath<OpenAIConfiguration>(configPath);
+            var auth = OpenAIAuthentication.Default.LoadFromAsset<OpenAIConfiguration>();
 
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.Info.ApiKey);
             Assert.IsNotEmpty(auth.Info.ApiKey);
             Assert.AreEqual(auth.Info.ApiKey, config.ApiKey);
-            Assert.IsNotNull(auth.Info.OrganizationId);
-            Assert.IsNotEmpty(auth.Info.OrganizationId);
             Assert.AreEqual(auth.Info.OrganizationId, config.OrganizationId);
-            AssetDatabase.DeleteAsset(configPath);
 
             if (cleanup)
             {
+                AssetDatabase.DeleteAsset(configPath);
                 AssetDatabase.DeleteAsset("Assets/Resources");
             }
         }
