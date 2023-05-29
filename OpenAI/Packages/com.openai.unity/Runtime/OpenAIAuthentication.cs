@@ -32,16 +32,21 @@ namespace OpenAI
         /// Instantiates a new Authentication object that will load the default config.
         /// </summary>
         public OpenAIAuthentication()
-            => cachedDefault ??= (LoadFromAsset<OpenAIConfiguration>() ??
-                                  LoadFromDirectory()) ??
-                                 LoadFromDirectory(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)) ??
-                                 LoadFromEnvironment();
+        {
+            if (cachedDefault != null) { return; }
+
+            cachedDefault = (LoadFromAsset<OpenAIConfiguration>() ??
+                             LoadFromDirectory()) ??
+                             LoadFromDirectory(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)) ??
+                             LoadFromEnvironment();
+            Info = cachedDefault?.Info;
+        }
 
         /// <summary>
         /// Instantiates a new Authentication object with the given <paramref name="apiKey"/>, which may be <see langword="null"/>.
         /// </summary>
         /// <param name="apiKey">The API key, required to access the API endpoint.</param>
-        public OpenAIAuthentication(string apiKey) => authInfo = new OpenAIAuthInfo(apiKey);
+        public OpenAIAuthentication(string apiKey) => Info = new OpenAIAuthInfo(apiKey);
 
         /// <summary>
         /// Instantiates a new Authentication object with the given <paramref name="apiKey"/>, which may be <see langword="null"/>.
@@ -51,18 +56,16 @@ namespace OpenAI
         /// For users who belong to multiple organizations, you can pass a header to specify which organization is used for an API request.
         /// Usage from these API requests will count against the specified organization's subscription quota.
         /// </param>
-        public OpenAIAuthentication(string apiKey, string organization) => authInfo = new OpenAIAuthInfo(apiKey, organization);
+        public OpenAIAuthentication(string apiKey, string organization) => Info = new OpenAIAuthInfo(apiKey, organization);
 
         /// <summary>
         /// Instantiates a new Authentication object with the given <paramref name="authInfo"/>, which may be <see langword="null"/>.
         /// </summary>
         /// <param name="authInfo"></param>
-        public OpenAIAuthentication(OpenAIAuthInfo authInfo) => this.authInfo = authInfo;
-
-        private readonly OpenAIAuthInfo authInfo;
+        public OpenAIAuthentication(OpenAIAuthInfo authInfo) => Info = authInfo;
 
         /// <inheritdoc />
-        public override OpenAIAuthInfo Info => authInfo ?? Default.Info;
+        public override OpenAIAuthInfo Info { get; }
 
         private static OpenAIAuthentication cachedDefault;
 
@@ -78,10 +81,10 @@ namespace OpenAI
         }
 
         [Obsolete("Use OpenAIAuthentication.Info.ApiKey")]
-        public string ApiKey => authInfo.ApiKey;
+        public string ApiKey => Info.ApiKey;
 
         [Obsolete("Use OpenAIAuthentication.Info.OrganizationId")]
-        public string OrganizationId => authInfo.OrganizationId;
+        public string OrganizationId => Info.OrganizationId;
 
         /// <inheritdoc />
         public override OpenAIAuthentication LoadFromAsset<T>()

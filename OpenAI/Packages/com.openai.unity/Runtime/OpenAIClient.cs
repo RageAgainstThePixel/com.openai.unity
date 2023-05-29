@@ -30,33 +30,16 @@ namespace OpenAI
         /// <summary>
         /// Creates a new entry point to the OpenAPI API, handling auth and allowing access to the various API endpoints
         /// </summary>
-        /// <param name="authentication">
-        /// The API authentication information to use for API calls,
-        /// or <see langword="null"/> to attempt to use the <see cref="OpenAIAuthentication.Default"/>,
-        /// potentially loading from environment vars or from a config file.
-        /// </param>
-        /// <param name="settings">
-        /// Optional, <see cref="OpenAIClientSettings"/> for specifying OpenAI deployments to Azure or proxy domain.
-        /// </param>
-        /// <param name="httpClient">A <see cref="HttpClient"/>.</param>
-        /// <exception cref="AuthenticationException">Raised when authentication details are missing or invalid.</exception>
-        public OpenAIClient(OpenAIAuthentication authentication, OpenAISettings settings, HttpClient httpClient)
-            : base(authentication, settings, httpClient)
-        {
-        }
-
-        /// <summary>
-        /// Creates a new entry point to the OpenAPI API, handling auth and allowing access to the various API endpoints
-        /// </summary>
         /// <param name="authentication">The API authentication information to use for API calls,
         /// or <see langword="null"/> to attempt to use the <see cref="OpenAI.OpenAIAuthentication.Default"/>,
         /// potentially loading from environment vars or from a config file.</param>
         /// <param name="settings">
         /// Optional, <see cref="OpenAIClientSettings"/> for specifying OpenAI deployments to Azure or proxy domain.
         /// </param>
+        /// <param name="httpClient">Optional, <see cref="HttpClient"/>.</param>
         /// <exception cref="AuthenticationException">Raised when authentication details are missing or invalid.</exception>
-        public OpenAIClient(OpenAIAuthentication authentication = null, OpenAISettings settings = null)
-            : base(authentication ?? OpenAIAuthentication.Default, settings ?? OpenAISettings.Default)
+        public OpenAIClient(OpenAIAuthentication authentication = null, OpenAISettings settings = null, HttpClient httpClient = null)
+            : base(authentication ?? OpenAIAuthentication.Default, settings ?? OpenAISettings.Default, httpClient)
         {
             JsonSerializationOptions = new JsonSerializerSettings
             {
@@ -91,7 +74,7 @@ namespace OpenAI
                  (!Authentication.Info.ApiKey.Contains(OpenAIAuthInfo.SecretKeyPrefix) &&
                   !Authentication.Info.ApiKey.Contains(OpenAIAuthInfo.SessionKeyPrefix))))
             {
-                throw new InvalidCredentialException($"{Authentication.Info.ApiKey} must start with '{OpenAIAuthInfo.SecretKeyPrefix}'");
+                throw new InvalidCredentialException($"{nameof(Authentication.Info.ApiKey)} must start with '{OpenAIAuthInfo.SecretKeyPrefix}'");
             }
 
             if (Settings.Info.UseOAuthAuthentication)
@@ -103,7 +86,7 @@ namespace OpenAI
                 client.DefaultRequestHeaders.Add("api-key", Authentication.Info.ApiKey);
             }
 
-            if (!string.IsNullOrWhiteSpace(Authentication.Info.OrganizationId))
+            if (!string.IsNullOrWhiteSpace(Authentication?.Info?.OrganizationId))
             {
                 client.DefaultRequestHeaders.Add("OpenAI-Organization", Authentication.Info.OrganizationId);
             }
@@ -119,7 +102,7 @@ namespace OpenAI
             }
         }
 
-        public override bool HasValidAuthentication => !string.IsNullOrWhiteSpace(Authentication.Info.ApiKey);
+        public override bool HasValidAuthentication => !string.IsNullOrWhiteSpace(Authentication?.Info?.ApiKey);
 
         /// <summary>
         /// The <see cref="JsonSerializationOptions"/> to use when making calls to the API.
