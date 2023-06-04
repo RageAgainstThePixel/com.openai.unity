@@ -3,7 +3,7 @@
 --- !u!129 &1
 PlayerSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 23
+  serializedVersion: 24
   productGUID: 40b10b75df2bc1c4081e9d8da766a3c0
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
@@ -12,7 +12,7 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: Stephen Hodgson
+  companyName: RageAgainstThePixel
   productName: OpenAI
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
@@ -157,12 +157,14 @@ PlayerSettings:
   applicationIdentifier:
     Android: com.openai.unity
     Lumin: com.openai.unity
-    Standalone: com.Stephen-Hodgson.OpenAI
+    Standalone: com.openai.unity
+    WebGL: com.openai.unity
+    iPhone: com.openai.unity
   buildNumber:
     Standalone: 0
     iPhone: 0
     tvOS: 0
-  overrideDefaultApplicationIdentifier: 0
+  overrideDefaultApplicationIdentifier: 1
   AndroidBundleVersionCode: 1
   AndroidMinSdkVersion: 22
   AndroidTargetSdkVersion: 0
