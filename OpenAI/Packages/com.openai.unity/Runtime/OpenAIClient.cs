@@ -14,8 +14,6 @@ using OpenAI.Images;
 using OpenAI.Models;
 using OpenAI.Moderations;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Security.Authentication;
 using Utilities.Rest.Extensions;
 using Utilities.WebRequestRest;
@@ -36,10 +34,9 @@ namespace OpenAI
         /// <param name="settings">
         /// Optional, <see cref="OpenAIClientSettings"/> for specifying OpenAI deployments to Azure or proxy domain.
         /// </param>
-        /// <param name="httpClient">Optional, <see cref="HttpClient"/>.</param>
         /// <exception cref="AuthenticationException">Raised when authentication details are missing or invalid.</exception>
-        public OpenAIClient(OpenAIAuthentication authentication = null, OpenAISettings settings = null, HttpClient httpClient = null)
-            : base(authentication ?? OpenAIAuthentication.Default, settings ?? OpenAISettings.Default, httpClient)
+        public OpenAIClient(OpenAIAuthentication authentication = null, OpenAISettings settings = null)
+            : base(authentication ?? OpenAIAuthentication.Default, settings ?? OpenAISettings.Default)
         {
             JsonSerializationOptions = new JsonSerializerSettings
             {
@@ -64,11 +61,14 @@ namespace OpenAI
             ModerationsEndpoint = new ModerationsEndpoint(this);
         }
 
-        protected override HttpClient SetupClient(HttpClient client = null)
+        protected override void SetupDefaultRequestHeaders()
         {
-            client ??= new HttpClient();
-            client.DefaultRequestHeaders.Add("User-Agent", "com.openai.unity");
-
+            var headers = new Dictionary<string, string>
+            {
+#if !UNITY_WEBGL
+                { "User-Agent", "com.openai.unity" }
+#endif
+            };
             if (!Settings.Info.BaseRequestUrlFormat.Contains(OpenAISettingsInfo.AzureOpenAIDomain) &&
                 (string.IsNullOrWhiteSpace(Authentication.Info.ApiKey) ||
                  (!Authentication.Info.ApiKey.Contains(OpenAIAuthInfo.SecretKeyPrefix) &&
@@ -79,19 +79,19 @@ namespace OpenAI
 
             if (Settings.Info.UseOAuthAuthentication)
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Authentication.Info.ApiKey);
+                headers.Add("Authorization", Rest.GetBearerOAuthToken(Authentication.Info.ApiKey));
             }
             else
             {
-                client.DefaultRequestHeaders.Add("api-key", Authentication.Info.ApiKey);
+                headers.Add("api-key", Authentication.Info.ApiKey);
             }
 
             if (!string.IsNullOrWhiteSpace(Authentication?.Info?.OrganizationId))
             {
-                client.DefaultRequestHeaders.Add("OpenAI-Organization", Authentication.Info.OrganizationId);
+                headers.Add("OpenAI-Organization", Authentication.Info.OrganizationId);
             }
 
-            return client;
+            DefaultRequestHeaders = headers;
         }
 
         protected override void ValidateAuthentication()
