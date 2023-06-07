@@ -72,14 +72,14 @@ namespace OpenAI.Files
         /// <returns><see cref="FileData"/>.</returns>
         public async Task<FileData> UploadFileAsync(FileUploadRequest request, IProgress<Progress> uploadProgress = null, CancellationToken cancellationToken = default)
         {
+            var wwwForm = new WWWForm();
             using var fileData = new MemoryStream();
-            var formContent = new WWWForm();
             await request.File.CopyToAsync(fileData, cancellationToken);
-            formContent.AddField("purpose", request.Purpose);
-            formContent.AddBinaryData("file", fileData.ToArray(), request.FileName);
+            wwwForm.AddField("purpose", request.Purpose);
+            wwwForm.AddBinaryData("file", fileData.ToArray(), request.FileName);
             request.Dispose();
 
-            var response = await Rest.PostAsync(GetUrl(), formContent, new RestParameters(client.DefaultRequestHeaders, uploadProgress), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl(), wwwForm, new RestParameters(client.DefaultRequestHeaders, uploadProgress), cancellationToken);
             response.ValidateResponse();
             return JsonConvert.DeserializeObject<FileData>(response.ResponseBody, client.JsonSerializationOptions);
         }
@@ -113,6 +113,7 @@ namespace OpenAI.Files
                     }
 
                     response.ValidateResponse();
+                    return false;
                 }
 
                 return true;
