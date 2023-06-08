@@ -106,9 +106,9 @@ namespace OpenAI.Completions
         public async Task<CompletionResult> CreateCompletionAsync(CompletionRequest completionRequest, CancellationToken cancellationToken = default)
         {
             completionRequest.Stream = false;
-            var jsonContent = JsonConvert.SerializeObject(completionRequest, client.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl(), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.ValidateResponse();
+            var payload = JsonConvert.SerializeObject(completionRequest, client.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate();
             return response.DeserializeResponse<CompletionResult>(response.Body, client.JsonSerializationOptions);
         }
 
@@ -196,13 +196,12 @@ namespace OpenAI.Completions
         public async Task StreamCompletionAsync(CompletionRequest completionRequest, Action<CompletionResult> resultHandler, CancellationToken cancellationToken = default)
         {
             completionRequest.Stream = true;
-            var jsonContent = JsonConvert.SerializeObject(completionRequest, client.JsonSerializationOptions);
-
-            var response = await Rest.PostAsync(GetUrl(), jsonContent, eventData =>
+            var payload = JsonConvert.SerializeObject(completionRequest, client.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl(), payload, eventData =>
             {
                 resultHandler(JsonConvert.DeserializeObject<CompletionResult>(eventData, client.JsonSerializationOptions));
             }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.ValidateResponse();
+            response.Validate();
         }
 
         #endregion Streaming

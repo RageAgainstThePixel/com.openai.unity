@@ -66,8 +66,8 @@ namespace OpenAI.Images
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
         public async Task<IReadOnlyDictionary<string, Texture2D>> GenerateImageAsync(ImageGenerationRequest request, CancellationToken cancellationToken = default)
         {
-            var jsonContent = JsonConvert.SerializeObject(request, client.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl("/generations"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var payload = JsonConvert.SerializeObject(request, client.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl("/generations"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             return await DeserializeResponseAsync(response, cancellationToken);
         }
 
@@ -284,7 +284,7 @@ namespace OpenAI.Images
 
         private async Task<IReadOnlyDictionary<string, Texture2D>> DeserializeResponseAsync(Response response, CancellationToken cancellationToken = default)
         {
-            response.ValidateResponse();
+            response.Validate();
 
             var imagesResponse = JsonConvert.DeserializeObject<ImagesResponse>(response.Body, client.JsonSerializationOptions);
 

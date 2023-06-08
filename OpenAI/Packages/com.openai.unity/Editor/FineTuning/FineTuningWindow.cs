@@ -321,7 +321,7 @@ namespace OpenAI.Editor.FineTuning
                                 try
                                 {
                                     void ProgressHandler(Progress report) => EditorUtility.DisplayProgressBar($"Downloading {trainingFile}", $"Downloading {trainingFile} @ {report.Speed} {report.Unit}/s", report.Percentage * 0.01f);
-                                    var downloadPath = await openAI.FilesEndpoint.DownloadFileAsync(trainingFile, new Progress<Progress>(ProgressHandler)).ConfigureAwait(true);
+                                    var downloadPath = await openAI.FilesEndpoint.DownloadFileAsync(trainingFile, new Progress<Progress>(ProgressHandler));
                                     EditorUtility.ClearProgressBar();
                                     EditorUtility.RevealInFinder(downloadPath);
                                 }

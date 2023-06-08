@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Scripting;
 using Utilities.WebRequestRest;
 
 namespace OpenAI.Audio
@@ -15,6 +16,7 @@ namespace OpenAI.Audio
     /// </summary>
     public sealed class AudioEndpoint : OpenAIBaseEndpoint
     {
+        [Preserve]
         private class AudioResponse
         {
             public AudioResponse([JsonProperty("text")] string text)
@@ -67,7 +69,7 @@ namespace OpenAI.Audio
             request.Dispose();
 
             var response = await Rest.PostAsync(GetUrl("/transcriptions"), form, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.ValidateResponse();
+            response.Validate();
             return responseFormat == AudioResponseFormat.Json
                 ? JsonConvert.DeserializeObject<AudioResponse>(response.Body)?.Text
                 : response.Body;
@@ -103,7 +105,7 @@ namespace OpenAI.Audio
             request.Dispose();
 
             var response = await Rest.PostAsync(GetUrl("/translations"), form, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.ValidateResponse();
+            response.Validate();
             return responseFormat == AudioResponseFormat.Json
                 ? JsonConvert.DeserializeObject<AudioResponse>(response.Body)?.Text
                 : response.Body;

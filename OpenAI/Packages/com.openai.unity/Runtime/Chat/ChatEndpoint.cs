@@ -31,9 +31,9 @@ namespace OpenAI.Chat
         /// <returns><see cref="ChatResponse"/>.</returns>
         public async Task<ChatResponse> GetCompletionAsync(ChatRequest chatRequest, CancellationToken cancellationToken = default)
         {
-            var jsonContent = JsonConvert.SerializeObject(chatRequest, client.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl("/completions"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken).ConfigureAwait(false);
-            response.ValidateResponse();
+            var payload = JsonConvert.SerializeObject(chatRequest, client.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl("/completions"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate();
             return response.DeserializeResponse<ChatResponse>(response.Body, client.JsonSerializationOptions);
         }
 
@@ -59,11 +59,9 @@ namespace OpenAI.Chat
                 partials.Add(new StringBuilder());
             }
 
-            var jsonContent = JsonConvert.SerializeObject(chatRequest, client.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl("/completions"), jsonContent, eventData =>
+            var payload = JsonConvert.SerializeObject(chatRequest, client.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl("/completions"), payload, eventData =>
             {
-                if (string.IsNullOrWhiteSpace(eventData)) { return; }
-
                 partialResponse = JsonConvert.DeserializeObject<ChatResponse>(eventData, client.JsonSerializationOptions);
 
                 foreach (var choice in partialResponse.Choices)
@@ -78,7 +76,7 @@ namespace OpenAI.Chat
 
                 resultHandler(partialResponse);
             }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.ValidateResponse();
+            response.Validate();
 
             if (partialResponse == null) { return null; }
 

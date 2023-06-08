@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine.Scripting;
 using Utilities.WebRequestRest;
 
 namespace OpenAI.Models
@@ -16,12 +17,14 @@ namespace OpenAI.Models
     /// </summary>
     public sealed class ModelsEndpoint : OpenAIBaseEndpoint
     {
+        [Preserve]
         private class ModelsList
         {
             [JsonProperty("data")]
             public List<Model> Data { get; set; }
         }
 
+        [Preserve]
         private class DeleteModelResponse
         {
             [JsonConstructor]
@@ -59,7 +62,7 @@ namespace OpenAI.Models
         public async Task<IReadOnlyList<Model>> GetModelsAsync(CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl(), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
-            response.ValidateResponse();
+            response.Validate(true);
             return JsonConvert.DeserializeObject<ModelsList>(response.Body, client.JsonSerializationOptions)?.Data;
         }
 
@@ -72,7 +75,7 @@ namespace OpenAI.Models
         public async Task<Model> GetModelDetailsAsync(string id, CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl($"/{id}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
-            response.ValidateResponse();
+            response.Validate();
             return JsonConvert.DeserializeObject<Model>(response.Body, client.JsonSerializationOptions);
         }
 
@@ -97,12 +100,12 @@ namespace OpenAI.Models
             try
             {
                 var response = await Rest.DeleteAsync(GetUrl($"/{model.Id}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
-                response.ValidateResponse();
+                response.Validate();
                 return JsonConvert.DeserializeObject<DeleteModelResponse>(response.Body, client.JsonSerializationOptions)?.Deleted ?? false;
             }
             catch (RestException e)
             {
-                if (e.StatusCode == 403 ||
+                if (e.Response.Code == 403 ||
                     e.Message.Contains("api.delete"))
                 {
                     throw new UnauthorizedAccessException("You do not have permissions to delete models for this organization.");

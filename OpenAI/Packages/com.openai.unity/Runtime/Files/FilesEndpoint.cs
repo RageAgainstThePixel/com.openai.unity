@@ -38,7 +38,7 @@ namespace OpenAI.Files
         public async Task<IReadOnlyList<FileData>> ListFilesAsync(CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl(), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.ValidateResponse();
+            response.Validate();
             return JsonConvert.DeserializeObject<FilesList>(response.Body, client.JsonSerializationOptions)?.Data;
         }
 
@@ -80,7 +80,7 @@ namespace OpenAI.Files
             request.Dispose();
 
             var response = await Rest.PostAsync(GetUrl(), form, new RestParameters(client.DefaultRequestHeaders, uploadProgress), cancellationToken);
-            response.ValidateResponse();
+            response.Validate();
             return JsonConvert.DeserializeObject<FileData>(response.Body, client.JsonSerializationOptions);
         }
 
@@ -112,7 +112,7 @@ namespace OpenAI.Files
                         return await InternalDeleteFileAsync(attempt + 1);
                     }
 
-                    response.ValidateResponse();
+                    response.Validate();
                     return false;
                 }
 
@@ -129,7 +129,7 @@ namespace OpenAI.Files
         public async Task<FileData> GetFileInfoAsync(string fileId, CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl($"/{fileId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.ValidateResponse();
+            response.Validate();
             return JsonConvert.DeserializeObject<FileData>(response.Body, client.JsonSerializationOptions);
         }
 
