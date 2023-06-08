@@ -59,7 +59,7 @@ namespace OpenAI.Moderations
             var jsonContent = JsonConvert.SerializeObject(request, client.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl(), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.ValidateResponse();
-            return JsonConvert.DeserializeObject<ModerationsResponse>(response.ResponseBody, client.JsonSerializationOptions);
+            return JsonConvert.DeserializeObject<ModerationsResponse>(response.Body, client.JsonSerializationOptions);
         }
     }
 }

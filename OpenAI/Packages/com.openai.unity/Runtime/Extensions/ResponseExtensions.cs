@@ -14,19 +14,19 @@ namespace OpenAI.Extensions
 
         internal static void SetResponseData(this BaseResponse response, Response restResponse)
         {
-            if (restResponse is not { ResponseHeaders: not null }) { return; }
+            if (restResponse is not { Headers: not null }) { return; }
 
-            if (restResponse.ResponseHeaders.TryGetValue(Organization, out var organization))
+            if (restResponse.Headers.TryGetValue(Organization, out var organization))
             {
                 response.Organization = organization;
             }
 
-            if (restResponse.ResponseHeaders.TryGetValue(RequestId, out var requestId))
+            if (restResponse.Headers.TryGetValue(RequestId, out var requestId))
             {
                 response.RequestId = requestId;
             }
 
-            if (restResponse.ResponseHeaders.TryGetValue(ProcessingTime, out var processingTime))
+            if (restResponse.Headers.TryGetValue(ProcessingTime, out var processingTime))
             {
                 response.ProcessingTime = TimeSpan.FromMilliseconds(double.Parse(processingTime));
             }

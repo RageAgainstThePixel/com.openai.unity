@@ -1,12 +1,12 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using OpenAI.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenAI.Extensions;
 using Utilities.WebRequestRest;
 
 namespace OpenAI.Completions
@@ -109,7 +109,7 @@ namespace OpenAI.Completions
             var jsonContent = JsonConvert.SerializeObject(completionRequest, client.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl(), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.ValidateResponse();
-            return response.DeserializeResponse<CompletionResult>(response.ResponseBody, client.JsonSerializationOptions);
+            return response.DeserializeResponse<CompletionResult>(response.Body, client.JsonSerializationOptions);
         }
 
         #endregion Non-Streaming
@@ -193,7 +193,6 @@ namespace OpenAI.Completions
         /// <param name="completionRequest">The request to send to the API.</param>
         /// <param name="resultHandler">An action to be called as each new result arrives.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <exception cref="HttpRequestException">Raised when the HTTP request fails</exception>
         public async Task StreamCompletionAsync(CompletionRequest completionRequest, Action<CompletionResult> resultHandler, CancellationToken cancellationToken = default)
         {
             completionRequest.Stream = true;

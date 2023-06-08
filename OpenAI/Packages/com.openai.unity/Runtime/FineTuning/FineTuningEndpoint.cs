@@ -54,7 +54,7 @@ namespace OpenAI.FineTuning
 
             var response = await Rest.PostAsync(GetUrl(), jsonContent, new RestParameters(client.DefaultRequestHeaders));
             response.ValidateResponse();
-            return response.DeserializeResponse<FineTuneJobResponse>(response.ResponseBody, client.JsonSerializationOptions);
+            return response.DeserializeResponse<FineTuneJobResponse>(response.Body, client.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace OpenAI.FineTuning
         {
             var response = await Rest.GetAsync(GetUrl(), new RestParameters(client.DefaultRequestHeaders));
             response.ValidateResponse();
-            return JsonConvert.DeserializeObject<FineTuneList>(response.ResponseBody, client.JsonSerializationOptions)?.Data.OrderBy(job => job.CreatedAtUnixTime).ToArray();
+            return JsonConvert.DeserializeObject<FineTuneList>(response.Body, client.JsonSerializationOptions)?.Data.OrderBy(job => job.CreatedAtUnixTime).ToArray();
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace OpenAI.FineTuning
         {
             var response = await Rest.GetAsync(GetUrl($"/{jobId}"), new RestParameters(client.DefaultRequestHeaders));
             response.ValidateResponse();
-            return response.DeserializeResponse<FineTuneJobResponse>(response.ResponseBody, client.JsonSerializationOptions);
+            return response.DeserializeResponse<FineTuneJobResponse>(response.Body, client.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -93,9 +93,9 @@ namespace OpenAI.FineTuning
 
             const string cancelled = "cancelled";
 
-            if (!string.IsNullOrWhiteSpace(response.ResponseBody))
+            if (!string.IsNullOrWhiteSpace(response.Body))
             {
-                var result = response.DeserializeResponse<FineTuneJobResponse>(response.ResponseBody, client.JsonSerializationOptions);
+                var result = response.DeserializeResponse<FineTuneJobResponse>(response.Body, client.JsonSerializationOptions);
                 return result.Status == cancelled;
             }
 
@@ -113,7 +113,7 @@ namespace OpenAI.FineTuning
         {
             var response = await Rest.GetAsync(GetUrl($"/{jobId}/events"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.ValidateResponse();
-            return JsonConvert.DeserializeObject<FineTuneEventList>(response.ResponseBody, client.JsonSerializationOptions)?.Data.OrderBy(@event => @event.CreatedAtUnixTime).ToArray();
+            return JsonConvert.DeserializeObject<FineTuneEventList>(response.Body, client.JsonSerializationOptions)?.Data.OrderBy(@event => @event.CreatedAtUnixTime).ToArray();
         }
 
         /// <summary>

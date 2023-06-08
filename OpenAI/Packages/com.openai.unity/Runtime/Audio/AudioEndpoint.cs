@@ -40,37 +40,37 @@ namespace OpenAI.Audio
         /// <returns>The transcribed text.</returns>
         public async Task<string> CreateTranscriptionAsync(AudioTranscriptionRequest request, CancellationToken cancellationToken = default)
         {
-            var wwwForm = new WWWForm();
+            var form = new WWWForm();
             using var audioData = new MemoryStream();
             await request.Audio.CopyToAsync(audioData, cancellationToken);
-            wwwForm.AddBinaryData("file", audioData.ToArray(), request.AudioName);
-            wwwForm.AddField("model", request.Model);
+            form.AddBinaryData("file", audioData.ToArray(), request.AudioName);
+            form.AddField("model", request.Model);
 
             if (!string.IsNullOrWhiteSpace(request.Prompt))
             {
-                wwwForm.AddField("prompt", request.Prompt);
+                form.AddField("prompt", request.Prompt);
             }
 
             var responseFormat = request.ResponseFormat;
-            wwwForm.AddField("response_format", responseFormat.ToString().ToLower());
+            form.AddField("response_format", responseFormat.ToString().ToLower());
 
             if (request.Temperature.HasValue)
             {
-                wwwForm.AddField("temperature", request.Temperature.ToString());
+                form.AddField("temperature", request.Temperature.ToString());
             }
 
             if (!string.IsNullOrWhiteSpace(request.Language))
             {
-                wwwForm.AddField("language", request.Language);
+                form.AddField("language", request.Language);
             }
 
             request.Dispose();
 
-            var response = await Rest.PostAsync(GetUrl("/transcriptions"), wwwForm, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl("/transcriptions"), form, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.ValidateResponse();
             return responseFormat == AudioResponseFormat.Json
-                ? JsonConvert.DeserializeObject<AudioResponse>(response.ResponseBody)?.Text
-                : response.ResponseBody;
+                ? JsonConvert.DeserializeObject<AudioResponse>(response.Body)?.Text
+                : response.Body;
         }
 
         /// <summary>
@@ -81,32 +81,32 @@ namespace OpenAI.Audio
         /// <returns>The translated text.</returns>
         public async Task<string> CreateTranslationAsync(AudioTranslationRequest request, CancellationToken cancellationToken = default)
         {
-            var wwwForm = new WWWForm();
+            var form = new WWWForm();
             using var audioData = new MemoryStream();
             await request.Audio.CopyToAsync(audioData, cancellationToken);
-            wwwForm.AddBinaryData("file", audioData.ToArray(), request.AudioName);
-            wwwForm.AddField("model", request.Model);
+            form.AddBinaryData("file", audioData.ToArray(), request.AudioName);
+            form.AddField("model", request.Model);
 
             if (!string.IsNullOrWhiteSpace(request.Prompt))
             {
-                wwwForm.AddField("prompt", request.Prompt);
+                form.AddField("prompt", request.Prompt);
             }
 
             var responseFormat = request.ResponseFormat;
-            wwwForm.AddField("response_format", responseFormat.ToString().ToLower());
+            form.AddField("response_format", responseFormat.ToString().ToLower());
 
             if (request.Temperature.HasValue)
             {
-                wwwForm.AddField("temperature", request.Temperature.ToString());
+                form.AddField("temperature", request.Temperature.ToString());
             }
 
             request.Dispose();
 
-            var response = await Rest.PostAsync(GetUrl("/translations"), wwwForm, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl("/translations"), form, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.ValidateResponse();
             return responseFormat == AudioResponseFormat.Json
-                ? JsonConvert.DeserializeObject<AudioResponse>(response.ResponseBody)?.Text
-                : response.ResponseBody;
+                ? JsonConvert.DeserializeObject<AudioResponse>(response.Body)?.Text
+                : response.Body;
         }
     }
 }

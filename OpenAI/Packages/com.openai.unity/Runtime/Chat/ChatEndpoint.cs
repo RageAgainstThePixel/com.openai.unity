@@ -34,7 +34,7 @@ namespace OpenAI.Chat
             var jsonContent = JsonConvert.SerializeObject(chatRequest, client.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl("/completions"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken).ConfigureAwait(false);
             response.ValidateResponse();
-            return response.DeserializeResponse<ChatResponse>(response.ResponseBody, client.JsonSerializationOptions);
+            return response.DeserializeResponse<ChatResponse>(response.Body, client.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -44,7 +44,6 @@ namespace OpenAI.Chat
         /// <param name="resultHandler">An action to be called as each new result arrives.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="ChatResponse"/>.</returns>
-        /// <exception cref="HttpRequestException">Raised when the HTTP request fails</exception>
         public async Task<ChatResponse> StreamCompletionAsync(ChatRequest chatRequest, Action<ChatResponse> resultHandler, CancellationToken cancellationToken = default)
         {
             chatRequest.Stream = true;

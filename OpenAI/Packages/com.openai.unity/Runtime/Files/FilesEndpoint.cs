@@ -39,7 +39,7 @@ namespace OpenAI.Files
         {
             var response = await Rest.GetAsync(GetUrl(), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.ValidateResponse();
-            return JsonConvert.DeserializeObject<FilesList>(response.ResponseBody, client.JsonSerializationOptions)?.Data;
+            return JsonConvert.DeserializeObject<FilesList>(response.Body, client.JsonSerializationOptions)?.Data;
         }
 
         /// <summary>
@@ -72,16 +72,16 @@ namespace OpenAI.Files
         /// <returns><see cref="FileData"/>.</returns>
         public async Task<FileData> UploadFileAsync(FileUploadRequest request, IProgress<Progress> uploadProgress = null, CancellationToken cancellationToken = default)
         {
-            var wwwForm = new WWWForm();
+            var form = new WWWForm();
             using var fileData = new MemoryStream();
             await request.File.CopyToAsync(fileData, cancellationToken);
-            wwwForm.AddField("purpose", request.Purpose);
-            wwwForm.AddBinaryData("file", fileData.ToArray(), request.FileName);
+            form.AddField("purpose", request.Purpose);
+            form.AddBinaryData("file", fileData.ToArray(), request.FileName);
             request.Dispose();
 
-            var response = await Rest.PostAsync(GetUrl(), wwwForm, new RestParameters(client.DefaultRequestHeaders, uploadProgress), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl(), form, new RestParameters(client.DefaultRequestHeaders, uploadProgress), cancellationToken);
             response.ValidateResponse();
-            return JsonConvert.DeserializeObject<FileData>(response.ResponseBody, client.JsonSerializationOptions);
+            return JsonConvert.DeserializeObject<FileData>(response.Body, client.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -103,9 +103,9 @@ namespace OpenAI.Files
                 {
                     const string fileProcessing = "File is still processing. Check back later.";
 
-                    if (response.ResponseCode == 409 ||
-                        response.ResponseBody != null &&
-                        response.ResponseBody.Contains(fileProcessing))
+                    if (response.Code == 409 ||
+                        response.Body != null &&
+                        response.Body.Contains(fileProcessing))
                     {
                         // back off requests on each attempt
                         await Task.Delay(1000 * attempt, cancellationToken);
@@ -130,7 +130,7 @@ namespace OpenAI.Files
         {
             var response = await Rest.GetAsync(GetUrl($"/{fileId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.ValidateResponse();
-            return JsonConvert.DeserializeObject<FileData>(response.ResponseBody, client.JsonSerializationOptions);
+            return JsonConvert.DeserializeObject<FileData>(response.Body, client.JsonSerializationOptions);
         }
 
         /// <summary>

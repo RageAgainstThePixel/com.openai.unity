@@ -167,31 +167,31 @@ namespace OpenAI.Images
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
         public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageEditAsync(ImageEditRequest request, CancellationToken cancellationToken = default)
         {
-            var wwwForm = new WWWForm();
+            var form = new WWWForm();
             using var imageData = new MemoryStream();
             await request.Image.CopyToAsync(imageData, cancellationToken);
-            wwwForm.AddBinaryData("image", imageData.ToArray(), request.ImageName);
+            form.AddBinaryData("image", imageData.ToArray(), request.ImageName);
 
             if (request.Mask != null)
             {
                 using var maskData = new MemoryStream();
                 await request.Mask.CopyToAsync(maskData, cancellationToken);
-                wwwForm.AddBinaryData("mask", maskData.ToArray(), request.MaskName);
+                form.AddBinaryData("mask", maskData.ToArray(), request.MaskName);
             }
 
-            wwwForm.AddField("prompt", request.Prompt);
-            wwwForm.AddField("n", request.Number.ToString());
-            wwwForm.AddField("size", request.Size);
-            wwwForm.AddField("response_format", request.ResponseFormat);
+            form.AddField("prompt", request.Prompt);
+            form.AddField("n", request.Number.ToString());
+            form.AddField("size", request.Size);
+            form.AddField("response_format", request.ResponseFormat);
 
             if (!string.IsNullOrWhiteSpace(request.User))
             {
-                wwwForm.AddField("user", request.User);
+                form.AddField("user", request.User);
             }
 
             request.Dispose();
 
-            var response = await Rest.PostAsync(GetUrl("/edits"), wwwForm, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl("/edits"), form, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             return await DeserializeResponseAsync(response, cancellationToken);
         }
 
@@ -263,22 +263,22 @@ namespace OpenAI.Images
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
         public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageVariationAsync(ImageVariationRequest request, CancellationToken cancellationToken = default)
         {
-            var wwwForm = new WWWForm();
+            var form = new WWWForm();
             using var imageData = new MemoryStream();
             await request.Image.CopyToAsync(imageData, cancellationToken);
-            wwwForm.AddBinaryData("image", imageData.ToArray(), request.ImageName);
-            wwwForm.AddField("n", request.Number.ToString());
-            wwwForm.AddField("size", request.Size);
-            wwwForm.AddField("response_format", request.ResponseFormat);
+            form.AddBinaryData("image", imageData.ToArray(), request.ImageName);
+            form.AddField("n", request.Number.ToString());
+            form.AddField("size", request.Size);
+            form.AddField("response_format", request.ResponseFormat);
 
             if (!string.IsNullOrWhiteSpace(request.User))
             {
-                wwwForm.AddField("user", request.User);
+                form.AddField("user", request.User);
             }
 
             request.Dispose();
 
-            var response = await Rest.PostAsync(GetUrl("/variations"), wwwForm, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl("/variations"), form, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             return await DeserializeResponseAsync(response, cancellationToken);
         }
 
@@ -286,11 +286,11 @@ namespace OpenAI.Images
         {
             response.ValidateResponse();
 
-            var imagesResponse = JsonConvert.DeserializeObject<ImagesResponse>(response.ResponseBody, client.JsonSerializationOptions);
+            var imagesResponse = JsonConvert.DeserializeObject<ImagesResponse>(response.Body, client.JsonSerializationOptions);
 
             if (imagesResponse?.Data == null || imagesResponse.Data.Count == 0)
             {
-                throw new Exception($"No image content returned!\n{response.ResponseBody}");
+                throw new Exception($"No image content returned!\n{response.Body}");
             }
 
             imagesResponse.SetResponseData(response);

@@ -60,7 +60,7 @@ namespace OpenAI.Models
         {
             var response = await Rest.GetAsync(GetUrl(), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
             response.ValidateResponse();
-            return JsonConvert.DeserializeObject<ModelsList>(response.ResponseBody, client.JsonSerializationOptions)?.Data;
+            return JsonConvert.DeserializeObject<ModelsList>(response.Body, client.JsonSerializationOptions)?.Data;
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace OpenAI.Models
         {
             var response = await Rest.GetAsync(GetUrl($"/{id}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
             response.ValidateResponse();
-            return JsonConvert.DeserializeObject<Model>(response.ResponseBody, client.JsonSerializationOptions);
+            return JsonConvert.DeserializeObject<Model>(response.Body, client.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace OpenAI.Models
             {
                 var response = await Rest.DeleteAsync(GetUrl($"/{model.Id}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
                 response.ValidateResponse();
-                return JsonConvert.DeserializeObject<DeleteModelResponse>(response.ResponseBody, client.JsonSerializationOptions)?.Deleted ?? false;
+                return JsonConvert.DeserializeObject<DeleteModelResponse>(response.Body, client.JsonSerializationOptions)?.Deleted ?? false;
             }
             catch (RestException e)
             {
