@@ -170,7 +170,7 @@ namespace OpenAI.Tests
                 }
             }
 
-            var jobInfo = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(fineTuneJob);
+            var jobInfo = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(fineTuneJob, CancellationToken.None);
             Assert.IsNotNull(jobInfo);
             Debug.Log($"{jobInfo.Id} -> {jobInfo.Status}");
             Assert.IsTrue(jobInfo.Status == "cancelled");

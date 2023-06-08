@@ -43,15 +43,16 @@ namespace OpenAI.FineTuning
 
         /// <summary>
         /// Creates a job that fine-tunes a specified model from a given dataset.
-        /// Response includes details of the enqueued job including job status and
+        /// Response includes details of the queued job including job status and
         /// the name of the fine-tuned models once complete.
         /// </summary>
         /// <param name="jobRequest"><see cref="CreateFineTuneJobRequest"/>.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="FineTuneJob"/>.</returns>
-        public async Task<FineTuneJob> CreateFineTuneJobAsync(CreateFineTuneJobRequest jobRequest)
+        public async Task<FineTuneJob> CreateFineTuneJobAsync(CreateFineTuneJobRequest jobRequest, CancellationToken cancellationToken = default)
         {
             var payload = JsonConvert.SerializeObject(jobRequest, client.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders));
+            var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate();
             return response.DeserializeResponse<FineTuneJobResponse>(response.Body, client.JsonSerializationOptions);
         }
@@ -59,10 +60,11 @@ namespace OpenAI.FineTuning
         /// <summary>
         /// List your organization's fine-tuning jobs.
         /// </summary>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>List of <see cref="FineTuneJob"/>s.</returns>
-        public async Task<IReadOnlyList<FineTuneJob>> ListFineTuneJobsAsync()
+        public async Task<IReadOnlyList<FineTuneJob>> ListFineTuneJobsAsync(CancellationToken cancellationToken = default)
         {
-            var response = await Rest.GetAsync(GetUrl(), new RestParameters(client.DefaultRequestHeaders));
+            var response = await Rest.GetAsync(GetUrl(), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate();
             return JsonConvert.DeserializeObject<FineTuneList>(response.Body, client.JsonSerializationOptions)?.Data.OrderBy(job => job.CreatedAtUnixTime).ToArray();
         }
@@ -71,10 +73,11 @@ namespace OpenAI.FineTuning
         /// Gets info about the fine-tune job.
         /// </summary>
         /// <param name="jobId"><see cref="FineTuneJob.Id"/>.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="FineTuneJobResponse"/>.</returns>
-        public async Task<FineTuneJob> RetrieveFineTuneJobInfoAsync(string jobId)
+        public async Task<FineTuneJob> RetrieveFineTuneJobInfoAsync(string jobId, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.GetAsync(GetUrl($"/{jobId}"), new RestParameters(client.DefaultRequestHeaders));
+            var response = await Rest.GetAsync(GetUrl($"/{jobId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate();
             return response.DeserializeResponse<FineTuneJobResponse>(response.Body, client.JsonSerializationOptions);
         }
@@ -83,11 +86,12 @@ namespace OpenAI.FineTuning
         /// Immediately cancel a fine-tune job.
         /// </summary>
         /// <param name="jobId"><see cref="FineTuneJob.Id"/> to cancel.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="FineTuneJobResponse"/>.</returns>
-        public async Task<bool> CancelFineTuneJobAsync(string jobId)
+        public async Task<bool> CancelFineTuneJobAsync(string jobId, CancellationToken cancellationToken = default)
         {
-            var job = await RetrieveFineTuneJobInfoAsync(jobId);
-            var response = await Rest.PostAsync(GetUrl($"/{job.Id}/cancel"), new RestParameters(client.DefaultRequestHeaders));
+            var job = await RetrieveFineTuneJobInfoAsync(jobId, cancellationToken);
+            var response = await Rest.PostAsync(GetUrl($"/{job.Id}/cancel"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate();
 
             const string cancelled = "cancelled";
@@ -98,7 +102,7 @@ namespace OpenAI.FineTuning
                 return result.Status == cancelled;
             }
 
-            job = await RetrieveFineTuneJobInfoAsync(jobId);
+            job = await RetrieveFineTuneJobInfoAsync(jobId, cancellationToken);
             return job.Status == cancelled;
         }
 
@@ -135,7 +139,7 @@ namespace OpenAI.FineTuning
 
             if (cancellationToken.IsCancellationRequested && cancelJob)
             {
-                var isCancelled = await CancelFineTuneJobAsync(jobId);
+                var isCancelled = await CancelFineTuneJobAsync(jobId, cancellationToken);
 
                 if (!isCancelled)
                 {
