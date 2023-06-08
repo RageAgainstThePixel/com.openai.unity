@@ -62,7 +62,7 @@ namespace OpenAI.Models
         public async Task<IReadOnlyList<Model>> GetModelsAsync(CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl(), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
-            response.Validate(true);
+            response.Validate();
             return JsonConvert.DeserializeObject<ModelsList>(response.Body, client.JsonSerializationOptions)?.Data;
         }
 
