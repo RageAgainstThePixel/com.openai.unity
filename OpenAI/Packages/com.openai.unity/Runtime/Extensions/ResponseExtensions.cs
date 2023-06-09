@@ -2,9 +2,7 @@
 
 using Newtonsoft.Json;
 using System;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
+using Utilities.WebRequestRest;
 
 namespace OpenAI.Extensions
 {
@@ -14,21 +12,30 @@ namespace OpenAI.Extensions
         private const string RequestId = "X-Request-ID";
         private const string ProcessingTime = "Openai-Processing-Ms";
 
-        internal static void SetResponseData(this BaseResponse response, HttpResponseHeaders headers)
+        internal static void SetResponseData(this BaseResponse response, Response restResponse)
         {
-            if (headers.Contains(Organization))
+            if (restResponse is not { Headers: not null }) { return; }
+
+            if (restResponse.Headers.TryGetValue(Organization, out var organization))
             {
-                response.Organization = headers.GetValues(Organization).FirstOrDefault();
+                response.Organization = organization;
             }
 
-            response.ProcessingTime = TimeSpan.FromMilliseconds(double.Parse(headers.GetValues(ProcessingTime).First()));
-            response.RequestId = headers.GetValues(RequestId).FirstOrDefault();
+            if (restResponse.Headers.TryGetValue(RequestId, out var requestId))
+            {
+                response.RequestId = requestId;
+            }
+
+            if (restResponse.Headers.TryGetValue(ProcessingTime, out var processingTime))
+            {
+                response.ProcessingTime = TimeSpan.FromMilliseconds(double.Parse(processingTime));
+            }
         }
 
-        internal static T DeserializeResponse<T>(this HttpResponseMessage response, string json, JsonSerializerSettings settings) where T : BaseResponse
+        internal static T DeserializeResponse<T>(this Response response, string json, JsonSerializerSettings settings) where T : BaseResponse
         {
             var result = JsonConvert.DeserializeObject<T>(json, settings);
-            result.SetResponseData(response.Headers);
+            result.SetResponseData(response);
             return result;
         }
     }

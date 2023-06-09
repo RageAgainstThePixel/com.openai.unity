@@ -69,36 +69,5 @@ namespace OpenAI.Tests
             Assert.IsNotNull(finalResult.Choices);
             Assert.IsTrue(finalResult.Choices.Count == 2);
         }
-
-        [Test]
-        public async Task Test_3_GetChatStreamingCompletionEnumerableAsync()
-        {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.ChatEndpoint);
-            var messages = new List<Message>
-            {
-                new Message(Role.System, "You are a helpful assistant."),
-                new Message(Role.User, "Who won the world series in 2020?"),
-                new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
-                new Message(Role.User, "Where was it played?"),
-            };
-            var chatRequest = new ChatRequest(messages, number: 2);
-            await foreach (var result in api.ChatEndpoint.StreamCompletionEnumerableAsync(chatRequest))
-            {
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.Choices);
-                Assert.NotZero(result.Choices.Count);
-
-                foreach (var choice in result.Choices.Where(choice => choice.Delta?.Content != null))
-                {
-                    Debug.Log($"[{choice.Index}] {choice.Delta.Content}");
-                }
-
-                foreach (var choice in result.Choices.Where(choice => choice.Message?.Content != null))
-                {
-                    Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
-                }
-            }
-        }
     }
 }

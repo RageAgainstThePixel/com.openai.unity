@@ -170,7 +170,7 @@ namespace OpenAI.Tests
                 }
             }
 
-            var jobInfo = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(fineTuneJob);
+            var jobInfo = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(fineTuneJob, CancellationToken.None);
             Assert.IsNotNull(jobInfo);
             Debug.Log($"{jobInfo.Id} -> {jobInfo.Status}");
             Assert.IsTrue(jobInfo.Status == "cancelled");
@@ -178,52 +178,6 @@ namespace OpenAI.Tests
             Assert.IsTrue(result);
         }
 
-        [Test]
-        public async Task Test_07_StreamFineTuneEventsEnumerable()
-        {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.FineTuningEndpoint);
-
-            var fileData = await CreateTestTrainingDataAsync(api);
-            var request = new CreateFineTuneJobRequest(fileData);
-            var fineTuneResponse = await api.FineTuningEndpoint.CreateFineTuneJobAsync(request);
-            Assert.IsNotNull(fineTuneResponse);
-
-            var fineTuneJob = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(fineTuneResponse);
-            Assert.IsNotNull(fineTuneJob);
-            Debug.Log($"{fineTuneJob.Id} ->");
-            var cancellationTokenSource = new CancellationTokenSource();
-
-            try
-            {
-                await foreach (var fineTuneEvent in api.FineTuningEndpoint.StreamFineTuneEventsEnumerableAsync(
-                                   fineTuneJob, cancelJob: true, cancellationTokenSource.Token))
-                {
-                    Debug.Log($"  {fineTuneEvent.CreatedAt} [{fineTuneEvent.Level}] {fineTuneEvent.Message}");
-                    cancellationTokenSource.Cancel();
-                }
-            }
-            catch (Exception e)
-            {
-                switch (e)
-                {
-                    case TaskCanceledException:
-                    case OperationCanceledException:
-                        // Ignored
-                        break;
-                    default:
-                        Debug.LogError(e);
-                        break;
-                }
-            }
-
-            var jobInfo = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(fineTuneJob);
-            Assert.IsNotNull(jobInfo);
-            Debug.Log($"{jobInfo.Id} -> {jobInfo.Status}");
-            Assert.IsTrue(jobInfo.Status == "cancelled");
-            var result = await api.FilesEndpoint.DeleteFileAsync(fileData, CancellationToken.None);
-            Assert.IsTrue(result);
-        }
 
         [Test]
         public async Task Test_08_DeleteFineTunedModel()

@@ -3,8 +3,9 @@
 using Newtonsoft.Json;
 using OpenAI.Extensions;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
-using Utilities.Rest.Extensions;
+using Utilities.WebRequestRest;
 
 namespace OpenAI.Embeddings
 {
@@ -35,9 +36,10 @@ namespace OpenAI.Embeddings
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="EmbeddingsResponse"/></returns>
-        public async Task<EmbeddingsResponse> CreateEmbeddingAsync(string input, string model = null, string user = null)
-            => await CreateEmbeddingAsync(new EmbeddingsRequest(input, model, user));
+        public async Task<EmbeddingsResponse> CreateEmbeddingAsync(string input, string model = null, string user = null, CancellationToken cancellationToken = default)
+            => await CreateEmbeddingAsync(new EmbeddingsRequest(input, model, user), cancellationToken);
 
         /// <summary>
         /// Creates an embedding vector representing the input text.
@@ -54,20 +56,23 @@ namespace OpenAI.Embeddings
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="EmbeddingsResponse"/></returns>
-        public async Task<EmbeddingsResponse> CreateEmbeddingAsync(IEnumerable<string> input, string model = null, string user = null)
-            => await CreateEmbeddingAsync(new EmbeddingsRequest(input, model, user)).ConfigureAwait(false);
+        public async Task<EmbeddingsResponse> CreateEmbeddingAsync(IEnumerable<string> input, string model = null, string user = null, CancellationToken cancellationToken = default)
+            => await CreateEmbeddingAsync(new EmbeddingsRequest(input, model, user), cancellationToken);
 
         /// <summary>
         /// Creates an embedding vector representing the input text.
         /// </summary>
+        /// <param name="request"><see cref="EmbeddingsRequest"/>.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="EmbeddingsResponse"/></returns>
-        public async Task<EmbeddingsResponse> CreateEmbeddingAsync(EmbeddingsRequest request)
+        public async Task<EmbeddingsResponse> CreateEmbeddingAsync(EmbeddingsRequest request, CancellationToken cancellationToken = default)
         {
-            var jsonContent = JsonConvert.SerializeObject(request, client.JsonSerializationOptions).ToJsonStringContent();
-            var response = await client.Client.PostAsync(GetUrl(), jsonContent);
-            var responseAsString = await response.ReadAsStringAsync();
-            return response.DeserializeResponse<EmbeddingsResponse>(responseAsString, client.JsonSerializationOptions);
+            var payload = JsonConvert.SerializeObject(request, client.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate();
+            return response.DeserializeResponse<EmbeddingsResponse>(response.Body, client.JsonSerializationOptions);
         }
     }
 }

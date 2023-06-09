@@ -1,11 +1,10 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using OpenAI.Extensions;
 using System.Linq;
-using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
-using Utilities.Rest.Extensions;
+using Utilities.WebRequestRest;
 
 namespace OpenAI.Moderations
 {
@@ -33,12 +32,13 @@ namespace OpenAI.Moderations
         /// If you use text-moderation-stable, we will provide advanced notice before updating the model.
         /// Accuracy of text-moderation-stable may be slightly lower than for text-moderation-latest.
         /// </param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>
         /// True, if the text has been flagged by the model as violating OpenAI's content policy.
         /// </returns>
-        public async Task<bool> GetModerationAsync(string input, string model = null)
+        public async Task<bool> GetModerationAsync(string input, string model = null, CancellationToken cancellationToken = default)
         {
-            var result = await CreateModerationAsync(new ModerationsRequest(input, model));
+            var result = await CreateModerationAsync(new ModerationsRequest(input, model), cancellationToken);
 
             if (result?.Results == null ||
                 result.Results.Count == 0)
@@ -53,13 +53,13 @@ namespace OpenAI.Moderations
         /// Classifies if text violates OpenAI's Content Policy
         /// </summary>
         /// <param name="request"><see cref="ModerationsRequest"/></param>
-        /// <exception cref="HttpRequestException">Raised when the HTTP request fails</exception>
-        public async Task<ModerationsResponse> CreateModerationAsync(ModerationsRequest request)
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        public async Task<ModerationsResponse> CreateModerationAsync(ModerationsRequest request, CancellationToken cancellationToken = default)
         {
-            var jsonContent = JsonConvert.SerializeObject(request, client.JsonSerializationOptions).ToJsonStringContent();
-            var response = await client.Client.PostAsync(GetUrl(), jsonContent);
-            var resultAsString = await response.ReadAsStringAsync();
-            return response.DeserializeResponse<ModerationsResponse>(resultAsString, client.JsonSerializationOptions);
+            var payload = JsonConvert.SerializeObject(request, client.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate();
+            return JsonConvert.DeserializeObject<ModerationsResponse>(response.Body, client.JsonSerializationOptions);
         }
     }
 }

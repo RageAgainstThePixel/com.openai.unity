@@ -7,11 +7,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using Utilities.Rest.Extensions;
 using Utilities.WebRequestRest;
 
 namespace OpenAI.Images
@@ -51,7 +49,6 @@ namespace OpenAI.Images
         /// Optional, <see cref="CancellationToken"/>.
         /// </param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
-        /// <exception cref="HttpRequestException"></exception>
         public async Task<IReadOnlyDictionary<string, Texture2D>> GenerateImageAsync(
             string prompt,
             int numberOfResults = 1,
@@ -67,11 +64,10 @@ namespace OpenAI.Images
         /// <param name="request"><see cref="ImageGenerationRequest"/></param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
-        /// <exception cref="HttpRequestException"></exception>
         public async Task<IReadOnlyDictionary<string, Texture2D>> GenerateImageAsync(ImageGenerationRequest request, CancellationToken cancellationToken = default)
         {
-            var jsonContent = JsonConvert.SerializeObject(request, client.JsonSerializationOptions).ToJsonStringContent();
-            var response = await client.Client.PostAsync(GetUrl("/generations"), jsonContent, cancellationToken);
+            var payload = JsonConvert.SerializeObject(request, client.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl("/generations"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             return await DeserializeResponseAsync(response, cancellationToken);
         }
 
@@ -108,7 +104,6 @@ namespace OpenAI.Images
         /// <returns>
         /// A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.
         /// </returns>
-        /// <exception cref="HttpRequestException"></exception>
         public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageEditAsync(
             string image,
             string mask,
@@ -153,7 +148,6 @@ namespace OpenAI.Images
         /// <returns>
         /// A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.
         /// </returns>
-        /// <exception cref="HttpRequestException"></exception>
         public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageEditAsync(
             Texture2D image,
             Texture2D mask,
@@ -171,34 +165,33 @@ namespace OpenAI.Images
         /// <param name="request"><see cref="ImageEditRequest"/></param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
-        /// <exception cref="HttpRequestException"></exception>
         public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageEditAsync(ImageEditRequest request, CancellationToken cancellationToken = default)
         {
-            using var content = new MultipartFormDataContent();
+            var form = new WWWForm();
             using var imageData = new MemoryStream();
             await request.Image.CopyToAsync(imageData, cancellationToken);
-            content.Add(new ByteArrayContent(imageData.ToArray()), "image", request.ImageName);
+            form.AddBinaryData("image", imageData.ToArray(), request.ImageName);
 
             if (request.Mask != null)
             {
                 using var maskData = new MemoryStream();
                 await request.Mask.CopyToAsync(maskData, cancellationToken);
-                content.Add(new ByteArrayContent(maskData.ToArray()), "mask", request.MaskName);
+                form.AddBinaryData("mask", maskData.ToArray(), request.MaskName);
             }
 
-            content.Add(new StringContent(request.Prompt), "prompt");
-            content.Add(new StringContent(request.Number.ToString()), "n");
-            content.Add(new StringContent(request.Size), "size");
-            content.Add(new StringContent(request.ResponseFormat), "response_format");
+            form.AddField("prompt", request.Prompt);
+            form.AddField("n", request.Number.ToString());
+            form.AddField("size", request.Size);
+            form.AddField("response_format", request.ResponseFormat);
 
             if (!string.IsNullOrWhiteSpace(request.User))
             {
-                content.Add(new StringContent(request.User), "user");
+                form.AddField("user", request.User);
             }
 
             request.Dispose();
 
-            var response = await client.Client.PostAsync(GetUrl("/edits"), content, cancellationToken);
+            var response = await Rest.PostAsync(GetUrl("/edits"), form, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             return await DeserializeResponseAsync(response, cancellationToken);
         }
 
@@ -223,7 +216,6 @@ namespace OpenAI.Images
         /// </param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
-        /// <exception cref="HttpRequestException"></exception>
         public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageVariationAsync(
             string imagePath,
             int numberOfResults = 1,
@@ -254,7 +246,6 @@ namespace OpenAI.Images
         /// </param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
-        /// <exception cref="HttpRequestException"></exception>
         public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageVariationAsync(
             Texture2D texture,
             int numberOfResults = 1,
@@ -270,39 +261,39 @@ namespace OpenAI.Images
         /// <param name="request"><see cref="ImageVariationRequest"/></param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
-        /// <exception cref="HttpRequestException"></exception>
         public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageVariationAsync(ImageVariationRequest request, CancellationToken cancellationToken = default)
         {
-            using var content = new MultipartFormDataContent();
+            var form = new WWWForm();
             using var imageData = new MemoryStream();
             await request.Image.CopyToAsync(imageData, cancellationToken);
-            content.Add(new ByteArrayContent(imageData.ToArray()), "image", request.ImageName);
-            content.Add(new StringContent(request.Number.ToString()), "n");
-            content.Add(new StringContent(request.Size), "size");
-            content.Add(new StringContent(request.ResponseFormat), "response_format");
+            form.AddBinaryData("image", imageData.ToArray(), request.ImageName);
+            form.AddField("n", request.Number.ToString());
+            form.AddField("size", request.Size);
+            form.AddField("response_format", request.ResponseFormat);
 
             if (!string.IsNullOrWhiteSpace(request.User))
             {
-                content.Add(new StringContent(request.User), "user");
+                form.AddField("user", request.User);
             }
 
             request.Dispose();
 
-            var response = await client.Client.PostAsync(GetUrl("/variations"), content, cancellationToken);
+            var response = await Rest.PostAsync(GetUrl("/variations"), form, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             return await DeserializeResponseAsync(response, cancellationToken);
         }
 
-        private async Task<IReadOnlyDictionary<string, Texture2D>> DeserializeResponseAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
+        private async Task<IReadOnlyDictionary<string, Texture2D>> DeserializeResponseAsync(Response response, CancellationToken cancellationToken = default)
         {
-            var resultAsString = await response.ReadAsStringAsync();
-            var imagesResponse = JsonConvert.DeserializeObject<ImagesResponse>(resultAsString, client.JsonSerializationOptions);
+            response.Validate();
+
+            var imagesResponse = JsonConvert.DeserializeObject<ImagesResponse>(response.Body, client.JsonSerializationOptions);
 
             if (imagesResponse?.Data == null || imagesResponse.Data.Count == 0)
             {
-                throw new HttpRequestException($"{nameof(DeserializeResponseAsync)} returned no results!  HTTP status code: {response.StatusCode}. Response body: {resultAsString}");
+                throw new Exception($"No image content returned!\n{response.Body}");
             }
 
-            imagesResponse.SetResponseData(response.Headers);
+            imagesResponse.SetResponseData(response);
 
             var images = new ConcurrentDictionary<string, Texture2D>();
             var downloads = imagesResponse.Data.Select(DownloadAsync).ToList();
@@ -333,7 +324,7 @@ namespace OpenAI.Images
                     resultString = result.Url;
                 }
 
-                var texture = await Rest.DownloadTextureAsync(resultString, cancellationToken: cancellationToken);
+                var texture = await Rest.DownloadTextureAsync(resultString, parameters: null, cancellationToken: cancellationToken);
 
                 if (Rest.TryGetDownloadCacheItem(resultString, out localFilePath))
                 {
