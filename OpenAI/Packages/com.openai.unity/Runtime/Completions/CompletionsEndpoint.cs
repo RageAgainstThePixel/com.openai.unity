@@ -59,8 +59,10 @@ namespace OpenAI.Completions
         /// <param name="model">Optional, <see cref="Model"/> to use when calling the API.
         /// Defaults to <see cref="Model.Davinci"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns>Asynchronously returns the completion result.
-        /// Look in its <see cref="CompletionResult.Completions"/> property for the completions.</returns>
+        /// <returns>
+        /// Asynchronously returns the completion result.
+        /// Look in its <see cref="CompletionResult.Completions"/> property for the completions.
+        /// </returns>
         public async Task<CompletionResult> CreateCompletionAsync(
             string prompt = null,
             IEnumerable<string> prompts = null,
@@ -101,8 +103,10 @@ namespace OpenAI.Completions
         /// </summary>
         /// <param name="completionRequest">The request to send to the API.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns>Asynchronously returns the completion result.
-        /// Look in its <see cref="CompletionResult.Completions"/> property for the completions.</returns>
+        /// <returns>
+        /// Asynchronously returns the completion result.
+        /// Look in its <see cref="CompletionResult.Completions"/> property for the completions.
+        /// </returns>
         public async Task<CompletionResult> CreateCompletionAsync(CompletionRequest completionRequest, CancellationToken cancellationToken = default)
         {
             completionRequest.Stream = false;
@@ -148,9 +152,6 @@ namespace OpenAI.Completions
         /// <param name="model">Optional, <see cref="Model"/> to use when calling the API.
         /// Defaults to <see cref="Model.Davinci"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns>An async enumerable with each of the results as they come in.
-        /// See <see href="https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-8#asynchronous-streams">the C# docs</see>
-        /// for more details on how to consume an async enumerable.</returns>
         public async Task StreamCompletionAsync(
             Action<CompletionResult> resultHandler,
             string prompt = null,
@@ -202,6 +203,32 @@ namespace OpenAI.Completions
                 resultHandler(JsonConvert.DeserializeObject<CompletionResult>(eventData, client.JsonSerializationOptions));
             }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate();
+        }
+
+        [Obsolete("Use StreamCompletionAsync")]
+        public IAsyncEnumerable<CompletionResult> StreamCompletionEnumerableAsync(
+            string prompt = null,
+            IEnumerable<string> prompts = null,
+            string suffix = null,
+            int? maxTokens = null,
+            double? temperature = null,
+            double? topP = null,
+            int? numOutputs = null,
+            double? presencePenalty = null,
+            double? frequencyPenalty = null,
+            int? logProbabilities = null,
+            bool? echo = null,
+            IEnumerable<string> stopSequences = null,
+            string model = null,
+            CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+
+        [Obsolete("Use StreamCompletionAsync")]
+        public IAsyncEnumerable<CompletionResult> StreamCompletionEnumerableAsync(CompletionRequest completionRequest, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion Streaming

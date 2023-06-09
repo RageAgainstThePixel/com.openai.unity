@@ -149,5 +149,11 @@ namespace OpenAI.FineTuning
 
             cancellationToken.ThrowIfCancellationRequested();
         }
+
+        [Obsolete("Use StreamFineTuneEventsAsync")]
+        public IAsyncEnumerable<Event> StreamFineTuneEventsEnumerableAsync(string jobId, bool cancelJob = false, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
