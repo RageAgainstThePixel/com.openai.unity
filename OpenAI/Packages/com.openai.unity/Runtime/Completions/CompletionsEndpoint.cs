@@ -232,6 +232,5 @@ namespace OpenAI.Completions
         }
 
         #endregion Streaming
-
     }
 }

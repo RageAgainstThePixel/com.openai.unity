@@ -111,12 +111,10 @@ namespace OpenAI.Files
                         await Task.Delay(1000 * attempt, cancellationToken);
                         return await InternalDeleteFileAsync(attempt + 1);
                     }
-
-                    response.Validate();
-                    return false;
                 }
 
-                return true;
+                response.Validate();
+                return response.Successful;
             }
         }
 
