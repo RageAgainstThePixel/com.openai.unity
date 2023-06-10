@@ -1,28 +1,21 @@
-﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using System;
-using System.Linq;
-using UnityEngine;
+using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI
 {
-    /// <summary>
-    /// The client settings for configuring Azure OpenAI or custom domain.
-    /// </summary>
-    [Obsolete("Use " + nameof(OpenAISettings))]
-    public sealed class OpenAIClientSettings
+    public sealed class OpenAISettingsInfo : ISettingsInfo
     {
-        public static implicit operator OpenAISettings(OpenAIClientSettings clientSettings) => new OpenAISettings(clientSettings);
-
         internal const string OpenAIDomain = "api.openai.com";
         internal const string DefaultOpenAIApiVersion = "v1";
         internal const string AzureOpenAIDomain = "openai.azure.com";
         internal const string DefaultAzureApiVersion = "2022-12-01";
 
         /// <summary>
-        /// Creates a new instance of <see cref="OpenAIClientSettings"/> for use with OpenAI.
+        /// Creates a new instance of <see cref="OpenAISettingsInfo"/> for use with OpenAI.
         /// </summary>
-        public OpenAIClientSettings()
+        public OpenAISettingsInfo()
         {
             ResourceName = OpenAIDomain;
             ApiVersion = DefaultOpenAIApiVersion;
@@ -33,11 +26,11 @@ namespace OpenAI
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="OpenAIClientSettings"/> for use with OpenAI.
+        /// Creates a new instance of <see cref="OpenAISettingsInfo"/> for use with OpenAI.
         /// </summary>
         /// <param name="domain">Base api domain.</param>
         /// <param name="apiVersion">The version of the OpenAI api you want to use.</param>
-        public OpenAIClientSettings(string domain, string apiVersion = DefaultOpenAIApiVersion)
+        public OpenAISettingsInfo(string domain, string apiVersion = DefaultOpenAIApiVersion)
         {
             if (string.IsNullOrWhiteSpace(domain))
             {
@@ -64,7 +57,7 @@ namespace OpenAI
         }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="OpenAIClientSettings"/> for use with Azure OpenAI.<br/>
+        /// Creates a new instance of the <see cref="OpenAISettingsInfo"/> for use with Azure OpenAI.<br/>
         /// <see href="https://learn.microsoft.com/en-us/azure/cognitive-services/openai/"/>
         /// </summary>
         /// <param name="resourceName">
@@ -79,7 +72,7 @@ namespace OpenAI
         /// <param name="useActiveDirectoryAuthentication">
         /// Optional, set to true if you want to use Azure Active Directory for Authentication.
         /// </param>
-        public OpenAIClientSettings(string resourceName, string deploymentId, string apiVersion = DefaultAzureApiVersion, bool useActiveDirectoryAuthentication = false)
+        public OpenAISettingsInfo(string resourceName, string deploymentId, string apiVersion = DefaultAzureApiVersion, bool useActiveDirectoryAuthentication = false)
         {
             if (string.IsNullOrWhiteSpace(resourceName))
             {
@@ -105,55 +98,21 @@ namespace OpenAI
             UseOAuthAuthentication = useActiveDirectoryAuthentication;
         }
 
+        [Obsolete]
+        internal OpenAISettingsInfo(OpenAIClientSettings clientSettings)
+        {
+        }
+
         public string ResourceName { get; }
 
         public string ApiVersion { get; }
 
         public string DeploymentId { get; }
 
-        internal string BaseRequest { get; }
+        public string BaseRequest { get; }
 
-        internal string BaseRequestUrlFormat { get; }
+        public string BaseRequestUrlFormat { get; }
 
-        internal bool UseOAuthAuthentication { get; }
-
-        private static OpenAIClientSettings cachedDefault;
-
-        public static OpenAIClientSettings Default
-        {
-            get
-            {
-                if (cachedDefault != null)
-                {
-                    return cachedDefault;
-                }
-
-                var config = Resources.LoadAll<OpenAIConfiguration>(string.Empty).FirstOrDefault(asset => asset != null);
-
-                if (config != null)
-                {
-                    if (config.UseAzureOpenAI)
-                    {
-                        cachedDefault = new OpenAIClientSettings(
-                            config.ResourceName,
-                            config.DeploymentId,
-                            config.ApiVersion,
-                            config.UseAzureActiveDirectory);
-                    }
-                    else
-                    {
-                        cachedDefault = new OpenAIClientSettings(
-                            domain: config.ProxyDomain,
-                            apiVersion: config.ApiVersion);
-                    }
-                }
-                else
-                {
-                    cachedDefault = new OpenAIClientSettings();
-                }
-
-                return cachedDefault;
-            }
-        }
+        public bool UseOAuthAuthentication { get; }
     }
 }

@@ -13,7 +13,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_01_UploadFile()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FilesEndpoint);
 
             await File.WriteAllTextAsync("test.jsonl", new FineTuningTrainingData("I'm a", "learning language model"));
@@ -31,7 +31,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_02_ListFiles()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FilesEndpoint);
 
             var result = await api.FilesEndpoint.ListFilesAsync();
@@ -51,7 +51,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_03_DownloadFile()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FilesEndpoint);
 
             var files = await api.FilesEndpoint.ListFilesAsync();
@@ -73,7 +73,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_04_DeleteFiles()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FilesEndpoint);
 
             var files = await api.FilesEndpoint.ListFilesAsync();

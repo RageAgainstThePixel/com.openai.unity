@@ -2,12 +2,7 @@
 
 using Newtonsoft.Json;
 using System;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using UnityEngine;
+using Utilities.WebRequestRest;
 
 namespace OpenAI.Extensions
 {
@@ -17,47 +12,30 @@ namespace OpenAI.Extensions
         private const string RequestId = "X-Request-ID";
         private const string ProcessingTime = "Openai-Processing-Ms";
 
-        internal static void SetResponseData(this BaseResponse response, HttpResponseHeaders headers)
+        internal static void SetResponseData(this BaseResponse response, Response restResponse)
         {
-            if (headers.Contains(Organization))
+            if (restResponse is not { Headers: not null }) { return; }
+
+            if (restResponse.Headers.TryGetValue(Organization, out var organization))
             {
-                response.Organization = headers.GetValues(Organization).FirstOrDefault();
+                response.Organization = organization;
             }
 
-            response.ProcessingTime = TimeSpan.FromMilliseconds(double.Parse(headers.GetValues(ProcessingTime).First()));
-            response.RequestId = headers.GetValues(RequestId).FirstOrDefault();
-        }
-
-        internal static async Task<string> ReadAsStringAsync(this HttpResponseMessage response, bool debug = false, [CallerMemberName] string methodName = null)
-        {
-            var responseAsString = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
+            if (restResponse.Headers.TryGetValue(RequestId, out var requestId))
             {
-                throw new HttpRequestException($"{methodName} Failed! HTTP status code: {response.StatusCode} | Response body: {responseAsString}");
+                response.RequestId = requestId;
             }
 
-            if (debug)
+            if (restResponse.Headers.TryGetValue(ProcessingTime, out var processingTime))
             {
-                Debug.Log(responseAsString);
-            }
-
-            return responseAsString;
-        }
-
-        internal static async Task CheckResponseAsync(this HttpResponseMessage response, [CallerMemberName] string methodName = null)
-        {
-            if (!response.IsSuccessStatusCode)
-            {
-                var responseAsString = await response.Content.ReadAsStringAsync();
-                throw new HttpRequestException($"{methodName} Failed! HTTP status code: {response.StatusCode} | Response body: {responseAsString}");
+                response.ProcessingTime = TimeSpan.FromMilliseconds(double.Parse(processingTime));
             }
         }
 
-        internal static T DeserializeResponse<T>(this HttpResponseMessage response, string json, JsonSerializerSettings settings) where T : BaseResponse
+        internal static T DeserializeResponse<T>(this Response response, string json, JsonSerializerSettings settings) where T : BaseResponse
         {
             var result = JsonConvert.DeserializeObject<T>(json, settings);
-            result.SetResponseData(response.Headers);
+            result.SetResponseData(response);
             return result;
         }
     }

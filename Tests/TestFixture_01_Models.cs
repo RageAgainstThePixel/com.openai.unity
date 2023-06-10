@@ -13,7 +13,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_1_GetModels()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.ModelsEndpoint);
             var results = await api.ModelsEndpoint.GetModelsAsync();
             Assert.IsNotNull(results);
@@ -23,7 +23,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_2_RetrieveModelDetails()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.ModelsEndpoint);
             var models = await api.ModelsEndpoint.GetModelsAsync();
             Assert.IsNotEmpty(models);
