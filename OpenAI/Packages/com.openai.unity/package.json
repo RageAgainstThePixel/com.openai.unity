@@ -20,6 +20,13 @@
     "com.utilities.rest": "2.0.1",
     "com.utilities.encoder.wav": "1.0.4"
   },
+  "samples": [
+    {
+      "displayName": "Chat",
+      "description": "Contains sample chat behaviour and scene",
+      "path": "Samples~/Chat"
+    }
+  ],
   "publishConfig": {
     "registry": "https://package.openupm.com"
   }
