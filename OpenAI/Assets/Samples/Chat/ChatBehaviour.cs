@@ -1,3 +1,5 @@
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
 using OpenAI.Chat;
 using OpenAI.Models;
 using System;
@@ -9,9 +11,9 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Utilities.Extensions;
 
-namespace OpenAI.Demo.Chat
+namespace OpenAI.Samples.Chat
 {
-    public class ChatDemo : MonoBehaviour
+    public class ChatBehaviour : MonoBehaviour
     {
         [SerializeField]
         private Button submitButton;
