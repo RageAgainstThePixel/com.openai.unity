@@ -1,11 +1,12 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine.Scripting;
+using Utilities.WebRequestRest;
 
 namespace OpenAI.Models
 {
@@ -14,14 +15,16 @@ namespace OpenAI.Models
     /// You can refer to the Models documentation to understand which models are available for certain endpoints: <see href="https://platform.openai.com/docs/models/model-endpoint-compatibility"/>.<br/>
     /// <see href="https://platform.openai.com/docs/api-reference/models"/>
     /// </summary>
-    public sealed class ModelsEndpoint : BaseEndPoint
+    public sealed class ModelsEndpoint : OpenAIBaseEndpoint
     {
+        [Preserve]
         private class ModelsList
         {
             [JsonProperty("data")]
             public List<Model> Data { get; set; }
         }
 
+        [Preserve]
         private class DeleteModelResponse
         {
             [JsonConstructor]
@@ -46,7 +49,7 @@ namespace OpenAI.Models
         }
 
         /// <inheritdoc />
-        public ModelsEndpoint(OpenAIClient api) : base(api) { }
+        public ModelsEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
         protected override string Root => "models";
@@ -54,39 +57,40 @@ namespace OpenAI.Models
         /// <summary>
         /// List all models via the API
         /// </summary>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>Asynchronously returns the list of all <see cref="Model"/>s</returns>
-        /// <exception cref="HttpRequestException">Raised when the HTTP request fails</exception>
-        public async Task<IReadOnlyList<Model>> GetModelsAsync()
+        public async Task<IReadOnlyList<Model>> GetModelsAsync(CancellationToken cancellationToken = default)
         {
-            var response = await Api.Client.GetAsync(GetUrl());
-            var responseAsString = await response.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<ModelsList>(responseAsString, Api.JsonSerializationOptions)?.Data;
+            var response = await Rest.GetAsync(GetUrl(), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
+            response.Validate();
+            return JsonConvert.DeserializeObject<ModelsList>(response.Body, client.JsonSerializationOptions)?.Data;
         }
 
         /// <summary>
         /// Get the details about a particular Model from the API
         /// </summary>
         /// <param name="id">The id/name of the model to get more details about</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>Asynchronously returns the <see cref="Model"/> with all available properties</returns>
-        /// <exception cref="HttpRequestException">Raised when the HTTP request fails</exception>
-        public async Task<Model> GetModelDetailsAsync(string id)
+        public async Task<Model> GetModelDetailsAsync(string id, CancellationToken cancellationToken = default)
         {
-            var response = await Api.Client.GetAsync(GetUrl($"/{id}"));
-            var responseAsString = await response.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<Model>(responseAsString, Api.JsonSerializationOptions);
+            var response = await Rest.GetAsync(GetUrl($"/{id}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
+            response.Validate();
+            return JsonConvert.DeserializeObject<Model>(response.Body, client.JsonSerializationOptions);
         }
 
         /// <summary>
         /// Delete a fine-tuned model. You must have the Owner role in your organization.
         /// </summary>
         /// <param name="modelId">The <see cref="Model"/> to delete.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>True, if fine-tuned model was successfully deleted.</returns>
-        /// <exception cref="HttpRequestException"></exception>
-        public async Task<bool> DeleteFineTuneModelAsync(string modelId)
+        public async Task<bool> DeleteFineTuneModelAsync(string modelId, CancellationToken cancellationToken = default)
         {
-            var model = await GetModelDetailsAsync(modelId);
+            var model = await GetModelDetailsAsync(modelId, cancellationToken);
 
-            if (model == null)
+            if (model == null ||
+                string.IsNullOrWhiteSpace(model))
             {
                 throw new Exception($"Failed to get {modelId} info!");
             }
@@ -95,13 +99,14 @@ namespace OpenAI.Models
 
             try
             {
-                var response = await Api.Client.DeleteAsync(GetUrl($"/{model.Id}"));
-                var responseAsString = await response.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<DeleteModelResponse>(responseAsString, Api.JsonSerializationOptions)?.Deleted ?? false;
+                var response = await Rest.DeleteAsync(GetUrl($"/{model.Id}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
+                response.Validate();
+                return JsonConvert.DeserializeObject<DeleteModelResponse>(response.Body, client.JsonSerializationOptions)?.Deleted ?? false;
             }
-            catch (Exception e)
+            catch (RestException e)
             {
-                if (e.Message.Contains("api.delete"))
+                if (e.Response.Code == 403 ||
+                    e.Message.Contains("api.delete"))
                 {
                     throw new UnauthorizedAccessException("You do not have permissions to delete models for this organization.");
                 }

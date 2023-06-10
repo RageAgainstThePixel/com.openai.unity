@@ -1,7 +1,9 @@
 {
   "dependencies": {
-    "com.unity.ide.rider": "3.0.21",
-    "com.unity.ide.visualstudio": "2.0.18"
+    "com.unity.ide.rider": "3.0.22",
+    "com.unity.ide.visualstudio": "2.0.18",
+    "com.unity.textmeshpro": "3.0.6",
+    "com.utilities.buildpipeline": "1.1.6"
   },
   "scopedRegistries": [
     {

@@ -12,7 +12,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_1_GetBasicEdit()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.EditsEndpoint);
             var request = new EditRequest("What day of the wek is it?", "Fix the spelling mistakes");
             var result = await api.EditsEndpoint.CreateEditAsync(request);

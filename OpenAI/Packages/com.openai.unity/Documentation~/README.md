@@ -116,11 +116,11 @@ var api = new OpenAIClient(new OpenAIAuthentication("sk-apiKey", "org-yourOrgani
 
 You can save the key directly into a scriptable object that is located in the `Assets/Resources` folder.
 
-You can create a new one by using the context menu of the project pane and creating a new `OpenAIConfigurationSettings` scriptable object.
+You can create a new one by using the context menu of the project pane and creating a new `OpenAIConfiguration` scriptable object.
 
 :warning: Beware checking this file into source control, as other people will be able to see your API key. It is recommended to use the [OpenAI-DotNet-Proxy](#openai-api-proxy) and authenticate users with your preferred OAuth provider.
 
-![Create new OpenAIConfigurationSettings](images/create-scriptable-object.png)
+![Create new OpenAIConfiguration](images/create-scriptable-object.png)
 
 #### Load key from configuration file
 
@@ -168,7 +168,7 @@ Use your system's environment variables specify an api key and organization to u
 - Use `OPENAI_ORGANIZATION_ID` to specify an organization.
 
 ```csharp
-var api = new OpenAIClient(OpenAIAuthentication.LoadFromEnv());
+var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
 ```
 
 ### [Azure OpenAI](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/)
@@ -185,17 +185,17 @@ https://{your-resource-name}.openai.azure.com/openai/deployments/{deployment-id}
 - `deployment-id` The deployment name you chose when you deployed the model.
 - `api-version` The API version to use for this operation. This follows the YYYY-MM-DD format.
 
-To setup the client to use your deployment, you'll need to pass in `OpenAIClientSettings` into the client constructor.
+To setup the client to use your deployment, you'll need to pass in `OpenAISettings` into the client constructor.
 
 ```csharp
 var auth = new OpenAIAuthentication("sk-apiKey");
-var settings = new OpenAIClientSettings(resourceName: "your-resource-name", deploymentId: "deployment-id", apiVersion: "api-version");
+var settings = new OpenAISettings(resourceName: "your-resource-name", deploymentId: "deployment-id", apiVersion: "api-version");
 var api = new OpenAIClient(auth, settings);
 ```
 
 #### [Azure Active Directory Authentication](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/reference#authentication)
 
-[Authenticate with MSAL](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet) as usual and get access token, then use the access token when creating your `OpenAIAuthentication`. Then be sure to set useAzureActiveDirectory to true when creating your `OpenAIClientSettings`.
+[Authenticate with MSAL](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet) as usual and get access token, then use the access token when creating your `OpenAIAuthentication`. Then be sure to set useAzureActiveDirectory to true when creating your `OpenAISettings`.
 
 [Tutorial: Desktop app that calls web APIs: Acquire a token](https://learn.microsoft.com/en-us/azure/active-directory/develop/scenario-desktop-acquire-token?tabs=dotnet)
 
@@ -203,7 +203,7 @@ var api = new OpenAIClient(auth, settings);
 // get your access token using any of the MSAL methods
 var accessToken = result.AccessToken;
 var auth = new OpenAIAuthentication(accessToken);
-var settings = new OpenAIClientSettings(resourceName: "your-resource", deploymentId: "deployment-id", apiVersion: "api-version", useActiveDirectoryAuthentication: true);
+var settings = new OpenAISettings(resourceName: "your-resource", deploymentId: "deployment-id", apiVersion: "api-version", useActiveDirectoryAuthentication: true);
 var api = new OpenAIClient(auth, settings);
 ```
 
@@ -222,7 +222,7 @@ Follow these steps:
 1. Setup a new project using either the [OpenAI-DotNet](https://github.com/RageAgainstThePixel/OpenAI-DotNet) or [com.openai.unity](https://github.com/RageAgainstThePixel/com.openai.unity) packages.
 2. Authenticate users with your OAuth provider.
 3. After successful authentication, create a new `OpenAIAuthentication` object and pass in the custom token with the prefix `sess-`.
-4. Create a new `OpenAIClientSettings` object and specify the domain where your intermediate API is located.
+4. Create a new `OpenAISettings` object and specify the domain where your intermediate API is located.
 5. Pass your new `auth` and `settings` objects to the `OpenAIClient` constructor when you create the client instance.
 
 Here's an example of how to set up the front end:
@@ -230,7 +230,7 @@ Here's an example of how to set up the front end:
 ```csharp
 var authToken = await LoginAsync();
 var auth = new OpenAIAuthentication($"sess-{authToken}");
-var settings = new OpenAIClientSettings(domain: "api.your-custom-domain.com");
+var settings = new OpenAISettings(domain: "api.your-custom-domain.com");
 var api = new OpenAIClient(auth, settings);
 ```
 
@@ -355,16 +355,6 @@ await api.CompletionsEndpoint.StreamCompletionAsync(result =>
 }, "My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", maxTokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci);
 ```
 
-Or if using [`IAsyncEnumerable{T}`](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=net-5.0) ([C# 8.0+](https://docs.microsoft.com/en-us/archive/msdn-magazine/2019/november/csharp-iterating-with-async-enumerables-in-csharp-8))
-
-```csharp
-var api = new OpenAIClient();
-await foreach (var token in api.CompletionsEndpoint.StreamCompletionEnumerableAsync("My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", maxTokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci))
-{
-  Debug.Log(token);
-}
-```
-
 ### [Chat](https://platform.openai.com/docs/api-reference/chat)
 
 Given a chat conversation, the model will return a chat completion response.
@@ -415,34 +405,6 @@ await api.ChatEndpoint.StreamCompletionAsync(chatRequest, result =>
         Debug.Log($"{choice.Message.Role}: {choice.Message.Content}");
     }
 });
-```
-
-Or if using [`IAsyncEnumerable{T}`](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=net-5.0) ([C# 8.0+](https://docs.microsoft.com/en-us/archive/msdn-magazine/2019/november/csharp-iterating-with-async-enumerables-in-csharp-8))
-
-```csharp
-var api = new OpenAIClient();
-var messages = new List<Message>
-{
-    new Message(Role.System, "You are a helpful assistant."),
-    new Message(Role.User, "Who won the world series in 2020?"),
-    new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
-    new Message(Role.User, "Where was it played?"),
-};
-var chatRequest = new ChatRequest(messages, Model.GPT4); // gpt4 access required
-await foreach (var result in api.ChatEndpoint.StreamCompletionEnumerableAsync(chatRequest))
-{
-    foreach (var choice in result.Choices.Where(choice => choice.Delta?.Content != null))
-    {
-        // Partial response content
-        Debug.Log(choice.Delta.Content);
-    }
-
-    foreach (var choice in result.Choices.Where(choice => choice.Message?.Content != null))
-    {
-        // Completed response content
-        Debug.Log($"{choice.Message.Role}: {choice.Message.Content}");
-    }
-}
 ```
 
 ### [Edits](https://platform.openai.com/docs/api-reference/edits)
@@ -714,16 +676,6 @@ await api.FineTuningEndpoint.StreamFineTuneEventsAsync(fineTuneJob, fineTuneEven
 {
     Debug.Log($"  {fineTuneEvent.CreatedAt} [{fineTuneEvent.Level}] {fineTuneEvent.Message}");
 });
-```
-
-Or if using [`IAsyncEnumerable{T}`](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=net-5.0) ([C# 8.0+](https://docs.microsoft.com/en-us/archive/msdn-magazine/2019/november/csharp-iterating-with-async-enumerables-in-csharp-8))
-
-```csharp
-var api = new OpenAIClient();
-await foreach (var fineTuneEvent in api.FineTuningEndpoint.StreamFineTuneEventsEnumerableAsync(fineTuneJob))
-{
-    Debug.Log($"  {fineTuneEvent.CreatedAt} [{fineTuneEvent.Level}] {fineTuneEvent.Message}");
-}
 ```
 
 ### [Moderations](https://platform.openai.com/docs/api-reference/moderations)

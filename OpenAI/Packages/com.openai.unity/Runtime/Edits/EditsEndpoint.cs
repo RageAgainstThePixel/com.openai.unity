@@ -3,7 +3,9 @@
 using Newtonsoft.Json;
 using OpenAI.Extensions;
 using OpenAI.Models;
+using System.Threading;
 using System.Threading.Tasks;
+using Utilities.WebRequestRest;
 
 namespace OpenAI.Edits
 {
@@ -11,10 +13,10 @@ namespace OpenAI.Edits
     /// Given a prompt and an instruction, the model will return an edited version of the prompt.
     /// <see href="https://platform.openai.com/docs/api-reference/edits"/>
     /// </summary>
-    public sealed class EditsEndpoint : BaseEndPoint
+    public sealed class EditsEndpoint : OpenAIBaseEndpoint
     {
         /// <inheritdoc />
-        public EditsEndpoint(OpenAIClient api) : base(api) { }
+        public EditsEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
         protected override string Root => "edits";
@@ -37,6 +39,7 @@ namespace OpenAI.Edits
         /// We generally recommend altering this or temperature but not both.
         /// </param>
         /// <param name="model">ID of the model to use. Defaults to text-davinci-edit-001.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>The top edit result choice.</returns>
         public async Task<string> CreateEditAsync(
             string input,
@@ -44,10 +47,11 @@ namespace OpenAI.Edits
             int? editCount,
             double? temperature,
             double? topP,
-            Model model = null)
+            Model model = null,
+            CancellationToken cancellationToken = default)
         {
             var request = new EditRequest(input, instruction, editCount, temperature, topP, model);
-            var result = await CreateEditAsync(request);
+            var result = await CreateEditAsync(request, cancellationToken);
             return result.ToString();
         }
 
@@ -55,13 +59,14 @@ namespace OpenAI.Edits
         /// Creates a new edit for the provided input, instruction, and parameters.
         /// </summary>
         /// <param name="request"><see cref="EditRequest"/>.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="EditResponse"/>.</returns>
-        public async Task<EditResponse> CreateEditAsync(EditRequest request)
+        public async Task<EditResponse> CreateEditAsync(EditRequest request, CancellationToken cancellationToken = default)
         {
-            var jsonContent = JsonConvert.SerializeObject(request, Api.JsonSerializationOptions).ToJsonStringContent();
-            var response = await Api.Client.PostAsync(GetUrl(), jsonContent);
-            var resultAsString = await response.ReadAsStringAsync();
-            return response.DeserializeResponse<EditResponse>(resultAsString, Api.JsonSerializationOptions);
+            var payload = JsonConvert.SerializeObject(request, client.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate();
+            return response.DeserializeResponse<EditResponse>(response.Body, client.JsonSerializationOptions);
         }
     }
 }
