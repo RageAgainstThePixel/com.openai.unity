@@ -8,9 +8,9 @@ namespace OpenAI
     {
         [JsonConstructor]
         public Usage(
-            int promptTokens,
-            int completionTokens,
-            int totalTokens)
+            int? promptTokens,
+            int? completionTokens,
+            int? totalTokens)
         {
             PromptTokens = promptTokens;
             CompletionTokens = completionTokens;
@@ -18,12 +18,30 @@ namespace OpenAI
         }
 
         [JsonProperty("prompt_tokens")]
-        public int PromptTokens { get; }
+        public int? PromptTokens { get; internal set; }
 
         [JsonProperty("completion_tokens")]
-        public int CompletionTokens { get; }
+        public int? CompletionTokens { get; internal set; }
 
         [JsonProperty("total_tokens")]
-        public int TotalTokens { get; }
+        public int? TotalTokens { get; internal set; }
+
+        internal void CopyFrom(Usage other)
+        {
+            if (other?.PromptTokens != null)
+            {
+                PromptTokens = other.PromptTokens.Value;
+            }
+
+            if (other?.CompletionTokens != null)
+            {
+                CompletionTokens = other.CompletionTokens.Value;
+            }
+
+            if (other?.TotalTokens != null)
+            {
+                TotalTokens = other.TotalTokens.Value;
+            }
+        }
     }
 }

@@ -36,6 +36,8 @@ namespace OpenAI.Tests
             {
                 Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
             }
+
+            result.PrintUsage();
         }
 
         [Test]
@@ -51,18 +53,18 @@ namespace OpenAI.Tests
                 new Message(Role.User, "Where was it played?"),
             };
             var chatRequest = new ChatRequest(messages, number: 2);
-            var finalResult = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, result =>
+            var finalResult = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
-                Assert.IsNotNull(result);
-                Assert.NotNull(result.Choices);
-                Assert.NotZero(result.Choices.Count);
+                Assert.IsNotNull(partialResponse);
+                Assert.NotNull(partialResponse.Choices);
+                Assert.NotZero(partialResponse.Choices.Count);
 
-                foreach (var choice in result.Choices.Where(choice => choice.Delta?.Content != null))
+                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Delta?.Content)))
                 {
                     Debug.Log($"[{choice.Index}] {choice.Delta.Content}");
                 }
 
-                foreach (var choice in result.Choices.Where(choice => choice.Message?.Content != null))
+                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Message?.Content)))
                 {
                     Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
                 }
@@ -71,6 +73,9 @@ namespace OpenAI.Tests
             Assert.IsNotNull(finalResult);
             Assert.IsNotNull(finalResult.Choices);
             Assert.IsTrue(finalResult.Choices.Count == 2);
+            Assert.IsTrue(finalResult.Choices[0].Message.Role == Role.Assistant);
+            Assert.IsTrue(finalResult.Choices[1].Message.Role == Role.Assistant);
+            finalResult.PrintUsage();
         }
 
         [Test]
@@ -151,6 +156,135 @@ namespace OpenAI.Tests
             Assert.IsTrue(result.FirstChoice.Message.Function.Name == nameof(WeatherService.GetCurrentWeather));
             Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Function.Name} | Finish Reason: {result.FirstChoice.FinishReason}");
             Debug.Log($"{result.FirstChoice.Message.Function.Arguments}");
+
+            var functionArgs = JsonConvert.DeserializeObject<WeatherArgs>(result.FirstChoice.Message.Function.Arguments.ToString());
+            var functionResult = WeatherService.GetCurrentWeather(functionArgs);
+            Assert.IsNotNull(functionResult);
+            messages.Add(new Message(Role.Function, functionResult));
+            Debug.Log($"{Role.Function}: {functionResult}");
+        }
+
+        [Test]
+        public async Task Test_5_GetChatFunctionCompletion_Streaming()
+        {
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
+            var messages = new List<Message>
+            {
+                new Message(Role.System, "You are a helpful weather assistant."),
+                new Message(Role.User, "What's the weather like today?"),
+            };
+
+            foreach (var message in messages)
+            {
+                Debug.Log($"{message.Role}: {message.Content}");
+            }
+
+            var functions = new List<Function>
+            {
+                new Function(
+                    nameof(WeatherService.GetCurrentWeather),
+                    "Get the current weather in a given location",
+                    new JObject
+                    {
+                        ["type"] = "object",
+                        ["properties"] = new JObject
+                        {
+                            ["location"] = new JObject
+                            {
+                                ["type"] = "string",
+                                ["description"] = "The city and state, e.g. San Francisco, CA"
+                            },
+                            ["unit"] = new JObject
+                            {
+                                ["type"] = "string",
+                                ["enum"] = new JArray {"celsius", "fahrenheit"}
+                            }
+                        },
+                        ["required"] = new JArray { "location", "unit" }
+                    })
+            };
+
+            var chatRequest = new ChatRequest(messages, functions: functions, functionCall: "auto", model: "gpt-3.5-turbo-0613");
+            var result = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
+            {
+                Assert.IsNotNull(partialResponse);
+                Assert.NotNull(partialResponse.Choices);
+                Assert.NotZero(partialResponse.Choices.Count);
+
+                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Delta?.Content)))
+                {
+                    Debug.Log($"{choice.Delta.Content}");
+                }
+
+                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Message?.Content)))
+                {
+                    Debug.Log($"{choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
+                }
+            });
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Choices);
+            Assert.IsTrue(result.Choices.Count == 1);
+            messages.Add(result.FirstChoice.Message);
+
+            var locationMessage = new Message(Role.User, "I'm in Glasgow, Scotland");
+            messages.Add(locationMessage);
+            Debug.Log($"{locationMessage.Role}: {locationMessage.Content}");
+            chatRequest = new ChatRequest(messages, functions: functions, functionCall: "auto", model: "gpt-3.5-turbo-0613");
+            result = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
+            {
+                Assert.IsNotNull(partialResponse);
+                Assert.NotNull(partialResponse.Choices);
+                Assert.NotZero(partialResponse.Choices.Count);
+
+                foreach (var choice in partialResponse.Choices.Where(choice => choice.Delta?.Content != null))
+                {
+                    Debug.Log($"[{choice.Index}] {choice.Delta.Content}");
+                }
+
+                foreach (var choice in partialResponse.Choices.Where(choice => choice.Message?.Content != null))
+                {
+                    Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
+                }
+            });
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Choices);
+            Assert.IsTrue(result.Choices.Count == 1);
+            messages.Add(result.FirstChoice.Message);
+
+            if (!string.IsNullOrWhiteSpace(result.FirstChoice.Message.Content))
+            {
+                Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishReason}");
+
+                var unitMessage = new Message(Role.User, "celsius");
+                messages.Add(unitMessage);
+                Debug.Log($"{unitMessage.Role}: {unitMessage.Content}");
+                chatRequest = new ChatRequest(messages, functions: functions, functionCall: "auto", model: "gpt-3.5-turbo-0613");
+                result = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
+                {
+                    Assert.IsNotNull(partialResponse);
+                    Assert.NotNull(partialResponse.Choices);
+                    Assert.NotZero(partialResponse.Choices.Count);
+
+                    foreach (var choice in partialResponse.Choices.Where(choice => choice.Delta?.Content != null))
+                    {
+                        Debug.Log($"{choice.Delta.Content}");
+                    }
+
+                    foreach (var choice in partialResponse.Choices.Where(choice => choice.Message?.Content != null))
+                    {
+                        Debug.Log($"{choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
+                    }
+                });
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.Choices);
+                Assert.IsTrue(result.Choices.Count == 1);
+            }
+
+            Assert.IsTrue(result.FirstChoice.FinishReason == "function_call");
+            Assert.IsTrue(result.FirstChoice.Message.Function.Name == nameof(WeatherService.GetCurrentWeather));
+            Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Function.Name} | Finish Reason: {result.FirstChoice.FinishReason}");
+            Debug.Log($"{result.FirstChoice.Message.Function.Arguments}");
+
             var functionArgs = JsonConvert.DeserializeObject<WeatherArgs>(result.FirstChoice.Message.Function.Arguments.ToString());
             var functionResult = WeatherService.GetCurrentWeather(functionArgs);
             Assert.IsNotNull(functionResult);
