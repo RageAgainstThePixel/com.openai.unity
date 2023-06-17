@@ -23,16 +23,43 @@ namespace OpenAI.Chat
         public Message Message { get; internal set; }
 
         [JsonProperty("delta")]
-        public Delta Delta { get; }
+        public Delta Delta { get; internal set; }
 
         [JsonProperty("finish_reason")]
-        public string FinishReason { get; }
+        public string FinishReason { get; internal set; }
 
         [JsonProperty("index")]
-        public int Index { get; }
+        public int Index { get; internal set; }
 
         public override string ToString() => Message?.Content ?? Delta?.Content ?? string.Empty;
 
         public static implicit operator string(Choice choice) => choice.ToString();
+
+        internal void CopyFrom(Choice other)
+        {
+            if (other?.Message != null)
+            {
+                Message = other.Message;
+            }
+
+            if (other?.Delta != null)
+            {
+                if (Message == null)
+                {
+                    Message = new Message(other.Delta);
+                }
+                else
+                {
+                    Message.CopyFrom(other.Delta);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(other?.FinishReason))
+            {
+                FinishReason = other.FinishReason;
+            }
+
+            Index = other?.Index ?? 0;
+        }
     }
 }

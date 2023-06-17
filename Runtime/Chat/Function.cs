@@ -1,6 +1,7 @@
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
 
 namespace OpenAI.Chat
 {
@@ -9,6 +10,8 @@ namespace OpenAI.Chat
     /// </summary>
     public class Function
     {
+        internal Function(Delta other) => CopyFrom(other);
+
         /// <summary>
         /// Creates a new function description to insert into a chat conversation.
         /// </summary>
@@ -32,22 +35,11 @@ namespace OpenAI.Chat
             [JsonProperty("parameters")] JToken parameters = null,
             [JsonProperty("arguments")] JToken arguments = null)
         {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentException($"{nameof(name)} cannot be null or whitespace.", nameof(name));
-            }
-
-            if (name.Length > 64)
-            {
-                throw new ArgumentException($"{nameof(name)} cannot be longer than 64 characters.", nameof(name));
-            }
-
             Name = name;
             Description = description;
             Parameters = parameters;
             Arguments = arguments;
         }
-
 
         /// <summary>
         /// The name of the function to generate arguments for.<br/>
@@ -63,17 +55,76 @@ namespace OpenAI.Chat
         [JsonProperty("description")]
         public string Description { get; private set; }
 
+        private string parametersString;
+
+        private JToken parameters;
+
         /// <summary>
         /// The optional parameters of the function.
         /// Describe the parameters that the model should generate in JSON schema format (json-schema.org).
         /// </summary>
         [JsonProperty("parameters")]
-        public JToken Parameters { get; private set; }
+        public JToken Parameters
+        {
+            get
+            {
+                if (parameters == null &&
+                    !string.IsNullOrWhiteSpace(parametersString))
+                {
+                    parameters = JToken.Parse(parametersString);
+                }
+
+                return parameters;
+            }
+            private set => parameters = value;
+        }
+
+        private string argumentsString;
+
+        private JToken arguments;
 
         /// <summary>
         /// The arguments to use when calling the function.
         /// </summary>
         [JsonProperty("arguments")]
-        public JToken Arguments { get; private set; }
+        public JToken Arguments
+        {
+            get
+            {
+                if (arguments == null &&
+                    !string.IsNullOrWhiteSpace(argumentsString))
+                {
+                    arguments = JToken.Parse(argumentsString);
+                }
+
+                return arguments;
+            }
+            private set => arguments = value;
+        }
+
+        internal void CopyFrom(Delta other)
+        {
+            var otherFunction = other.Function;
+
+            if (!string.IsNullOrWhiteSpace(otherFunction.Name))
+            {
+                Name = otherFunction.Name;
+            }
+
+            if (!string.IsNullOrWhiteSpace(otherFunction.Description))
+            {
+                Description = otherFunction.Description;
+            }
+
+            if (otherFunction.Arguments != null)
+            {
+                argumentsString += otherFunction.Arguments.ToString();
+            }
+
+            if (otherFunction.Parameters != null)
+            {
+                parametersString += otherFunction.Parameters.ToString();
+            }
+        }
     }
 }

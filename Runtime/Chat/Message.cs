@@ -9,6 +9,8 @@ namespace OpenAI.Chat
     [Serializable]
     public sealed class Message
     {
+        internal Message(Delta other) => CopyFrom(other);
+
         /// <summary>
         /// Creates a new message to insert into a chat conversation.
         /// </summary>
@@ -76,5 +78,36 @@ namespace OpenAI.Chat
         public override string ToString() => Content ?? string.Empty;
 
         public static implicit operator string(Message message) => message.ToString();
+
+        internal void CopyFrom(Delta other)
+        {
+            if (role == 0 &&
+                other?.Role > 0)
+            {
+                role = other.Role;
+            }
+
+            if (!string.IsNullOrWhiteSpace(other?.Content))
+            {
+                content += other.Content;
+            }
+
+            if (!string.IsNullOrWhiteSpace(other?.Name))
+            {
+                name = other.Name;
+            }
+
+            if (other?.Function != null)
+            {
+                if (Function == null)
+                {
+                    Function = new Function(other);
+                }
+                else
+                {
+                    Function.CopyFrom(other);
+                }
+            }
+        }
     }
 }
