@@ -3,11 +3,14 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace OpenAI.Chat
 {
     public sealed class ChatResponse : BaseResponse
     {
+        internal ChatResponse(ChatResponse other) => CopyFrom(other);
+
         [JsonConstructor]
         public ChatResponse(
             [JsonProperty("id")] string id,
@@ -22,7 +25,7 @@ namespace OpenAI.Chat
             Created = created;
             Model = model;
             Usage = usage;
-            Choices = choices;
+            this.choices = choices;
         }
 
         [JsonProperty("id")]
@@ -40,8 +43,11 @@ namespace OpenAI.Chat
         [JsonProperty("usage")]
         public Usage Usage { get; internal set; }
 
+        [JsonIgnore]
+        private List<Choice> choices;
+
         [JsonProperty("choices")]
-        public IReadOnlyList<Choice> Choices { get; }
+        public IReadOnlyList<Choice> Choices => choices;
 
         [JsonIgnore]
         public Choice FirstChoice => Choices?.FirstOrDefault(choice => choice.Index == 0);
@@ -49,5 +55,62 @@ namespace OpenAI.Chat
         public override string ToString() => FirstChoice?.ToString() ?? string.Empty;
 
         public static implicit operator string(ChatResponse response) => response.ToString();
+
+        internal void CopyFrom(ChatResponse other)
+        {
+            if (!string.IsNullOrWhiteSpace(other?.Id))
+            {
+                Id = other.Id;
+            }
+
+            if (!string.IsNullOrEmpty(other?.Object))
+            {
+                Object = other.Object;
+            }
+
+            if (!string.IsNullOrWhiteSpace(other?.Model))
+            {
+                Model = other.Model;
+            }
+
+            if (other?.Usage != null)
+            {
+                if (Usage == null)
+                {
+                    Usage = other.Usage;
+                }
+                else
+                {
+                    Usage.CopyFrom(other.Usage);
+                }
+            }
+
+            if (other?.Choices is { Count: > 0 })
+            {
+                choices ??= new List<Choice>();
+
+                foreach (var otherChoice in other.Choices)
+                {
+                    if (otherChoice.Index + 1 > choices.Count)
+                    {
+                        choices.Insert(otherChoice.Index, otherChoice);
+                    }
+
+                    choices[otherChoice.Index].CopyFrom(otherChoice);
+                }
+            }
+        }
+
+        public string GetUsage(bool log = true)
+        {
+            var message = $"{Id} | {Model} | {Usage}";
+
+            if (log)
+            {
+                Debug.Log(message);
+            }
+
+            return message;
+        }
     }
 }

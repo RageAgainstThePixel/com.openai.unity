@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 
 namespace OpenAI.Tests.Weather
 {
-
     internal class WeatherService
     {
         public static string GetCurrentWeather(WeatherArgs weatherArgs)
