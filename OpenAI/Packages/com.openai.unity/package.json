@@ -17,7 +17,7 @@
     "url": "https://github.com/StephenHodgson"
   },
   "dependencies": {
-    "com.utilities.rest": "2.0.2",
+    "com.utilities.rest": "2.0.6",
     "com.utilities.encoder.wav": "1.0.4"
   },
   "samples": [
