@@ -1,7 +1,10 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using OpenAI.Chat;
+using OpenAI.Tests.Weather;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -68,6 +71,91 @@ namespace OpenAI.Tests
             Assert.IsNotNull(finalResult);
             Assert.IsNotNull(finalResult.Choices);
             Assert.IsTrue(finalResult.Choices.Count == 2);
+        }
+
+        [Test]
+        public async Task Test_4_GetChatFunctionCompletion()
+        {
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
+            var messages = new List<Message>
+            {
+                new Message(Role.System, "You are a helpful weather assistant."),
+                new Message(Role.User, "What's the weather like today?"),
+            };
+
+            foreach (var message in messages)
+            {
+                Debug.Log($"{message.Role}: {message.Content}");
+            }
+
+            var functions = new List<Function>
+            {
+                new Function(
+                    nameof(WeatherService.GetCurrentWeather),
+                    "Get the current weather in a given location",
+                     new JObject
+                     {
+                         ["type"] = "object",
+                         ["properties"] = new JObject
+                         {
+                             ["location"] = new JObject
+                             {
+                                 ["type"] = "string",
+                                 ["description"] = "The city and state, e.g. San Francisco, CA"
+                             },
+                             ["unit"] = new JObject
+                             {
+                                 ["type"] = "string",
+                                 ["enum"] = new JArray {"celsius", "fahrenheit"}
+                             }
+                         },
+                         ["required"] = new JArray { "location", "unit" }
+                     })
+            };
+
+            var chatRequest = new ChatRequest(messages, functions: functions, functionCall: "auto", model: "gpt-3.5-turbo-0613");
+            var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Choices);
+            Assert.IsTrue(result.Choices.Count == 1);
+            messages.Add(result.FirstChoice.Message);
+
+            Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishReason}");
+
+            var locationMessage = new Message(Role.User, "I'm in Glasgow, Scotland");
+            messages.Add(locationMessage);
+            Debug.Log($"{locationMessage.Role}: {locationMessage.Content}");
+            chatRequest = new ChatRequest(messages, functions: functions, functionCall: "auto", model: "gpt-3.5-turbo-0613");
+            result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Choices);
+            Assert.IsTrue(result.Choices.Count == 1);
+            messages.Add(result.FirstChoice.Message);
+
+            if (!string.IsNullOrWhiteSpace(result.FirstChoice.Message.Content))
+            {
+                Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishReason}");
+
+                var unitMessage = new Message(Role.User, "celsius");
+                messages.Add(unitMessage);
+                Debug.Log($"{unitMessage.Role}: {unitMessage.Content}");
+                chatRequest = new ChatRequest(messages, functions: functions, functionCall: "auto", model: "gpt-3.5-turbo-0613");
+                result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.Choices);
+                Assert.IsTrue(result.Choices.Count == 1);
+            }
+
+            Assert.IsTrue(result.FirstChoice.FinishReason == "function_call");
+            Assert.IsTrue(result.FirstChoice.Message.Function.Name == nameof(WeatherService.GetCurrentWeather));
+            Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Function.Name} | Finish Reason: {result.FirstChoice.FinishReason}");
+            Debug.Log($"{result.FirstChoice.Message.Function.Arguments}");
+            var functionArgs = JsonConvert.DeserializeObject<WeatherArgs>(result.FirstChoice.Message.Function.Arguments.ToString());
+            var functionResult = WeatherService.GetCurrentWeather(functionArgs);
+            Assert.IsNotNull(functionResult);
+            messages.Add(new Message(Role.Function, functionResult));
+            Debug.Log($"{Role.Function}: {functionResult}");
         }
     }
 }
