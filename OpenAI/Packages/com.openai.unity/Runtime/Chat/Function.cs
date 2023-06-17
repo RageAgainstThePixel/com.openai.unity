@@ -10,10 +10,7 @@ namespace OpenAI.Chat
     /// </summary>
     public class Function
     {
-        internal Function(Delta other)
-        {
-            CopyFrom(other);
-        }
+        internal Function(Delta other) => CopyFrom(other);
 
         /// <summary>
         /// Creates a new function description to insert into a chat conversation.

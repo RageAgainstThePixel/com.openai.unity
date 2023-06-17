@@ -9,10 +9,7 @@ namespace OpenAI.Chat
     [Serializable]
     public sealed class Message
     {
-        internal Message(Delta other)
-        {
-            CopyFrom(other);
-        }
+        internal Message(Delta other) => CopyFrom(other);
 
         /// <summary>
         /// Creates a new message to insert into a chat conversation.

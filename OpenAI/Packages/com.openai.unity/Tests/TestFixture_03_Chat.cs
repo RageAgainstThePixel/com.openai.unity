@@ -236,12 +236,12 @@ namespace OpenAI.Tests
                 Assert.NotNull(partialResponse.Choices);
                 Assert.NotZero(partialResponse.Choices.Count);
 
-                foreach (var choice in partialResponse.Choices.Where(choice => choice.Delta?.Content != null))
+                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Delta?.Content)))
                 {
                     Debug.Log($"[{choice.Index}] {choice.Delta.Content}");
                 }
 
-                foreach (var choice in partialResponse.Choices.Where(choice => choice.Message?.Content != null))
+                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Message?.Content)))
                 {
                     Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
                 }
@@ -265,12 +265,12 @@ namespace OpenAI.Tests
                     Assert.NotNull(partialResponse.Choices);
                     Assert.NotZero(partialResponse.Choices.Count);
 
-                    foreach (var choice in partialResponse.Choices.Where(choice => choice.Delta?.Content != null))
+                    foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Delta?.Content)))
                     {
                         Debug.Log($"{choice.Delta.Content}");
                     }
 
-                    foreach (var choice in partialResponse.Choices.Where(choice => choice.Message?.Content != null))
+                    foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Message?.Content)))
                     {
                         Debug.Log($"{choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
                     }
