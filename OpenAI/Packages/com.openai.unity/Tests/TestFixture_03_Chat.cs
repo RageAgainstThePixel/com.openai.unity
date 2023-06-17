@@ -37,7 +37,7 @@ namespace OpenAI.Tests
                 Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
             }
 
-            result.PrintUsage();
+            result.GetUsage();
         }
 
         [Test]
@@ -53,7 +53,7 @@ namespace OpenAI.Tests
                 new Message(Role.User, "Where was it played?"),
             };
             var chatRequest = new ChatRequest(messages, number: 2);
-            var finalResult = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
+            var result = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
                 Assert.NotNull(partialResponse.Choices);
@@ -70,12 +70,12 @@ namespace OpenAI.Tests
                 }
             });
 
-            Assert.IsNotNull(finalResult);
-            Assert.IsNotNull(finalResult.Choices);
-            Assert.IsTrue(finalResult.Choices.Count == 2);
-            Assert.IsTrue(finalResult.Choices[0].Message.Role == Role.Assistant);
-            Assert.IsTrue(finalResult.Choices[1].Message.Role == Role.Assistant);
-            finalResult.PrintUsage();
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Choices);
+            Assert.IsTrue(result.Choices.Count == 2);
+            Assert.IsTrue(result.Choices[0].Message.Role == Role.Assistant);
+            Assert.IsTrue(result.Choices[1].Message.Role == Role.Assistant);
+            result.GetUsage();
         }
 
         [Test]

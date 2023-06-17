@@ -43,5 +43,7 @@ namespace OpenAI
                 TotalTokens = other.TotalTokens.Value;
             }
         }
+
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

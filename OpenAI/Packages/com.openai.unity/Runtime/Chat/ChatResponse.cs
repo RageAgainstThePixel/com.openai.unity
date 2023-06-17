@@ -101,9 +101,9 @@ namespace OpenAI.Chat
             }
         }
 
-        public string PrintUsage(bool log = true)
+        public string GetUsage(bool log = true)
         {
-            var message = $"{Id} | {Model} | prompt tokens: {Usage?.PromptTokens} | completion tokens: {Usage?.CompletionTokens} | total: {Usage?.TotalTokens}";
+            var message = $"{Id} | {Model} | {Usage}";
 
             if (log)
             {
