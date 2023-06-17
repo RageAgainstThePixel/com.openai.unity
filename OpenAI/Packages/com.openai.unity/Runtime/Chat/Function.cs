@@ -25,7 +25,12 @@ namespace OpenAI.Chat
         /// <param name="arguments">
         /// The arguments to use when calling the function.
         /// </param>
-        public Function(string name, string description = null, JObject parameters = null, JObject arguments = null)
+        [JsonConstructor]
+        public Function(
+            [JsonProperty("name")] string name,
+            [JsonProperty("description")] string description = null,
+            [JsonProperty("parameters")] JToken parameters = null,
+            [JsonProperty("arguments")] JToken arguments = null)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -63,12 +68,12 @@ namespace OpenAI.Chat
         /// Describe the parameters that the model should generate in JSON schema format (json-schema.org).
         /// </summary>
         [JsonProperty("parameters")]
-        public JObject Parameters { get; private set; }
+        public JToken Parameters { get; private set; }
 
         /// <summary>
         /// The arguments to use when calling the function.
         /// </summary>
         [JsonProperty("arguments")]
-        public JObject Arguments { get; private set; }
+        public JToken Arguments { get; private set; }
     }
 }
