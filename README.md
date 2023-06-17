@@ -393,13 +393,13 @@ var messages = new List<Message>
 var chatRequest = new ChatRequest(messages, Model.GPT3_5_Turbo, number: 2);
 await api.ChatEndpoint.StreamCompletionAsync(chatRequest, result =>
 {
-    foreach (var choice in result.Choices.Where(choice => choice.Delta?.Content != null))
+    foreach (var choice in result.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Delta?.Content)))
     {
         // Partial response content
         Debug.Log(choice.Delta.Content);
     }
 
-    foreach (var choice in result.Choices.Where(choice => choice.Message?.Content != null))
+    foreach (var choice in result.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Message?.Content)))
     {
         // Completed response content
         Debug.Log($"{choice.Message.Role}: {choice.Message.Content}");
