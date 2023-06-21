@@ -45,6 +45,7 @@ namespace OpenAI.Tests
         {
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.ChatEndpoint);
+            const int choiceCount = 2;
             var messages = new List<Message>
             {
                 new Message(Role.System, "You are a helpful assistant."),
@@ -52,30 +53,42 @@ namespace OpenAI.Tests
                 new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
                 new Message(Role.User, "Where was it played?"),
             };
-            var chatRequest = new ChatRequest(messages, number: 2);
-            var result = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
+            var chatRequest = new ChatRequest(messages, number: choiceCount);
+            var cumulativeDelta = new List<string>();
+
+            for (var i = 0; i < choiceCount; i++)
+            {
+                cumulativeDelta.Add(string.Empty);
+            }
+
+            var response = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
                 Assert.NotNull(partialResponse.Choices);
                 Assert.NotZero(partialResponse.Choices.Count);
 
-                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Delta?.Content)))
+                foreach (var choice in partialResponse.Choices.Where(choice => choice.Delta?.Content != null))
                 {
                     Debug.Log($"[{choice.Index}] {choice.Delta.Content}");
-                }
-
-                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Message?.Content)))
-                {
-                    Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
+                    cumulativeDelta[choice.Index] += choice.Delta.Content;
                 }
             });
 
-            Assert.IsNotNull(result);
-            Assert.IsNotNull(result.Choices);
-            Assert.IsTrue(result.Choices.Count == 2);
-            Assert.IsTrue(result.Choices[0].Message.Role == Role.Assistant);
-            Assert.IsTrue(result.Choices[1].Message.Role == Role.Assistant);
-            result.GetUsage();
+            Assert.IsNotNull(response);
+            Assert.IsNotNull(response.Choices);
+            Assert.IsTrue(response.Choices.Count == choiceCount);
+
+            for (var i = 0; i < choiceCount; i++)
+            {
+                var choice = response.Choices[i];
+                Assert.IsFalse(string.IsNullOrWhiteSpace(choice?.Message?.Content));
+                Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
+                Assert.IsTrue(choice.Message.Role == Role.Assistant);
+                var deltaContent = cumulativeDelta[i];
+                Assert.IsTrue(choice.Message.Content.Equals(deltaContent));
+            }
+
+            response.GetUsage();
         }
 
         [Test]
