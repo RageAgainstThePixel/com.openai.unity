@@ -87,7 +87,7 @@ namespace OpenAI.Chat
                 role = other.Role;
             }
 
-            if (!string.IsNullOrWhiteSpace(other?.Content))
+            if (!string.IsNullOrEmpty(other?.Content))
             {
                 content += other.Content;
             }
