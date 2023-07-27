@@ -38,6 +38,7 @@ The recommended installation method is though the unity package manager and [Ope
 - Add package from git url: `https://github.com/RageAgainstThePixel/com.openai.unity.git#upm`
   > Note: this repo has dependencies on other repositories! You are responsible for adding these on your own.
   - [com.utilities.async](https://github.com/RageAgainstThePixel/com.utilities.async)
+  - [com.utilities.extensions](https://github.com/RageAgainstThePixel/com.utilities.extensions)
   - [com.utilities.rest](https://github.com/RageAgainstThePixel/com.utilities.rest)
   - [com.utilities.audio](https://github.com/RageAgainstThePixel/com.utilities.audio)
   - [com.utilities.encoder.wav](https://github.com/RageAgainstThePixel/com.utilities.encoder.wav)
@@ -393,13 +394,13 @@ var messages = new List<Message>
 var chatRequest = new ChatRequest(messages, Model.GPT3_5_Turbo, number: 2);
 await api.ChatEndpoint.StreamCompletionAsync(chatRequest, result =>
 {
-    foreach (var choice in result.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Delta?.Content)))
+    foreach (var choice in result.Choices.Where(choice => !string.IsNullOrEmpty(choice.Delta?.Content)))
     {
         // Partial response content
         Debug.Log(choice.Delta.Content);
     }
 
-    foreach (var choice in result.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Message?.Content)))
+    foreach (var choice in result.Choices.Where(choice => !string.IsNullOrEmpty(choice.Message?.Content)))
     {
         // Completed response content
         Debug.Log($"{choice.Message.Role}: {choice.Message.Content}");
@@ -461,7 +462,7 @@ chatRequest = new ChatRequest(messages, functions: functions, functionCall: "aut
 result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
 messages.Add(result.FirstChoice.Message);
 
-if (!string.IsNullOrWhiteSpace(result.FirstChoice.Message.Content))
+if (!string.IsNullOrEmpty(result.FirstChoice.Message.Content))
 {
     // It's possible that the assistant will also ask you which units you want the temperature in.
     Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishReason}");
