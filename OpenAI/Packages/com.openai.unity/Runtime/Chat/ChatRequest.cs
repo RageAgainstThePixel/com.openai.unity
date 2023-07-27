@@ -86,7 +86,7 @@ namespace OpenAI.Chat
             double? frequencyPenalty = null,
             IReadOnlyDictionary<string, double> logitBias = null,
             string user = null,
-            object functionCall = null,
+            dynamic functionCall = null,
             IEnumerable<Function> functions = null)
         {
             Model = string.IsNullOrWhiteSpace(model) ? Models.Model.GPT3_5_Turbo : model;
@@ -218,7 +218,7 @@ namespace OpenAI.Chat
         /// If functions is not null or empty, this is required.  Pass "auto" to let the API decide, "none" if none are to be called, or {"name": "function-name"}
         /// </summary>
         [JsonProperty("function_call")]
-        public object FunctionCall { get; }
+        public dynamic FunctionCall { get; }
 
         /// <summary>
         /// An optional list of functions to get arguments for.

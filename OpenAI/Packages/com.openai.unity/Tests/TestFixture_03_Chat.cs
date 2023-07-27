@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using OpenAI.Chat;
 using OpenAI.Tests.Weather;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -304,7 +305,7 @@ namespace OpenAI.Tests
             messages.Add(new Message(Role.Function, functionResult));
             Debug.Log($"{Role.Function}: {functionResult}");
         }
-        
+
         [Test]
         public async Task Test_6_GetChatFunctionForceCompletion()
         {
@@ -358,9 +359,9 @@ namespace OpenAI.Tests
             messages.Add(locationMessage);
             Debug.Log($"{locationMessage.Role}: {locationMessage.Content}");
             chatRequest = new ChatRequest(
-                messages, 
-                functions: functions, 
-                functionCall: new JObject {["name"] = $"{nameof(WeatherService.GetCurrentWeather)}"}, 
+                messages,
+                functions: functions,
+                functionCall: new JObject {["name"] = $"{nameof(WeatherService.GetCurrentWeather)}"},
                 model: "gpt-3.5-turbo-0613");
             result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
 
