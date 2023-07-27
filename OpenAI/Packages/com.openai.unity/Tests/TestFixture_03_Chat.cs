@@ -81,7 +81,7 @@ namespace OpenAI.Tests
             for (var i = 0; i < choiceCount; i++)
             {
                 var choice = response.Choices[i];
-                Assert.IsFalse(string.IsNullOrWhiteSpace(choice?.Message?.Content));
+                Assert.IsFalse(string.IsNullOrEmpty(choice?.Message?.Content));
                 Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
                 Assert.IsTrue(choice.Message.Role == Role.Assistant);
                 var deltaContent = cumulativeDelta[i];
@@ -151,7 +151,7 @@ namespace OpenAI.Tests
             Assert.IsTrue(result.Choices.Count == 1);
             messages.Add(result.FirstChoice.Message);
 
-            if (!string.IsNullOrWhiteSpace(result.FirstChoice.Message.Content))
+            if (!string.IsNullOrEmpty(result.FirstChoice.Message.Content))
             {
                 Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishReason}");
 
@@ -224,12 +224,12 @@ namespace OpenAI.Tests
                 Assert.NotNull(partialResponse.Choices);
                 Assert.NotZero(partialResponse.Choices.Count);
 
-                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Delta?.Content)))
+                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrEmpty(choice.Delta?.Content)))
                 {
                     Debug.Log($"{choice.Delta.Content}");
                 }
 
-                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Message?.Content)))
+                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrEmpty(choice.Message?.Content)))
                 {
                     Debug.Log($"{choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
                 }
@@ -249,12 +249,12 @@ namespace OpenAI.Tests
                 Assert.NotNull(partialResponse.Choices);
                 Assert.NotZero(partialResponse.Choices.Count);
 
-                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Delta?.Content)))
+                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrEmpty(choice.Delta?.Content)))
                 {
                     Debug.Log($"[{choice.Index}] {choice.Delta.Content}");
                 }
 
-                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Message?.Content)))
+                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrEmpty(choice.Message?.Content)))
                 {
                     Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
                 }
@@ -264,7 +264,7 @@ namespace OpenAI.Tests
             Assert.IsTrue(result.Choices.Count == 1);
             messages.Add(result.FirstChoice.Message);
 
-            if (!string.IsNullOrWhiteSpace(result.FirstChoice.Message.Content))
+            if (!string.IsNullOrEmpty(result.FirstChoice.Message.Content))
             {
                 Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishReason}");
 
@@ -278,12 +278,12 @@ namespace OpenAI.Tests
                     Assert.NotNull(partialResponse.Choices);
                     Assert.NotZero(partialResponse.Choices.Count);
 
-                    foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Delta?.Content)))
+                    foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrEmpty(choice.Delta?.Content)))
                     {
                         Debug.Log($"{choice.Delta.Content}");
                     }
 
-                    foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrWhiteSpace(choice.Message?.Content)))
+                    foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrEmpty(choice.Message?.Content)))
                     {
                         Debug.Log($"{choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
                     }
