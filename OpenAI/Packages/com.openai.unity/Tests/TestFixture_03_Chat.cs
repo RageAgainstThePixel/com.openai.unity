@@ -361,7 +361,7 @@ namespace OpenAI.Tests
             chatRequest = new ChatRequest(
                 messages,
                 functions: functions,
-                functionCall: new JObject {["name"] = $"{nameof(WeatherService.GetCurrentWeather)}"},
+                functionCall: new JObject { ["name"] = $"{nameof(WeatherService.GetCurrentWeather)}" },
                 model: "gpt-3.5-turbo-0613");
             result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
 
