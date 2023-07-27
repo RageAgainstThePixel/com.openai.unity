@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -69,10 +70,10 @@ namespace OpenAI.Chat
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
         /// <param name="functionCall">
-        /// If functions is not null or empty, this is required.  Pass "auto" to let the API decide, "none" if none are to be called, or {"name": "function-name"}
+        /// Pass "auto" to let the OpenAI service decide, "none" if none are to be called, or "functionName" to force function call. Defaults to "auto".
         /// </param>
         /// <param name="functions">
-        /// An optional list of functions to get arguments for.
+        /// An optional list of functions to get arguments for.  Null or empty for none.
         /// </param>
         public ChatRequest(
             IEnumerable<Message> messages,
@@ -114,13 +115,29 @@ namespace OpenAI.Chat
             LogitBias = logitBias;
             User = user;
 
-            if (string.IsNullOrEmpty(functionCall) && Functions is { Count: > 0 })
+            var functionList = functions?.ToList();
+
+            if (functionList != null && functionList.Any())
             {
-                throw new ArgumentException("If functions are provided, please also provide a function_call specifier e.g. (auto, none, or {\"name\": \"<insert-function-name>\"})");
+                if (string.IsNullOrWhiteSpace(functionCall))
+                {
+                    FunctionCall = "auto";
+                }
+                else
+                {
+                    if (!functionCall.Equals("none") &&
+                        !functionCall.Equals("auto"))
+                    {
+                        FunctionCall = new JObject { ["name"] = functionCall };
+                    }
+                    else
+                    {
+                        FunctionCall = functionCall;
+                    }
+                }
             }
 
-            FunctionCall = functionCall;
-            Functions = functions?.ToList();
+            Functions = functionList?.ToList();
         }
 
         /// <summary>
@@ -221,10 +238,10 @@ namespace OpenAI.Chat
         public string User { get; }
 
         /// <summary>
-        /// If functions is not null or empty, this is required.  Pass "auto" to let the API decide, "none" if none are to be called, or {"name": "function-name"}
+        /// Pass "auto" to let the OpenAI service decide, "none" if none are to be called, or "functionName" to force function call. Defaults to "auto".
         /// </summary>
         [JsonProperty("function_call")]
-        public string FunctionCall { get; }
+        public dynamic FunctionCall { get; }
 
         /// <summary>
         /// An optional list of functions to get arguments for.
