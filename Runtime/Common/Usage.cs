@@ -8,9 +8,9 @@ namespace OpenAI
     {
         [JsonConstructor]
         public Usage(
-            int? promptTokens,
-            int? completionTokens,
-            int? totalTokens)
+            [JsonProperty("prompt_tokens")] int? promptTokens,
+            [JsonProperty("completion_tokens")] int? completionTokens,
+            [JsonProperty("total_tokens")] int? totalTokens)
         {
             PromptTokens = promptTokens;
             CompletionTokens = completionTokens;
