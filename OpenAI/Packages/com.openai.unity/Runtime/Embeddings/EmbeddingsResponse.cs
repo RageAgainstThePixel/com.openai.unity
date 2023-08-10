@@ -8,7 +8,11 @@ namespace OpenAI.Embeddings
     public sealed class EmbeddingsResponse : BaseResponse
     {
         [JsonConstructor]
-        public EmbeddingsResponse(string @object, IReadOnlyList<Datum> data, string model, Usage usage)
+        public EmbeddingsResponse(
+            [JsonProperty("object")] string @object,
+            [JsonProperty("data")] IReadOnlyList<Datum> data,
+            [JsonProperty("model")] string model,
+            [JsonProperty("usage")] Usage usage)
         {
             Object = @object;
             Data = data;
@@ -17,15 +21,15 @@ namespace OpenAI.Embeddings
         }
 
         [JsonProperty("object")]
-        public string Object { get; }
+        public string Object { get; private set; }
 
         [JsonProperty("data")]
-        public IReadOnlyList<Datum> Data { get; }
+        public IReadOnlyList<Datum> Data { get; private set; }
 
         [JsonProperty("model")]
-        public string Model { get; }
+        public string Model { get; private set; }
 
         [JsonProperty("usage")]
-        public Usage Usage { get; }
+        public Usage Usage { get; private set; }
     }
 }
