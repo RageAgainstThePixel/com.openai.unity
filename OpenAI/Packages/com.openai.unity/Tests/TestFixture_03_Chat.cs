@@ -5,7 +5,6 @@ using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using OpenAI.Chat;
 using OpenAI.Tests.Weather;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -178,7 +177,7 @@ namespace OpenAI.Tests
             Debug.Log($"{Role.Function}: {functionResult}");
             chatRequest = new ChatRequest(messages, functions: functions, functionCall: "auto", model: "gpt-3.5-turbo");
             result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
-            Console.WriteLine(result);
+            Debug.Log(result);
         }
 
         [Test]
