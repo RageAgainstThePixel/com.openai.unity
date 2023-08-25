@@ -1,7 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using System;
 
 namespace OpenAI.Moderations
 {
@@ -11,7 +10,11 @@ namespace OpenAI.Moderations
         public Scores(
             [JsonProperty("hate")] double hate,
             [JsonProperty("hate/threatening")] double hateThreatening,
+            [JsonProperty("harassment")] double harassment,
+            [JsonProperty("harassment/threatening")] double harassmentThreatening,
             [JsonProperty("self-harm")] double selfHarm,
+            [JsonProperty("self-harm/intent")] double selfHarmIntent,
+            [JsonProperty("self-harm/instructions")] double selfHarmInstructions,
             [JsonProperty("sexual")] double sexual,
             [JsonProperty("sexual/minors")] double sexualMinors,
             [JsonProperty("violence")] double violence,
@@ -19,7 +22,11 @@ namespace OpenAI.Moderations
         {
             Hate = hate;
             HateThreatening = hateThreatening;
+            Harassment = harassment;
+            HarassmentThreatening = harassmentThreatening;
             SelfHarm = selfHarm;
+            SelfHarmIntent = selfHarmIntent;
+            SelfHarmInstructions = selfHarmInstructions;
             Sexual = sexual;
             SexualMinors = sexualMinors;
             Violence = violence;
@@ -32,8 +39,20 @@ namespace OpenAI.Moderations
         [JsonProperty("hate/threatening")]
         public double HateThreatening { get; }
 
+        [JsonProperty("harassment")]
+        public double Harassment { get; }
+
+        [JsonProperty("harassment/threatening")]
+        public double HarassmentThreatening { get; }
+
         [JsonProperty("self-harm")]
         public double SelfHarm { get; }
+
+        [JsonProperty("self-harm/intent")]
+        public double SelfHarmIntent { get; }
+
+        [JsonProperty("self-harm/instructions")]
+        public double SelfHarmInstructions { get; }
 
         [JsonProperty("sexual")]
         public double Sexual { get; }
@@ -48,13 +67,17 @@ namespace OpenAI.Moderations
         public double ViolenceGraphic { get; }
 
         public override string ToString() =>
-            $"{"Hate:",-10}{Hate:0.00 E+00}{Environment.NewLine}" +
-            $"{"Threat:",-10}{HateThreatening:0.00 E+00}{Environment.NewLine}" +
-            $"{"Violence:",-10}{Violence:0.00 E+00}{Environment.NewLine}" +
-            $"{"Graphic:",-10}{ViolenceGraphic:0.00 E+00}{Environment.NewLine}" +
-            $"{"SelfHarm:",-10}{SelfHarm:0.00 E+00}{Environment.NewLine}" +
-            $"{"Sexual:",-10}{Sexual:0.00 E+00}{Environment.NewLine}" +
-            $"{"Minors:",-10}{SexualMinors:0.00 E+00}{Environment.NewLine}";
+            $"Hate: {Hate:0.00 e+00}\n" +
+            $"Hate/Threatening: {HateThreatening:0.00 e+00}\n" +
+            $"Harassment: {Harassment:0.00 e+00}\n" +
+            $"Harassment/Threatening: {HarassmentThreatening:0.00 e+00}\n" +
+            $"Self-Harm: {SelfHarm:0.00 e+00}\n" +
+            $"Self-Harm/Intent: {SelfHarmIntent:0.00 e+00}\n" +
+            $"Self-Harm/Instructions: {SelfHarmInstructions:0.00 e+00}\n" +
+            $"Sexual: {Sexual:0.00 e+00}\n" +
+            $"Sexual/Minors: {SexualMinors:0.00 e+00}\n" +
+            $"Violence: {Violence:0.00 e+00}\n" +
+            $"Violence/Graphic: {ViolenceGraphic:0.00 e+00}\n";
 
         public static implicit operator string(Scores scores) => scores.ToString();
     }
