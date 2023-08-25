@@ -46,7 +46,7 @@ namespace OpenAI.Audio
             string model = null,
             string prompt = null,
             AudioResponseFormat responseFormat = AudioResponseFormat.Json,
-            int? temperature = null,
+            float? temperature = null,
             string language = null)
             : this(File.OpenRead(audioPath), Path.GetFileName(audioPath), model, prompt, responseFormat, temperature, language)
         {
@@ -89,7 +89,7 @@ namespace OpenAI.Audio
             string model = null,
             string prompt = null,
             AudioResponseFormat responseFormat = AudioResponseFormat.Json,
-            int? temperature = null,
+            float? temperature = null,
             string language = null)
             : this(new MemoryStream(audio.EncodeToWav()), $"{audio.name}.wav", model, prompt, responseFormat, temperature, language)
         {
@@ -136,7 +136,7 @@ namespace OpenAI.Audio
             string model = null,
             string prompt = null,
             AudioResponseFormat responseFormat = AudioResponseFormat.Json,
-            int? temperature = null,
+            float? temperature = null,
             string language = null)
         {
             Audio = audio;
@@ -196,7 +196,7 @@ namespace OpenAI.Audio
         /// the model will use log probability to automatically increase the temperature until certain thresholds are hit.<br/>
         /// Defaults to 0
         /// </summary>
-        public int? Temperature { get; }
+        public float? Temperature { get; }
 
         /// <summary>
         /// Optional, The language of the input audio.

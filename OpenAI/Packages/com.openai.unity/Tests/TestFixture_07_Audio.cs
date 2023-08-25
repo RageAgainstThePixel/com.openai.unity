@@ -18,7 +18,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(api.AudioEndpoint);
             var audioPath = AssetDatabase.GUIDToAssetPath("259eaa73cab84284eac307d3134c3ade");
             var audioClip = AssetDatabase.LoadAssetAtPath<AudioClip>(audioPath);
-            using var request = new AudioTranscriptionRequest(audioClip, language: "en");
+            using var request = new AudioTranscriptionRequest(audioClip, temperature: 0.1f, language: "en");
             var result = await api.AudioEndpoint.CreateTranscriptionAsync(request);
             Assert.IsNotNull(result);
             Debug.Log(result);
@@ -30,7 +30,7 @@ namespace OpenAI.Tests
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.AudioEndpoint);
             var audioPath = AssetDatabase.GUIDToAssetPath("259eaa73cab84284eac307d3134c3ade");
-            using var request = new AudioTranscriptionRequest(Path.GetFullPath(audioPath), language: "en");
+            using var request = new AudioTranscriptionRequest(Path.GetFullPath(audioPath), temperature: 0.1f, language: "en");
             var result = await api.AudioEndpoint.CreateTranscriptionAsync(request);
             Assert.IsNotNull(result);
             Debug.Log(result);

@@ -2,8 +2,8 @@
 
 using NUnit.Framework;
 using OpenAI.Moderations;
-using System;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace OpenAI.Tests
 {
@@ -18,7 +18,7 @@ namespace OpenAI.Tests
 
             var response = await api.ModerationsEndpoint.CreateModerationAsync(new ModerationsRequest("I love you"));
             Assert.IsNotNull(response);
-            Console.WriteLine(response.Results?[0]?.Scores?.ToString());
+            Debug.Log(response.Results?[0]?.Scores?.ToString());
         }
     }
 }
