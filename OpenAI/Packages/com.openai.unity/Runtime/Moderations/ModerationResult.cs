@@ -7,7 +7,10 @@ namespace OpenAI.Moderations
     public sealed class ModerationResult
     {
         [JsonConstructor]
-        public ModerationResult(Categories categories, Scores scores, bool flagged)
+        public ModerationResult(
+            [JsonProperty("categories")] Categories categories,
+            [JsonProperty("category_scores")] Scores scores,
+            [JsonProperty("flagged")] bool flagged)
         {
             Categories = categories;
             Scores = scores;
