@@ -106,9 +106,9 @@ namespace OpenAI.Models
             catch (RestException e)
             {
                 if (e.Response.Code == 403 ||
-                    e.Message.Contains("api.delete"))
+                    e.Message.Contains("You have insufficient permissions for this operation. You need to be this role: Owner."))
                 {
-                    throw new UnauthorizedAccessException("You do not have permissions to delete models for this organization.");
+                    throw new UnauthorizedAccessException("You have insufficient permissions for this operation. You need to be this role: Owner.");
                 }
 
                 throw;

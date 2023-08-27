@@ -656,7 +656,7 @@ namespace OpenAI.Editor.FineTuning
                         }
                         catch (UnauthorizedAccessException)
                         {
-                            EditorUtility.DisplayDialog("Unauthorized", "You do not have permissions to delete models for this organization.", "Ok");
+                            EditorUtility.DisplayDialog("Unauthorized", "You have insufficient permissions for this operation. You need to be this role: Owner.", "Ok");
                         }
                         catch (Exception e)
                         {
