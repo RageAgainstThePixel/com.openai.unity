@@ -1,11 +1,14 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using UnityEngine.Scripting;
 
 namespace OpenAI
 {
+    [Preserve]
     public sealed class Usage
     {
+        [Preserve]
         [JsonConstructor]
         public Usage(
             [JsonProperty("prompt_tokens")] int? promptTokens,
@@ -17,15 +20,19 @@ namespace OpenAI
             TotalTokens = totalTokens;
         }
 
+        [Preserve]
         [JsonProperty("prompt_tokens")]
         public int? PromptTokens { get; internal set; }
 
+        [Preserve]
         [JsonProperty("completion_tokens")]
         public int? CompletionTokens { get; internal set; }
 
+        [Preserve]
         [JsonProperty("total_tokens")]
         public int? TotalTokens { get; internal set; }
 
+        [Preserve]
         internal void CopyFrom(Usage other)
         {
             if (other?.PromptTokens != null)

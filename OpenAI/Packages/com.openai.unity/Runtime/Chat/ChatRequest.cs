@@ -5,9 +5,11 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Scripting;
 
 namespace OpenAI.Chat
 {
+    [Preserve]
     public sealed class ChatRequest
     {
         /// <summary>
@@ -75,6 +77,7 @@ namespace OpenAI.Chat
         /// <param name="functions">
         /// An optional list of functions to get arguments for.  Null or empty for none.
         /// </param>
+        [Preserve]
         public ChatRequest(
             IEnumerable<Message> messages,
             string model = null,
@@ -144,12 +147,14 @@ namespace OpenAI.Chat
         /// ID of the model to use.<br/>
         /// Currently, only gpt-4, gpt-3.5-turbo and gpt-3.5-turbo-0301 are supported.
         /// </summary>
+        [Preserve]
         [JsonProperty("model")]
         public string Model { get; }
 
         /// <summary>
         /// The messages to generate chat completions for, in the chat format.
         /// </summary>
+        [Preserve]
         [JsonProperty("messages")]
         public IReadOnlyList<Message> Messages { get; }
 
@@ -160,6 +165,7 @@ namespace OpenAI.Chat
         /// We generally recommend altering this or top_p but not both.<br/>
         /// Defaults to 1
         /// </summary>
+        [Preserve]
         [JsonProperty("temperature")]
         public double? Temperature { get; }
 
@@ -170,6 +176,7 @@ namespace OpenAI.Chat
         /// We generally recommend altering this or temperature but not both.<br/>
         /// Defaults to 1
         /// </summary>
+        [Preserve]
         [JsonProperty("top_p")]
         public double? TopP { get; }
 
@@ -177,6 +184,7 @@ namespace OpenAI.Chat
         /// How many chat completion choices to generate for each input message.<br/>
         /// Defaults to 1
         /// </summary>
+        [Preserve]
         [JsonProperty("n")]
         public int? Number { get; }
 
@@ -185,12 +193,14 @@ namespace OpenAI.Chat
         /// Do not set this yourself, use the appropriate methods on <see cref="ChatEndpoint"/> instead.<br/>
         /// Defaults to false
         /// </summary>
+        [Preserve]
         [JsonProperty("stream")]
         public bool Stream { get; internal set; }
 
         /// <summary>
         /// Up to 4 sequences where the API will stop generating further tokens.
         /// </summary>
+        [Preserve]
         [JsonProperty("stop")]
         public string[] Stops { get; }
 
@@ -198,6 +208,7 @@ namespace OpenAI.Chat
         /// The maximum number of tokens allowed for the generated answer.
         /// By default, the number of tokens the model can return will be (4096 - prompt tokens).
         /// </summary>
+        [Preserve]
         [JsonProperty("max_tokens")]
         public int? MaxTokens { get; }
 
@@ -207,6 +218,7 @@ namespace OpenAI.Chat
         /// increasing the model's likelihood to talk about new topics.<br/>
         /// Defaults to 0
         /// </summary>
+        [Preserve]
         [JsonProperty("presence_penalty")]
         public double? PresencePenalty { get; }
 
@@ -216,6 +228,7 @@ namespace OpenAI.Chat
         /// decreasing the model's likelihood to repeat the same line verbatim.<br/>
         /// Defaults to 0
         /// </summary>
+        [Preserve]
         [JsonProperty("frequency_penalty")]
         public double? FrequencyPenalty { get; }
 
@@ -228,24 +241,28 @@ namespace OpenAI.Chat
         /// in a ban or exclusive selection of the relevant token.<br/>
         /// Defaults to null
         /// </summary>
+        [Preserve]
         [JsonProperty("logit_bias")]
         public IReadOnlyDictionary<string, double> LogitBias { get; }
 
         /// <summary>
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </summary>
+        [Preserve]
         [JsonProperty("user")]
         public string User { get; }
 
         /// <summary>
         /// Pass "auto" to let the OpenAI service decide, "none" if none are to be called, or "functionName" to force function call. Defaults to "auto".
         /// </summary>
+        [Preserve]
         [JsonProperty("function_call")]
         public dynamic FunctionCall { get; }
 
         /// <summary>
         /// An optional list of functions to get arguments for.
         /// </summary>
+        [Preserve]
         [JsonProperty("functions")]
         public IReadOnlyList<Function> Functions { get; }
 

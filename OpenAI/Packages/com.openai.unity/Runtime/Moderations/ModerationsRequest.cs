@@ -2,12 +2,14 @@
 
 using Newtonsoft.Json;
 using System;
+using UnityEngine.Scripting;
 
 namespace OpenAI.Moderations
 {
     /// <summary>
     /// Given a input text, outputs if the model classifies it as violating OpenAI's content policy.
     /// </summary>
+    [Preserve]
     public sealed class ModerationsRequest
     {
         /// <summary>
@@ -21,8 +23,11 @@ namespace OpenAI.Moderations
         /// If you use text-moderation-stable, we will provide advanced notice before updating the model.
         /// Accuracy of text-moderation-stable may be slightly lower than for text-moderation-latest.
         /// </param>
+        [Preserve]
         [JsonConstructor]
-        public ModerationsRequest(string input, string model = null)
+        public ModerationsRequest(
+            [JsonProperty("input")] string input,
+            [JsonProperty("model")] string model = null)
         {
             Input = input;
             Model = string.IsNullOrWhiteSpace(model) ? Models.Model.Moderation_Latest : model;
@@ -33,9 +38,11 @@ namespace OpenAI.Moderations
             }
         }
 
+        [Preserve]
         [JsonProperty("input")]
         public string Input { get; }
 
+        [Preserve]
         [JsonProperty("model")]
         public string Model { get; }
     }

@@ -4,13 +4,17 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Scripting;
 
 namespace OpenAI.Chat
 {
+    [Preserve]
     public sealed class ChatResponse : BaseResponse
     {
+        [Preserve]
         internal ChatResponse(ChatResponse other) => CopyFrom(other);
 
+        [Preserve]
         [JsonConstructor]
         public ChatResponse(
             [JsonProperty("id")] string id,
@@ -28,27 +32,35 @@ namespace OpenAI.Chat
             this.choices = choices;
         }
 
+        [Preserve]
         [JsonProperty("id")]
         public string Id { get; internal set; }
 
+        [Preserve]
         [JsonProperty("object")]
         public string Object { get; internal set; }
 
+        [Preserve]
         [JsonProperty("created")]
         public int Created { get; internal set; }
 
+        [Preserve]
         [JsonProperty("model")]
         public string Model { get; internal set; }
 
+        [Preserve]
         [JsonProperty("usage")]
         public Usage Usage { get; internal set; }
 
+        [Preserve]
         [JsonIgnore]
         private List<Choice> choices;
 
+        [Preserve]
         [JsonProperty("choices")]
         public IReadOnlyList<Choice> Choices => choices;
 
+        [Preserve]
         [JsonIgnore]
         public Choice FirstChoice => Choices?.FirstOrDefault(choice => choice.Index == 0);
 
@@ -56,6 +68,7 @@ namespace OpenAI.Chat
 
         public static implicit operator string(ChatResponse response) => response.ToString();
 
+        [Preserve]
         internal void CopyFrom(ChatResponse other)
         {
             if (!string.IsNullOrWhiteSpace(other?.Id))

@@ -21,8 +21,16 @@ namespace OpenAI.Files
         [Preserve]
         private class FilesList
         {
+            [Preserve]
+            [JsonConstructor]
+            public FilesList([JsonProperty("data")] List<FileData> data)
+            {
+                Data = data;
+            }
+
+            [Preserve]
             [JsonProperty("data")]
-            public List<FileData> Data { get; set; }
+            public List<FileData> Data { get; }
         }
 
         /// <inheritdoc />

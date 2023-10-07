@@ -1,11 +1,14 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using UnityEngine.Scripting;
 
 namespace OpenAI.Chat
 {
+    [Preserve]
     public sealed class Choice
     {
+        [Preserve]
         [JsonConstructor]
         public Choice(
             [JsonProperty("message")] Message message,
@@ -19,15 +22,19 @@ namespace OpenAI.Chat
             Index = index;
         }
 
+        [Preserve]
         [JsonProperty("message")]
         public Message Message { get; internal set; }
 
+        [Preserve]
         [JsonProperty("delta")]
         public Delta Delta { get; internal set; }
 
+        [Preserve]
         [JsonProperty("finish_reason")]
         public string FinishReason { get; internal set; }
 
+        [Preserve]
         [JsonProperty("index")]
         public int Index { get; internal set; }
 
@@ -35,6 +42,7 @@ namespace OpenAI.Chat
 
         public static implicit operator string(Choice choice) => choice.ToString();
 
+        [Preserve]
         internal void CopyFrom(Choice other)
         {
             if (other?.Message != null)

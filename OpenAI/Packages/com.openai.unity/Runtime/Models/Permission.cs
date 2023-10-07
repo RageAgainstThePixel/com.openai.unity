@@ -2,11 +2,14 @@
 
 using Newtonsoft.Json;
 using System;
+using UnityEngine.Scripting;
 
 namespace OpenAI.Models
 {
+    [Preserve]
     public sealed class Permission
     {
+        [Preserve]
         [JsonConstructor]
         public Permission(
             [JsonProperty("id")] string id,
@@ -36,42 +39,55 @@ namespace OpenAI.Models
             IsBlocking = isBlocking;
         }
 
+        [Preserve]
         [JsonProperty("id")]
         public string Id { get; }
 
+        [Preserve]
         [JsonProperty("object")]
         public string Object { get; }
 
+        [Preserve]
         [JsonProperty("created")]
         public int CreatedAtUnixTime { get; }
 
+        [Preserve]
         [JsonIgnore]
         public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTime).DateTime;
 
+        [Preserve]
         [JsonProperty("allow_create_engine")]
         public bool AllowCreateEngine { get; }
 
+        [Preserve]
         [JsonProperty("allow_sampling")]
         public bool AllowSampling { get; }
 
+        [Preserve]
         [JsonProperty("allow_logprobs")]
         public bool AllowLogprobs { get; }
 
+        [Preserve]
         [JsonProperty("allow_search_indices")]
         public bool AllowSearchIndices { get; }
 
+        [Preserve]
         [JsonProperty("allow_view")]
         public bool AllowView { get; }
 
+        [Preserve]
         [JsonProperty("allow_fine_tuning")]
         public bool AllowFineTuning { get; }
 
+        [Preserve]
         [JsonProperty("organization")]
         public string Organization { get; }
 
+        [Preserve]
         [JsonProperty("group")]
         public object Group { get; }
 
+        [Preserve]
         [JsonProperty("is_blocking")]
         public bool IsBlocking { get; }
     }
