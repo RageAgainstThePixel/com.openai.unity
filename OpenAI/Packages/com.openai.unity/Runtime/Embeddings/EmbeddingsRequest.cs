@@ -5,9 +5,11 @@ using OpenAI.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Scripting;
 
 namespace OpenAI.Embeddings
 {
+    [Preserve]
     public sealed class EmbeddingsRequest
     {
         /// <summary>
@@ -26,6 +28,7 @@ namespace OpenAI.Embeddings
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
         /// <exception cref="ArgumentNullException">A valid <see cref="input"/> string is a Required parameter.</exception>
+        [Preserve]
         public EmbeddingsRequest(string input, string model = null, string user = null)
             : this(new List<string> { input }, model, user)
         {
@@ -51,6 +54,7 @@ namespace OpenAI.Embeddings
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
         /// <exception cref="ArgumentNullException">A valid <see cref="input"/> string is a Required parameter.</exception>
+        [Preserve]
         public EmbeddingsRequest(IEnumerable<string> input, string model = null, string user = null)
         {
             Input = input?.ToList();
@@ -72,12 +76,15 @@ namespace OpenAI.Embeddings
             User = user;
         }
 
+        [Preserve]
         [JsonProperty("input")]
         public IReadOnlyList<string> Input { get; }
 
+        [Preserve]
         [JsonProperty("model")]
         public string Model { get; }
 
+        [Preserve]
         [JsonProperty("user")]
         public string User { get; }
     }

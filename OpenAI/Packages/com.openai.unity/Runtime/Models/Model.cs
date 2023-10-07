@@ -3,6 +3,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using UnityEngine.Scripting;
 
 namespace OpenAI.Models
 {
@@ -10,6 +11,7 @@ namespace OpenAI.Models
     /// Represents a language model.<br/>
     /// <see href="https://platform.openai.com/docs/models/model-endpoint-compatability"/>
     /// </summary>
+    [Preserve]
     public sealed class Model
     {
         /// <summary>
@@ -17,6 +19,7 @@ namespace OpenAI.Models
         /// </summary>
         /// <param name="id">Model id.</param>
         /// <param name="ownedBy">Optional, owned by id.</param>
+        [Preserve]
         public Model(string id, string ownedBy = null)
         {
             if (string.IsNullOrWhiteSpace(id))
@@ -28,6 +31,7 @@ namespace OpenAI.Models
             OwnedBy = ownedBy;
         }
 
+        [Preserve]
         [JsonConstructor]
         public Model(
             [JsonProperty("id")] string id,
@@ -61,27 +65,35 @@ namespace OpenAI.Models
         /// <inheritdoc />
         public override string ToString() => Id;
 
+        [Preserve]
         [JsonProperty("id")]
         public string Id { get; }
 
+        [Preserve]
         [JsonProperty("object")]
         public string Object { get; }
 
+        [Preserve]
         [JsonProperty("created")]
         public int CreatedAtUnixTimeSeconds { get; }
 
+        [Preserve]
         [JsonIgnore]
         public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTimeSeconds).DateTime;
 
+        [Preserve]
         [JsonProperty("owned_by")]
         public string OwnedBy { get; private set; }
 
+        [Preserve]
         [JsonProperty("permission")]
         public IReadOnlyList<Permission> Permissions { get; }
 
+        [Preserve]
         [JsonProperty("root")]
         public string Root { get; }
 
+        [Preserve]
         [JsonProperty("parent")]
         public string Parent { get; }
 

@@ -2,12 +2,14 @@
 
 using Newtonsoft.Json;
 using System;
+using UnityEngine.Scripting;
 
 namespace OpenAI.Images
 {
     /// <summary>
     /// Abstract base image class for making requests.
     /// </summary>
+    [Preserve]
     public abstract class AbstractBaseImageRequest
     {
         /// <summary>
@@ -28,6 +30,7 @@ namespace OpenAI.Images
         /// <para/> Defaults to <see cref="Images.ResponseFormat.Url"/>
         /// </param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
+        [Preserve]
         protected AbstractBaseImageRequest(int numberOfResults = 1, ImageSize size = ImageSize.Large, ResponseFormat responseFormat = Images.ResponseFormat.Url, string user = null)
         {
             Number = numberOfResults;
@@ -52,6 +55,7 @@ namespace OpenAI.Images
         /// <summary>
         /// The number of images to generate. Must be between 1 and 10.
         /// </summary>
+        [Preserve]
         [JsonProperty("n")]
         public int Number { get; }
 
@@ -60,18 +64,21 @@ namespace OpenAI.Images
         /// Must be one of url or b64_json.
         /// <para/> Defaults to <see cref="Images.ResponseFormat.Url"/>
         /// </summary>
+        [Preserve]
         [JsonProperty("response_format")]
         public string ResponseFormat { get; }
 
         /// <summary>
         /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
         /// </summary>
+        [Preserve]
         [JsonProperty("size")]
         public string Size { get; }
 
         /// <summary>
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </summary>
+        [Preserve]
         [JsonProperty("user")]
         public string User { get; }
     }

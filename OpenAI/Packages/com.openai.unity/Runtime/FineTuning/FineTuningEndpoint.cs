@@ -21,9 +21,21 @@ namespace OpenAI.FineTuning
         [Preserve]
         private class FineTuneList
         {
+            [Preserve]
+            [JsonConstructor]
+            public FineTuneList(
+                [JsonProperty("object")] string @object,
+                [JsonProperty("data")] List<FineTuneJob> data)
+            {
+                Object = @object;
+                Data = data;
+            }
+
+            [Preserve]
             [JsonProperty("object")]
             public string Object { get; set; }
 
+            [Preserve]
             [JsonProperty("data")]
             public List<FineTuneJob> Data { get; set; }
         }
@@ -31,8 +43,16 @@ namespace OpenAI.FineTuning
         [Preserve]
         private class FineTuneEventList
         {
+            [Preserve]
+            [JsonConstructor]
+            public FineTuneEventList([JsonProperty("data")] List<Event> data)
+            {
+                Data = data;
+            }
+
+            [Preserve]
             [JsonProperty("data")]
-            public List<Event> Data { get; set; }
+            public List<Event> Data { get; }
         }
 
         /// <inheritdoc />

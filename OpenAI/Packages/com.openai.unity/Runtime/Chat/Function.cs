@@ -2,14 +2,17 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using UnityEngine.Scripting;
 
 namespace OpenAI.Chat
 {
     /// <summary>
     /// <see href="https://platform.openai.com/docs/guides/gpt/function-calling"/>
     /// </summary>
+    [Preserve]
     public class Function
     {
+        [Preserve]
         internal Function(Delta other) => CopyFrom(other);
 
         /// <summary>
@@ -28,6 +31,7 @@ namespace OpenAI.Chat
         /// <param name="arguments">
         /// The arguments to use when calling the function.
         /// </param>
+        [Preserve]
         [JsonConstructor]
         public Function(
             [JsonProperty("name")] string name,
@@ -46,12 +50,14 @@ namespace OpenAI.Chat
         /// May contain a-z, A-Z, 0-9, and underscores and dashes, with a maximum length of 64 characters.
         /// Recommended to not begin with a number or a dash.
         /// </summary>
+        [Preserve]
         [JsonProperty("name")]
         public string Name { get; private set; }
 
         /// <summary>
         /// The optional description of the function.
         /// </summary>
+        [Preserve]
         [JsonProperty("description")]
         public string Description { get; private set; }
 
@@ -63,6 +69,7 @@ namespace OpenAI.Chat
         /// The optional parameters of the function.
         /// Describe the parameters that the model should generate in JSON schema format (json-schema.org).
         /// </summary>
+        [Preserve]
         [JsonProperty("parameters")]
         public JToken Parameters
         {
@@ -86,6 +93,7 @@ namespace OpenAI.Chat
         /// <summary>
         /// The arguments to use when calling the function.
         /// </summary>
+        [Preserve]
         [JsonProperty("arguments")]
         public JToken Arguments
         {
@@ -102,6 +110,7 @@ namespace OpenAI.Chat
             private set => arguments = value;
         }
 
+        [Preserve]
         internal void CopyFrom(Delta other)
         {
             var otherFunction = other.Function;

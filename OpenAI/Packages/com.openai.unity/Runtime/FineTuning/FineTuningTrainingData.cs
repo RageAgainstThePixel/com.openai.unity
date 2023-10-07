@@ -3,6 +3,7 @@
 using Newtonsoft.Json;
 using System;
 using UnityEngine;
+using UnityEngine.Scripting;
 
 namespace OpenAI.FineTuning
 {
@@ -12,6 +13,7 @@ namespace OpenAI.FineTuning
     /// where you might input detailed instructions or multiple examples in a single prompt.
     /// <see href="https://platform.openai.com/docs/guides/fine-tuning/specific-guidelines"/>
     /// </summary>
+    [Preserve]
     [Serializable]
     public sealed class FineTuningTrainingData
     {
@@ -31,6 +33,7 @@ namespace OpenAI.FineTuning
         /// Optional, Each completion should end with a fixed stop sequence to inform the model when the completion ends.
         /// A stop sequence could be "\n", "###", or any other token that does not appear in any completion. Default is " END".
         /// </param>
+        [Preserve]
         public FineTuningTrainingData(string prompt, string completion, string promptSuffix = "\\n\\n###\\n\\n", string completionSuffix = " END")
         {
             this.prompt = prompt;
@@ -49,6 +52,7 @@ namespace OpenAI.FineTuning
         /// <summary>
         /// Prompt text.
         /// </summary>
+        [Preserve]
         [JsonProperty("prompt")]
         public string Prompt => $"{prompt}{promptSuffix.Replace("\\n", "\n")}";
 
@@ -62,6 +66,7 @@ namespace OpenAI.FineTuning
         /// <summary>
         /// The ideal completion text.
         /// </summary>
+        [Preserve]
         [JsonProperty("completion")]
         public string Completion => $" {completion}{completionSuffix.Replace("\\n", "\n")}";
 

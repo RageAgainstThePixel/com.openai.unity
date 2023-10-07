@@ -1,11 +1,14 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using UnityEngine.Scripting;
 
 namespace OpenAI.Moderations
 {
+    [Preserve]
     public sealed class Scores
     {
+        [Preserve]
         [JsonConstructor]
         public Scores(
             [JsonProperty("hate")] double hate,
@@ -33,36 +36,47 @@ namespace OpenAI.Moderations
             ViolenceGraphic = violenceGraphic;
         }
 
+        [Preserve]
         [JsonProperty("hate")]
         public double Hate { get; }
 
+        [Preserve]
         [JsonProperty("hate/threatening")]
         public double HateThreatening { get; }
 
+        [Preserve]
         [JsonProperty("harassment")]
         public double Harassment { get; }
 
+        [Preserve]
         [JsonProperty("harassment/threatening")]
         public double HarassmentThreatening { get; }
 
+        [Preserve]
         [JsonProperty("self-harm")]
         public double SelfHarm { get; }
 
+        [Preserve]
         [JsonProperty("self-harm/intent")]
         public double SelfHarmIntent { get; }
 
+        [Preserve]
         [JsonProperty("self-harm/instructions")]
         public double SelfHarmInstructions { get; }
 
+        [Preserve]
         [JsonProperty("sexual")]
         public double Sexual { get; }
 
+        [Preserve]
         [JsonProperty("sexual/minors")]
         public double SexualMinors { get; }
 
+        [Preserve]
         [JsonProperty("violence")]
         public double Violence { get; }
 
+        [Preserve]
         [JsonProperty("violence/graphic")]
         public double ViolenceGraphic { get; }
 
