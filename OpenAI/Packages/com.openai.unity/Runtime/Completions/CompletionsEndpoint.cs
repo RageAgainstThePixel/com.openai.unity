@@ -205,32 +205,6 @@ namespace OpenAI.Completions
             response.Validate();
         }
 
-        [Obsolete("Use StreamCompletionAsync")]
-        public IAsyncEnumerable<CompletionResult> StreamCompletionEnumerableAsync(
-            string prompt = null,
-            IEnumerable<string> prompts = null,
-            string suffix = null,
-            int? maxTokens = null,
-            double? temperature = null,
-            double? topP = null,
-            int? numOutputs = null,
-            double? presencePenalty = null,
-            double? frequencyPenalty = null,
-            int? logProbabilities = null,
-            bool? echo = null,
-            IEnumerable<string> stopSequences = null,
-            string model = null,
-            CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("Use StreamCompletionAsync")]
-        public IAsyncEnumerable<CompletionResult> StreamCompletionEnumerableAsync(CompletionRequest completionRequest, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
         #endregion Streaming
     }
 }

@@ -80,11 +80,5 @@ namespace OpenAI.Chat
             resultHandler(chatResponse);
             return chatResponse;
         }
-
-        [Obsolete("Use StreamCompletionAsync")]
-        public IAsyncEnumerable<ChatResponse> StreamCompletionEnumerableAsync(ChatRequest chatRequest, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

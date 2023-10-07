@@ -59,7 +59,7 @@ namespace OpenAI.FineTuning
         public FineTuningEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
-        protected override string Root => "fine-tunes";
+        protected override string Root => "fine_tuning";
 
         /// <summary>
         /// Creates a job that fine-tunes a specified model from a given dataset.
@@ -72,9 +72,9 @@ namespace OpenAI.FineTuning
         public async Task<FineTuneJob> CreateFineTuneJobAsync(CreateFineTuneJobRequest jobRequest, CancellationToken cancellationToken = default)
         {
             var payload = JsonConvert.SerializeObject(jobRequest, client.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl("/jobs"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate();
-            return response.DeserializeResponse<FineTuneJobResponse>(response.Body, client.JsonSerializationOptions);
+            return JsonConvert.DeserializeObject<FineTuneJob>(response.Body, client.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -84,8 +84,8 @@ namespace OpenAI.FineTuning
         /// <returns>List of <see cref="FineTuneJob"/>s.</returns>
         public async Task<IReadOnlyList<FineTuneJob>> ListFineTuneJobsAsync(CancellationToken cancellationToken = default)
         {
-            var response = await Rest.GetAsync(GetUrl(), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
+            var response = await Rest.GetAsync(GetUrl("/jobs"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(true);
             return JsonConvert.DeserializeObject<FineTuneList>(response.Body, client.JsonSerializationOptions)?.Data.OrderBy(job => job.CreatedAtUnixTime).ToArray();
         }
 
@@ -94,12 +94,12 @@ namespace OpenAI.FineTuning
         /// </summary>
         /// <param name="jobId"><see cref="FineTuneJob.Id"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="FineTuneJobResponse"/>.</returns>
+        /// <returns><see cref="FineTuneJob"/>.</returns>
         public async Task<FineTuneJob> RetrieveFineTuneJobInfoAsync(string jobId, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.GetAsync(GetUrl($"/{jobId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
-            return response.DeserializeResponse<FineTuneJobResponse>(response.Body, client.JsonSerializationOptions);
+            var response = await Rest.GetAsync(GetUrl($"/jobs/{jobId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(true);
+            return JsonConvert.DeserializeObject<FineTuneJob>(response.Body, client.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -107,23 +107,21 @@ namespace OpenAI.FineTuning
         /// </summary>
         /// <param name="jobId"><see cref="FineTuneJob.Id"/> to cancel.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="FineTuneJobResponse"/>.</returns>
+        /// <returns><see cref="FineTuneJob"/>.</returns>
         public async Task<bool> CancelFineTuneJobAsync(string jobId, CancellationToken cancellationToken = default)
         {
             var job = await RetrieveFineTuneJobInfoAsync(jobId, cancellationToken);
-            var response = await Rest.PostAsync(GetUrl($"/{job.Id}/cancel"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl($"/jobs/{job.Id}/cancel"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate();
-
-            const string cancelled = "cancelled";
 
             if (!string.IsNullOrWhiteSpace(response.Body))
             {
-                var result = response.DeserializeResponse<FineTuneJobResponse>(response.Body, client.JsonSerializationOptions);
-                return result.Status == cancelled;
+                var result = JsonConvert.DeserializeObject<FineTuneJob>(response.Body, client.JsonSerializationOptions);
+                return result.Status == JobStatus.Cancelled;
             }
 
             job = await RetrieveFineTuneJobInfoAsync(jobId, cancellationToken);
-            return job.Status == cancelled;
+            return job.Status == JobStatus.Cancelled;
         }
 
         /// <summary>
@@ -134,7 +132,7 @@ namespace OpenAI.FineTuning
         /// <returns>List of events for <see cref="FineTuneJob"/>.</returns>
         public async Task<IReadOnlyList<Event>> ListFineTuneEventsAsync(string jobId, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.GetAsync(GetUrl($"/{jobId}/events"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.GetAsync(GetUrl($"/jobs/{jobId}/events"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate();
             return JsonConvert.DeserializeObject<FineTuneEventList>(response.Body, client.JsonSerializationOptions)?.Data.OrderBy(@event => @event.CreatedAtUnixTime).ToArray();
         }
@@ -148,7 +146,7 @@ namespace OpenAI.FineTuning
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         public async Task StreamFineTuneEventsAsync(string jobId, Action<Event> fineTuneEventCallback, bool cancelJob = false, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.GetAsync(GetUrl($"/{jobId}/events?stream=true"), eventData =>
+            var response = await Rest.GetAsync(GetUrl($"/jobs/{jobId}/events?stream=true"), eventData =>
             {
                 if (!string.IsNullOrWhiteSpace(eventData))
                 {
@@ -168,12 +166,6 @@ namespace OpenAI.FineTuning
             }
 
             cancellationToken.ThrowIfCancellationRequested();
-        }
-
-        [Obsolete("Use StreamFineTuneEventsAsync")]
-        public IAsyncEnumerable<Event> StreamFineTuneEventsEnumerableAsync(string jobId, bool cancelJob = false, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
         }
     }
 }

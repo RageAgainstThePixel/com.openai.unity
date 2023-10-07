@@ -92,7 +92,7 @@ namespace OpenAI.Tests
 
             foreach (var job in fineTuneJobs)
             {
-                if (job.Status == "cancelled")
+                if (job.Status == JobStatus.Cancelled)
                 {
                     continue;
                 }
@@ -122,7 +122,7 @@ namespace OpenAI.Tests
 
             foreach (var job in fineTuneJobs)
             {
-                if (job.Status == "pending")
+                if (job.Status == JobStatus.Pending)
                 {
                     var result = await api.FineTuningEndpoint.CancelFineTuneJobAsync(job);
                     Assert.IsNotNull(result);
@@ -173,11 +173,10 @@ namespace OpenAI.Tests
             var jobInfo = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(fineTuneJob, CancellationToken.None);
             Assert.IsNotNull(jobInfo);
             Debug.Log($"{jobInfo.Id} -> {jobInfo.Status}");
-            Assert.IsTrue(jobInfo.Status == "cancelled");
+            Assert.IsTrue(jobInfo.Status == JobStatus.Cancelled);
             var result = await api.FilesEndpoint.DeleteFileAsync(fileData, CancellationToken.None);
             Assert.IsTrue(result);
         }
-
 
         [Test]
         public async Task Test_08_DeleteFineTunedModel()

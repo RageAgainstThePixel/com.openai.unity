@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
+using Utilities.Extensions.Editor;
 using Progress = Utilities.WebRequestRest.Progress;
 
 namespace OpenAI.Editor.FineTuning
@@ -171,6 +172,26 @@ namespace OpenAI.Editor.FineTuning
         {
             if (modelOptions == null || isFetchingModels) { return; }
 
+            if (GUILayout.Button("Create new Training Data Set"))
+            {
+                EditorApplication.delayCall += () =>
+                {
+                    var fineTuningDirectory = $"{Application.dataPath}/OpenAI/Editor/FineTuningJobs";
+
+                    if (!Directory.Exists(fineTuningDirectory))
+                    {
+                        Directory.CreateDirectory(fineTuningDirectory);
+                    }
+
+                    var newTrainingSetDataInstance = CreateInstance<FineTuningTrainingDataSet>().CreateAsset(fineTuningDirectory);
+                    fineTuningTrainingDataSets.Add(new SerializedObject(newTrainingSetDataInstance));
+
+                    EditorApplication.delayCall += AssetDatabase.Refresh;
+                };
+            }
+
+            EditorGUILayout.Space();
+
             foreach (var dataSet in fineTuningTrainingDataSets)
             {
                 if (dataSet is not { targetObject: FineTuningTrainingDataSet })
@@ -281,17 +302,18 @@ namespace OpenAI.Editor.FineTuning
 
                 if (openAI != null)
                 {
-                    if (jobStatus.stringValue.Contains("not started") ||
-                        jobStatus.stringValue.Contains("cancelled") ||
-                        jobStatus.stringValue.Contains("succeeded"))
+                    if (jobStatus.intValue is
+                        (int)JobStatus.NotStarted or
+                        (int)JobStatus.Cancelled or
+                        (int)JobStatus.Succeeded)
                     {
                         FineTuneJob fineTuneJob = null;
 
-                        if (jobStatus.stringValue.Contains("succeeded"))
+                        if (jobStatus.intValue == (int)JobStatus.Succeeded)
                         {
                             EditorGUI.indentLevel++;
                             EditorGUILayout.BeginHorizontal();
-                            EditorGUILayout.LabelField($"Status: {jobStatus.stringValue}", GUILayout.MaxWidth(128));
+                            EditorGUILayout.LabelField($"Status: {(JobStatus)jobStatus.intValue}", GUILayout.MaxWidth(128));
                             GUILayout.FlexibleSpace();
 
                             if (fineTuneJobs.TryGetValue(jobId.stringValue, out fineTuneJob))
@@ -417,7 +439,7 @@ namespace OpenAI.Editor.FineTuning
                         fineTuneJobs.TryUpdate(dataSet.FineTuneJob.Id, dataSet.FineTuneJob, job);
                     }
 
-                    if (dataSet.FineTuneJob.Status.Equals("succeeded"))
+                    if (dataSet.FineTuneJob.Status == JobStatus.Succeeded)
                     {
                         FetchAllModels();
                     }
@@ -462,7 +484,7 @@ namespace OpenAI.Editor.FineTuning
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField($"Status: {fineTuneDataSet.FineTuneJob.Status}");
 
-            var canCancel = fineTuneDataSet.Status.Equals("pending") || fineTuneDataSet.Status.Equals("running");
+            var canCancel = fineTuneDataSet.Status is JobStatus.Pending or JobStatus.Running;
 
             if (canCancel && GUILayout.Button("Cancel Training"))
             {
@@ -479,7 +501,7 @@ namespace OpenAI.Editor.FineTuning
                         return;
                     }
 
-                    fineTuneDataSet.Status = "cancelled";
+                    fineTuneDataSet.Status = JobStatus.Cancelled;
 
                     try
                     {
@@ -533,7 +555,9 @@ namespace OpenAI.Editor.FineTuning
                 EditorGUILayout.LabelField($"Status: {job.Status}");
                 EditorGUILayout.LabelField("Events:");
 
+#pragma warning disable CS0618
                 var events = job.Events.OrderBy(e => e.CreatedAt);
+#pragma warning restore CS0618
 
                 foreach (var jobEvent in events)
                 {
@@ -562,16 +586,16 @@ namespace OpenAI.Editor.FineTuning
             try
             {
                 var jobs = await openAI.FineTuningEndpoint.ListFineTuneJobsAsync();
-                jobs = jobs.OrderByDescending(job => job.UpdatedAt).ToList();
+                jobs = jobs.OrderByDescending(job => job.FinishedAt).ToList();
 
                 fineTuneJobs.Clear();
                 await Task.WhenAll(jobs.Select(SyncJobDataAsync));
 
                 static async Task SyncJobDataAsync(FineTuneJob job)
                 {
-                    var jobIsCancelled = job.Status.Contains("cancelled");
+                    var jobIsCancelled = job.Status == JobStatus.Cancelled;
 
-                    if (jobIsCancelled || IsStale(job.UpdatedAt))
+                    if (jobIsCancelled || IsStale(job.FinishedAt))
                     {
                         return;
                     }
@@ -682,10 +706,9 @@ namespace OpenAI.Editor.FineTuning
                 var allModels = (await openAI.ModelsEndpoint.GetModelsAsync()).OrderBy(model => model.Id).ToList();
                 var modelOptionList = new List<string>
                 {
-                    "ada",
-                    "babbage",
-                    "curie",
-                    "davinci"
+                    "gpt-3.5-turbo",
+                    "babbage-002",
+                    "davinci-002"
                 };
 
                 foreach (var model in allModels)
