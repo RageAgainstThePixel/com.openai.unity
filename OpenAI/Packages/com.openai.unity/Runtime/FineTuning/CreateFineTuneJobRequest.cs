@@ -1,6 +1,8 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Models;
+using System;
 using System.Collections.Generic;
 using UnityEngine.Scripting;
 
@@ -11,9 +13,24 @@ namespace OpenAI.FineTuning
     {
         [Preserve]
         public CreateFineTuneJobRequest(
+            Model model,
             string trainingFileId,
-            string validationFileId = null,
+            HyperParameters hyperParameters = null,
+            string suffix = null,
+            string validationFileId = null)
+        {
+            Model = model ?? Models.Model.GPT3_5_Turbo;
+            TrainingFileId = trainingFileId;
+            HyperParameters = hyperParameters;
+            Suffix = suffix;
+            ValidationFileId = validationFileId;
+        }
+
+        [Obsolete("use new constructor")]
+        public CreateFineTuneJobRequest(
+            string trainingFileId,
             string model = null,
+            string validationFileId = null,
             uint epochs = 4,
             int? batchSize = null,
             double? learningRateMultiplier = null,
@@ -26,7 +43,7 @@ namespace OpenAI.FineTuning
         {
             TrainingFileId = trainingFileId;
             ValidationFileId = validationFileId;
-            Model = model ?? "curie";
+            Model = model ?? "gpt-3.5-turbo";
             Epochs = (int)epochs;
             BatchSize = batchSize;
             LearningRateMultiplier = learningRateMultiplier;
@@ -39,51 +56,59 @@ namespace OpenAI.FineTuning
         }
 
         [Preserve]
+        [JsonProperty("model")]
+        public string Model { get; set; }
+
+        [Preserve]
         [JsonProperty("training_file")]
         public string TrainingFileId { get; set; }
+
+        [Preserve]
+        [JsonProperty("hyperparameters")]
+        public HyperParameters HyperParameters { get; set; }
+
+        [Preserve]
+        [JsonProperty("suffix")]
+        public string Suffix { get; set; }
 
         [Preserve]
         [JsonProperty("validation_file")]
         public string ValidationFileId { get; set; }
 
-        [Preserve]
-        [JsonProperty("model")]
-        public string Model { get; set; }
+        #region Obsolete
 
-        [Preserve]
-        [JsonProperty("n_epochs")]
+        [JsonIgnore]
+        [Obsolete("use HyperParameters")]
         public int Epochs { get; set; }
 
-        [Preserve]
-        [JsonProperty("batch_size")]
+        [JsonIgnore]
+        [Obsolete("removed")]
         public int? BatchSize { get; set; }
 
-        [Preserve]
-        [JsonProperty("learning_rate_multiplier")]
+        [JsonIgnore]
+        [Obsolete("removed")]
         public double? LearningRateMultiplier { get; set; }
 
-        [Preserve]
-        [JsonProperty("prompt_loss_weight")]
+        [JsonIgnore]
+        [Obsolete("removed")]
         public double PromptLossWeight { get; set; }
 
-        [Preserve]
-        [JsonProperty("compute_classification_metrics")]
+        [JsonIgnore]
+        [Obsolete("removed")]
         public bool ComputeClassificationMetrics { get; set; }
 
-        [Preserve]
-        [JsonProperty("classification_n_classes")]
+        [JsonIgnore]
+        [Obsolete("removed")]
         public int? ClassificationNClasses { get; set; }
 
-        [Preserve]
-        [JsonProperty("classification_positive_class")]
+        [JsonIgnore]
+        [Obsolete("removed")]
         public string ClassificationPositiveClasses { get; set; }
 
-        [Preserve]
-        [JsonProperty("classification_betas")]
+        [JsonIgnore]
+        [Obsolete("removed")]
         public IReadOnlyList<double> ClassificationBetas { get; set; }
 
-        [Preserve]
-        [JsonProperty("suffix")]
-        public string Suffix { get; set; }
+        #endregion Obsolete
     }
 }

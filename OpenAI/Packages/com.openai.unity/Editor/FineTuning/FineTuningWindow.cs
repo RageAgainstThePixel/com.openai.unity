@@ -205,7 +205,7 @@ namespace OpenAI.Editor.FineTuning
                 var jobStatus = dataSet.FindProperty("status");
                 var baseModel = dataSet.FindProperty("baseModel");
                 var modelSuffix = dataSet.FindProperty("modelSuffix");
-                var trainingData = dataSet.FindProperty("trainingData");
+                var trainingData = dataSet.FindProperty("legacyTrainingData");
                 var isAdvanced = dataSet.FindProperty("advanced");
 
                 var prevLabelWidth = EditorGUIUtility.labelWidth;
@@ -395,20 +395,17 @@ namespace OpenAI.Editor.FineTuning
                     Directory.CreateDirectory(tempDir);
                 }
 
-                var lines = fineTuneDataSet.TrainingData.Select(trainingData => trainingData.ToString()).ToList();
+                var lines = fineTuneDataSet.LegacyTrainingData.Select(trainingData => trainingData.ToString()).ToList();
                 var tempFilePath = Path.Combine(tempDir, $"{fineTuneDataSet.name}.jsonl");
                 await File.WriteAllLinesAsync(tempFilePath, lines);
                 var fileData = await openAI.FilesEndpoint.UploadFileAsync(tempFilePath, "fine-tune");
                 File.Delete(tempFilePath);
 
                 var jobRequest = new CreateFineTuneJobRequest(
-                    trainingFileId: fileData.Id,
                     model: fineTuneDataSet.BaseModel,
+                    trainingFileId: fileData.Id,
                     suffix: fineTuneDataSet.ModelSuffix,
-                    epochs: (uint)(fineTuneDataSet.Advanced ? fineTuneDataSet.Epochs : 4),
-                    batchSize: fineTuneDataSet.Advanced ? fineTuneDataSet.BatchSize : null,
-                    learningRateMultiplier: fineTuneDataSet.Advanced ? fineTuneDataSet.LearningRateMultiplier : null,
-                    promptLossWeight: fineTuneDataSet.Advanced ? fineTuneDataSet.PromptLossWeight : 0.01f);
+                    hyperParameters: new HyperParameters(fineTuneDataSet.Epochs));
                 var job = await openAI.FineTuningEndpoint.CreateFineTuneJobAsync(jobRequest);
                 fineTuneDataSet.FineTuneJob = job;
 

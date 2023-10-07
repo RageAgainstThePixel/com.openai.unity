@@ -47,7 +47,7 @@ namespace OpenAI.Files
         {
             var response = await Rest.GetAsync(GetUrl(), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate();
-            return JsonConvert.DeserializeObject<FilesList>(response.Body, client.JsonSerializationOptions)?.Data;
+            return JsonConvert.DeserializeObject<FilesList>(response.Body, OpenAIClient.JsonSerializationOptions)?.Data;
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace OpenAI.Files
 
             var response = await Rest.PostAsync(GetUrl(), form, new RestParameters(client.DefaultRequestHeaders, uploadProgress), cancellationToken);
             response.Validate();
-            return JsonConvert.DeserializeObject<FileData>(response.Body, client.JsonSerializationOptions);
+            return JsonConvert.DeserializeObject<FileData>(response.Body, OpenAIClient.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace OpenAI.Files
         {
             var response = await Rest.GetAsync(GetUrl($"/{fileId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate();
-            return JsonConvert.DeserializeObject<FileData>(response.Body, client.JsonSerializationOptions);
+            return JsonConvert.DeserializeObject<FileData>(response.Body, OpenAIClient.JsonSerializationOptions);
         }
 
         /// <summary>

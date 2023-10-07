@@ -51,7 +51,7 @@ namespace OpenAI
             }
         }
 
-        public override string ToString() => JsonConvert.SerializeObject(this);
+        public override string ToString() => JsonConvert.SerializeObject(this, OpenAIClient.JsonSerializationOptions);
 
         public static Usage operator +(Usage a, Usage b)
             => new Usage(

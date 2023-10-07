@@ -8,10 +8,9 @@ using UnityEngine.Scripting;
 namespace OpenAI.FineTuning
 {
     /// <summary>
-    /// To fine-tune a model, you'll need a set of training examples that each consist of a single input
-    /// ("prompt") and its associated output ("completion"). This is notably different from using our base models,
-    /// where you might input detailed instructions or multiple examples in a single prompt.
-    /// <see href="https://platform.openai.com/docs/guides/fine-tuning/specific-guidelines"/>
+    /// To fine-tune a model a legacy model, you'll need a set of training examples that each consist of a single input
+    /// ("prompt") and its associated output ("completion"). For use with babbage and davinci models.
+    /// <see href="https://platform.openai.com/docs/guides/legacy-fine-tuning/prepare-training-data"/>
     /// </summary>
     [Preserve]
     [Serializable]
@@ -70,8 +69,8 @@ namespace OpenAI.FineTuning
         [JsonProperty("completion")]
         public string Completion => $" {completion}{completionSuffix.Replace("\\n", "\n")}";
 
-        public static implicit operator string(FineTuningTrainingData data) => data.ToString();
+        public override string ToString() => JsonConvert.SerializeObject(this, OpenAIClient.JsonSerializationOptions);
 
-        public override string ToString() => JsonConvert.SerializeObject(this);
+        public static implicit operator string(FineTuningTrainingData data) => data.ToString();
     }
 }

@@ -1,10 +1,10 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine.Scripting;
@@ -18,28 +18,6 @@ namespace OpenAI.FineTuning
     /// </summary>
     public sealed class FineTuningEndpoint : OpenAIBaseEndpoint
     {
-        [Preserve]
-        private class FineTuneList
-        {
-            [Preserve]
-            [JsonConstructor]
-            public FineTuneList(
-                [JsonProperty("object")] string @object,
-                [JsonProperty("data")] List<FineTuneJob> data)
-            {
-                Object = @object;
-                Data = data;
-            }
-
-            [Preserve]
-            [JsonProperty("object")]
-            public string Object { get; set; }
-
-            [Preserve]
-            [JsonProperty("data")]
-            public List<FineTuneJob> Data { get; set; }
-        }
-
         [Preserve]
         private class FineTuneEventList
         {
@@ -71,22 +49,37 @@ namespace OpenAI.FineTuning
         /// <returns><see cref="FineTuneJob"/>.</returns>
         public async Task<FineTuneJob> CreateFineTuneJobAsync(CreateFineTuneJobRequest jobRequest, CancellationToken cancellationToken = default)
         {
-            var payload = JsonConvert.SerializeObject(jobRequest, client.JsonSerializationOptions);
+            var payload = JsonConvert.SerializeObject(jobRequest, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl("/jobs"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
-            return JsonConvert.DeserializeObject<FineTuneJob>(response.Body, client.JsonSerializationOptions);
+            response.Validate(true);
+            return JsonConvert.DeserializeObject<FineTuneJob>(response.Body, OpenAIClient.JsonSerializationOptions);
         }
 
         /// <summary>
         /// List your organization's fine-tuning jobs.
         /// </summary>
+        /// <param name="limit">Number of fine-tuning jobs to retrieve (Default 20).</param>
+        /// <param name="after">Identifier for the last job from the previous pagination request.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>List of <see cref="FineTuneJob"/>s.</returns>
-        public async Task<IReadOnlyList<FineTuneJob>> ListFineTuneJobsAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<FineTuneJob>> ListFineTuneJobsAsync(int? limit = null, string after = null, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.GetAsync(GetUrl("/jobs"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var parameters = new StringBuilder();
+
+            if (limit.HasValue)
+            {
+                parameters.Append($"?{nameof(limit)}={limit}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(after))
+            {
+                parameters.Append(limit.HasValue ? "&" : "?");
+                parameters.Append($"{nameof(after)}={after}");
+            }
+
+            var response = await Rest.GetAsync(GetUrl($"/jobs{parameters}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(true);
-            return JsonConvert.DeserializeObject<FineTuneList>(response.Body, client.JsonSerializationOptions)?.Data.OrderBy(job => job.CreatedAtUnixTime).ToArray();
+            return JsonConvert.DeserializeObject<FineTuneList>(response.Body, OpenAIClient.JsonSerializationOptions)?.Data.OrderBy(job => job.CreatedAtUnixTime).ToArray();
         }
 
         /// <summary>
@@ -99,7 +92,7 @@ namespace OpenAI.FineTuning
         {
             var response = await Rest.GetAsync(GetUrl($"/jobs/{jobId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(true);
-            return JsonConvert.DeserializeObject<FineTuneJob>(response.Body, client.JsonSerializationOptions);
+            return JsonConvert.DeserializeObject<FineTuneJob>(response.Body, OpenAIClient.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -116,7 +109,7 @@ namespace OpenAI.FineTuning
 
             if (!string.IsNullOrWhiteSpace(response.Body))
             {
-                var result = JsonConvert.DeserializeObject<FineTuneJob>(response.Body, client.JsonSerializationOptions);
+                var result = JsonConvert.DeserializeObject<FineTuneJob>(response.Body, OpenAIClient.JsonSerializationOptions);
                 return result.Status == JobStatus.Cancelled;
             }
 
@@ -133,8 +126,8 @@ namespace OpenAI.FineTuning
         public async Task<IReadOnlyList<Event>> ListFineTuneEventsAsync(string jobId, CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl($"/jobs/{jobId}/events"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
-            return JsonConvert.DeserializeObject<FineTuneEventList>(response.Body, client.JsonSerializationOptions)?.Data.OrderBy(@event => @event.CreatedAtUnixTime).ToArray();
+            response.Validate(true);
+            return JsonConvert.DeserializeObject<FineTuneEventList>(response.Body, OpenAIClient.JsonSerializationOptions)?.Data.OrderBy(@event => @event.CreatedAtUnixTime).ToArray();
         }
 
         /// <summary>
@@ -150,10 +143,10 @@ namespace OpenAI.FineTuning
             {
                 if (!string.IsNullOrWhiteSpace(eventData))
                 {
-                    fineTuneEventCallback(JsonConvert.DeserializeObject<Event>(eventData, client.JsonSerializationOptions));
+                    fineTuneEventCallback(JsonConvert.DeserializeObject<Event>(eventData, OpenAIClient.JsonSerializationOptions));
                 }
             }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
+            response.Validate(true);
 
             if (cancellationToken.IsCancellationRequested && cancelJob)
             {

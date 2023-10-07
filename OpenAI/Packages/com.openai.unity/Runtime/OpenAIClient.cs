@@ -29,26 +29,15 @@ namespace OpenAI
         /// Creates a new entry point to the OpenAPI API, handling auth and allowing access to the various API endpoints
         /// </summary>
         /// <param name="authentication">The API authentication information to use for API calls,
-        /// or <see langword="null"/> to attempt to use the <see cref="OpenAI.OpenAIAuthentication.Default"/>,
+        /// or <see langword="null"/> to attempt to use the <see cref="OpenAIAuthentication.Default"/>,
         /// potentially loading from environment vars or from a config file.</param>
         /// <param name="settings">
-        /// Optional, <see cref="OpenAIClientSettings"/> for specifying OpenAI deployments to Azure or proxy domain.
+        /// Optional, <see cref="OpenAISettings"/> for specifying OpenAI deployments to Azure or proxy domain.
         /// </param>
         /// <exception cref="AuthenticationException">Raised when authentication details are missing or invalid.</exception>
         public OpenAIClient(OpenAIAuthentication authentication = null, OpenAISettings settings = null)
             : base(authentication ?? OpenAIAuthentication.Default, settings ?? OpenAISettings.Default)
         {
-            JsonSerializationOptions = new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                DefaultValueHandling = DefaultValueHandling.Ignore,
-                Converters = new List<JsonConverter>
-                {
-                    new StringEnumConverter(new CamelCaseNamingStrategy())
-                },
-                ContractResolver = new EmptyToNullStringContractResolver()
-            };
-
             ModelsEndpoint = new ModelsEndpoint(this);
             CompletionsEndpoint = new CompletionsEndpoint(this);
             ChatEndpoint = new ChatEndpoint(this);
@@ -107,7 +96,16 @@ namespace OpenAI
         /// <summary>
         /// The <see cref="JsonSerializationOptions"/> to use when making calls to the API.
         /// </summary>
-        internal JsonSerializerSettings JsonSerializationOptions { get; }
+        internal static JsonSerializerSettings JsonSerializationOptions { get; } = new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Ignore,
+            Converters = new List<JsonConverter>
+            {
+                new StringEnumConverter(new CamelCaseNamingStrategy())
+            },
+            ContractResolver = new EmptyToNullStringContractResolver()
+        };
 
         /// <summary>
         /// List and describe the various models available in the API.

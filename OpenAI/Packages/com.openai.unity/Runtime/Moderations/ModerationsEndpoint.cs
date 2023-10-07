@@ -56,10 +56,10 @@ namespace OpenAI.Moderations
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         public async Task<ModerationsResponse> CreateModerationAsync(ModerationsRequest request, CancellationToken cancellationToken = default)
         {
-            var payload = JsonConvert.SerializeObject(request, client.JsonSerializationOptions);
+            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate();
-            return JsonConvert.DeserializeObject<ModerationsResponse>(response.Body, client.JsonSerializationOptions);
+            return JsonConvert.DeserializeObject<ModerationsResponse>(response.Body, OpenAIClient.JsonSerializationOptions);
         }
     }
 }

@@ -31,10 +31,10 @@ namespace OpenAI.Chat
         /// <returns><see cref="ChatResponse"/>.</returns>
         public async Task<ChatResponse> GetCompletionAsync(ChatRequest chatRequest, CancellationToken cancellationToken = default)
         {
-            var payload = JsonConvert.SerializeObject(chatRequest, client.JsonSerializationOptions);
+            var payload = JsonConvert.SerializeObject(chatRequest, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl("/completions"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate();
-            return response.DeserializeResponse<ChatResponse>(response.Body, client.JsonSerializationOptions);
+            return response.DeserializeResponse<ChatResponse>(response.Body);
         }
 
         /// <summary>
@@ -49,12 +49,12 @@ namespace OpenAI.Chat
             chatRequest.Stream = true;
             ChatResponse chatResponse = null;
 
-            var payload = JsonConvert.SerializeObject(chatRequest, client.JsonSerializationOptions);
+            var payload = JsonConvert.SerializeObject(chatRequest, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl("/completions"), payload, eventData =>
             {
                 try
                 {
-                    var partialResponse = JsonConvert.DeserializeObject<ChatResponse>(eventData, client.JsonSerializationOptions);
+                    var partialResponse = JsonConvert.DeserializeObject<ChatResponse>(eventData, OpenAIClient.JsonSerializationOptions);
 
                     if (chatResponse == null)
                     {

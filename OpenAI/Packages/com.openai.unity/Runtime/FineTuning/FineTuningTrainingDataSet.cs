@@ -1,8 +1,12 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using OpenAI.Chat;
+using OpenAI.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace OpenAI.FineTuning
 {
@@ -11,11 +15,6 @@ namespace OpenAI.FineTuning
     {
         private void Awake()
         {
-            if (trainingData.Count == 0)
-            {
-                trainingData.Add(new FineTuningTrainingData("<prompt text>", "<ideal generated text>"));
-            }
-
             id = "ft-";
             status = JobStatus.NotStarted;
             fineTuneJob = null;
@@ -41,27 +40,41 @@ namespace OpenAI.FineTuning
         [HideInInspector]
         private string baseModel = "gpt-3.5-turbo";
 
-        public string BaseModel => baseModel;
+        public Model BaseModel
+        {
+            get => baseModel;
+            set => baseModel = value;
+        }
 
         [SerializeField]
         [HideInInspector]
         [Tooltip("You can add a suffix of up to 40 characters to your fine-tuned model name.")]
         private string modelSuffix;
 
-        public string ModelSuffix => modelSuffix;
+        public string ModelSuffix
+        {
+            get => modelSuffix;
+            set => modelSuffix = value;
+        }
 
         [SerializeField]
         [Tooltip("When enabled this will use the advanced parameter training options when training.")]
         private bool advanced;
 
+        [Obsolete("removed")]
         public bool Advanced => advanced;
 
         [SerializeField]
         [Range(1, 4)]
-        [Tooltip("The number of epochs to train the model for. An epoch refers to one full cycle through the training dataset.")]
+        [Tooltip(
+            "The number of epochs to train the model for. An epoch refers to one full cycle through the training dataset.")]
         private int epochs = 4;
 
-        public int Epochs => epochs;
+        public int Epochs
+        {
+            get => epochs;
+            set => epochs = value;
+        }
 
         [SerializeField]
         [Range(1, 256)]
@@ -71,7 +84,12 @@ namespace OpenAI.FineTuning
                  "capped at 256 - in general, we've found that larger batch sizes tend to work better for larger datasets.")]
         private int batchSize = 1;
 
-        public int BatchSize => batchSize;
+        [Obsolete("removed")]
+        public int BatchSize
+        {
+            get => batchSize;
+            set => batchSize = value;
+        }
 
         [SerializeField]
         [Range(0.01f, 1f)]
@@ -82,7 +100,12 @@ namespace OpenAI.FineTuning
                  "We recommend experimenting with values in the range 0.02 to 0.2 to see what produces the best results.")]
         private float learningRateMultiplier = 0.2f;
 
-        public float LearningRateMultiplier => learningRateMultiplier;
+        [Obsolete("removed")]
+        public float LearningRateMultiplier
+        {
+            get => learningRateMultiplier;
+            set => learningRateMultiplier = value;
+        }
 
         [SerializeField]
         [Range(0.01f, 1f)]
@@ -94,12 +117,34 @@ namespace OpenAI.FineTuning
                  "it may make sense to reduce this weight so as to avoid over-prioritizing learning the prompt.")]
         private float promptLossWeight = 0.1f;
 
-        public float PromptLossWeight => promptLossWeight;
+        [Obsolete("removed")]
+        public float PromptLossWeight
+        {
+            get => promptLossWeight;
+            set => promptLossWeight = value;
+        }
 
         [SerializeField]
-        private List<FineTuningTrainingData> trainingData = new List<FineTuningTrainingData>();
+        [FormerlySerializedAs("trainingData")]
+        private List<FineTuningTrainingData> legacyTrainingData = new List<FineTuningTrainingData>();
 
-        public IReadOnlyList<FineTuningTrainingData> TrainingData => trainingData;
+        [Obsolete("Use LegacyTrainingData")]
+        public IReadOnlyList<FineTuningTrainingData> TrainingData => legacyTrainingData;
+
+        public List<FineTuningTrainingData> LegacyTrainingData
+        {
+            get => legacyTrainingData;
+            set => legacyTrainingData = value;
+        }
+
+        [SerializeField]
+        private List<Conversation> conversationTrainingData = new List<Conversation>();
+
+        public List<Conversation> ConversationTrainingData
+        {
+            get => conversationTrainingData;
+            set => conversationTrainingData = value;
+        }
 
         [NonSerialized]
         private FineTuneJob fineTuneJob;
@@ -112,7 +157,22 @@ namespace OpenAI.FineTuning
                 id = value.Id;
                 status = value.Status;
                 fineTuneJob = value;
+
             }
+        }
+
+        public IReadOnlyList<string> LegacyTrainingToJsonl()
+        {
+            var result = new List<string>(LegacyTrainingData.Count);
+            result.AddRange(LegacyTrainingData.Select(trainingData => trainingData.ToString()));
+            return result;
+        }
+
+        public IReadOnlyList<string> ConversationTrainingToJsonl()
+        {
+            var result = new List<string>(LegacyTrainingData.Count);
+            result.AddRange(ConversationTrainingData.Select(trainingData => trainingData.ToString()));
+            return result;
         }
     }
 }

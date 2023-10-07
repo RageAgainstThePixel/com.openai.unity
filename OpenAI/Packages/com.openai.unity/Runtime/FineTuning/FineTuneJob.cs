@@ -37,6 +37,10 @@ namespace OpenAI.FineTuning
             OrganizationId = organizationId;
             Status = status;
             HyperParameters = hyperParameters;
+            TrainingFile = trainingFile;
+            ValidationFile = validationFile;
+            ResultFiles = resultFiles;
+            TrainedTokens = trainedTokens;
         }
 
         [Preserve]
@@ -118,6 +122,9 @@ namespace OpenAI.FineTuning
         [JsonIgnore]
         [Obsolete("Removed. Get events using endpoint call.")]
         public IReadOnlyList<Event> Events { get; }
+
+        [JsonProperty("trained_tokens")]
+        public int TrainedTokens { get; }
 
         public static implicit operator string(FineTuneJob job) => job.Id;
     }

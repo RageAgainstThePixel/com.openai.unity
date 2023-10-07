@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using NUnit.Framework;
+using OpenAI.Chat;
 using OpenAI.Files;
 using OpenAI.FineTuning;
 using System;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenAI.Models;
 using UnityEngine;
 
 namespace OpenAI.Tests
@@ -16,14 +18,31 @@ namespace OpenAI.Tests
     {
         private async Task<FileData> CreateTestTrainingDataAsync(OpenAIClient api)
         {
-            var lines = new List<string>
+            var fineTuningTrainingData = ScriptableObject.CreateInstance<FineTuningTrainingDataSet>();
+            fineTuningTrainingData.ConversationTrainingData = new List<Conversation>
             {
-                new FineTuningTrainingData("Company: BHFF insurance\\nProduct: allround insurance\\nAd:One stop shop for all your insurance needs!\\nSupported:", "yes"),
-                new FineTuningTrainingData("Company: Loft conversion specialists\\nProduct: -\\nAd:Straight teeth in weeks!\\nSupported:", "no")
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "What's the capital of France?"),
+                    new Message(Role.Assistant, "Paris, as if everyone doesn't know that already.")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "Who wrote 'Romeo and Juliet'?"),
+                    new Message(Role.Assistant, "Oh, just some guy named William Shakespeare. Ever heard of him?")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "How far is the Moon from Earth?"),
+                    new Message(Role.Assistant, "Around 384,400 kilometers. Give or take a few, like that really matters.")
+                })
             };
 
             const string localTrainingDataPath = "fineTunesTestTrainingData.jsonl";
-            await File.WriteAllLinesAsync(localTrainingDataPath, lines);
+            await File.WriteAllLinesAsync(localTrainingDataPath, fineTuningTrainingData.ConversationTrainingToJsonl());
 
             var fileData = await api.FilesEndpoint.UploadFileAsync(localTrainingDataPath, "fine-tune");
             File.Delete(localTrainingDataPath);
@@ -38,7 +57,8 @@ namespace OpenAI.Tests
             Assert.IsNotNull(api.FineTuningEndpoint);
 
             var fileData = await CreateTestTrainingDataAsync(api);
-            var request = new CreateFineTuneJobRequest(fileData);
+            Assert.IsNotNull(fileData);
+            var request = new CreateFineTuneJobRequest(Model.GPT3_5_Turbo, fileData);
             var fineTuneResponse = await api.FineTuningEndpoint.CreateFineTuneJobAsync(request);
 
             Assert.IsNotNull(fineTuneResponse);
@@ -139,7 +159,8 @@ namespace OpenAI.Tests
             Assert.IsNotNull(api.FineTuningEndpoint);
 
             var fileData = await CreateTestTrainingDataAsync(api);
-            var request = new CreateFineTuneJobRequest(fileData);
+            Assert.IsNotNull(fileData);
+            var request = new CreateFineTuneJobRequest(Model.GPT3_5_Turbo, fileData);
             var fineTuneResponse = await api.FineTuningEndpoint.CreateFineTuneJobAsync(request);
             Assert.IsNotNull(fineTuneResponse);
 
