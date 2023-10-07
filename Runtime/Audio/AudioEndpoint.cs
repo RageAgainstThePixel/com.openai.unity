@@ -19,11 +19,14 @@ namespace OpenAI.Audio
         [Preserve]
         private class AudioResponse
         {
+            [Preserve]
+            [JsonConstructor]
             public AudioResponse([JsonProperty("text")] string text)
             {
                 Text = text;
             }
 
+            [Preserve]
             [JsonProperty("text")]
             public string Text { get; }
         }

@@ -2,18 +2,20 @@
 
 using Newtonsoft.Json;
 using System;
+using UnityEngine.Scripting;
 
 namespace OpenAI
 {
+    [Preserve]
     public sealed class Event
     {
+        [Preserve]
         [JsonConstructor]
         public Event(
-            string @object,
-            int createdAtUnixTime,
-            string level,
-            string message
-        )
+            [JsonProperty("object")] string @object,
+            [JsonProperty("created_at")] int createdAtUnixTime,
+            [JsonProperty("level")] string level,
+            [JsonProperty("message")] string message)
         {
             Object = @object;
             CreatedAtUnixTime = createdAtUnixTime;
@@ -21,18 +23,23 @@ namespace OpenAI
             Message = message;
         }
 
+        [Preserve]
         [JsonProperty("object")]
         public string Object { get; }
 
+        [Preserve]
         [JsonProperty("created_at")]
         public int CreatedAtUnixTime { get; }
 
+        [Preserve]
         [JsonIgnore]
         public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTime).DateTime;
 
+        [Preserve]
         [JsonProperty("level")]
         public string Level { get; }
 
+        [Preserve]
         [JsonProperty("message")]
         public string Message { get; }
     }

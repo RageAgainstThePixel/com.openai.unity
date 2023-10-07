@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Scripting;
 
 namespace OpenAI.Completions
 {
@@ -12,20 +13,24 @@ namespace OpenAI.Completions
     /// <see href="https://platform.openai.com/docs/api-reference/completions">the OpenAI docs</see>,
     /// although some have been renames or expanded into single/multiple properties for ease of use.
     /// </summary>
+    [Preserve]
     public sealed class CompletionRequest
     {
+        [Preserve]
         [JsonProperty("model")]
         public string Model { get; set; }
 
         /// <summary>
         /// If you are requesting more than one prompt, specify them as an array of strings.
         /// </summary>
+        [Preserve]
         [JsonProperty("prompt")]
         public string[] Prompts { get; set; } = Array.Empty<string>();
 
         /// <summary>
         /// For convenience, if you are only requesting a single prompt, set it here
         /// </summary>
+        [Preserve]
         [JsonIgnore]
         public string Prompt
         {
@@ -53,12 +58,14 @@ namespace OpenAI.Completions
         /// <summary>
         /// The suffix that comes after a completion of inserted text.
         /// </summary>
+        [Preserve]
         [JsonProperty("suffix")]
         public string Suffix { get; set; }
 
         /// <summary>
         /// How many tokens to complete to. Can return fewer if a stop sequence is hit.
         /// </summary>
+        [Preserve]
         [JsonProperty("max_tokens")]
         public int? MaxTokens { get; set; }
 
@@ -67,6 +74,7 @@ namespace OpenAI.Completions
         /// Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer.
         /// It is generally recommend to use this or <see cref="TopP"/> but not both.
         /// </summary>
+        [Preserve]
         [JsonProperty("temperature")]
         public double? Temperature { get; set; }
 
@@ -76,6 +84,7 @@ namespace OpenAI.Completions
         /// So 0.1 means only the tokens comprising the top 10% probability mass are considered.
         /// It is generally recommend to use this or <see cref="Temperature"/> but not both.
         /// </summary>
+        [Preserve]
         [JsonProperty("top_p")]
         public double? TopP { get; set; }
 
@@ -83,6 +92,7 @@ namespace OpenAI.Completions
         /// The scale of the penalty applied if a token is already present at all.
         /// Should generally be between 0 and 1, although negative numbers are allowed to encourage token reuse.
         /// </summary>
+        [Preserve]
         [JsonProperty("presence_penalty")]
         public double? PresencePenalty { get; set; }
 
@@ -90,12 +100,14 @@ namespace OpenAI.Completions
         /// The scale of the penalty for how often a token is used.
         /// Should generally be between 0 and 1, although negative numbers are allowed to encourage token reuse.
         /// </summary>
+        [Preserve]
         [JsonProperty("frequency_penalty")]
         public double? FrequencyPenalty { get; set; }
 
         /// <summary>
         /// How many different choices to request for each prompt.
         /// </summary>
+        [Preserve]
         [JsonProperty("n")]
         public int? NumChoicesPerPrompt { get; set; }
 
@@ -103,6 +115,7 @@ namespace OpenAI.Completions
         /// Specifies where the results should stream and be returned at one time.
         /// Do not set this yourself, use the appropriate methods on <see cref="CompletionsEndpoint"/> instead.
         /// </summary>
+        [Preserve]
         [JsonProperty("stream")]
         public bool Stream { get; internal set; }
 
@@ -113,18 +126,21 @@ namespace OpenAI.Completions
         /// If logprobs is supplied, the API will always return the logprob of the sampled token,
         /// so there may be up to logprobs+1 elements in the response.
         /// </summary>
+        [Preserve]
         [JsonProperty("logprobs")]
         public int? LogProbabilities { get; set; }
 
         /// <summary>
         /// Echo back the prompt in addition to the completion
         /// </summary>
+        [Preserve]
         [JsonProperty("echo")]
         public bool? Echo { get; set; }
 
         /// <summary>
         /// One or more sequences where the API will stop generating further tokens. The returned text will not contain the stop sequence.
         /// </summary>
+        [Preserve]
         [JsonProperty("stop")]
         public string[] StopSequences { get; set; }
 
@@ -132,6 +148,7 @@ namespace OpenAI.Completions
         /// The stop sequence where the API will stop generating further tokens. The returned text will not contain the stop sequence.
         /// For convenience, if you are only requesting a single stop sequence, set it here
         /// </summary>
+        [Preserve]
         [JsonIgnore]
         public string StopSequence
         {
@@ -161,6 +178,7 @@ namespace OpenAI.Completions
         /// generating a token, while negative biases decreases the probability of a token. Very large biases (e.g. -100,100) can
         /// either eliminate or force a token to be generated.
         /// </summary>
+        [Preserve]
         [JsonProperty("logit_bias")]
         public Dictionary<string, double> LogitBias { get; set; }
 
@@ -168,12 +186,14 @@ namespace OpenAI.Completions
         /// How many different completions to generate.  Interacts with <see cref="NumChoicesPerPrompt"/> to generate top
         /// NumChoicesPerPrompt out of BestOf. In cases where both are set, BestOf should be greater than NumChoicesPerPrompt.
         /// </summary>
+        [Preserve]
         [JsonProperty("best_of")]
         public int? BestOf { get; set; }
 
         /// <summary>
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </summary>
+        [Preserve]
         [JsonProperty("user")]
         public string User { get; set; }
 
@@ -182,18 +202,21 @@ namespace OpenAI.Completions
         /// For every request, if you do not have a parameter set on the request but do have it set here as a default,
         /// the request will automatically pick up the default value.
         /// </summary>
+        [Preserve]
         [JsonIgnore]
         public static CompletionRequest DefaultCompletionRequestArgs { get; set; } = null;
 
         /// <summary>
         /// Creates a new <see cref="CompletionRequest"/> based on the <see cref="DefaultCompletionRequestArgs"/>.
         /// </summary>
+        [Preserve]
         public CompletionRequest() : this(DefaultCompletionRequestArgs) { }
 
         /// <summary>
         /// Creates a new <see cref="CompletionRequest"/>, inheriting any parameters set in <paramref name="basedOn"/>.
         /// </summary>
         /// <param name="basedOn">The <see cref="CompletionRequest"/> to copy</param>
+        [Preserve]
         public CompletionRequest(CompletionRequest basedOn)
         {
             if (basedOn == null)
@@ -248,6 +271,7 @@ namespace OpenAI.Completions
         /// <param name="logitBias">A dictionary of logit bias to influence the probability of generating a token.</param>
         /// <param name="bestOf">Returns the top bestOf results based on the best probability.</param>
         /// <param name="user">A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.</param>
+        [Preserve]
         public CompletionRequest(
             string model = null,
             string prompt = null,

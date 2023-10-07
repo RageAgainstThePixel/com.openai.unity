@@ -2,12 +2,14 @@
 
 using Newtonsoft.Json;
 using System;
+using UnityEngine.Scripting;
 
 namespace OpenAI.Images
 {
     /// <summary>
     /// Creates an image given a prompt.
     /// </summary>
+    [Preserve]
     public sealed class ImageGenerationRequest : AbstractBaseImageRequest
     {
         /// <summary>
@@ -31,6 +33,7 @@ namespace OpenAI.Images
         /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
         /// </param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
+        [Preserve]
         public ImageGenerationRequest(string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null, ResponseFormat responseFormat = Images.ResponseFormat.Url)
             : base(numberOfResults, size, responseFormat, user)
         {
@@ -50,6 +53,7 @@ namespace OpenAI.Images
         /// <summary>
         /// A text description of the desired image(s). The maximum length is 1000 characters.
         /// </summary>
+        [Preserve]
         [JsonProperty("prompt")]
         public string Prompt { get; }
     }

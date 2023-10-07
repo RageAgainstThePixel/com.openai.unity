@@ -286,14 +286,12 @@ namespace OpenAI.Images
         {
             response.Validate();
 
-            var imagesResponse = JsonConvert.DeserializeObject<ImagesResponse>(response.Body, client.JsonSerializationOptions);
+            var imagesResponse = response.DeserializeResponse<ImagesResponse>(response.Body, client.JsonSerializationOptions);
 
             if (imagesResponse?.Data == null || imagesResponse.Data.Count == 0)
             {
                 throw new Exception($"No image content returned!\n{response.Body}");
             }
-
-            imagesResponse.SetResponseData(response);
 
             var images = new ConcurrentDictionary<string, Texture2D>();
             var downloads = imagesResponse.Data.Select(DownloadAsync).ToList();

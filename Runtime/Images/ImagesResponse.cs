@@ -2,21 +2,28 @@
 
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using UnityEngine.Scripting;
 
 namespace OpenAI.Images
 {
+    [Preserve]
     internal class ImagesResponse : BaseResponse
     {
+        [Preserve]
         [JsonConstructor]
-        public ImagesResponse(int created, IReadOnlyList<ImageResult> data)
+        public ImagesResponse(
+            [JsonProperty("created")] int created,
+            [JsonProperty("data")] IReadOnlyList<ImageResult> data)
         {
             Created = created;
             Data = data;
         }
 
+        [Preserve]
         [JsonProperty("created")]
         public int Created { get; }
 
+        [Preserve]
         [JsonProperty("data")]
         public IReadOnlyList<ImageResult> Data { get; }
     }
