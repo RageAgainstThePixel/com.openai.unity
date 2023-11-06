@@ -39,14 +39,7 @@ namespace OpenAI.Moderations
         public async Task<bool> GetModerationAsync(string input, string model = null, CancellationToken cancellationToken = default)
         {
             var result = await CreateModerationAsync(new ModerationsRequest(input, model), cancellationToken);
-
-            if (result?.Results == null ||
-                result.Results.Count == 0)
-            {
-                return false;
-            }
-
-            return result.Results.Any(moderationResult => moderationResult.Flagged);
+            return result?.Results is { Count: not 0 } && result.Results.Any(moderationResult => moderationResult.Flagged);
         }
 
         /// <summary>
@@ -58,7 +51,7 @@ namespace OpenAI.Moderations
         {
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
+            response.Validate(EnableDebug);
             return JsonConvert.DeserializeObject<ModerationsResponse>(response.Body, OpenAIClient.JsonSerializationOptions);
         }
     }

@@ -71,7 +71,7 @@ namespace OpenAI.Embeddings
         {
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
+            response.Validate(EnableDebug);
             return response.DeserializeResponse<EmbeddingsResponse>(response.Body);
         }
     }

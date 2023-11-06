@@ -284,7 +284,7 @@ namespace OpenAI.Images
 
         private async Task<IReadOnlyDictionary<string, Texture2D>> DeserializeResponseAsync(Response response, CancellationToken cancellationToken = default)
         {
-            response.Validate();
+            response.Validate(EnableDebug);
 
             var imagesResponse = response.DeserializeResponse<ImagesResponse>(response.Body);
 
@@ -295,8 +295,6 @@ namespace OpenAI.Images
 
             var images = new ConcurrentDictionary<string, Texture2D>();
             var downloads = imagesResponse.Data.Select(DownloadAsync).ToList();
-
-            await Task.WhenAll(downloads);
 
             async Task DownloadAsync(ImageResult result)
             {
@@ -334,6 +332,7 @@ namespace OpenAI.Images
                 }
             }
 
+            await Task.WhenAll(downloads).ConfigureAwait(true);
             return images;
         }
     }

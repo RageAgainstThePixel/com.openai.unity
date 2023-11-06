@@ -4,12 +4,12 @@ using NUnit.Framework;
 using OpenAI.Chat;
 using OpenAI.Files;
 using OpenAI.FineTuning;
+using OpenAI.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenAI.Models;
 using UnityEngine;
 
 namespace OpenAI.Tests
@@ -38,6 +38,48 @@ namespace OpenAI.Tests
                     new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
                     new Message(Role.User, "How far is the Moon from Earth?"),
                     new Message(Role.Assistant, "Around 384,400 kilometers. Give or take a few, like that really matters.")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "What's the capital of France?"),
+                    new Message(Role.Assistant, "Paris, as if everyone doesn't know that already.")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "Who wrote 'Romeo and Juliet'?"),
+                    new Message(Role.Assistant, "Oh, just some guy named William Shakespeare. Ever heard of him?")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "How far is the Moon from Earth?"),
+                    new Message(Role.Assistant, "Around 384,400 kilometers. Give or take a few, like that really matters.")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "What's the capital of France?"),
+                    new Message(Role.Assistant, "Paris, as if everyone doesn't know that already.")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "Who wrote 'Romeo and Juliet'?"),
+                    new Message(Role.Assistant, "Oh, just some guy named William Shakespeare. Ever heard of him?")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "How far is the Moon from Earth?"),
+                    new Message(Role.Assistant, "Around 384,400 kilometers. Give or take a few, like that really matters.")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "How far is the Moon from Earth?"),
+                    new Message(Role.Assistant, "Around 384,400 kilometers. Give or take a few, like that really matters.")
                 })
             };
 
@@ -59,7 +101,7 @@ namespace OpenAI.Tests
             var fileData = await CreateTestTrainingDataAsync(api);
             Assert.IsNotNull(fileData);
             var request = new CreateFineTuneJobRequest(Model.GPT3_5_Turbo, fileData);
-            var fineTuneResponse = await api.FineTuningEndpoint.CreateFineTuneJobAsync(request);
+            var fineTuneResponse = await api.FineTuningEndpoint.CreateJobAsync(request);
 
             Assert.IsNotNull(fineTuneResponse);
             var result = await api.FilesEndpoint.DeleteFileAsync(fileData);
@@ -72,7 +114,7 @@ namespace OpenAI.Tests
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
-            var fineTuneJobs = await api.FineTuningEndpoint.ListFineTuneJobsAsync();
+            var fineTuneJobs = await api.FineTuningEndpoint.ListJobsAsync();
             Assert.IsNotNull(fineTuneJobs);
             Assert.IsNotEmpty(fineTuneJobs);
 
@@ -88,13 +130,13 @@ namespace OpenAI.Tests
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
-            var fineTuneJobs = await api.FineTuningEndpoint.ListFineTuneJobsAsync();
+            var fineTuneJobs = await api.FineTuningEndpoint.ListJobsAsync();
             Assert.IsNotNull(fineTuneJobs);
             Assert.IsNotEmpty(fineTuneJobs);
 
             foreach (var job in fineTuneJobs)
             {
-                var request = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(job);
+                var request = await api.FineTuningEndpoint.GetJobInfoAsync(job);
                 Assert.IsNotNull(request);
                 Debug.Log($"{request.Id} -> {request.Status}");
             }
@@ -106,7 +148,7 @@ namespace OpenAI.Tests
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
-            var fineTuneJobs = await api.FineTuningEndpoint.ListFineTuneJobsAsync();
+            var fineTuneJobs = await api.FineTuningEndpoint.ListJobsAsync();
             Assert.IsNotNull(fineTuneJobs);
             Assert.IsNotEmpty(fineTuneJobs);
 
@@ -136,7 +178,7 @@ namespace OpenAI.Tests
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
-            var fineTuneJobs = await api.FineTuningEndpoint.ListFineTuneJobsAsync();
+            var fineTuneJobs = await api.FineTuningEndpoint.ListJobsAsync();
             Assert.IsNotNull(fineTuneJobs);
             Assert.IsNotEmpty(fineTuneJobs);
 
@@ -161,10 +203,10 @@ namespace OpenAI.Tests
             var fileData = await CreateTestTrainingDataAsync(api);
             Assert.IsNotNull(fileData);
             var request = new CreateFineTuneJobRequest(Model.GPT3_5_Turbo, fileData);
-            var fineTuneResponse = await api.FineTuningEndpoint.CreateFineTuneJobAsync(request);
+            var fineTuneResponse = await api.FineTuningEndpoint.CreateJobAsync(request);
             Assert.IsNotNull(fineTuneResponse);
 
-            var fineTuneJob = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(fineTuneResponse);
+            var fineTuneJob = await api.FineTuningEndpoint.GetJobInfoAsync(fineTuneResponse);
             Assert.IsNotNull(fineTuneJob);
             Debug.Log($"{fineTuneJob.Id} ->");
             var cancellationTokenSource = new CancellationTokenSource();
@@ -191,7 +233,7 @@ namespace OpenAI.Tests
                 }
             }
 
-            var jobInfo = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(fineTuneJob, CancellationToken.None);
+            var jobInfo = await api.FineTuningEndpoint.GetJobInfoAsync(fineTuneJob, CancellationToken.None);
             Assert.IsNotNull(jobInfo);
             Debug.Log($"{jobInfo.Id} -> {jobInfo.Status}");
             Assert.IsTrue(jobInfo.Status == JobStatus.Cancelled);

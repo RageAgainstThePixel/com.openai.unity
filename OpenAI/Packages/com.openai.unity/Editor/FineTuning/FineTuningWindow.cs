@@ -73,7 +73,7 @@ namespace OpenAI.Editor.FineTuning
         [SerializeField]
         private int tab;
 
-        [MenuItem("OpenAI/Fine Tuning")]
+        [MenuItem("Window/Dashboard/OpenAI/Fine Tuning")]
         private static void OpenWindow()
         {
             // Dock it next to the Scene View.
@@ -395,7 +395,7 @@ namespace OpenAI.Editor.FineTuning
                     Directory.CreateDirectory(tempDir);
                 }
 
-                var lines = fineTuneDataSet.LegacyTrainingData.Select(trainingData => trainingData.ToString()).ToList();
+                var lines = fineTuneDataSet.ConversationTrainingData.Select(trainingData => trainingData.ToString()).ToList();
                 var tempFilePath = Path.Combine(tempDir, $"{fineTuneDataSet.name}.jsonl");
                 await File.WriteAllLinesAsync(tempFilePath, lines);
                 var fileData = await openAI.FilesEndpoint.UploadFileAsync(tempFilePath, "fine-tune");
@@ -406,7 +406,7 @@ namespace OpenAI.Editor.FineTuning
                     trainingFileId: fileData.Id,
                     suffix: fineTuneDataSet.ModelSuffix,
                     hyperParameters: new HyperParameters(fineTuneDataSet.Epochs));
-                var job = await openAI.FineTuningEndpoint.CreateFineTuneJobAsync(jobRequest);
+                var job = await openAI.FineTuningEndpoint.CreateJobAsync(jobRequest);
                 fineTuneDataSet.FineTuneJob = job;
 
                 FetchAllTrainingJobs();
@@ -429,7 +429,7 @@ namespace OpenAI.Editor.FineTuning
             {
                 await openAI.FineTuningEndpoint.StreamFineTuneEventsAsync(dataSet.FineTuneJob, async _ =>
                 {
-                    dataSet.FineTuneJob = await openAI.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(dataSet.FineTuneJob);
+                    dataSet.FineTuneJob = await openAI.FineTuningEndpoint.GetJobInfoAsync(dataSet.FineTuneJob);
 
                     if (fineTuneJobs.TryGetValue(dataSet.FineTuneJob.Id, out var job))
                     {
@@ -582,7 +582,7 @@ namespace OpenAI.Editor.FineTuning
 
             try
             {
-                var jobs = await openAI.FineTuningEndpoint.ListFineTuneJobsAsync();
+                var jobs = await openAI.FineTuningEndpoint.ListJobsAsync();
                 jobs = jobs.OrderByDescending(job => job.FinishedAt).ToList();
 
                 fineTuneJobs.Clear();
@@ -597,7 +597,7 @@ namespace OpenAI.Editor.FineTuning
                         return;
                     }
 
-                    var jobDetails = await openAI.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(job);
+                    var jobDetails = await openAI.FineTuningEndpoint.GetJobInfoAsync(job);
 
                     fineTuneJobs.TryAdd(jobDetails.Id, jobDetails);
 

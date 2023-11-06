@@ -33,7 +33,7 @@ namespace OpenAI.Chat
         {
             var payload = JsonConvert.SerializeObject(chatRequest, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl("/completions"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
+            response.Validate(EnableDebug);
             return response.DeserializeResponse<ChatResponse>(response.Body);
         }
 
@@ -72,7 +72,7 @@ namespace OpenAI.Chat
                     Debug.LogError($"{eventData}\n{e}");
                 }
             }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
+            response.Validate(EnableDebug);
 
             if (chatResponse == null) { return null; }
 

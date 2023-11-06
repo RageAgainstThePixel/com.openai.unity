@@ -72,7 +72,7 @@ namespace OpenAI.Audio
             request.Dispose();
 
             var response = await Rest.PostAsync(GetUrl("/transcriptions"), form, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
+            response.Validate(EnableDebug);
             return responseFormat == AudioResponseFormat.Json
                 ? JsonConvert.DeserializeObject<AudioResponse>(response.Body)?.Text
                 : response.Body;
@@ -108,7 +108,7 @@ namespace OpenAI.Audio
             request.Dispose();
 
             var response = await Rest.PostAsync(GetUrl("/translations"), form, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
+            response.Validate(EnableDebug);
             return responseFormat == AudioResponseFormat.Json
                 ? JsonConvert.DeserializeObject<AudioResponse>(response.Body)?.Text
                 : response.Body;

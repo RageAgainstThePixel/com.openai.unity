@@ -10,32 +10,13 @@ namespace OpenAI.FineTuning
     {
         [Preserve]
         [JsonConstructor]
-        public HyperParams(
-            [JsonProperty("batch_size")] int? batchSize,
-            [JsonProperty("learning_rate_multiplier")] double? learningRateMultiplier,
-            [JsonProperty("n_epochs")] int epochs,
-            [JsonProperty("prompt_loss_weight")] double promptLossWeight)
+        public HyperParams([JsonProperty("n_epochs")] string epochs)
         {
-            BatchSize = batchSize;
-            LearningRateMultiplier = learningRateMultiplier;
             Epochs = epochs;
-            PromptLossWeight = promptLossWeight;
         }
 
         [Preserve]
-        [JsonProperty("batch_size")]
-        public int? BatchSize { get; }
-
-        [Preserve]
-        [JsonProperty("learning_rate_multiplier")]
-        public double? LearningRateMultiplier { get; }
-
-        [Preserve]
         [JsonProperty("n_epochs")]
-        public int Epochs { get; }
-
-        [Preserve]
-        [JsonProperty("prompt_loss_weight")]
-        public double PromptLossWeight { get; }
+        public string Epochs { get; }
     }
 }

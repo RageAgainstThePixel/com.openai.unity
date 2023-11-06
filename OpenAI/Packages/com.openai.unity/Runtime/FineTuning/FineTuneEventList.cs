@@ -7,17 +7,17 @@ using UnityEngine.Scripting;
 namespace OpenAI.FineTuning
 {
     [Preserve]
-    public sealed class FineTuneList
+    public sealed class FineTuneEventList
     {
         [Preserve]
         [JsonConstructor]
-        public FineTuneList(
+        public FineTuneEventList(
             [JsonProperty("object")] string @object,
-            [JsonProperty("data")] IReadOnlyList<FineTuneJob> jobs,
+            [JsonProperty("data")] IReadOnlyList<Event> events,
             [JsonProperty("has_more")] bool hasMore)
         {
             Object = @object;
-            Jobs = jobs;
+            Events = events;
             HasMore = hasMore;
         }
 
@@ -27,7 +27,7 @@ namespace OpenAI.FineTuning
 
         [Preserve]
         [JsonProperty("data")]
-        public IReadOnlyList<FineTuneJob> Jobs { get; }
+        public IReadOnlyList<Event> Events { get; }
 
         [Preserve]
         [JsonProperty("has_more")]
