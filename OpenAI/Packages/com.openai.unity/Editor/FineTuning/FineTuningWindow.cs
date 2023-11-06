@@ -205,7 +205,7 @@ namespace OpenAI.Editor.FineTuning
                 var jobStatus = dataSet.FindProperty("status");
                 var baseModel = dataSet.FindProperty("baseModel");
                 var modelSuffix = dataSet.FindProperty("modelSuffix");
-                var trainingData = dataSet.FindProperty("legacyTrainingData");
+                var trainingData = dataSet.FindProperty("conversationTrainingData");
                 var isAdvanced = dataSet.FindProperty("advanced");
 
                 var prevLabelWidth = EditorGUIUtility.labelWidth;
