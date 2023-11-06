@@ -57,14 +57,22 @@ namespace OpenAI.FineTuning
         }
 
         [SerializeField]
-        [Range(1, 4)]
+        private bool autoEpochs = true;
+
+        public bool AutoEpochs => autoEpochs;
+
+        [SerializeField]
         [Tooltip("The number of epochs to train the model for. An epoch refers to one full cycle through the training dataset.")]
         private int epochs = 4;
 
         public int Epochs
         {
             get => epochs;
-            set => epochs = value;
+            set
+            {
+                epochs = value;
+                autoEpochs = epochs > 0;
+            }
         }
 
         [SerializeField]

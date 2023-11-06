@@ -205,8 +205,9 @@ namespace OpenAI.Editor.FineTuning
                 var jobStatus = dataSet.FindProperty("status");
                 var baseModel = dataSet.FindProperty("baseModel");
                 var modelSuffix = dataSet.FindProperty("modelSuffix");
+                var autoEpochs = dataSet.FindProperty("autoEpochs");
+                var epochs = dataSet.FindProperty("epochs");
                 var trainingData = dataSet.FindProperty("conversationTrainingData");
-                var isAdvanced = dataSet.FindProperty("advanced");
 
                 var prevLabelWidth = EditorGUIUtility.labelWidth;
                 EditorGUIUtility.labelWidth = Screen.width;
@@ -249,49 +250,11 @@ namespace OpenAI.Editor.FineTuning
                         }
                     }
 
-                    EditorGUI.BeginChangeCheck();
-                    isAdvanced.boolValue = EditorGUILayout.ToggleLeft(new GUIContent("Use Advanced Settings", isAdvanced.tooltip), isAdvanced.boolValue);
+                    EditorGUILayout.PropertyField(autoEpochs);
 
-                    if (EditorGUI.EndChangeCheck())
+                    if (!autoEpochs.boolValue)
                     {
-                        var batchSize = dataSet.FindProperty("batchSize");
-                        batchSize.intValue = Mathf.RoundToInt(trainingData.arraySize * 0.2f);
-
-                        if (batchSize.intValue == 0)
-                        {
-                            batchSize.intValue = 1;
-                        }
-
-                        if (batchSize.intValue > 256)
-                        {
-                            batchSize.intValue = 256;
-                        }
-                    }
-
-                    if (isAdvanced.boolValue)
-                    {
-                        var epochs = dataSet.FindProperty("epochs");
-                        var batchSize = dataSet.FindProperty("batchSize");
-                        var learningRateMultiplier = dataSet.FindProperty("learningRateMultiplier");
-                        var promptLossWeight = dataSet.FindProperty("promptLossWeight");
-
-                        EditorGUI.indentLevel++;
-                        isAdvanced.isExpanded = EditorGUILayout.Foldout(isAdvanced.isExpanded, "Advanced Model Training Options", true);
-
-                        if (isAdvanced.isExpanded)
-                        {
-                            EditorGUI.indentLevel++;
-                            prevLabelWidth = EditorGUIUtility.labelWidth;
-                            EditorGUIUtility.labelWidth = 256;
-                            EditorGUILayout.PropertyField(epochs);
-                            EditorGUILayout.PropertyField(batchSize);
-                            EditorGUILayout.PropertyField(learningRateMultiplier);
-                            EditorGUILayout.PropertyField(promptLossWeight);
-                            EditorGUIUtility.labelWidth = prevLabelWidth;
-                            EditorGUI.indentLevel--;
-                        }
-
-                        EditorGUI.indentLevel--;
+                        EditorGUILayout.PropertyField(epochs);
                     }
 
                     EditorGUILayout.PropertyField(trainingData);
@@ -327,11 +290,14 @@ namespace OpenAI.Editor.FineTuning
                         }
 
                         EditorGUILayout.BeginHorizontal();
+                        GUI.enabled = trainingData.arraySize > 10;
 
-                        if (GUILayout.Button("Train new Model"))
+                        if (GUILayout.Button("Train New Model"))
                         {
                             EditorApplication.delayCall += () => TrainModel(dataSet);
                         }
+
+                        GUI.enabled = true;
 
                         var trainingFile = fineTuneJob?.ResultFiles?.FirstOrDefault();
 
@@ -405,7 +371,7 @@ namespace OpenAI.Editor.FineTuning
                     model: fineTuneDataSet.BaseModel,
                     trainingFileId: fileData.Id,
                     suffix: fineTuneDataSet.ModelSuffix,
-                    hyperParameters: new HyperParameters(fineTuneDataSet.Epochs));
+                    hyperParameters: fineTuneDataSet.AutoEpochs ? null : new HyperParameters(fineTuneDataSet.Epochs));
                 var job = await openAI.FineTuningEndpoint.CreateJobAsync(jobRequest);
                 fineTuneDataSet.FineTuneJob = job;
 
