@@ -371,10 +371,12 @@ namespace OpenAI.Editor.FineTuning
                     model: fineTuneDataSet.BaseModel,
                     trainingFileId: fileData.Id,
                     suffix: fineTuneDataSet.ModelSuffix,
-                    hyperParameters: fineTuneDataSet.AutoEpochs ? null : new HyperParameters(fineTuneDataSet.Epochs));
+                    hyperParameters: new HyperParameters(
+                        epochs: fineTuneDataSet.AutoEpochs ? null : fineTuneDataSet.Epochs,
+                        batchSize: fineTuneDataSet.AutoBatchSize ? null : fineTuneDataSet.BatchSize,
+                        learningRateMultiplier: fineTuneDataSet.AutoLearningRateMultiplier ? null : fineTuneDataSet.LearningRateMultiplier));
                 var job = await openAI.FineTuningEndpoint.CreateJobAsync(jobRequest);
                 fineTuneDataSet.FineTuneJob = job;
-
                 FetchAllTrainingJobs();
             }
             catch (Exception e)
@@ -478,9 +480,7 @@ namespace OpenAI.Editor.FineTuning
                 EditorGUILayout.LabelField($"Status: {job.Status}");
                 EditorGUILayout.LabelField("Events:");
 
-#pragma warning disable CS0618
                 var events = job.Events.OrderBy(e => e.CreatedAt);
-#pragma warning restore CS0618
 
                 foreach (var jobEvent in events)
                 {
@@ -608,6 +608,10 @@ namespace OpenAI.Editor.FineTuning
                         catch (Exception e)
                         {
                             Debug.LogError(e);
+                        }
+                        finally
+                        {
+                            FetchAllModels();
                         }
                     };
                 }

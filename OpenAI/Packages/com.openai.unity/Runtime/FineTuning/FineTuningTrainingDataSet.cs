@@ -37,7 +37,7 @@ namespace OpenAI.FineTuning
 
         [SerializeField]
         [HideInInspector]
-        private string baseModel = "gpt-3.5-turbo";
+        private string baseModel = Model.GPT3_5_Turbo.ToString();
 
         public Model BaseModel
         {
@@ -59,11 +59,15 @@ namespace OpenAI.FineTuning
         [SerializeField]
         private bool autoEpochs = true;
 
-        public bool AutoEpochs => autoEpochs;
+        public bool AutoEpochs
+        {
+            get => autoEpochs;
+            set => autoEpochs = value;
+        }
 
         [SerializeField]
         [Tooltip("The number of epochs to train the model for. An epoch refers to one full cycle through the training dataset.")]
-        private int epochs = 4;
+        private int epochs;
 
         public int Epochs
         {
@@ -72,6 +76,50 @@ namespace OpenAI.FineTuning
             {
                 epochs = value;
                 autoEpochs = epochs > 0;
+            }
+        }
+
+        [SerializeField]
+        private bool autoBatchSize = true;
+
+        public bool AutoBatchSize
+        {
+            get => autoBatchSize;
+            set => autoBatchSize = value;
+        }
+
+        [SerializeField]
+        private int batchSize;
+
+        public int BatchSize
+        {
+            get => batchSize;
+            set
+            {
+                batchSize = value;
+                autoBatchSize = batchSize > 0;
+            }
+        }
+
+        [SerializeField]
+        private bool autoLearningRateMultiplier = true;
+
+        public bool AutoLearningRateMultiplier
+        {
+            get => autoLearningRateMultiplier;
+            set => autoLearningRateMultiplier = value;
+        }
+
+        [SerializeField]
+        private int learningRateMultiplier;
+
+        public int LearningRateMultiplier
+        {
+            get => learningRateMultiplier;
+            set
+            {
+                learningRateMultiplier = value;
+                autoLearningRateMultiplier = learningRateMultiplier > 0;
             }
         }
 
