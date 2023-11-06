@@ -19,8 +19,7 @@ namespace OpenAI.Chat
         /// The list of messages for the current chat session.
         /// </param>
         /// <param name="model">
-        /// Id of the model to use.<br/>
-        /// Currently, only gpt-4 and gpt-3.5-turbo and their variants are supported.
+        /// Id of the model to use.
         /// </param>
         /// <param name="temperature">
         /// What sampling temperature to use, between 0 and 2.
@@ -137,8 +136,7 @@ namespace OpenAI.Chat
         }
 
         /// <summary>
-        /// ID of the model to use.<br/>
-        /// Currently, only gpt-4, gpt-3.5-turbo and gpt-3.5-turbo-0301 are supported.
+        /// Id of the model to use.
         /// </summary>
         [Preserve]
         [JsonProperty("model")]
