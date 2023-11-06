@@ -376,50 +376,10 @@ namespace OpenAI.Editor.FineTuning
                 fineTuneDataSet.FineTuneJob = job;
 
                 FetchAllTrainingJobs();
-                StreamJobEvents(fineTuneDataSet);
             }
             catch (Exception e)
             {
                 Debug.LogError(e);
-            }
-        }
-
-        private static async void StreamJobEvents(FineTuningTrainingDataSet dataSet)
-        {
-            if (dataSet.FineTuneJob == null)
-            {
-                return;
-            }
-
-            try
-            {
-                await openAI.FineTuningEndpoint.StreamFineTuneEventsAsync(dataSet.FineTuneJob, async _ =>
-                {
-                    dataSet.FineTuneJob = await openAI.FineTuningEndpoint.GetJobInfoAsync(dataSet.FineTuneJob);
-
-                    if (fineTuneJobs.TryGetValue(dataSet.FineTuneJob.Id, out var job))
-                    {
-                        fineTuneJobs.TryUpdate(dataSet.FineTuneJob.Id, dataSet.FineTuneJob, job);
-                    }
-
-                    if (dataSet.FineTuneJob.Status == JobStatus.Succeeded)
-                    {
-                        FetchAllModels();
-                    }
-                });
-            }
-            catch (Exception e)
-            {
-                switch (e)
-                {
-                    case TaskCanceledException:
-                    case OperationCanceledException:
-                        // Ignored
-                        break;
-                    default:
-                        Debug.LogError(e);
-                        break;
-                }
             }
         }
 
@@ -447,7 +407,7 @@ namespace OpenAI.Editor.FineTuning
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField($"Status: {fineTuneDataSet.FineTuneJob.Status}");
 
-            var canCancel = fineTuneDataSet.Status is JobStatus.Pending or JobStatus.Running;
+            var canCancel = fineTuneDataSet.Status is > JobStatus.NotStarted and < JobStatus.Succeeded;
 
             if (canCancel && GUILayout.Button("Cancel Training"))
             {

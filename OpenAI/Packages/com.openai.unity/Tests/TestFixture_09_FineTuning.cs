@@ -8,7 +8,6 @@ using OpenAI.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -184,7 +183,7 @@ namespace OpenAI.Tests
 
             foreach (var job in fineTuneJobs)
             {
-                if (job.Status == JobStatus.Pending)
+                if (job.Status is > JobStatus.NotStarted and < JobStatus.Succeeded)
                 {
                     var result = await api.FineTuningEndpoint.CancelFineTuneJobAsync(job);
                     Assert.IsNotNull(result);
@@ -195,54 +194,7 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_06_StreamFineTuneEvents()
-        {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.FineTuningEndpoint);
-
-            var fileData = await CreateTestTrainingDataAsync(api);
-            Assert.IsNotNull(fileData);
-            var request = new CreateFineTuneJobRequest(Model.GPT3_5_Turbo, fileData);
-            var fineTuneResponse = await api.FineTuningEndpoint.CreateJobAsync(request);
-            Assert.IsNotNull(fineTuneResponse);
-
-            var fineTuneJob = await api.FineTuningEndpoint.GetJobInfoAsync(fineTuneResponse);
-            Assert.IsNotNull(fineTuneJob);
-            Debug.Log($"{fineTuneJob.Id} ->");
-            var cancellationTokenSource = new CancellationTokenSource();
-
-            try
-            {
-                await api.FineTuningEndpoint.StreamFineTuneEventsAsync(fineTuneJob, fineTuneEvent =>
-                {
-                    Debug.Log($"  {fineTuneEvent.CreatedAt} [{fineTuneEvent.Level}] {fineTuneEvent.Message}");
-                    cancellationTokenSource.Cancel();
-                }, cancelJob: true, cancellationTokenSource.Token);
-            }
-            catch (Exception e)
-            {
-                switch (e)
-                {
-                    case TaskCanceledException:
-                    case OperationCanceledException:
-                        // Ignored
-                        break;
-                    default:
-                        Debug.LogError(e);
-                        break;
-                }
-            }
-
-            var jobInfo = await api.FineTuningEndpoint.GetJobInfoAsync(fineTuneJob, CancellationToken.None);
-            Assert.IsNotNull(jobInfo);
-            Debug.Log($"{jobInfo.Id} -> {jobInfo.Status}");
-            Assert.IsTrue(jobInfo.Status == JobStatus.Cancelled);
-            var result = await api.FilesEndpoint.DeleteFileAsync(fileData, CancellationToken.None);
-            Assert.IsTrue(result);
-        }
-
-        [Test]
-        public async Task Test_08_DeleteFineTunedModel()
+        public async Task Test_07_DeleteFineTunedModel()
         {
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.ModelsEndpoint);

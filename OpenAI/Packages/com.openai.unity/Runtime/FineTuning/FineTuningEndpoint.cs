@@ -1,7 +1,6 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -34,7 +33,7 @@ namespace OpenAI.FineTuning
         {
             var payload = JsonConvert.SerializeObject(jobRequest, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl("/jobs"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(true);
+            response.Validate(EnableDebug);
             return JsonConvert.DeserializeObject<FineTuneJob>(response.Body, OpenAIClient.JsonSerializationOptions);
         }
 
@@ -60,7 +59,7 @@ namespace OpenAI.FineTuning
             }
 
             var response = await Rest.GetAsync(GetUrl("/jobs", parameters), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(true);
+            response.Validate(EnableDebug);
             return JsonConvert.DeserializeObject<FineTuneList>(response.Body, OpenAIClient.JsonSerializationOptions)?.Jobs.OrderBy(job => job.CreatedAtUnixTime).ToArray();
         }
 
@@ -73,7 +72,7 @@ namespace OpenAI.FineTuning
         public async Task<FineTuneJob> GetJobInfoAsync(string jobId, CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl($"/jobs/{jobId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(true);
+            response.Validate(EnableDebug);
             var job = JsonConvert.DeserializeObject<FineTuneJob>(response.Body, OpenAIClient.JsonSerializationOptions);
             job.Events = await ListFineTuneEventsAsync(job, cancellationToken: cancellationToken);
             return job;
@@ -124,39 +123,8 @@ namespace OpenAI.FineTuning
             }
 
             var response = await Rest.GetAsync(GetUrl($"/jobs/{jobId}/events", parameters), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(true);
+            response.Validate(EnableDebug);
             return JsonConvert.DeserializeObject<FineTuneEventList>(response.Body, OpenAIClient.JsonSerializationOptions)?.Events.OrderBy(@event => @event.CreatedAtUnixTime).ToList();
-        }
-
-        /// <summary>
-        /// Stream the fine-grained status updates for a fine-tune job.
-        /// </summary>
-        /// <param name="jobId"><see cref="FineTuneJob.Id"/>.</param>
-        /// <param name="fineTuneEventCallback">The event callback handler.</param>
-        /// <param name="cancelJob">Optional, Cancel the job if streaming is aborted. Default is false.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        public async Task StreamFineTuneEventsAsync(string jobId, Action<Event> fineTuneEventCallback, bool cancelJob = false, CancellationToken cancellationToken = default)
-        {
-            var response = await Rest.GetAsync(GetUrl($"/jobs/{jobId}/events?stream=true"), eventData =>
-            {
-                if (!string.IsNullOrWhiteSpace(eventData))
-                {
-                    fineTuneEventCallback(JsonConvert.DeserializeObject<Event>(eventData, OpenAIClient.JsonSerializationOptions));
-                }
-            }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(true);
-
-            if (cancellationToken.IsCancellationRequested && cancelJob)
-            {
-                var isCancelled = await CancelFineTuneJobAsync(jobId, cancellationToken);
-
-                if (!isCancelled)
-                {
-                    throw new Exception($"Failed to cancel {jobId}");
-                }
-            }
-
-            cancellationToken.ThrowIfCancellationRequested();
         }
     }
 }

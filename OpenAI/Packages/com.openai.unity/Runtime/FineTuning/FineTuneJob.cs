@@ -1,6 +1,7 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Scripting;
@@ -86,6 +87,7 @@ namespace OpenAI.FineTuning
 
         [Preserve]
         [JsonProperty("status")]
+        [JsonConverter(typeof(StringEnumConverter))]
         public JobStatus Status { get; set; }
 
         [Preserve]
