@@ -94,13 +94,6 @@ namespace OpenAI.Chat
             IEnumerable<Function> functions = null)
         {
             Model = string.IsNullOrWhiteSpace(model) ? Models.Model.GPT3_5_Turbo : model;
-
-            if (!Model.Contains("turbo") &&
-                !Model.Contains("gpt-4"))
-            {
-                throw new ArgumentException($"{Model} is not supported", nameof(model));
-            }
-
             Messages = messages?.ToList();
 
             if (Messages?.Count == 0)

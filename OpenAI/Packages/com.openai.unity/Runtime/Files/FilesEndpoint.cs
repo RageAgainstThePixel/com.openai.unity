@@ -86,7 +86,6 @@ namespace OpenAI.Files
             form.AddField("purpose", request.Purpose);
             form.AddBinaryData("file", fileData.ToArray(), request.FileName);
             request.Dispose();
-
             var response = await Rest.PostAsync(GetUrl(), form, new RestParameters(client.DefaultRequestHeaders, uploadProgress), cancellationToken);
             response.Validate(EnableDebug);
             return JsonConvert.DeserializeObject<FileData>(response.Body, OpenAIClient.JsonSerializationOptions);
@@ -116,8 +115,8 @@ namespace OpenAI.Files
                         response.Body.Contains(fileProcessing))
                     {
                         // back off requests on each attempt
-                        await Task.Delay(1000 * attempt, cancellationToken);
-                        return await InternalDeleteFileAsync(attempt + 1);
+                        await Task.Delay(1000 * attempt++, cancellationToken);
+                        return await InternalDeleteFileAsync(attempt);
                     }
                 }
 
