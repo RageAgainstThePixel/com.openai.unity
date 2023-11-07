@@ -7,11 +7,11 @@ using UnityEngine.Scripting;
 namespace OpenAI.FineTuning
 {
     [Preserve]
-    public sealed class FineTuneEventList
+    public sealed class EventList
     {
         [Preserve]
         [JsonConstructor]
-        public FineTuneEventList(
+        public EventList(
             [JsonProperty("object")] string @object,
             [JsonProperty("data")] IReadOnlyList<Event> events,
             [JsonProperty("has_more")] bool hasMore)

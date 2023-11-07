@@ -11,8 +11,6 @@ namespace OpenAI.FineTuning
     [Preserve]
     public sealed class FineTuneJob
     {
-        public static implicit operator string(FineTuneJob job) => job.Id;
-
         [Preserve]
         [JsonConstructor]
         public FineTuneJob(
@@ -42,7 +40,7 @@ namespace OpenAI.FineTuning
             ValidationFile = validationFile;
             TrainingFile = trainingFile;
             HyperParameters = hyperParameters;
-            TrainedTokens = trainedTokens ?? 0;
+            TrainedTokens = trainedTokens;
         }
 
         [Preserve]
@@ -104,9 +102,11 @@ namespace OpenAI.FineTuning
 
         [Preserve]
         [JsonProperty("trained_tokens")]
-        public int TrainedTokens { get; }
+        public int? TrainedTokens { get; }
 
         [JsonIgnore]
         public IReadOnlyList<Event> Events { get; internal set; } = new List<Event>();
+
+        public static implicit operator string(FineTuneJob job) => job.Id;
     }
 }
