@@ -1,7 +1,6 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using OpenAI.Files;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Scripting;
@@ -14,42 +13,42 @@ namespace OpenAI.FineTuning
         [Preserve]
         [JsonConstructor]
         public FineTuneJob(
-            [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
+            [JsonProperty("id")] string id,
             [JsonProperty("model")] string model,
-            [JsonProperty("created_at")] int createdAtUnixTime,
-            [JsonProperty("events")] IReadOnlyList<Event> events,
+            [JsonProperty("created_at")] int? createdAtUnixTime,
+            [JsonProperty("finished_at")] int? finishedAtUnixTime,
             [JsonProperty("fine_tuned_model")] string fineTunedModel,
-            [JsonProperty("hyperparams")] HyperParams hyperParams,
             [JsonProperty("organization_id")] string organizationId,
-            [JsonProperty("result_files")] IReadOnlyList<FileData> resultFiles,
-            [JsonProperty("status")] string status,
-            [JsonProperty("validation_files")] IReadOnlyList<FileData> validationFiles,
-            [JsonProperty("training_files")] IReadOnlyList<FileData> trainingFiles,
-            [JsonProperty("updated_at")] int updatedAtUnixTime)
+            [JsonProperty("result_files")] IReadOnlyList<string> resultFiles,
+            [JsonProperty("status")] JobStatus status,
+            [JsonProperty("validation_file")] string validationFile,
+            [JsonProperty("training_file")] string trainingFile,
+            [JsonProperty("hyperparameters")] HyperParams hyperParameters,
+            [JsonProperty("trained_tokens")] int? trainedTokens)
         {
-            Id = id;
             Object = @object;
+            Id = id;
             Model = model;
-            CreatedAtUnixTime = createdAtUnixTime;
-            Events = events;
+            CreatedAtUnixTime = createdAtUnixTime ?? 0;
+            FinishedAtUnixTime = finishedAtUnixTime ?? 0;
             FineTunedModel = fineTunedModel;
-            HyperParams = hyperParams;
             OrganizationId = organizationId;
             ResultFiles = resultFiles;
             Status = status;
-            ValidationFiles = validationFiles;
-            TrainingFiles = trainingFiles;
-            UpdatedAtUnixTime = updatedAtUnixTime;
+            ValidationFile = validationFile;
+            TrainingFile = trainingFile;
+            HyperParameters = hyperParameters;
+            TrainedTokens = trainedTokens;
         }
-
-        [Preserve]
-        [JsonProperty("id")]
-        public string Id { get; }
 
         [Preserve]
         [JsonProperty("object")]
         public string Object { get; }
+
+        [Preserve]
+        [JsonProperty("id")]
+        public string Id { get; }
 
         [Preserve]
         [JsonProperty("model")]
@@ -64,16 +63,16 @@ namespace OpenAI.FineTuning
         public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTime).DateTime;
 
         [Preserve]
-        [JsonProperty("events")]
-        public IReadOnlyList<Event> Events { get; }
+        [JsonProperty("finished_at")]
+        public int FinishedAtUnixTime { get; }
+
+        [Preserve]
+        [JsonIgnore]
+        public DateTime FinishedAt => DateTimeOffset.FromUnixTimeSeconds(FinishedAtUnixTime).DateTime;
 
         [Preserve]
         [JsonProperty("fine_tuned_model")]
         public string FineTunedModel { get; }
-
-        [Preserve]
-        [JsonProperty("hyperparams")]
-        public HyperParams HyperParams { get; }
 
         [Preserve]
         [JsonProperty("organization_id")]
@@ -81,27 +80,30 @@ namespace OpenAI.FineTuning
 
         [Preserve]
         [JsonProperty("result_files")]
-        public IReadOnlyList<FileData> ResultFiles { get; }
+        public IReadOnlyList<string> ResultFiles { get; }
 
         [Preserve]
         [JsonProperty("status")]
-        public string Status { get; set; }
+        public JobStatus Status { get; set; }
 
         [Preserve]
-        [JsonProperty("validation_files")]
-        public IReadOnlyList<FileData> ValidationFiles { get; }
+        [JsonProperty("validation_file")]
+        public string ValidationFile { get; }
 
         [Preserve]
-        [JsonProperty("training_files")]
-        public IReadOnlyList<FileData> TrainingFiles { get; }
+        [JsonProperty("training_file")]
+        public string TrainingFile { get; }
 
         [Preserve]
-        [JsonProperty("updated_at")]
-        public int UpdatedAtUnixTime { get; }
+        [JsonProperty("hyperparameters")]
+        public HyperParams HyperParameters { get; }
 
         [Preserve]
+        [JsonProperty("trained_tokens")]
+        public int? TrainedTokens { get; }
+
         [JsonIgnore]
-        public DateTime UpdatedAt => DateTimeOffset.FromUnixTimeSeconds(UpdatedAtUnixTime).DateTime;
+        public IReadOnlyList<Event> Events { get; internal set; } = new List<Event>();
 
         public static implicit operator string(FineTuneJob job) => job.Id;
     }

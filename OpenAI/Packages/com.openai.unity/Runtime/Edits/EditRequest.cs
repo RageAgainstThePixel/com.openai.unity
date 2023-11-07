@@ -6,6 +6,7 @@ using UnityEngine.Scripting;
 
 namespace OpenAI.Edits
 {
+    [Obsolete]
     [Preserve]
     public sealed class EditRequest
     {
@@ -37,12 +38,6 @@ namespace OpenAI.Edits
             string model = null)
         {
             Model = string.IsNullOrWhiteSpace(model) ? Models.Model.DavinciEdit : model;
-
-            if (!Model.Contains("-edit-"))
-            {
-                throw new ArgumentException($"{Model} is not supported", nameof(model));
-            }
-
             Input = input;
             Instruction = instruction;
             EditCount = editCount;

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using Utilities.Async;
 using Utilities.WebRequestRest;
 
 namespace OpenAI.Images
@@ -49,6 +50,7 @@ namespace OpenAI.Images
         /// Optional, <see cref="CancellationToken"/>.
         /// </param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
+        [Obsolete]
         public async Task<IReadOnlyDictionary<string, Texture2D>> GenerateImageAsync(
             string prompt,
             int numberOfResults = 1,
@@ -66,7 +68,7 @@ namespace OpenAI.Images
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
         public async Task<IReadOnlyDictionary<string, Texture2D>> GenerateImageAsync(ImageGenerationRequest request, CancellationToken cancellationToken = default)
         {
-            var payload = JsonConvert.SerializeObject(request, client.JsonSerializationOptions);
+            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl("/generations"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             return await DeserializeResponseAsync(response, cancellationToken);
         }
@@ -182,7 +184,7 @@ namespace OpenAI.Images
             form.AddField("prompt", request.Prompt);
             form.AddField("n", request.Number.ToString());
             form.AddField("size", request.Size);
-            form.AddField("response_format", request.ResponseFormat);
+            form.AddField("response_format", request.ResponseFormat.ToString().ToLower());
 
             if (!string.IsNullOrWhiteSpace(request.User))
             {
@@ -269,7 +271,7 @@ namespace OpenAI.Images
             form.AddBinaryData("image", imageData.ToArray(), request.ImageName);
             form.AddField("n", request.Number.ToString());
             form.AddField("size", request.Size);
-            form.AddField("response_format", request.ResponseFormat);
+            form.AddField("response_format", request.ResponseFormat.ToString().ToLower());
 
             if (!string.IsNullOrWhiteSpace(request.User))
             {
@@ -284,56 +286,55 @@ namespace OpenAI.Images
 
         private async Task<IReadOnlyDictionary<string, Texture2D>> DeserializeResponseAsync(Response response, CancellationToken cancellationToken = default)
         {
-            response.Validate();
+            response.Validate(EnableDebug);
 
-            var imagesResponse = response.DeserializeResponse<ImagesResponse>(response.Body, client.JsonSerializationOptions);
+            var imagesResponse = response.DeserializeResponse<ImagesResponse>(response.Body);
 
-            if (imagesResponse?.Data == null || imagesResponse.Data.Count == 0)
+            if (imagesResponse?.Results is not { Count: not 0 })
             {
                 throw new Exception($"No image content returned!\n{response.Body}");
             }
 
             var images = new ConcurrentDictionary<string, Texture2D>();
-            var downloads = imagesResponse.Data.Select(DownloadAsync).ToList();
-
-            await Task.WhenAll(downloads);
+            await Rest.ValidateCacheDirectoryAsync();
+            var downloads = imagesResponse.Results.Select(DownloadAsync).ToList();
 
             async Task DownloadAsync(ImageResult result)
             {
-                string resultString;
+                string resultImagePath;
                 string localFilePath;
 
                 if (string.IsNullOrWhiteSpace(result.Url))
                 {
-                    resultString = result.B64_Json;
-                    var imageData = Convert.FromBase64String(resultString);
-                    await Rest.ValidateCacheDirectoryAsync();
+                    resultImagePath = result.B64_Json;
+                    var imageData = Convert.FromBase64String(resultImagePath);
 
-                    if (!Rest.TryGetDownloadCacheItem(resultString, out localFilePath))
+                    if (!Rest.TryGetDownloadCacheItem(resultImagePath, out localFilePath))
                     {
-                        await using var fileStream = new FileStream(localFilePath, FileMode.Create, FileAccess.ReadWrite);
-                        await fileStream.WriteAsync(imageData, cancellationToken);
+                        await File.WriteAllBytesAsync(localFilePath, imageData, cancellationToken);
                     }
 
-                    resultString = $"file://{localFilePath}";
+                    resultImagePath = $"file://{localFilePath}";
                 }
                 else
                 {
-                    resultString = result.Url;
+                    resultImagePath = result.Url;
                 }
 
-                var texture = await Rest.DownloadTextureAsync(resultString, parameters: null, cancellationToken: cancellationToken);
+                await Awaiters.UnityMainThread;
+                var texture = await Rest.DownloadTextureAsync(resultImagePath, cancellationToken: cancellationToken);
 
-                if (Rest.TryGetDownloadCacheItem(resultString, out localFilePath))
+                if (Rest.TryGetDownloadCacheItem(resultImagePath, out localFilePath))
                 {
                     images.TryAdd(localFilePath, texture);
                 }
                 else
                 {
-                    Debug.LogError($"Failed to find cached item for {resultString}");
+                    Debug.LogError($"Failed to find cached item for {resultImagePath}");
                 }
             }
 
+            await Task.WhenAll(downloads).ConfigureAwait(true);
             return images;
         }
     }

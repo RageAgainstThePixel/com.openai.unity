@@ -6,14 +6,14 @@ using UnityEngine.Scripting;
 namespace OpenAI.FineTuning
 {
     [Preserve]
-    public sealed class HyperParams
+    public sealed class HyperParameters
     {
         [Preserve]
         [JsonConstructor]
-        public HyperParams(
-            [JsonProperty("n_epochs")] object epochs,
-            [JsonProperty("batch_size")] object batchSize,
-            [JsonProperty("learning_rate_multiplier")] object learningRateMultiplier)
+        public HyperParameters(
+            [JsonProperty("n_epochs")] int? epochs = null,
+            [JsonProperty("batch_size")] int? batchSize = null,
+            [JsonProperty("learning_rate_multiplier")] int? learningRateMultiplier = null)
         {
             Epochs = epochs;
             BatchSize = batchSize;
@@ -22,14 +22,14 @@ namespace OpenAI.FineTuning
 
         [Preserve]
         [JsonProperty("n_epochs")]
-        public object Epochs { get; }
+        public int? Epochs { get; set; }
 
         [Preserve]
         [JsonProperty("batch_size")]
-        public object BatchSize { get; }
+        public int? BatchSize { get; set; }
 
         [Preserve]
         [JsonProperty("learning_rate_multiplier")]
-        public object LearningRateMultiplier { get; }
+        public int? LearningRateMultiplier { get; set; }
     }
 }

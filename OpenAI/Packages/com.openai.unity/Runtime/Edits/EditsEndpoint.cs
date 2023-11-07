@@ -1,5 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
 using Newtonsoft.Json;
 using OpenAI.Extensions;
 using OpenAI.Models;
@@ -13,6 +14,7 @@ namespace OpenAI.Edits
     /// Given a prompt and an instruction, the model will return an edited version of the prompt.
     /// <see href="https://platform.openai.com/docs/api-reference/edits"/>
     /// </summary>
+    [Obsolete]
     public sealed class EditsEndpoint : OpenAIBaseEndpoint
     {
         /// <inheritdoc />
@@ -63,10 +65,10 @@ namespace OpenAI.Edits
         /// <returns><see cref="EditResponse"/>.</returns>
         public async Task<EditResponse> CreateEditAsync(EditRequest request, CancellationToken cancellationToken = default)
         {
-            var payload = JsonConvert.SerializeObject(request, client.JsonSerializationOptions);
+            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
-            return response.DeserializeResponse<EditResponse>(response.Body, client.JsonSerializationOptions);
+            response.Validate(EnableDebug);
+            return response.DeserializeResponse<EditResponse>(response.Body);
         }
     }
 }

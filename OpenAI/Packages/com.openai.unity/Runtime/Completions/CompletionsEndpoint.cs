@@ -110,10 +110,10 @@ namespace OpenAI.Completions
         public async Task<CompletionResult> CreateCompletionAsync(CompletionRequest completionRequest, CancellationToken cancellationToken = default)
         {
             completionRequest.Stream = false;
-            var payload = JsonConvert.SerializeObject(completionRequest, client.JsonSerializationOptions);
+            var payload = JsonConvert.SerializeObject(completionRequest, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
-            return response.DeserializeResponse<CompletionResult>(response.Body, client.JsonSerializationOptions);
+            response.Validate(EnableDebug);
+            return response.DeserializeResponse<CompletionResult>(response.Body);
         }
 
         #endregion Non-Streaming
@@ -197,38 +197,12 @@ namespace OpenAI.Completions
         public async Task StreamCompletionAsync(CompletionRequest completionRequest, Action<CompletionResult> resultHandler, CancellationToken cancellationToken = default)
         {
             completionRequest.Stream = true;
-            var payload = JsonConvert.SerializeObject(completionRequest, client.JsonSerializationOptions);
+            var payload = JsonConvert.SerializeObject(completionRequest, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl(), payload, eventData =>
             {
-                resultHandler(JsonConvert.DeserializeObject<CompletionResult>(eventData, client.JsonSerializationOptions));
+                resultHandler(JsonConvert.DeserializeObject<CompletionResult>(eventData, OpenAIClient.JsonSerializationOptions));
             }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
-        }
-
-        [Obsolete("Use StreamCompletionAsync")]
-        public IAsyncEnumerable<CompletionResult> StreamCompletionEnumerableAsync(
-            string prompt = null,
-            IEnumerable<string> prompts = null,
-            string suffix = null,
-            int? maxTokens = null,
-            double? temperature = null,
-            double? topP = null,
-            int? numOutputs = null,
-            double? presencePenalty = null,
-            double? frequencyPenalty = null,
-            int? logProbabilities = null,
-            bool? echo = null,
-            IEnumerable<string> stopSequences = null,
-            string model = null,
-            CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
-        }
-
-        [Obsolete("Use StreamCompletionAsync")]
-        public IAsyncEnumerable<CompletionResult> StreamCompletionEnumerableAsync(CompletionRequest completionRequest, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
+            response.Validate(EnableDebug);
         }
 
         #endregion Streaming

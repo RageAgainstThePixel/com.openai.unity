@@ -1,5 +1,6 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -29,30 +30,21 @@ namespace OpenAI
         /// Creates a new entry point to the OpenAPI API, handling auth and allowing access to the various API endpoints
         /// </summary>
         /// <param name="authentication">The API authentication information to use for API calls,
-        /// or <see langword="null"/> to attempt to use the <see cref="OpenAI.OpenAIAuthentication.Default"/>,
+        /// or <see langword="null"/> to attempt to use the <see cref="OpenAIAuthentication.Default"/>,
         /// potentially loading from environment vars or from a config file.</param>
         /// <param name="settings">
-        /// Optional, <see cref="OpenAIClientSettings"/> for specifying OpenAI deployments to Azure or proxy domain.
+        /// Optional, <see cref="OpenAISettings"/> for specifying OpenAI deployments to Azure or proxy domain.
         /// </param>
         /// <exception cref="AuthenticationException">Raised when authentication details are missing or invalid.</exception>
         public OpenAIClient(OpenAIAuthentication authentication = null, OpenAISettings settings = null)
             : base(authentication ?? OpenAIAuthentication.Default, settings ?? OpenAISettings.Default)
         {
-            JsonSerializationOptions = new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                DefaultValueHandling = DefaultValueHandling.Ignore,
-                Converters = new List<JsonConverter>
-                {
-                    new StringEnumConverter(new CamelCaseNamingStrategy())
-                },
-                ContractResolver = new EmptyToNullStringContractResolver()
-            };
-
             ModelsEndpoint = new ModelsEndpoint(this);
             CompletionsEndpoint = new CompletionsEndpoint(this);
             ChatEndpoint = new ChatEndpoint(this);
+#pragma warning disable CS0612 // Type or member is obsolete
             EditsEndpoint = new EditsEndpoint(this);
+#pragma warning restore CS0612 // Type or member is obsolete
             ImagesEndPoint = new ImagesEndpoint(this);
             EmbeddingsEndpoint = new EmbeddingsEndpoint(this);
             AudioEndpoint = new AudioEndpoint(this);
@@ -107,7 +99,16 @@ namespace OpenAI
         /// <summary>
         /// The <see cref="JsonSerializationOptions"/> to use when making calls to the API.
         /// </summary>
-        internal JsonSerializerSettings JsonSerializationOptions { get; }
+        internal static JsonSerializerSettings JsonSerializationOptions { get; } = new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Ignore,
+            Converters = new List<JsonConverter>
+            {
+                new StringEnumConverter(new SnakeCaseNamingStrategy())
+            },
+            ContractResolver = new EmptyToNullStringContractResolver()
+        };
 
         /// <summary>
         /// List and describe the various models available in the API.
@@ -136,6 +137,7 @@ namespace OpenAI
         /// Given a prompt and an instruction, the model will return an edited version of the prompt.<br/>
         /// <see href="https://platform.openai.com/docs/api-reference/edits"/>
         /// </summary>
+        [Obsolete]
         public EditsEndpoint EditsEndpoint { get; }
 
         /// <summary>

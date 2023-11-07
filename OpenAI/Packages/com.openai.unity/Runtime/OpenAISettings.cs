@@ -1,6 +1,5 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
 using System.Linq;
 using UnityEngine;
 using Utilities.WebRequestRest.Interfaces;
@@ -72,9 +71,6 @@ namespace OpenAI
         /// </param>
         public OpenAISettings(string resourceName, string deploymentId, string apiVersion = OpenAISettingsInfo.DefaultAzureApiVersion, bool useActiveDirectoryAuthentication = false)
             => Info = new OpenAISettingsInfo(resourceName, deploymentId, apiVersion, useActiveDirectoryAuthentication);
-
-        [Obsolete("Obsolete")]
-        internal OpenAISettings(OpenAIClientSettings clientSettings) => Info = new OpenAISettingsInfo(clientSettings);
 
         private static OpenAISettings cachedDefault;
 

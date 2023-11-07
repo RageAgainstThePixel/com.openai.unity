@@ -219,11 +219,7 @@ namespace OpenAI.Completions
         [Preserve]
         public CompletionRequest(CompletionRequest basedOn)
         {
-            if (basedOn == null)
-            {
-                return;
-            }
-
+            if (basedOn == null) { return; }
             Model = basedOn.Model ?? DefaultCompletionRequestArgs?.Model ?? Models.Model.Davinci;
             Prompts = basedOn.Prompts;
             Suffix = basedOn.Suffix ?? DefaultCompletionRequestArgs?.Suffix;
@@ -300,7 +296,7 @@ namespace OpenAI.Completions
             }
             else
             {
-                throw new ArgumentNullException(nameof(prompt), $"Missing required prompt or prompts");
+                throw new ArgumentNullException(nameof(prompts), "Missing required prompt or prompts");
             }
 
             Model = string.IsNullOrWhiteSpace(model)
@@ -308,16 +304,6 @@ namespace OpenAI.Completions
                         ? Models.Model.Davinci
                         : DefaultCompletionRequestArgs.Model)
                     : model;
-
-            if (!Model.Contains("davinci") &&
-                !Model.Contains("curie") &&
-                !Model.Contains("cushman") &&
-                !Model.Contains("babbage") &&
-                !Model.Contains("ada"))
-            {
-                throw new ArgumentException($"{Model} is not supported", nameof(model));
-            }
-
             Suffix = suffix ?? DefaultCompletionRequestArgs?.Suffix;
             MaxTokens = maxTokens ?? DefaultCompletionRequestArgs?.MaxTokens;
             Temperature = temperature ?? DefaultCompletionRequestArgs?.Temperature;

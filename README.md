@@ -62,31 +62,31 @@ The recommended installation method is though the unity package manager and [Ope
 - [Chat](#chat)
   - [Chat Completions](#chat-completions)
   - [Streaming](#chat-streaming)
-  - [Functions](#chat-functions) :new:
+  - [Functions](#chat-functions)
 - [Edits](#edits)
   - [Create Edit](#create-edit)
 - [Embeddings](#embeddings)
   - [Create Embedding](#create-embeddings)
-- [Audio](#audio)
+- [Audio](#audio) :construction:
+  - [Create Speech](#create-speech) :new:
   - [Create Transcription](#create-transcription)
   - [Create Translation](#create-translation)
-- [Images](#images)
-  - [Create Image](#create-image)
-  - [Edit Image](#edit-image)
-  - [Create Image Variation](#create-image-variation)
+- [Images](#images) :construction:
+  - [Create Image](#create-image) :new:
+  - [Edit Image](#edit-image) :new:
+  - [Create Image Variation](#create-image-variation) :new:
 - [Files](#files)
   - [List Files](#list-files)
   - [Upload File](#upload-file)
   - [Delete File](#delete-file)
   - [Retrieve File Info](#retrieve-file-info)
   - [Download File Content](#download-file-content)
-- [Fine Tuning](#fine-tuning)
-  - [Create Fine Tune Job](#create-fine-tune-job)
-  - [List Fine Tune Jobs](#list-fine-tune-jobs)
-  - [Retrieve Fine Tune Job Info](#retrieve-fine-tune-job-info)
-  - [Cancel Fine Tune Job](#cancel-fine-tune-job)
-  - [List Fine Tune Events](#list-fine-tune-events)
-  - [Stream Fine Tune Events](#stream-fine-tune-events)
+- [Fine Tuning](#fine-tuning) :construction:
+  - [Create Fine Tune Job](#create-fine-tune-job) :new:
+  - [List Fine Tune Jobs](#list-fine-tune-jobs) :new:
+  - [Retrieve Fine Tune Job Info](#retrieve-fine-tune-job-info) :new:
+  - [Cancel Fine Tune Job](#cancel-fine-tune-job) :new:
+  - [List Fine Tune Job Events](#list-fine-tune-job-events) :new:
 - [Moderations](#moderations)
   - [Create Moderation](#create-moderation)
 
@@ -494,6 +494,8 @@ Debug.Log($"{Role.Function}: {functionResult}");
 
 ### [Edits](https://platform.openai.com/docs/api-reference/edits)
 
+> Deprecated, and soon to be removed.
+
 Given a prompt and an instruction, the model will return an edited version of the prompt.
 
 The Edits API is accessed via `OpenAIClient.EditsEndpoint`
@@ -533,7 +535,18 @@ Converts audio into text.
 
 The Audio API is accessed via `OpenAIClient.AudioEndpoint`
 
-#### [Create Transcription](https://platform.openai.com/docs/api-reference/audio/create)
+#### [Create Speech](https://platform.openai.com/docs/api-reference/audio/createSpeech)
+
+Generates audio from the input text.
+
+```csharp
+var api = new OpenAIClient();
+var request = new SpeechRequest("Hello world!");
+var (path, clip) = await api.AudioEndpoint.CreateSpeechAsync(request);
+audioSource.PlayOneShot(clip);
+```
+
+#### [Create Transcription](https://platform.openai.com/docs/api-reference/audio/createTranscription)
 
 Transcribes audio into the input language.
 
@@ -544,7 +557,7 @@ var result = await api.AudioEndpoint.CreateTranscriptionAsync(request);
 Debug.Log(result);
 ```
 
-#### [Create Translation](https://platform.openai.com/docs/api-reference/audio/create)
+#### [Create Translation](https://platform.openai.com/docs/api-reference/audio/createTranslation)
 
 Translates audio into into English.
 
@@ -688,7 +701,7 @@ Debug.Log(downloadedFilePath);
 Assert.IsTrue(File.Exists(downloadedFilePath));
 ```
 
-### [Fine Tuning](https://platform.openai.com/docs/api-reference/fine-tunes)
+### [Fine Tuning](https://platform.openai.com/docs/api-reference/fine-tuning)
 
 Manage fine-tuning jobs to tailor a model to your specific training data.
 
@@ -696,7 +709,7 @@ Related guide: [Fine-tune models](https://platform.openai.com/docs/guides/fine-t
 
 The Files API is accessed via `OpenAIClient.FineTuningEndpoint`
 
-#### [Create Fine Tune Job](https://platform.openai.com/docs/api-reference/fine-tunes/create)
+#### [Create Fine Tune Job](https://platform.openai.com/docs/api-reference/fine-tuning/create)
 
 Creates a job that fine-tunes a specified model from a given dataset.
 
@@ -704,36 +717,37 @@ Response includes details of the enqueued job including job status and the name 
 
 ```csharp
 var api = new OpenAIClient();
-var request = new CreateFineTuneRequest(fileData);
-var fineTuneJob = await api.FineTuningEndpoint.CreateFineTuneJobAsync(request);
-Debug.Log(fineTuneJob.Id);
+var fileId = "file-abc123";
+var request = new CreateFineTuneRequest(fileId);
+var job = await api.FineTuningEndpoint.CreateJobAsync(Model.GPT3_5_Turbo, request);
+Debug.Log($"Started {job.Id} | Status: {job.Status}");
 ```
 
-#### [List Fine Tune Jobs](https://platform.openai.com/docs/api-reference/fine-tunes/list)
+#### [List Fine Tune Jobs](https://platform.openai.com/docs/api-reference/fine-tuning/list)
 
 List your organization's fine-tuning jobs.
 
 ```csharp
 var api = new OpenAIClient();
-var fineTuneJobs = await api.FineTuningEndpoint.ListFineTuneJobsAsync();
+var list = await api.FineTuningEndpoint.ListJobsAsync();
 
-foreach (var job in fineTuneJobs)
+foreach (var job in list.Jobs)
 {
     Debug.Log($"{job.Id} -> {job.Status}");
 }
 ```
 
-#### [Retrieve Fine Tune Job Info](https://platform.openai.com/docs/api-reference/fine-tunes/retrieve)
+#### [Retrieve Fine Tune Job Info](https://platform.openai.com/docs/api-reference/fine-tuning/retrieve)
 
 Gets info about the fine-tune job.
 
 ```csharp
 var api = new OpenAIClient();
-var result = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(fineTuneJob);
-Debug.Log($"{result.Id} -> {result.Status}");
+var job = await api.FineTuningEndpoint.GetJobInfoAsync(fineTuneJob);
+Debug.Log($"{job.Id} -> {job.Status}");
 ```
 
-#### [Cancel Fine Tune Job](https://platform.openai.com/docs/api-reference/fine-tunes/cancel)
+#### [Cancel Fine Tune Job](https://platform.openai.com/docs/api-reference/fine-tuning/cancel)
 
 Immediately cancel a fine-tune job.
 
@@ -743,24 +757,19 @@ var result = await api.FineTuningEndpoint.CancelFineTuneJobAsync(fineTuneJob);
 Assert.IsTrue(result);
 ```
 
-#### [List Fine Tune Events](https://platform.openai.com/docs/api-reference/fine-tunes/events)
+#### [List Fine Tune Job Events](https://platform.openai.com/docs/api-reference/fine-tuning/list-events)
 
-Get fine-grained status updates for a fine-tune job.
-
-```csharp
-var api = new OpenAIClient();
-var fineTuneEvents = await api.FineTuningEndpoint.ListFineTuneEventsAsync(fineTuneJob);
-Debug.Log($"{fineTuneJob.Id} -> status: {fineTuneJob.Status} | event count: {fineTuneEvents.Count}");
-```
-
-#### [Stream Fine Tune Events](https://platform.openai.com/docs/api-reference/fine-tunes/events#fine-tunes/events-stream)
+Get status updates for a fine-tuning job.
 
 ```csharp
 var api = new OpenAIClient();
-await api.FineTuningEndpoint.StreamFineTuneEventsAsync(fineTuneJob, fineTuneEvent =>
+var eventList = await api.FineTuningEndpoint.ListJobEventsAsync(fineTuneJob);
+Debug.Log($"{fineTuneJob.Id} -> status: {fineTuneJob.Status} | event count: {eventList.Events.Count}");
+
+foreach (var @event in eventList.Events.OrderByDescending(@event => @event.CreatedAt))
 {
-    Debug.Log($"  {fineTuneEvent.CreatedAt} [{fineTuneEvent.Level}] {fineTuneEvent.Message}");
-});
+    Debug.Log($"  {@event.CreatedAt} [{@event.Level}] {@event.Message.Replace("\n", " ")}");
+}
 ```
 
 ### [Moderations](https://platform.openai.com/docs/api-reference/moderations)

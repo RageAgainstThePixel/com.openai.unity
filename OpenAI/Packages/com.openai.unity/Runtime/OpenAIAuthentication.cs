@@ -80,12 +80,6 @@ namespace OpenAI
             internal set => cachedDefault = value;
         }
 
-        [Obsolete("Use OpenAIAuthentication.Info.ApiKey")]
-        public string ApiKey => Info.ApiKey;
-
-        [Obsolete("Use OpenAIAuthentication.Info.OrganizationId")]
-        public string OrganizationId => Info.OrganizationId;
-
         /// <inheritdoc />
         public override OpenAIAuthentication LoadFromAsset<T>()
             => Resources.LoadAll<T>(string.Empty)
@@ -209,8 +203,5 @@ namespace OpenAI
 
             return new OpenAIAuthentication(tempAuth);
         }
-
-        [Obsolete("use OpenAIAuthentication.Default.LoadFromEnvironment")]
-        public static OpenAIAuthentication LoadFromEnv() => Default.LoadFromEnvironment();
     }
 }

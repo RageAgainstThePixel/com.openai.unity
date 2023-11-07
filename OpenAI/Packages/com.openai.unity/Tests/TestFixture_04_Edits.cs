@@ -1,5 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
 using NUnit.Framework;
 using OpenAI.Edits;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using UnityEngine;
 
 namespace OpenAI.Tests
 {
+    [Obsolete]
     internal class TestFixture_04_Edits
     {
         [Test]
