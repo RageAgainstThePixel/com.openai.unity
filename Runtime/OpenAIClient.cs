@@ -160,7 +160,7 @@ namespace OpenAI
 
         /// <summary>
         /// Files are used to upload documents that can be used with features like Fine-tuning.<br/>
-        /// <see href="https://platform.openai.com/docs/api-reference/fine-tunes"/>
+        /// <see href="https://platform.openai.com/docs/api-reference/files"/>
         /// </summary>
         public FilesEndpoint FilesEndpoint { get; }
 
