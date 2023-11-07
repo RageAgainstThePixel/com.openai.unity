@@ -309,8 +309,7 @@ namespace OpenAI.Images
 
                     if (!Rest.TryGetDownloadCacheItem(resultString, out localFilePath))
                     {
-                        await using var fileStream = new FileStream(localFilePath, FileMode.Create, FileAccess.ReadWrite);
-                        await fileStream.WriteAsync(imageData, cancellationToken);
+                        await File.WriteAllBytesAsync(localFilePath, imageData, cancellationToken);
                     }
 
                     resultString = $"file://{localFilePath}";

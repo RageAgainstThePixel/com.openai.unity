@@ -1,5 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
 using NUnit.Framework;
 using OpenAI.Audio;
 using System.IO;
@@ -59,6 +60,18 @@ namespace OpenAI.Tests
             var result = await api.AudioEndpoint.CreateTranslationAsync(request);
             Assert.IsNotNull(result);
             Debug.Log(result);
+        }
+
+        [Test]
+        public async Task Test_3_Speech()
+        {
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
+            Assert.IsNotNull(api.AudioEndpoint);
+            api.AudioEndpoint.EnableDebug = true;
+            var request = new SpeechRequest("Hello world!");
+            var (path, clip) = await api.AudioEndpoint.CreateSpeechAsync(request);
+            Debug.Log(path);
+            Assert.IsNotNull(clip);
         }
     }
 }

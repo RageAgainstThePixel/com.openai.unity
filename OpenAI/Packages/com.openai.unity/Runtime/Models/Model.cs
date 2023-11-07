@@ -164,5 +164,10 @@ namespace OpenAI.Models
         /// The default model for <see cref="Moderations.ModerationsEndpoint"/>.
         /// </summary>
         public static Model Moderation_Latest { get; } = new("text-moderation-latest", "openai");
+
+        /// <summary>
+        /// The default model for <see cref="Audio.SpeechRequest"/>s.
+        /// </summary>
+        public static Model TTS_1 { get; } = new("tts-1", "openai");
     }
 }

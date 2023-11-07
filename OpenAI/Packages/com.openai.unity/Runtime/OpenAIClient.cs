@@ -102,7 +102,7 @@ namespace OpenAI
             DefaultValueHandling = DefaultValueHandling.Ignore,
             Converters = new List<JsonConverter>
             {
-                new StringEnumConverter(new CamelCaseNamingStrategy())
+                new StringEnumConverter(new SnakeCaseNamingStrategy())
             },
             ContractResolver = new EmptyToNullStringContractResolver()
         };

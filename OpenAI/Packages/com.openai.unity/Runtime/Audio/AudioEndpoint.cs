@@ -1,6 +1,8 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,6 +38,38 @@ namespace OpenAI.Audio
 
         /// <inheritdoc />
         protected override string Root => "audio";
+
+        /// <summary>
+        /// Generates audio from the input text.
+        /// </summary>
+        /// <param name="request"><see cref="SpeechRequest"/>.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="AudioClip"/> and the cached path.</returns>
+        public async Task<Tuple<string, AudioClip>> CreateSpeechAsync(SpeechRequest request, CancellationToken cancellationToken = default)
+        {
+            var audioFormat = request.ResponseFormat switch
+            {
+                SpeechResponseFormat.MP3 => AudioType.MPEG,
+                _ => throw new NotSupportedException(request.ResponseFormat.ToString())
+            };
+            var ext = request.ResponseFormat switch
+            {
+                SpeechResponseFormat.MP3 => "mp3",
+                _ => throw new NotSupportedException(request.ResponseFormat.ToString())
+            };
+            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl("/speech"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            await Rest.ValidateCacheDirectoryAsync();
+            var cacheDirectory = Rest.DownloadCacheDirectory
+                  .CreateNewDirectory(nameof(OpenAI)
+                  .CreateNewDirectory(nameof(Audio)
+                  .CreateNewDirectory("Speech")));
+            var cachedPath = Path.Combine(cacheDirectory, $"{DateTime.UtcNow:yyyyMMddThhmmss}.{ext}");
+            await File.WriteAllBytesAsync(cachedPath, response.Data, cancellationToken).ConfigureAwait(true);
+            var clip = await Rest.DownloadAudioClipAsync($"file://{cachedPath}", audioFormat, cancellationToken: cancellationToken);
+            return new Tuple<string, AudioClip>(cachedPath, clip);
+        }
 
         /// <summary>
         /// Transcribes audio into the input language.
