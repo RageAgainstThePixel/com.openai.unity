@@ -3,7 +3,7 @@
   "displayName": "OpenAI",
   "description": "A OpenAI package for the Unity Game Engine to use GPT-4, GPT-3.5, GPT-3 and Dall-E though their RESTful API (currently in beta).\n\nIndependently developed, this is not an official library and I am not affiliated with OpenAI.\n\nAn OpenAI API account is required.",
   "keywords": [],
-  "version": "5.1.0",
+  "version": "5.1.1",
   "unity": "2021.3",
   "documentationUrl": "https://github.com/RageAgainstThePixel/com.openai.unity#documentation",
   "changelogUrl": "https://github.com/RageAgainstThePixel/com.openai.unity/releases",

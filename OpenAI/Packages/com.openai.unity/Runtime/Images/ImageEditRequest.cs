@@ -31,7 +31,7 @@ namespace OpenAI.Images
         /// <param name="responseFormat">
         /// The format in which the generated images are returned.
         /// Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="Images.ResponseFormat.Url"/>
+        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
         /// </param>
         /// <param name="model">
         /// The model to use for image generation.

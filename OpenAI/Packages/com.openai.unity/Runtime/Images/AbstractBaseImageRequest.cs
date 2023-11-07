@@ -31,11 +31,11 @@ namespace OpenAI.Images
         /// <param name="responseFormat">
         /// The format in which the generated images are returned.
         /// Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="Images.ResponseFormat.Url"/>
+        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
         /// </param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         [Preserve]
-        protected AbstractBaseImageRequest(Model model = null, int numberOfResults = 1, ImageSize size = ImageSize.Large, ResponseFormat responseFormat = Images.ResponseFormat.Url, string user = null)
+        protected AbstractBaseImageRequest(Model model = null, int numberOfResults = 1, ImageSize size = ImageSize.Large, ResponseFormat responseFormat = ResponseFormat.Url, string user = null)
         {
             Model = string.IsNullOrWhiteSpace(model?.Id) ? Models.Model.DallE_2 : model;
             Number = numberOfResults;

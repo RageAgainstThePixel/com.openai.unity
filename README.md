@@ -580,7 +580,8 @@ Creates an image given a prompt.
 
 ```csharp
 var api = new OpenAIClient();
-var results = await api.ImagesEndPoint.GenerateImageAsync("A house riding a velociraptor", 1, ImageSize.Small);
+var request = new ImageGenerationRequest("A house riding a velociraptor", Model.DallE_3);
+var results = await api.ImagesEndPoint.GenerateImageAsync(request);
 
 foreach (var (path, texture) in results)
 {
@@ -597,7 +598,8 @@ Creates an edited or extended image given an original image and a prompt.
 
 ```csharp
 var api = new OpenAIClient();
-var results = await api.ImagesEndPoint.CreateImageEditAsync(Path.GetFullPath(imageAssetPath), Path.GetFullPath(maskAssetPath), "A sunlit indoor lounge area with a pool containing a flamingo", 1, ImageSize.Small);
+var request = new ImageEditRequest(Path.GetFullPath(imageAssetPath), Path.GetFullPath(maskAssetPath), "A sunlit indoor lounge area with a pool containing a flamingo", size: ImageSize.Small);
+var results = await api.ImagesEndPoint.CreateImageEditAsync(request);
 
 foreach (var (path, texture) in results)
 {
@@ -614,7 +616,8 @@ Creates a variation of a given image.
 
 ```csharp
 var api = new OpenAIClient();
-var results = await api.ImagesEndPoint.CreateImageVariationAsync(Path.GetFullPath(imageAssetPath), 1, ImageSize.Small);
+var request = new ImageVariationRequest(imageTexture, size: ImageSize.Small);
+var results = await api.ImagesEndPoint.CreateImageVariationAsync(request);
 
 foreach (var (path, texture) in results)
 {
@@ -629,7 +632,8 @@ Alternatively, the endpoint can directly take a Texture2D with Read/Write enable
 
 ```csharp
 var api = new OpenAIClient();
-var results = await api.ImagesEndPoint.CreateImageVariationAsync(imageTexture, 1, ImageSize.Small);
+var request = new ImageVariationRequest(imageTexture, size: ImageSize.Small);
+var results = await api.ImagesEndPoint.CreateImageVariationAsync(request);
 // imageTexture is of type Texture2D
 foreach (var (path, texture) in results)
 {

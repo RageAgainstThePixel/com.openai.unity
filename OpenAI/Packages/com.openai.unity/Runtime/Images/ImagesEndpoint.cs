@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Unity.Collections;
 using UnityEngine;
 using Utilities.Async;
 using Utilities.WebRequestRest;
@@ -106,6 +107,7 @@ namespace OpenAI.Images
         /// <returns>
         /// A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.
         /// </returns>
+        [Obsolete]
         public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageEditAsync(
             string image,
             string mask,
@@ -150,6 +152,7 @@ namespace OpenAI.Images
         /// <returns>
         /// A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.
         /// </returns>
+        [Obsolete]
         public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageEditAsync(
             Texture2D image,
             Texture2D mask,
@@ -218,6 +221,7 @@ namespace OpenAI.Images
         /// </param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
+        [Obsolete]
         public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageVariationAsync(
             string imagePath,
             int numberOfResults = 1,
@@ -248,6 +252,7 @@ namespace OpenAI.Images
         /// </param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
+        [Obsolete]
         public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageVariationAsync(
             Texture2D texture,
             int numberOfResults = 1,
