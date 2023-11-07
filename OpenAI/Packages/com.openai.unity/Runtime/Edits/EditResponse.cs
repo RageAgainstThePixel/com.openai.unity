@@ -7,6 +7,7 @@ using UnityEngine.Scripting;
 
 namespace OpenAI.Edits
 {
+    [Obsolete]
     [Preserve]
     public sealed class EditResponse : BaseResponse
     {
