@@ -17,9 +17,17 @@ namespace OpenAI.Editor.FineTuning
 {
     public class FineTuningWindow : EditorWindow
     {
+        private const int EndWidth = 10;
+        private const float WideColumnWidth = 128f;
+        private const float DefaultColumnWidth = 96f;
+
         private static readonly GUIContent guiTitleContent = new GUIContent("OpenAI Fine Tuning");
 
         private static readonly string[] tabTitles = { "Training Data", "Training Jobs", "Models" };
+
+        private static readonly GUIContent deleteContent = new GUIContent("Delete");
+
+        private static readonly GUIContent refreshContent = new GUIContent("Refresh");
 
         private static readonly List<SerializedObject> fineTuningTrainingDataSets = new List<SerializedObject>();
 
@@ -58,6 +66,26 @@ namespace OpenAI.Editor.FineTuning
 
         private static GUIStyle RightMiddleAlignedLabel => rightMiddleAlignedLabel ??= new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleRight };
 
+        private static readonly GUILayoutOption[] defaultColumnWidthOption =
+        {
+            GUILayout.Width(DefaultColumnWidth)
+        };
+
+        private static readonly GUILayoutOption[] wideColumnWidthOption =
+        {
+            GUILayout.Width(WideColumnWidth)
+        };
+
+        private static readonly GUILayoutOption[] expandWidthOption =
+        {
+            GUILayout.ExpandWidth(true)
+        };
+
+        private static readonly GUILayoutOption[] squareWidthOption =
+        {
+            GUILayout.Width(24)
+        };
+
         private static Vector2 scrollPosition = Vector2.zero;
 
         private static bool hasFetchedModels;
@@ -68,7 +96,7 @@ namespace OpenAI.Editor.FineTuning
 
         private static bool hasFetchedJobEvents;
 
-        private static bool isFetchingJobEvents;
+        private static bool isFetchingJobs;
 
         [SerializeField]
         private int tab;
@@ -112,7 +140,7 @@ namespace OpenAI.Editor.FineTuning
             if (!hasFetchedJobEvents)
             {
                 hasFetchedJobEvents = true;
-                FetchAllTrainingJobs();
+                FetchTrainingJobs();
             }
         }
 
@@ -284,7 +312,7 @@ namespace OpenAI.Editor.FineTuning
                                 EditorGUILayout.LabelField(fineTuneJob.FineTunedModel, RightMiddleAlignedLabel, GUILayout.MaxWidth(Screen.width));
                             }
 
-                            GUILayout.Space(10);
+                            GUILayout.Space(EndWidth);
                             EditorGUILayout.EndHorizontal();
                             EditorGUI.indentLevel--;
                         }
@@ -377,7 +405,7 @@ namespace OpenAI.Editor.FineTuning
                         learningRateMultiplier: fineTuneDataSet.AutoLearningRateMultiplier ? null : fineTuneDataSet.LearningRateMultiplier));
                 var job = await openAI.FineTuningEndpoint.CreateJobAsync(jobRequest);
                 fineTuneDataSet.FineTuneJob = job;
-                FetchAllTrainingJobs();
+                FetchTrainingJobs();
             }
             catch (Exception e)
             {
@@ -430,7 +458,7 @@ namespace OpenAI.Editor.FineTuning
 
                     try
                     {
-                        await openAI.FineTuningEndpoint.CancelFineTuneJobAsync(fineTuneDataSet.Id);
+                        await openAI.FineTuningEndpoint.CancelJobAsync(fineTuneDataSet.Id);
                     }
                     catch (Exception e)
                     {
@@ -446,16 +474,46 @@ namespace OpenAI.Editor.FineTuning
         private static void RenderTrainingJobQueue()
         {
             EditorGUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
+            EditorGUI.BeginChangeCheck();
+            trainingJobCount = EditorGUILayout.IntField("Jobs per page", trainingJobCount);
 
-            GUI.enabled = !isFetchingJobEvents;
-
-            if (GUILayout.Button("Refresh"))
+            if (EditorGUI.EndChangeCheck())
             {
-                EditorApplication.delayCall += FetchAllTrainingJobs;
+                if (trainingJobCount > 100)
+                {
+                    trainingJobCount = 100;
+                }
+
+                if (trainingJobCount < 1)
+                {
+                    trainingJobCount = 1;
+                }
             }
 
-            EditorGUILayout.Space(10);
+            GUILayout.FlexibleSpace();
+
+            GUI.enabled = !isFetchingJobs;
+            if (fineTuneJobList is not null && trainingJobIds.Count > 0 && GUILayout.Button("Prev Page", defaultColumnWidthOption))
+            {
+                EditorApplication.delayCall += () =>
+                {
+                    if (trainingJobIds.TryPeek(out var prevPageId))
+                    {
+                        FetchTrainingJobs(prevPageId);
+                    }
+                };
+            }
+
+            if (fineTuneJobList is { HasMore: true } && GUILayout.Button("Next Page", defaultColumnWidthOption))
+            {
+                EditorApplication.delayCall += () => FetchTrainingJobs(fineTuneJobList.Jobs.LastOrDefault());
+            }
+
+            if (GUILayout.Button(refreshContent, defaultColumnWidthOption))
+            {
+                EditorApplication.delayCall += () => FetchTrainingJobs();
+            }
+
             GUI.enabled = true;
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space();
@@ -465,19 +523,27 @@ namespace OpenAI.Editor.FineTuning
 
             foreach (var job in jobs)
             {
-                EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
-                EditorGUILayout.LabelField(job.Id, EditorStyles.boldLabel, GUILayout.MaxWidth(Screen.width));
+                EditorGUILayout.BeginVertical();
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField(job.Id, EditorStyles.boldLabel, GUILayout.MaxWidth(Screen.width), GUILayout.ExpandWidth(true));
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.LabelField(job.Status.ToString(), RightMiddleAlignedLabel);
+                EditorGUILayout.Space(EndWidth);
+                EditorGUILayout.EndHorizontal();
+                EditorGUI.indentLevel++;
+                EditorGUILayout.LabelField($"Base Model: {job.Model}");
+                EditorGUILayout.LabelField($"Created At: {job.CreatedAt}");
 
                 if (!string.IsNullOrWhiteSpace(job.FineTunedModel))
                 {
-                    GUILayout.FlexibleSpace();
-                    EditorGUILayout.LabelField(job.FineTunedModel, RightMiddleAlignedLabel, GUILayout.MaxWidth(Screen.width));
-                    EditorGUILayout.Space(12);
+                    EditorGUILayout.LabelField("Fine Tuned Model:");
+
+                    EditorGUI.indentLevel++;
+                    EditorGUILayout.SelectableLabel(job.FineTunedModel);
+                    EditorGUI.indentLevel--;
                 }
 
-                EditorGUILayout.EndHorizontal();
-                EditorGUILayout.BeginVertical();
-                EditorGUILayout.LabelField($"Status: {job.Status}");
+                EditorGUILayout.LabelField($"Trained Tokens: {job.TrainedTokens}");
 
                 if (job.HyperParameters != null)
                 {
@@ -505,52 +571,66 @@ namespace OpenAI.Editor.FineTuning
                 {
                     EditorGUI.indentLevel++;
                     EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField($"[{jobEvent.Level}]", GUILayout.Width(72));
+                    EditorGUILayout.LabelField($"[{jobEvent.Level}]", GUILayout.Width(80f));
                     EditorGUILayout.LabelField($"{jobEvent.Message.Replace("\n", " ")}", GUILayout.MaxWidth(Screen.width), GUILayout.ExpandWidth(true));
                     GUILayout.FlexibleSpace();
-                    EditorGUILayout.LabelField($"{jobEvent.CreatedAt.ToLocalTime()}", GUILayout.Width(165));
+                    EditorGUILayout.LabelField($"{jobEvent.CreatedAt.ToLocalTime()}", GUILayout.Width(173f));
                     EditorGUILayout.EndHorizontal();
                     EditorGUI.indentLevel--;
                 }
 
-                EditorGUILayout.Space(10);
+                EditorGUI.indentLevel--;
+                EditorGUILayout.Space(EndWidth);
                 EditorGUILayout.EndVertical();
+                EditorGUILayoutExtensions.Divider();
             }
 
             EditorGUI.indentLevel--;
         }
 
-        private static async void FetchAllTrainingJobs()
+        private static FineTuneJobList fineTuneJobList;
+        private static int trainingJobCount = 25;
+        private static readonly Stack<string> trainingJobIds = new Stack<string>();
+
+        private static async void FetchTrainingJobs(string trainingJobId = null)
         {
-            if (isFetchingJobEvents) { return; }
-            isFetchingJobEvents = true;
+            if (isFetchingJobs) { return; }
+            isFetchingJobs = true;
 
             try
             {
-                var list = await openAI.FineTuningEndpoint.ListJobsAsync(limit: 25);
-                var jobs = list.Jobs.OrderByDescending(job => job.FinishedAt).ToList();
+                if (string.IsNullOrWhiteSpace(trainingJobId) &&
+                    trainingJobIds.Count > 0 &&
+                    trainingJobIds.TryPeek(out var prevPageId))
+                {
+                    trainingJobId = prevPageId;
+                }
+                else
+                {
+                    if (trainingJobIds.TryPeek(out prevPageId) && prevPageId == trainingJobId)
+                    {
+                        trainingJobIds.Pop();
+                        trainingJobId = trainingJobIds.Count > 0 && trainingJobIds.TryPeek(out prevPageId) ? prevPageId : null;
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrWhiteSpace(trainingJobId))
+                        {
+                            trainingJobIds.Push(trainingJobId);
+                        }
+                    }
+                }
 
+                fineTuneJobList = null;
+                var list = await openAI.FineTuningEndpoint.ListJobsAsync(limit: trainingJobCount, after: trainingJobId);
                 fineTuneJobs.Clear();
-                await Task.WhenAll(jobs.Select(SyncJobDataAsync));
+                await Task.WhenAll(list.Jobs.Select(SyncJobDataAsync));
+                fineTuneJobList = list;
 
                 static async Task SyncJobDataAsync(FineTuneJob job)
                 {
-                    //var jobIsCancelled = job.Status == JobStatus.Cancelled;
-
-                    //if (jobIsCancelled || IsStale(job.FinishedAt))
-                    //{
-                    //    return;
-                    //}
-
                     var jobDetails = await openAI.FineTuningEndpoint.GetJobInfoAsync(job);
-
                     fineTuneJobs.TryAdd(jobDetails.Id, jobDetails);
-
-                    //static bool IsStale(DateTime dateTime)
-                    //{
-                    //    var timeSpan = DateTimeOffset.Now - dateTime;
-                    //    return timeSpan >= TimeSpan.FromDays(7);
-                    //}
                 }
             }
             catch (Exception e)
@@ -559,7 +639,7 @@ namespace OpenAI.Editor.FineTuning
             }
             finally
             {
-                isFetchingJobEvents = false;
+                isFetchingJobs = false;
             }
         }
 
@@ -575,10 +655,10 @@ namespace OpenAI.Editor.FineTuning
                 EditorApplication.delayCall += FetchAllModels;
             }
 
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space(EndWidth);
             GUI.enabled = true;
             EditorGUILayout.EndHorizontal();
-            EditorGUILayout.Space(10);
+            EditorGUILayout.Space(EndWidth);
             EditorGUI.indentLevel++;
 
             foreach (var model in organizationModels)
@@ -593,7 +673,7 @@ namespace OpenAI.Editor.FineTuning
                 EditorGUILayout.LabelField(model, GUILayout.MaxWidth(Screen.width));
                 GUILayout.FlexibleSpace();
                 EditorGUILayout.LabelField(model.OwnedBy, RightMiddleAlignedLabel);
-                EditorGUILayout.Space(12);
+                EditorGUILayout.Space(EndWidth);
 
                 if (GUILayout.Button("Delete"))
                 {
@@ -634,9 +714,9 @@ namespace OpenAI.Editor.FineTuning
                         }
                     };
                 }
-                EditorGUILayout.Space(12);
+                EditorGUILayout.Space(EndWidth);
                 EditorGUILayout.EndHorizontal();
-                EditorGUILayout.Space(10);
+                EditorGUILayout.Space(EndWidth);
             }
 
             EditorGUI.indentLevel--;

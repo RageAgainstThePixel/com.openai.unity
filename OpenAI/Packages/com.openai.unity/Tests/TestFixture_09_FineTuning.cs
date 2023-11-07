@@ -186,7 +186,7 @@ namespace OpenAI.Tests
             {
                 if (job.Status is > JobStatus.NotStarted and < JobStatus.Succeeded)
                 {
-                    var result = await api.FineTuningEndpoint.CancelFineTuneJobAsync(job);
+                    var result = await api.FineTuningEndpoint.CancelJobAsync(job);
                     Assert.IsNotNull(result);
                     Assert.IsTrue(result);
                     Debug.Log($"{job.Id} -> cancelled");
