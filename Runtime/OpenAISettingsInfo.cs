@@ -98,11 +98,6 @@ namespace OpenAI
             UseOAuthAuthentication = useActiveDirectoryAuthentication;
         }
 
-        [Obsolete]
-        internal OpenAISettingsInfo(OpenAIClientSettings clientSettings)
-        {
-        }
-
         public string ResourceName { get; }
 
         public string ApiVersion { get; }

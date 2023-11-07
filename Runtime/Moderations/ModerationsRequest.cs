@@ -1,7 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using System;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Moderations
@@ -31,11 +30,6 @@ namespace OpenAI.Moderations
         {
             Input = input;
             Model = string.IsNullOrWhiteSpace(model) ? Models.Model.Moderation_Latest : model;
-
-            if (!Model.Contains("text-moderation"))
-            {
-                throw new ArgumentException($"{model} is not supported", nameof(model));
-            }
         }
 
         [Preserve]

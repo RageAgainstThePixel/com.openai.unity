@@ -74,8 +74,8 @@ namespace OpenAI.Models
         public async Task<IReadOnlyList<Model>> GetModelsAsync(CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl(), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
-            response.Validate();
-            return JsonConvert.DeserializeObject<ModelsList>(response.Body, client.JsonSerializationOptions)?.Data;
+            response.Validate(EnableDebug);
+            return JsonConvert.DeserializeObject<ModelsList>(response.Body, OpenAIClient.JsonSerializationOptions)?.Data;
         }
 
         /// <summary>
@@ -87,8 +87,8 @@ namespace OpenAI.Models
         public async Task<Model> GetModelDetailsAsync(string id, CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl($"/{id}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
-            response.Validate();
-            return JsonConvert.DeserializeObject<Model>(response.Body, client.JsonSerializationOptions);
+            response.Validate(EnableDebug);
+            return JsonConvert.DeserializeObject<Model>(response.Body, OpenAIClient.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -112,8 +112,8 @@ namespace OpenAI.Models
             try
             {
                 var response = await Rest.DeleteAsync(GetUrl($"/{model.Id}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
-                response.Validate();
-                return JsonConvert.DeserializeObject<DeleteModelResponse>(response.Body, client.JsonSerializationOptions)?.Deleted ?? false;
+                response.Validate(EnableDebug);
+                return JsonConvert.DeserializeObject<DeleteModelResponse>(response.Body, OpenAIClient.JsonSerializationOptions)?.Deleted ?? false;
             }
             catch (RestException e)
             {

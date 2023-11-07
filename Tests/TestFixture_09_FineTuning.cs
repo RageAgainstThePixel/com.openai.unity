@@ -1,12 +1,14 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using NUnit.Framework;
+using OpenAI.Chat;
 using OpenAI.Files;
 using OpenAI.FineTuning;
+using OpenAI.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -16,14 +18,73 @@ namespace OpenAI.Tests
     {
         private async Task<FileData> CreateTestTrainingDataAsync(OpenAIClient api)
         {
-            var lines = new List<string>
+            var fineTuningTrainingData = ScriptableObject.CreateInstance<FineTuningTrainingDataSet>();
+            fineTuningTrainingData.ConversationTrainingData = new List<Conversation>
             {
-                new FineTuningTrainingData("Company: BHFF insurance\\nProduct: allround insurance\\nAd:One stop shop for all your insurance needs!\\nSupported:", "yes"),
-                new FineTuningTrainingData("Company: Loft conversion specialists\\nProduct: -\\nAd:Straight teeth in weeks!\\nSupported:", "no")
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "What's the capital of France?"),
+                    new Message(Role.Assistant, "Paris, as if everyone doesn't know that already.")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "Who wrote 'Romeo and Juliet'?"),
+                    new Message(Role.Assistant, "Oh, just some guy named William Shakespeare. Ever heard of him?")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "How far is the Moon from Earth?"),
+                    new Message(Role.Assistant, "Around 384,400 kilometers. Give or take a few, like that really matters.")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "What's the capital of France?"),
+                    new Message(Role.Assistant, "Paris, as if everyone doesn't know that already.")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "Who wrote 'Romeo and Juliet'?"),
+                    new Message(Role.Assistant, "Oh, just some guy named William Shakespeare. Ever heard of him?")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "How far is the Moon from Earth?"),
+                    new Message(Role.Assistant, "Around 384,400 kilometers. Give or take a few, like that really matters.")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "What's the capital of France?"),
+                    new Message(Role.Assistant, "Paris, as if everyone doesn't know that already.")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "Who wrote 'Romeo and Juliet'?"),
+                    new Message(Role.Assistant, "Oh, just some guy named William Shakespeare. Ever heard of him?")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "How far is the Moon from Earth?"),
+                    new Message(Role.Assistant, "Around 384,400 kilometers. Give or take a few, like that really matters.")
+                }),
+                new Conversation(new List<Message>
+                {
+                    new Message(Role.System, "Marv is a factual chatbot that is also sarcastic."),
+                    new Message(Role.User, "How far is the Moon from Earth?"),
+                    new Message(Role.Assistant, "Around 384,400 kilometers. Give or take a few, like that really matters.")
+                })
             };
 
             const string localTrainingDataPath = "fineTunesTestTrainingData.jsonl";
-            await File.WriteAllLinesAsync(localTrainingDataPath, lines);
+            await File.WriteAllLinesAsync(localTrainingDataPath, fineTuningTrainingData.ConversationTrainingToJsonl());
 
             var fileData = await api.FilesEndpoint.UploadFileAsync(localTrainingDataPath, "fine-tune");
             File.Delete(localTrainingDataPath);
@@ -38,12 +99,13 @@ namespace OpenAI.Tests
             Assert.IsNotNull(api.FineTuningEndpoint);
 
             var fileData = await CreateTestTrainingDataAsync(api);
-            var request = new CreateFineTuneJobRequest(fileData);
-            var fineTuneResponse = await api.FineTuningEndpoint.CreateFineTuneJobAsync(request);
+            Assert.IsNotNull(fileData);
+            var request = new CreateFineTuneJobRequest(Model.GPT3_5_Turbo, fileData);
+            api.FineTuningEndpoint.EnableDebug = true;
+            var job = await api.FineTuningEndpoint.CreateJobAsync(request);
 
-            Assert.IsNotNull(fineTuneResponse);
-            var result = await api.FilesEndpoint.DeleteFileAsync(fileData);
-            Assert.IsTrue(result);
+            Assert.IsNotNull(job);
+            Debug.Log($"Started {job.Id} | Status: {job.Status}");
         }
 
         [Test]
@@ -52,11 +114,11 @@ namespace OpenAI.Tests
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
-            var fineTuneJobs = await api.FineTuningEndpoint.ListFineTuneJobsAsync();
-            Assert.IsNotNull(fineTuneJobs);
-            Assert.IsNotEmpty(fineTuneJobs);
+            var list = await api.FineTuningEndpoint.ListJobsAsync();
+            Assert.IsNotNull(list);
+            Assert.IsNotEmpty(list.Jobs);
 
-            foreach (var job in fineTuneJobs)
+            foreach (var job in list.Jobs.OrderByDescending(job => job.CreatedAt))
             {
                 Debug.Log($"{job.Id} -> {job.CreatedAt} | {job.Status}");
             }
@@ -68,15 +130,15 @@ namespace OpenAI.Tests
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
-            var fineTuneJobs = await api.FineTuningEndpoint.ListFineTuneJobsAsync();
-            Assert.IsNotNull(fineTuneJobs);
-            Assert.IsNotEmpty(fineTuneJobs);
+            var list = await api.FineTuningEndpoint.ListJobsAsync();
+            Assert.IsNotNull(list);
+            Assert.IsNotEmpty(list.Jobs);
 
-            foreach (var job in fineTuneJobs)
+            foreach (var job in list.Jobs.OrderByDescending(job => job.CreatedAt))
             {
-                var request = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(job);
-                Assert.IsNotNull(request);
-                Debug.Log($"{request.Id} -> {request.Status}");
+                var result = await api.FineTuningEndpoint.GetJobInfoAsync(job);
+                Assert.IsNotNull(result);
+                Debug.Log($"{result.Id} -> {result.Status}");
             }
         }
 
@@ -86,24 +148,24 @@ namespace OpenAI.Tests
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
-            var fineTuneJobs = await api.FineTuningEndpoint.ListFineTuneJobsAsync();
-            Assert.IsNotNull(fineTuneJobs);
-            Assert.IsNotEmpty(fineTuneJobs);
+            var list = await api.FineTuningEndpoint.ListJobsAsync();
+            Assert.IsNotNull(list);
+            Assert.IsNotEmpty(list.Jobs);
 
-            foreach (var job in fineTuneJobs)
+            foreach (var job in list.Jobs)
             {
-                if (job.Status == "cancelled")
+                if (job.Status == JobStatus.Cancelled)
                 {
                     continue;
                 }
 
-                var fineTuneEvents = await api.FineTuningEndpoint.ListFineTuneEventsAsync(job);
-                Assert.IsNotNull(fineTuneEvents);
-                Assert.IsNotEmpty(fineTuneEvents);
+                var eventList = await api.FineTuningEndpoint.ListJobEventsAsync(job);
+                Assert.IsNotNull(eventList);
+                Assert.IsNotEmpty(eventList.Events);
 
-                Debug.Log($"{job.Id} -> status: {job.Status} | event count: {fineTuneEvents.Count} | date: {job.CreatedAt}");
+                Debug.Log($"{job.Id} -> status: {job.Status} | event count: {eventList.Events.Count} | date: {job.CreatedAt}");
 
-                foreach (var @event in fineTuneEvents)
+                foreach (var @event in eventList.Events.OrderByDescending(@event => @event.CreatedAt))
                 {
                     Debug.Log($"  {@event.CreatedAt} [{@event.Level}] {@event.Message.Replace("\n", " ")}");
                 }
@@ -116,71 +178,27 @@ namespace OpenAI.Tests
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
-            var fineTuneJobs = await api.FineTuningEndpoint.ListFineTuneJobsAsync();
-            Assert.IsNotNull(fineTuneJobs);
-            Assert.IsNotEmpty(fineTuneJobs);
+            var list = await api.FineTuningEndpoint.ListJobsAsync();
+            Assert.IsNotNull(list);
+            Assert.IsNotEmpty(list.Jobs);
 
-            foreach (var job in fineTuneJobs)
+            foreach (var job in list.Jobs)
             {
-                if (job.Status == "pending")
+                if (job.Status is > JobStatus.NotStarted and < JobStatus.Succeeded)
                 {
-                    var result = await api.FineTuningEndpoint.CancelFineTuneJobAsync(job);
+                    var result = await api.FineTuningEndpoint.CancelJobAsync(job);
                     Assert.IsNotNull(result);
                     Assert.IsTrue(result);
                     Debug.Log($"{job.Id} -> cancelled");
+                    result = await api.FilesEndpoint.DeleteFileAsync(job.TrainingFile);
+                    Assert.IsTrue(result);
+                    Debug.Log($"{job.TrainingFile} -> deleted");
                 }
             }
         }
 
         [Test]
-        public async Task Test_06_StreamFineTuneEvents()
-        {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.FineTuningEndpoint);
-
-            var fileData = await CreateTestTrainingDataAsync(api);
-            var request = new CreateFineTuneJobRequest(fileData);
-            var fineTuneResponse = await api.FineTuningEndpoint.CreateFineTuneJobAsync(request);
-            Assert.IsNotNull(fineTuneResponse);
-
-            var fineTuneJob = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(fineTuneResponse);
-            Assert.IsNotNull(fineTuneJob);
-            Debug.Log($"{fineTuneJob.Id} ->");
-            var cancellationTokenSource = new CancellationTokenSource();
-
-            try
-            {
-                await api.FineTuningEndpoint.StreamFineTuneEventsAsync(fineTuneJob, fineTuneEvent =>
-                {
-                    Debug.Log($"  {fineTuneEvent.CreatedAt} [{fineTuneEvent.Level}] {fineTuneEvent.Message}");
-                    cancellationTokenSource.Cancel();
-                }, cancelJob: true, cancellationTokenSource.Token);
-            }
-            catch (Exception e)
-            {
-                switch (e)
-                {
-                    case TaskCanceledException:
-                    case OperationCanceledException:
-                        // Ignored
-                        break;
-                    default:
-                        Debug.LogError(e);
-                        break;
-                }
-            }
-
-            var jobInfo = await api.FineTuningEndpoint.RetrieveFineTuneJobInfoAsync(fineTuneJob, CancellationToken.None);
-            Assert.IsNotNull(jobInfo);
-            Debug.Log($"{jobInfo.Id} -> {jobInfo.Status}");
-            Assert.IsTrue(jobInfo.Status == "cancelled");
-            var result = await api.FilesEndpoint.DeleteFileAsync(fileData, CancellationToken.None);
-            Assert.IsTrue(result);
-        }
-
-
-        [Test]
-        public async Task Test_08_DeleteFineTunedModel()
+        public async Task Test_07_DeleteFineTunedModel()
         {
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.ModelsEndpoint);
@@ -199,17 +217,17 @@ namespace OpenAI.Tests
                         continue;
                     }
 
-                    Console.WriteLine(model);
+                    Debug.Log(model);
                     var result = await api.ModelsEndpoint.DeleteFineTuneModelAsync(model);
                     Assert.IsNotNull(result);
                     Assert.IsTrue(result);
-                    Console.WriteLine($"{model.Id} -> deleted");
+                    Debug.Log($"{model.Id} -> deleted");
                     break;
                 }
             }
             catch (UnauthorizedAccessException)
             {
-                Console.WriteLine("You have insufficient permissions for this operation. You need to be this role: Owner.");
+                Debug.Log("You have insufficient permissions for this operation. You need to be this role: Owner.");
             }
         }
     }

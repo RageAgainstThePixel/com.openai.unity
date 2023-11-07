@@ -19,8 +19,7 @@ namespace OpenAI.Chat
         /// The list of messages for the current chat session.
         /// </param>
         /// <param name="model">
-        /// Id of the model to use.<br/>
-        /// Currently, only gpt-4 and gpt-3.5-turbo and their variants are supported.
+        /// Id of the model to use.
         /// </param>
         /// <param name="temperature">
         /// What sampling temperature to use, between 0 and 2.
@@ -94,13 +93,6 @@ namespace OpenAI.Chat
             IEnumerable<Function> functions = null)
         {
             Model = string.IsNullOrWhiteSpace(model) ? Models.Model.GPT3_5_Turbo : model;
-
-            if (!Model.Contains("turbo") &&
-                !Model.Contains("gpt-4"))
-            {
-                throw new ArgumentException($"{Model} is not supported", nameof(model));
-            }
-
             Messages = messages?.ToList();
 
             if (Messages?.Count == 0)
@@ -144,8 +136,7 @@ namespace OpenAI.Chat
         }
 
         /// <summary>
-        /// ID of the model to use.<br/>
-        /// Currently, only gpt-4, gpt-3.5-turbo and gpt-3.5-turbo-0301 are supported.
+        /// Id of the model to use.
         /// </summary>
         [Preserve]
         [JsonProperty("model")]
@@ -267,6 +258,6 @@ namespace OpenAI.Chat
         public IReadOnlyList<Function> Functions { get; }
 
         /// <inheritdoc />
-        public override string ToString() => JsonConvert.SerializeObject(this);
+        public override string ToString() => JsonConvert.SerializeObject(this, OpenAIClient.JsonSerializationOptions);
     }
 }

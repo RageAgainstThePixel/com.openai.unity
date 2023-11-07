@@ -13,10 +13,10 @@ namespace OpenAI.Images
         [JsonConstructor]
         public ImagesResponse(
             [JsonProperty("created")] int created,
-            [JsonProperty("data")] IReadOnlyList<ImageResult> data)
+            [JsonProperty("data")] IReadOnlyList<ImageResult> results)
         {
             Created = created;
-            Data = data;
+            Results = results;
         }
 
         [Preserve]
@@ -25,6 +25,6 @@ namespace OpenAI.Images
 
         [Preserve]
         [JsonProperty("data")]
-        public IReadOnlyList<ImageResult> Data { get; }
+        public IReadOnlyList<ImageResult> Results { get; }
     }
 }

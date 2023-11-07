@@ -3,7 +3,6 @@
 using Newtonsoft.Json;
 using OpenAI.Extensions;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -31,10 +30,10 @@ namespace OpenAI.Chat
         /// <returns><see cref="ChatResponse"/>.</returns>
         public async Task<ChatResponse> GetCompletionAsync(ChatRequest chatRequest, CancellationToken cancellationToken = default)
         {
-            var payload = JsonConvert.SerializeObject(chatRequest, client.JsonSerializationOptions);
+            var payload = JsonConvert.SerializeObject(chatRequest, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl("/completions"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
-            return response.DeserializeResponse<ChatResponse>(response.Body, client.JsonSerializationOptions);
+            response.Validate(EnableDebug);
+            return response.DeserializeResponse<ChatResponse>(response.Body);
         }
 
         /// <summary>
@@ -49,12 +48,12 @@ namespace OpenAI.Chat
             chatRequest.Stream = true;
             ChatResponse chatResponse = null;
 
-            var payload = JsonConvert.SerializeObject(chatRequest, client.JsonSerializationOptions);
+            var payload = JsonConvert.SerializeObject(chatRequest, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl("/completions"), payload, eventData =>
             {
                 try
                 {
-                    var partialResponse = JsonConvert.DeserializeObject<ChatResponse>(eventData, client.JsonSerializationOptions);
+                    var partialResponse = JsonConvert.DeserializeObject<ChatResponse>(eventData, OpenAIClient.JsonSerializationOptions);
 
                     if (chatResponse == null)
                     {
@@ -72,19 +71,13 @@ namespace OpenAI.Chat
                     Debug.LogError($"{eventData}\n{e}");
                 }
             }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate();
+            response.Validate(EnableDebug);
 
             if (chatResponse == null) { return null; }
 
             chatResponse.SetResponseData(response);
             resultHandler(chatResponse);
             return chatResponse;
-        }
-
-        [Obsolete("Use StreamCompletionAsync")]
-        public IAsyncEnumerable<ChatResponse> StreamCompletionEnumerableAsync(ChatRequest chatRequest, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException();
         }
     }
 }

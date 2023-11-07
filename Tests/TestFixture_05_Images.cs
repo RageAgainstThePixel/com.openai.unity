@@ -5,6 +5,7 @@ using OpenAI.Images;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using OpenAI.Models;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,9 +18,8 @@ namespace OpenAI.Tests
         {
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.ImagesEndPoint);
-
-            var results = await api.ImagesEndPoint.GenerateImageAsync("A house riding a velociraptor", 1, ImageSize.Small);
-
+            var request = new ImageGenerationRequest("A house riding a velociraptor", Model.DallE_3);
+            var results = await api.ImagesEndPoint.GenerateImageAsync(request);
             Assert.IsNotNull(results);
             Assert.NotZero(results.Count);
 
@@ -36,7 +36,8 @@ namespace OpenAI.Tests
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.ImagesEndPoint);
 
-            var results = await api.ImagesEndPoint.GenerateImageAsync("A house riding a velociraptor", 1, ImageSize.Small, responseFormat: ResponseFormat.B64_Json);
+            var request = new ImageGenerationRequest("A house riding a velociraptor", Model.DallE_2, responseFormat: ResponseFormat.B64_Json);
+            var results = await api.ImagesEndPoint.GenerateImageAsync(request);
 
             Assert.IsNotNull(results);
             Assert.NotZero(results.Count);
