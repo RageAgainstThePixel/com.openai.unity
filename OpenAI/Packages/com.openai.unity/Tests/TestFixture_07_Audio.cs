@@ -67,7 +67,6 @@ namespace OpenAI.Tests
         {
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.AudioEndpoint);
-            api.AudioEndpoint.EnableDebug = true;
             var request = new SpeechRequest("Hello world!");
             var (path, clip) = await api.AudioEndpoint.CreateSpeechAsync(request);
             Debug.Log(path);
