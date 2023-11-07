@@ -105,7 +105,7 @@ namespace OpenAI.Tests
             var job = await api.FineTuningEndpoint.CreateJobAsync(request);
 
             Assert.IsNotNull(job);
-            Console.WriteLine($"Started {job.Id} | Status: {job.Status}");
+            Debug.Log($"Started {job.Id} | Status: {job.Status}");
         }
 
         [Test]
@@ -118,7 +118,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(list);
             Assert.IsNotEmpty(list.Jobs);
 
-            foreach (var job in list.Jobs.OrderByDescending(job => job.FinishedAt))
+            foreach (var job in list.Jobs.OrderByDescending(job => job.CreatedAt))
             {
                 Debug.Log($"{job.Id} -> {job.CreatedAt} | {job.Status}");
             }
@@ -134,11 +134,11 @@ namespace OpenAI.Tests
             Assert.IsNotNull(list);
             Assert.IsNotEmpty(list.Jobs);
 
-            foreach (var job in list.Jobs.OrderByDescending(job => job.FinishedAt))
+            foreach (var job in list.Jobs.OrderByDescending(job => job.CreatedAt))
             {
-                var request = await api.FineTuningEndpoint.GetJobInfoAsync(job);
-                Assert.IsNotNull(request);
-                Debug.Log($"{request.Id} -> {request.Status}");
+                var result = await api.FineTuningEndpoint.GetJobInfoAsync(job);
+                Assert.IsNotNull(result);
+                Debug.Log($"{result.Id} -> {result.Status}");
             }
         }
 
@@ -192,7 +192,7 @@ namespace OpenAI.Tests
                     Debug.Log($"{job.Id} -> cancelled");
                     result = await api.FilesEndpoint.DeleteFileAsync(job.TrainingFile);
                     Assert.IsTrue(result);
-                    Console.WriteLine($"{job.TrainingFile} -> deleted");
+                    Debug.Log($"{job.TrainingFile} -> deleted");
                 }
             }
         }
@@ -217,17 +217,17 @@ namespace OpenAI.Tests
                         continue;
                     }
 
-                    Console.WriteLine(model);
+                    Debug.Log(model);
                     var result = await api.ModelsEndpoint.DeleteFineTuneModelAsync(model);
                     Assert.IsNotNull(result);
                     Assert.IsTrue(result);
-                    Console.WriteLine($"{model.Id} -> deleted");
+                    Debug.Log($"{model.Id} -> deleted");
                     break;
                 }
             }
             catch (UnauthorizedAccessException)
             {
-                Console.WriteLine("You have insufficient permissions for this operation. You need to be this role: Owner.");
+                Debug.Log("You have insufficient permissions for this operation. You need to be this role: Owner.");
             }
         }
     }
