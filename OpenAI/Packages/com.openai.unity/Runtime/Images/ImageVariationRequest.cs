@@ -29,12 +29,16 @@ namespace OpenAI.Images
         /// Must be one of url or b64_json.
         /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
         /// </param>
+        /// <param name="model">
+        /// The model to use for image generation.
+        /// </param>
         public ImageVariationRequest(
             string imagePath,
             int numberOfResults = 1,
             ImageSize size = ImageSize.Large,
             string user = null,
-            ResponseFormat responseFormat = Images.ResponseFormat.Url)
+            ResponseFormat responseFormat = ResponseFormat.Url,
+            Model model = null)
             : this(File.OpenRead(imagePath), Path.GetFileName(imagePath), numberOfResults, size, user, responseFormat)
         {
         }
@@ -59,7 +63,16 @@ namespace OpenAI.Images
         /// Must be one of url or b64_json.
         /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
         /// </param>
-        public ImageVariationRequest(Texture2D texture, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null, ResponseFormat responseFormat = Images.ResponseFormat.Url)
+        /// <param name="model">
+        /// The model to use for image generation.
+        /// </param>
+        public ImageVariationRequest(
+            Texture2D texture,
+            int numberOfResults = 1,
+            ImageSize size = ImageSize.Large,
+            string user = null,
+            ResponseFormat responseFormat = ResponseFormat.Url,
+            Model model = null)
             : this(
                 new MemoryStream(texture.EncodeToPNG()),
                 !string.IsNullOrWhiteSpace(texture.name) ? $"{texture.name}.png" : null,
@@ -96,7 +109,14 @@ namespace OpenAI.Images
         /// <param name="model">
         /// The model to use for image generation.
         /// </param>
-        public ImageVariationRequest(Stream image, string imageName, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null, ResponseFormat responseFormat = ResponseFormat.Url, Model model = null)
+        public ImageVariationRequest(
+            Stream image,
+            string imageName,
+            int numberOfResults = 1,
+            ImageSize size = ImageSize.Large,
+            string user = null,
+            ResponseFormat responseFormat = ResponseFormat.Url,
+            Model model = null)
             : base(model, numberOfResults, size, responseFormat, user)
         {
             Image = image;

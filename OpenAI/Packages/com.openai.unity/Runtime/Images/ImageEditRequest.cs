@@ -33,12 +33,17 @@ namespace OpenAI.Images
         /// Must be one of url or b64_json.
         /// <para/> Defaults to <see cref="Images.ResponseFormat.Url"/>
         /// </param>
+        /// <param name="model">
+        /// The model to use for image generation.
+        /// </param>
         public ImageEditRequest(
             string imagePath,
             string prompt,
             int numberOfResults = 1,
             ImageSize size = ImageSize.Large,
-            string user = null, ResponseFormat responseFormat = Images.ResponseFormat.Url)
+            string user = null,
+            ResponseFormat responseFormat = ResponseFormat.Url,
+            Model model = null)
             : this(imagePath, null, prompt, numberOfResults, size, user, responseFormat)
         {
         }
@@ -71,6 +76,9 @@ namespace OpenAI.Images
         /// Must be one of url or b64_json.
         /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
         /// </param>
+        /// <param name="model">
+        /// The model to use for image generation.
+        /// </param>
         public ImageEditRequest(
             string imagePath,
             string maskPath,
@@ -78,7 +86,8 @@ namespace OpenAI.Images
             int numberOfResults = 1,
             ImageSize size = ImageSize.Large,
             string user = null,
-            ResponseFormat responseFormat = Images.ResponseFormat.Url)
+            ResponseFormat responseFormat = ResponseFormat.Url,
+            Model model = null)
             : this(
                 File.OpenRead(imagePath),
                 Path.GetFileName(imagePath),
@@ -116,13 +125,17 @@ namespace OpenAI.Images
         /// Must be one of url or b64_json.
         /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
         /// </param>
+        /// <param name="model">
+        /// The model to use for image generation.
+        /// </param>
         public ImageEditRequest(
             Texture2D texture,
             string prompt,
             int numberOfResults = 1,
             ImageSize size = ImageSize.Large,
             string user = null,
-            ResponseFormat responseFormat = Images.ResponseFormat.Url)
+            ResponseFormat responseFormat = ResponseFormat.Url,
+            Model model = null)
             : this(texture, null, prompt, numberOfResults, size, user, responseFormat)
         {
         }
@@ -155,6 +168,9 @@ namespace OpenAI.Images
         /// Must be one of url or b64_json.
         /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
         /// </param>
+        /// <param name="model">
+        /// The model to use for image generation.
+        /// </param>
         public ImageEditRequest(
             Texture2D texture,
             Texture2D mask,
@@ -162,7 +178,8 @@ namespace OpenAI.Images
             int numberOfResults = 1,
             ImageSize size = ImageSize.Large,
             string user = null,
-            ResponseFormat responseFormat = Images.ResponseFormat.Url)
+            ResponseFormat responseFormat = ResponseFormat.Url,
+            Model model = null)
             : this(
                 new MemoryStream(texture.EncodeToPNG()),
                 !string.IsNullOrWhiteSpace(texture.name) ? $"{texture.name}.png" : null,
@@ -201,6 +218,9 @@ namespace OpenAI.Images
         /// Must be one of url or b64_json.
         /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
         /// </param>
+        /// <param name="model">
+        /// The model to use for image generation.
+        /// </param>
         public ImageEditRequest(
             Stream image,
             string imageName,
@@ -208,7 +228,8 @@ namespace OpenAI.Images
             int numberOfResults = 1,
             ImageSize size = ImageSize.Large,
             string user = null,
-            ResponseFormat responseFormat = Images.ResponseFormat.Url)
+            ResponseFormat responseFormat = ResponseFormat.Url,
+            Model model = null)
             : this(image, imageName, null, null, prompt, numberOfResults, size, user, responseFormat)
         {
         }
