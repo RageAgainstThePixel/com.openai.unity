@@ -1,5 +1,6 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -41,7 +42,9 @@ namespace OpenAI
             ModelsEndpoint = new ModelsEndpoint(this);
             CompletionsEndpoint = new CompletionsEndpoint(this);
             ChatEndpoint = new ChatEndpoint(this);
+#pragma warning disable CS0612 // Type or member is obsolete
             EditsEndpoint = new EditsEndpoint(this);
+#pragma warning restore CS0612 // Type or member is obsolete
             ImagesEndPoint = new ImagesEndpoint(this);
             EmbeddingsEndpoint = new EmbeddingsEndpoint(this);
             AudioEndpoint = new AudioEndpoint(this);
@@ -134,6 +137,7 @@ namespace OpenAI
         /// Given a prompt and an instruction, the model will return an edited version of the prompt.<br/>
         /// <see href="https://platform.openai.com/docs/api-reference/edits"/>
         /// </summary>
+        [Obsolete]
         public EditsEndpoint EditsEndpoint { get; }
 
         /// <summary>
