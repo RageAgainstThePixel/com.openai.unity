@@ -169,5 +169,14 @@ namespace OpenAI.Models
         /// The default model for <see cref="Audio.SpeechRequest"/>s.
         /// </summary>
         public static Model TTS_1 { get; } = new("tts-1", "openai");
+
+        public static Model TTS_1HD { get; } = new("tts-1-hd", "openai");
+
+        /// <summary>
+        /// The default model for <see cref="Images.ImagesEndpoint"/>.
+        /// </summary>
+        public static Model DallE_2 { get; } = new("dall-e-2", "openai");
+
+        public static Model DallE_3 { get; } = new("dall-e-3", "openai");
     }
 }

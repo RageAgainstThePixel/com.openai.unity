@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using System;
+using OpenAI.Models;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Images
@@ -15,11 +16,14 @@ namespace OpenAI.Images
         /// <summary>
         /// Constructor.
         /// </summary>
+        /// <param name="model">
+        /// The model to use for image generation.
+        /// </param>
         /// <param name="numberOfResults">
         /// The number of images to generate. Must be between 1 and 10.
         /// </param>
         /// <param name="size">
-        /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
+        /// The size of the generated images.
         /// </param>
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
@@ -31,10 +35,10 @@ namespace OpenAI.Images
         /// </param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         [Preserve]
-        protected AbstractBaseImageRequest(int numberOfResults = 1, ImageSize size = ImageSize.Large, ResponseFormat responseFormat = Images.ResponseFormat.Url, string user = null)
+        protected AbstractBaseImageRequest(Model model = null, int numberOfResults = 1, ImageSize size = ImageSize.Large, ResponseFormat responseFormat = Images.ResponseFormat.Url, string user = null)
         {
+            Model = string.IsNullOrWhiteSpace(model?.Id) ? Models.Model.DallE_2 : model;
             Number = numberOfResults;
-
             Size = size switch
             {
                 ImageSize.Small => "256x256",
@@ -42,15 +46,16 @@ namespace OpenAI.Images
                 ImageSize.Large => "1024x1024",
                 _ => throw new ArgumentOutOfRangeException(nameof(size), size, null)
             };
-
             User = user;
-            ResponseFormat = responseFormat switch
-            {
-                Images.ResponseFormat.Url => "url",
-                Images.ResponseFormat.B64_Json => "b64_json",
-                _ => throw new ArgumentOutOfRangeException(nameof(responseFormat), responseFormat, null)
-            };
+            ResponseFormat = responseFormat;
         }
+
+        /// <summary>
+        /// The model to use for image generation.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("model")]
+        public string Model { get; }
 
         /// <summary>
         /// The number of images to generate. Must be between 1 and 10.
@@ -62,11 +67,11 @@ namespace OpenAI.Images
         /// <summary>
         /// The format in which the generated images are returned.
         /// Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="Images.ResponseFormat.Url"/>
+        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
         /// </summary>
         [Preserve]
         [JsonProperty("response_format")]
-        public string ResponseFormat { get; }
+        public ResponseFormat ResponseFormat { get; }
 
         /// <summary>
         /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.

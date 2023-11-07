@@ -2,6 +2,7 @@
 
 using System;
 using System.IO;
+using OpenAI.Models;
 using UnityEngine;
 
 namespace OpenAI.Images
@@ -242,6 +243,9 @@ namespace OpenAI.Images
         /// Must be one of url or b64_json.
         /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
         /// </param>
+        /// <param name="model">
+        /// The model to use for image generation.
+        /// </param>
         public ImageEditRequest(
             Stream image,
             string imageName,
@@ -251,8 +255,9 @@ namespace OpenAI.Images
             int numberOfResults = 1,
             ImageSize size = ImageSize.Large,
             string user = null,
-            ResponseFormat responseFormat = Images.ResponseFormat.Url)
-            : base(numberOfResults, size, responseFormat, user)
+            ResponseFormat responseFormat = ResponseFormat.Url,
+            Model model = null)
+            : base(model, numberOfResults, size, responseFormat, user)
         {
             Image = image;
 

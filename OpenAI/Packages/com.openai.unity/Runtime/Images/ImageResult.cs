@@ -12,10 +12,12 @@ namespace OpenAI.Images
         [JsonConstructor]
         public ImageResult(
             [JsonProperty("url")] string url,
-            [JsonProperty("b64_json")] string b64_json)
+            [JsonProperty("b64_json")] string b64_json,
+            [JsonProperty("revised_prompt")] string revisedPrompt)
         {
             Url = url;
             B64_Json = b64_json;
+            RevisedPrompt = revisedPrompt;
         }
 
         [Preserve]
@@ -25,5 +27,9 @@ namespace OpenAI.Images
         [Preserve]
         [JsonProperty("b64_json")]
         public string B64_Json { get; private set; }
+
+        [Preserve]
+        [JsonProperty("revised_prompt")]
+        public string RevisedPrompt { get; private set; }
     }
 }
