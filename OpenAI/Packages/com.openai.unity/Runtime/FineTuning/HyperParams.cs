@@ -11,9 +11,9 @@ namespace OpenAI.FineTuning
         [Preserve]
         [JsonConstructor]
         public HyperParams(
-            [JsonProperty("n_epochs")] string epochs,
-            [JsonProperty("batch_size")] string batchSize,
-            [JsonProperty("learning_rate_multiplier")] string learningRateMultiplier)
+            [JsonProperty("n_epochs")] object epochs,
+            [JsonProperty("batch_size")] object batchSize,
+            [JsonProperty("learning_rate_multiplier")] object learningRateMultiplier)
         {
             Epochs = epochs;
             BatchSize = batchSize;
@@ -22,14 +22,14 @@ namespace OpenAI.FineTuning
 
         [Preserve]
         [JsonProperty("n_epochs")]
-        public string Epochs { get; }
+        public object Epochs { get; }
 
         [Preserve]
         [JsonProperty("batch_size")]
-        public string BatchSize { get; }
+        public object BatchSize { get; }
 
         [Preserve]
         [JsonProperty("learning_rate_multiplier")]
-        public string LearningRateMultiplier { get; }
+        public object LearningRateMultiplier { get; }
     }
 }

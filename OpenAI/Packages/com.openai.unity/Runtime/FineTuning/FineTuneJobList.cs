@@ -7,11 +7,11 @@ using UnityEngine.Scripting;
 namespace OpenAI.FineTuning
 {
     [Preserve]
-    public sealed class FineTuneList
+    public sealed class FineTuneJobList
     {
         [Preserve]
         [JsonConstructor]
-        public FineTuneList(
+        public FineTuneJobList(
             [JsonProperty("object")] string @object,
             [JsonProperty("data")] IReadOnlyList<FineTuneJob> jobs,
             [JsonProperty("has_more")] bool hasMore)

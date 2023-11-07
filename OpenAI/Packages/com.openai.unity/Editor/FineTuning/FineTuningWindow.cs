@@ -478,6 +478,25 @@ namespace OpenAI.Editor.FineTuning
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.BeginVertical();
                 EditorGUILayout.LabelField($"Status: {job.Status}");
+
+                if (job.HyperParameters != null)
+                {
+                    if (job.HyperParameters.Epochs != null)
+                    {
+                        EditorGUILayout.LabelField($"Epochs: {job.HyperParameters.Epochs}");
+                    }
+
+                    if (job.HyperParameters.BatchSize != null)
+                    {
+                        EditorGUILayout.LabelField($"BatchSize: {job.HyperParameters.BatchSize}");
+                    }
+
+                    if (job.HyperParameters.LearningRateMultiplier != null)
+                    {
+                        EditorGUILayout.LabelField($"Learning Rate Multiplier: {job.HyperParameters.LearningRateMultiplier}");
+                    }
+                }
+
                 EditorGUILayout.LabelField("Events:");
 
                 var events = job.Events.OrderBy(e => e.CreatedAt);
@@ -508,30 +527,30 @@ namespace OpenAI.Editor.FineTuning
 
             try
             {
-                var jobs = await openAI.FineTuningEndpoint.ListJobsAsync();
-                jobs = jobs.OrderByDescending(job => job.FinishedAt).ToList();
+                var list = await openAI.FineTuningEndpoint.ListJobsAsync(limit: 25);
+                var jobs = list.Jobs.OrderByDescending(job => job.FinishedAt).ToList();
 
                 fineTuneJobs.Clear();
                 await Task.WhenAll(jobs.Select(SyncJobDataAsync));
 
                 static async Task SyncJobDataAsync(FineTuneJob job)
                 {
-                    var jobIsCancelled = job.Status == JobStatus.Cancelled;
+                    //var jobIsCancelled = job.Status == JobStatus.Cancelled;
 
-                    if (jobIsCancelled || IsStale(job.FinishedAt))
-                    {
-                        return;
-                    }
+                    //if (jobIsCancelled || IsStale(job.FinishedAt))
+                    //{
+                    //    return;
+                    //}
 
                     var jobDetails = await openAI.FineTuningEndpoint.GetJobInfoAsync(job);
 
                     fineTuneJobs.TryAdd(jobDetails.Id, jobDetails);
 
-                    static bool IsStale(DateTime dateTime)
-                    {
-                        var timeSpan = DateTimeOffset.Now - dateTime;
-                        return timeSpan >= TimeSpan.FromDays(7);
-                    }
+                    //static bool IsStale(DateTime dateTime)
+                    //{
+                    //    var timeSpan = DateTimeOffset.Now - dateTime;
+                    //    return timeSpan >= TimeSpan.FromDays(7);
+                    //}
                 }
             }
             catch (Exception e)
