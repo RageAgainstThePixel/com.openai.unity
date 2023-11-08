@@ -289,6 +289,9 @@ namespace OpenAI.Images
             return await DeserializeResponseAsync(response, cancellationToken);
         }
 
+        private const string LocalFilePrefix = "file://";
+        private readonly char[] localFilePrefixCharArray = LocalFilePrefix.ToCharArray();
+
         private async Task<IReadOnlyDictionary<string, Texture2D>> DeserializeResponseAsync(Response response, CancellationToken cancellationToken = default)
         {
             response.Validate(EnableDebug);
@@ -319,7 +322,7 @@ namespace OpenAI.Images
                         await File.WriteAllBytesAsync(localFilePath, imageData, cancellationToken);
                     }
 
-                    resultImagePath = localFilePath;
+                    resultImagePath = $"{LocalFilePrefix}{localFilePath}";
                 }
                 else
                 {
@@ -327,11 +330,11 @@ namespace OpenAI.Images
                 }
 
                 await Awaiters.UnityMainThread;
-                var texture = await Rest.DownloadTextureAsync($"file://{resultImagePath}", cancellationToken: cancellationToken);
+                var texture = await Rest.DownloadTextureAsync(resultImagePath, cancellationToken: cancellationToken);
 
                 if (Rest.TryGetDownloadCacheItem(resultImagePath, out localFilePath))
                 {
-                    images.TryAdd(localFilePath, texture);
+                    images.TryAdd(localFilePath.TrimStart(localFilePrefixCharArray), texture);
                 }
                 else
                 {
