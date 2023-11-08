@@ -319,7 +319,7 @@ namespace OpenAI.Images
                         await File.WriteAllBytesAsync(localFilePath, imageData, cancellationToken);
                     }
 
-                    resultImagePath = $"file://{localFilePath}";
+                    resultImagePath = localFilePath;
                 }
                 else
                 {
@@ -327,7 +327,7 @@ namespace OpenAI.Images
                 }
 
                 await Awaiters.UnityMainThread;
-                var texture = await Rest.DownloadTextureAsync(resultImagePath, cancellationToken: cancellationToken);
+                var texture = await Rest.DownloadTextureAsync($"file://{resultImagePath}", cancellationToken: cancellationToken);
 
                 if (Rest.TryGetDownloadCacheItem(resultImagePath, out localFilePath))
                 {
