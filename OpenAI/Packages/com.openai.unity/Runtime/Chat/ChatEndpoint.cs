@@ -31,6 +31,12 @@ namespace OpenAI.Chat
         public async Task<ChatResponse> GetCompletionAsync(ChatRequest chatRequest, CancellationToken cancellationToken = default)
         {
             var payload = JsonConvert.SerializeObject(chatRequest, OpenAIClient.JsonSerializationOptions);
+
+            if (EnableDebug)
+            {
+                Debug.Log(payload);
+            }
+
             var response = await Rest.PostAsync(GetUrl("/completions"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.DeserializeResponse<ChatResponse>(response.Body);
@@ -47,12 +53,16 @@ namespace OpenAI.Chat
         {
             chatRequest.Stream = true;
             ChatResponse chatResponse = null;
-
             var payload = JsonConvert.SerializeObject(chatRequest, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl("/completions"), payload, eventData =>
             {
                 try
                 {
+                    if (EnableDebug)
+                    {
+                        Debug.Log(eventData);
+                    }
+
                     var partialResponse = JsonConvert.DeserializeObject<ChatResponse>(eventData, OpenAIClient.JsonSerializationOptions);
 
                     if (chatResponse == null)
@@ -64,19 +74,17 @@ namespace OpenAI.Chat
                         chatResponse.CopyFrom(partialResponse);
                     }
 
-                    resultHandler(partialResponse);
+                    resultHandler?.Invoke(partialResponse);
                 }
                 catch (Exception e)
                 {
                     Debug.LogError($"{eventData}\n{e}");
                 }
             }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(EnableDebug);
-
+            response?.Validate(EnableDebug);
             if (chatResponse == null) { return null; }
-
             chatResponse.SetResponseData(response);
-            resultHandler(chatResponse);
+            resultHandler?.Invoke(chatResponse);
             return chatResponse;
         }
     }

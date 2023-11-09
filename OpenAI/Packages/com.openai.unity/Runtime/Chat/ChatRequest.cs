@@ -12,6 +12,101 @@ namespace OpenAI.Chat
     [Preserve]
     public sealed class ChatRequest
     {
+        /// <inheritdoc />
+        [Obsolete("Use new constructor arguments")]
+        public ChatRequest(
+            IEnumerable<Message> messages,
+            IEnumerable<Function> functions,
+            string functionCall = null,
+            string model = null,
+            double? temperature = null,
+            double? topP = null,
+            int? number = null,
+            string[] stops = null,
+            int? maxTokens = null,
+            double? presencePenalty = null,
+            double? frequencyPenalty = null,
+            IReadOnlyDictionary<string, double> logitBias = null,
+            string user = null)
+            : this(messages, model, frequencyPenalty, logitBias, maxTokens, number, presencePenalty, ChatResponseFormat.Text, maxTokens, stops, temperature, topP, user)
+        {
+            var functionList = functions?.ToList();
+
+            if (functionList != null && functionList.Any())
+            {
+                if (string.IsNullOrWhiteSpace(functionCall))
+                {
+                    FunctionCall = "auto";
+                }
+                else
+                {
+                    if (!functionCall.Equals("none") &&
+                        !functionCall.Equals("auto"))
+                    {
+                        FunctionCall = new JObject { ["name"] = functionCall };
+                    }
+                    else
+                    {
+                        FunctionCall = functionCall;
+                    }
+                }
+            }
+
+            Functions = functionList?.ToList();
+        }
+
+        /// <inheritdoc />
+        [Preserve]
+        public ChatRequest(
+            IEnumerable<Message> messages,
+            IEnumerable<Tool> tools,
+            string toolChoice = null,
+            string model = null,
+            double? frequencyPenalty = null,
+            IReadOnlyDictionary<string, double> logitBias = null,
+            int? maxTokens = null,
+            int? number = null,
+            double? presencePenalty = null,
+            ChatResponseFormat responseFormat = ChatResponseFormat.Text,
+            string[] stops = null,
+            double? temperature = null,
+            double? topP = null,
+            string user = null)
+            : this(messages, model, frequencyPenalty, logitBias, maxTokens, number, presencePenalty, responseFormat, number, stops, temperature, topP, user)
+        {
+            var tooList = tools?.ToList();
+
+            if (tooList != null && tooList.Any())
+            {
+                if (string.IsNullOrWhiteSpace(toolChoice))
+                {
+                    ToolChoice = "auto";
+                }
+                else
+                {
+                    if (!toolChoice.Equals("none") &&
+                        !toolChoice.Equals("auto"))
+                    {
+                        var tool = new JObject
+                        {
+                            ["type"] = "function",
+                            ["function"] = new JObject
+                            {
+                                ["name"] = toolChoice
+                            }
+                        };
+                        ToolChoice = tool;
+                    }
+                    else
+                    {
+                        ToolChoice = toolChoice;
+                    }
+                }
+            }
+
+            Tools = tooList?.ToList();
+        }
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -39,6 +134,7 @@ namespace OpenAI.Chat
         /// How many chat completion choices to generate for each input message.<br/>
         /// Defaults to 1
         /// </param>
+        /// <param name="seed"></param>
         /// <param name="stops">
         /// Up to 4 sequences where the API will stop generating further tokens.
         /// </param>
@@ -51,6 +147,11 @@ namespace OpenAI.Chat
         /// Positive values penalize new tokens based on whether they appear in the text so far,
         /// increasing the model's likelihood to talk about new topics.<br/>
         /// Defaults to 0
+        /// </param>
+        /// <param name="responseFormat">
+        /// An object specifying the format that the model must output.
+        /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
+        /// which guarantees the message the model generates is valid JSON.
         /// </param>
         /// <param name="frequencyPenalty">
         /// Number between -2.0 and 2.0.
@@ -70,29 +171,22 @@ namespace OpenAI.Chat
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
-        /// <param name="functionCall">
-        /// Pass "auto" to let the OpenAI service decide, "none" if none are to be called, or "functionName" to force function call. Defaults to "auto".
-        /// </param>
-        /// <param name="functions">
-        /// An optional list of functions to get arguments for.  Null or empty for none.
-        /// </param>
         [Preserve]
         public ChatRequest(
             IEnumerable<Message> messages,
             string model = null,
-            double? temperature = null,
-            double? topP = null,
-            int? number = null,
-            string[] stops = null,
-            int? maxTokens = null,
-            double? presencePenalty = null,
             double? frequencyPenalty = null,
             IReadOnlyDictionary<string, double> logitBias = null,
-            string user = null,
-            string functionCall = null,
-            IEnumerable<Function> functions = null)
+            int? maxTokens = null,
+            int? number = null,
+            double? presencePenalty = null,
+            ChatResponseFormat responseFormat = ChatResponseFormat.Text,
+            int? seed = null,
+            string[] stops = null,
+            double? temperature = null,
+            double? topP = null,
+            string user = null)
         {
-            Model = string.IsNullOrWhiteSpace(model) ? Models.Model.GPT3_5_Turbo : model;
             Messages = messages?.ToList();
 
             if (Messages?.Count == 0)
@@ -100,47 +194,19 @@ namespace OpenAI.Chat
                 throw new ArgumentNullException(nameof(messages), $"Missing required {nameof(messages)} parameter");
             }
 
-            Temperature = temperature;
-            TopP = topP;
-            Number = number;
-            Stops = stops;
-            MaxTokens = maxTokens;
-            PresencePenalty = presencePenalty;
+            Model = string.IsNullOrWhiteSpace(model) ? Models.Model.GPT3_5_Turbo : model;
             FrequencyPenalty = frequencyPenalty;
             LogitBias = logitBias;
+            MaxTokens = maxTokens;
+            Number = number;
+            PresencePenalty = presencePenalty;
+            ResponseFormat = ChatResponseFormat.Json == responseFormat ? responseFormat : null;
+            Seed = seed;
+            Stops = stops;
+            Temperature = temperature;
+            TopP = topP;
             User = user;
-
-            var functionList = functions?.ToList();
-
-            if (functionList != null && functionList.Any())
-            {
-                if (string.IsNullOrWhiteSpace(functionCall))
-                {
-                    FunctionCall = "auto";
-                }
-                else
-                {
-                    if (!functionCall.Equals("none") &&
-                        !functionCall.Equals("auto"))
-                    {
-                        FunctionCall = new JObject { ["name"] = functionCall };
-                    }
-                    else
-                    {
-                        FunctionCall = functionCall;
-                    }
-                }
-            }
-
-            Functions = functionList?.ToList();
         }
-
-        /// <summary>
-        /// Id of the model to use.
-        /// </summary>
-        [Preserve]
-        [JsonProperty("model")]
-        public string Model { get; }
 
         /// <summary>
         /// The messages to generate chat completions for, in the chat format.
@@ -150,68 +216,11 @@ namespace OpenAI.Chat
         public IReadOnlyList<Message> Messages { get; }
 
         /// <summary>
-        /// What sampling temperature to use, between 0 and 2.
-        /// Higher values like 0.8 will make the output more random, while lower values like 0.2 will
-        /// make it more focused and deterministic.
-        /// We generally recommend altering this or top_p but not both.<br/>
-        /// Defaults to 1
+        /// ID of the model to use.
         /// </summary>
         [Preserve]
-        [JsonProperty("temperature")]
-        public double? Temperature { get; }
-
-        /// <summary>
-        /// An alternative to sampling with temperature, called nucleus sampling,
-        /// where the model considers the results of the tokens with top_p probability mass.
-        /// So 0.1 means only the tokens comprising the top 10% probability mass are considered.
-        /// We generally recommend altering this or temperature but not both.<br/>
-        /// Defaults to 1
-        /// </summary>
-        [Preserve]
-        [JsonProperty("top_p")]
-        public double? TopP { get; }
-
-        /// <summary>
-        /// How many chat completion choices to generate for each input message.<br/>
-        /// Defaults to 1
-        /// </summary>
-        [Preserve]
-        [JsonProperty("n")]
-        public int? Number { get; }
-
-        /// <summary>
-        /// Specifies where the results should stream and be returned at one time.
-        /// Do not set this yourself, use the appropriate methods on <see cref="ChatEndpoint"/> instead.<br/>
-        /// Defaults to false
-        /// </summary>
-        [Preserve]
-        [JsonProperty("stream")]
-        public bool Stream { get; internal set; }
-
-        /// <summary>
-        /// Up to 4 sequences where the API will stop generating further tokens.
-        /// </summary>
-        [Preserve]
-        [JsonProperty("stop")]
-        public string[] Stops { get; }
-
-        /// <summary>
-        /// The maximum number of tokens allowed for the generated answer.
-        /// By default, the number of tokens the model can return will be (4096 - prompt tokens).
-        /// </summary>
-        [Preserve]
-        [JsonProperty("max_tokens")]
-        public int? MaxTokens { get; }
-
-        /// <summary>
-        /// Number between -2.0 and 2.0.
-        /// Positive values penalize new tokens based on whether they appear in the text so far,
-        /// increasing the model's likelihood to talk about new topics.<br/>
-        /// Defaults to 0
-        /// </summary>
-        [Preserve]
-        [JsonProperty("presence_penalty")]
-        public double? PresencePenalty { get; }
+        [JsonProperty("model")]
+        public string Model { get; }
 
         /// <summary>
         /// Number between -2.0 and 2.0.
@@ -237,6 +246,117 @@ namespace OpenAI.Chat
         public IReadOnlyDictionary<string, double> LogitBias { get; }
 
         /// <summary>
+        /// The maximum number of tokens allowed for the generated answer.
+        /// By default, the number of tokens the model can return will be (4096 - prompt tokens).
+        /// </summary>
+        [Preserve]
+        [JsonProperty("max_tokens")]
+        public int? MaxTokens { get; }
+
+        /// <summary>
+        /// How many chat completion choices to generate for each input message.<br/>
+        /// Defaults to 1
+        /// </summary>
+        [Preserve]
+        [JsonProperty("n")]
+        public int? Number { get; }
+
+        /// <summary>
+        /// Number between -2.0 and 2.0.
+        /// Positive values penalize new tokens based on whether they appear in the text so far,
+        /// increasing the model's likelihood to talk about new topics.<br/>
+        /// Defaults to 0
+        /// </summary>
+        [Preserve]
+        [JsonProperty("presence_penalty")]
+        public double? PresencePenalty { get; }
+
+        /// <summary>
+        /// An object specifying the format that the model must output.
+        /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
+        /// which guarantees the message the model generates is valid JSON.
+        /// </summary>
+        /// <remarks>
+        /// Important: When using JSON mode you must still instruct the model to produce JSON yourself via some conversation message,
+        /// for example via your system message. If you don't do this, the model may generate an unending stream of
+        /// whitespace until the generation reaches the token limit, which may take a lot of time and give the appearance
+        /// of a "stuck" request. Also note that the message content may be partial (i.e. cut off) if finish_reason="length",
+        /// which indicates the generation exceeded max_tokens or the conversation exceeded the max context length.
+        /// </remarks>
+        [Preserve]
+        [JsonProperty("response_format")]
+        public ResponseFormat ResponseFormat { get; }
+
+        /// <summary>
+        /// This feature is in Beta. If specified, our system will make a best effort to sample deterministically,
+        /// such that repeated requests with the same seed and parameters should return the same result.
+        /// Determinism is not guaranteed, and you should refer to the system_fingerprint response parameter to
+        /// monitor changes in the backend.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("seed")]
+        public int? Seed { get; }
+
+        /// <summary>
+        /// Up to 4 sequences where the API will stop generating further tokens.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("stop")]
+        public string[] Stops { get; }
+
+        /// <summary>
+        /// Specifies where the results should stream and be returned at one time.
+        /// Do not set this yourself, use the appropriate methods on <see cref="ChatEndpoint"/> instead.<br/>
+        /// Defaults to false
+        /// </summary>
+        [Preserve]
+        [JsonProperty("stream")]
+        public bool Stream { get; internal set; }
+
+        /// <summary>
+        /// What sampling temperature to use, between 0 and 2.
+        /// Higher values like 0.8 will make the output more random, while lower values like 0.2 will
+        /// make it more focused and deterministic.
+        /// We generally recommend altering this or top_p but not both.<br/>
+        /// Defaults to 1
+        /// </summary>
+        [Preserve]
+        [JsonProperty("temperature")]
+        public double? Temperature { get; }
+
+        /// <summary>
+        /// An alternative to sampling with temperature, called nucleus sampling,
+        /// where the model considers the results of the tokens with top_p probability mass.
+        /// So 0.1 means only the tokens comprising the top 10% probability mass are considered.
+        /// We generally recommend altering this or temperature but not both.<br/>
+        /// Defaults to 1
+        /// </summary>
+        [Preserve]
+        [JsonProperty("top_p")]
+        public double? TopP { get; }
+
+        /// <summary>
+        /// A list of tools the model may call. Currently, only functions are supported as a tool.
+        /// Use this to provide a list of functions the model may generate JSON inputs for.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("tools")]
+        public IReadOnlyList<Tool> Tools { get; }
+
+        /// <summary>
+        /// Controls which (if any) function is called by the model.<br/>
+        /// 'none' means the model will not call a function and instead generates a message.&lt;br/&gt;
+        /// 'auto' means the model can pick between generating a message or calling a function.&lt;br/&gt;
+        /// Specifying a particular function via {"type: "function", "function": {"name": "my_function"}}
+        /// forces the model to call that function.<br/>
+        /// 'none' is the default when no functions are present.<br/>
+        /// 'auto' is the default if functions are present.<br/>
+        /// </summary>
+        [Preserve]
+        [JsonProperty("tool_choice")]
+        public dynamic ToolChoice { get; }
+
+        /// <summary>
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </summary>
         [Preserve]
@@ -244,9 +364,11 @@ namespace OpenAI.Chat
         public string User { get; }
 
         /// <summary>
-        /// Pass "auto" to let the OpenAI service decide, "none" if none are to be called, or "functionName" to force function call. Defaults to "auto".
+        /// Pass "auto" to let the OpenAI service decide, "none" if none are to be called,
+        /// or "functionName" to force function call. Defaults to "auto".
         /// </summary>
         [Preserve]
+        [Obsolete("Use ToolChoice")]
         [JsonProperty("function_call")]
         public dynamic FunctionCall { get; }
 
@@ -254,6 +376,7 @@ namespace OpenAI.Chat
         /// An optional list of functions to get arguments for.
         /// </summary>
         [Preserve]
+        [Obsolete("Use Tools")]
         [JsonProperty("functions")]
         public IReadOnlyList<Function> Functions { get; }
 

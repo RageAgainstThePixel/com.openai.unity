@@ -9,37 +9,32 @@ namespace OpenAI.Chat
     public sealed class Choice
     {
         [Preserve]
-        [JsonConstructor]
-        public Choice(
-            [JsonProperty("message")] Message message,
-            [JsonProperty("delta")] Delta delta,
-            [JsonProperty("finish_reason")] string finishReason,
-            [JsonProperty("index")] int index)
-        {
-            Message = message;
-            Delta = delta;
-            FinishReason = finishReason;
-            Index = index;
-        }
+        public Choice() { }
 
         [Preserve]
         [JsonProperty("message")]
-        public Message Message { get; internal set; }
+        public Message Message { get; private set; }
 
         [Preserve]
         [JsonProperty("delta")]
-        public Delta Delta { get; internal set; }
+        public Delta Delta { get; private set; }
 
         [Preserve]
         [JsonProperty("finish_reason")]
-        public string FinishReason { get; internal set; }
+        public string FinishReason { get; private set; }
+
+        [Preserve]
+        [JsonProperty("finish_details")]
+        public FinishDetails FinishDetails { get; private set; }
 
         [Preserve]
         [JsonProperty("index")]
-        public int Index { get; internal set; }
+        public int Index { get; private set; }
 
-        public override string ToString() => Message?.Content ?? Delta?.Content ?? string.Empty;
+        [Preserve]
+        public override string ToString() => Message?.Content?.ToString() ?? Delta?.Content ?? string.Empty;
 
+        [Preserve]
         public static implicit operator string(Choice choice) => choice.ToString();
 
         [Preserve]
@@ -65,6 +60,11 @@ namespace OpenAI.Chat
             if (!string.IsNullOrWhiteSpace(other?.FinishReason))
             {
                 FinishReason = other.FinishReason;
+            }
+
+            if (other?.FinishDetails != null)
+            {
+                FinishDetails = other.FinishDetails;
             }
 
             Index = other?.Index ?? 0;
