@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -19,38 +20,58 @@ namespace OpenAI.Chat
         public ChatResponse(
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
-            [JsonProperty("created")] int created,
+            [JsonProperty("created")] int createdAt,
             [JsonProperty("model")] string model,
+            [JsonProperty("system_fingerprint")] string systemFingerprint,
             [JsonProperty("usage")] Usage usage,
-            [JsonProperty("choices")] List<Choice> choices)
+            [JsonProperty("choices")] IReadOnlyList<Choice> choices)
         {
             Id = id;
             Object = @object;
-            Created = created;
+            CreatedAtUnixTimeSeconds = createdAt;
             Model = model;
+            SystemFingerprint = systemFingerprint;
             Usage = usage;
-            this.choices = choices;
+            this.choices = choices.ToList();
         }
 
         [Preserve]
         [JsonProperty("id")]
-        public string Id { get; internal set; }
+        public string Id { get; private set; }
 
         [Preserve]
         [JsonProperty("object")]
-        public string Object { get; internal set; }
+        public string Object { get; private set; }
 
+        [Obsolete("Use CreatedAtUnixTimeSeconds")]
+        public int Created => CreatedAtUnixTimeSeconds;
+
+        /// <summary>
+        /// The Unix timestamp (in seconds) of when the chat completion was created.
+        /// </summary>
         [Preserve]
         [JsonProperty("created")]
-        public int Created { get; internal set; }
+        public int CreatedAtUnixTimeSeconds { get; private set; }
+
+        [JsonIgnore]
+        public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTimeSeconds).DateTime;
 
         [Preserve]
         [JsonProperty("model")]
-        public string Model { get; internal set; }
+        public string Model { get; private set; }
+
+        /// <summary>
+        /// This fingerprint represents the backend configuration that the model runs with.
+        /// Can be used in conjunction with the seed request parameter to understand when
+        /// backend changes have been made that might impact determinism.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("system_fingerprint")]
+        public string SystemFingerprint { get; private set; }
 
         [Preserve]
         [JsonProperty("usage")]
-        public Usage Usage { get; internal set; }
+        public Usage Usage { get; private set; }
 
         [Preserve]
         [JsonIgnore]
@@ -58,14 +79,20 @@ namespace OpenAI.Chat
 
         [Preserve]
         [JsonProperty("choices")]
-        public IReadOnlyList<Choice> Choices => choices;
+        public IReadOnlyList<Choice> Choices
+        {
+            get => choices;
+            private set => choices = value.ToList();
+        }
 
         [Preserve]
         [JsonIgnore]
         public Choice FirstChoice => Choices?.FirstOrDefault(choice => choice.Index == 0);
 
+        [Preserve]
         public override string ToString() => FirstChoice?.ToString() ?? string.Empty;
 
+        [Preserve]
         public static implicit operator string(ChatResponse response) => response.ToString();
 
         [Preserve]
