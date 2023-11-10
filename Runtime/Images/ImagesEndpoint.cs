@@ -70,7 +70,8 @@ namespace OpenAI.Images
         public async Task<IReadOnlyDictionary<string, Texture2D>> GenerateImageAsync(ImageGenerationRequest request, CancellationToken cancellationToken = default)
         {
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl("/generations"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var endpoint = GetUrl($"/generations{(client.Settings.Info.IsAzureDeployment ? ":submit" : string.Empty)}");
+            var response = await Rest.PostAsync(endpoint, payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             return await DeserializeResponseAsync(response, cancellationToken);
         }
 

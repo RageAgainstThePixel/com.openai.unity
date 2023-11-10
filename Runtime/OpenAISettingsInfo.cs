@@ -109,5 +109,7 @@ namespace OpenAI
         public string BaseRequestUrlFormat { get; }
 
         public bool UseOAuthAuthentication { get; }
+
+        internal bool IsAzureDeployment => BaseRequestUrlFormat.Contains(AzureOpenAIDomain);
     }
 }

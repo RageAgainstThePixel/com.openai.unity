@@ -21,7 +21,7 @@ namespace OpenAI.Chat
 
         [Preserve]
         public Content(Texture2D texture)
-            : this(ContentType.ImageUrl, $"data:image/jpeg;base64,{Convert.ToBase64String(texture.EncodeToPNG())}")
+            : this(ContentType.ImageUrl, $"data:image/png;base64,{Convert.ToBase64String(texture.EncodeToPNG())}")
         {
         }
 
