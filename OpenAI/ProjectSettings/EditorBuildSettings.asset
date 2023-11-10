@@ -5,7 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Packages/com.openai.unity/Samples/Chat/OpenAIChatSample.unity
     guid: fe475a467de017e4983b082da4aa0dbb
   m_configObjects: {}
