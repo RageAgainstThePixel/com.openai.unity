@@ -114,26 +114,25 @@ namespace OpenAI.Chat
             private set => role = value;
         }
 
-        [Preserve]
         [SerializeField]
         [TextArea(1, 30)]
         private string content;
 
-        private dynamic contentList;
+        private object contentList;
 
         /// <summary>
         /// The contents of the message.
         /// </summary>
         [Preserve]
         [JsonProperty("content", DefaultValueHandling = DefaultValueHandling.Populate, NullValueHandling = NullValueHandling.Include, Required = Required.AllowNull)]
-        public dynamic Content
+        public object Content
         {
             get => contentList ?? content;
             private set
             {
-                if (value is string)
+                if (value is string s)
                 {
-                    content = value;
+                    content = s;
                 }
                 else
                 {

@@ -1,8 +1,8 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
 using Newtonsoft.Json;
 using OpenAI.Extensions;
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,11 +61,7 @@ namespace OpenAI.Audio
             var response = await Rest.PostAsync(GetUrl("/speech"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             await Rest.ValidateCacheDirectoryAsync();
-            var cacheDirectory = Rest.DownloadCacheDirectory
-                  .CreateNewDirectory(nameof(OpenAI)
-                  .CreateNewDirectory(nameof(Audio)
-                  .CreateNewDirectory("Speech")));
-            var cachedPath = Path.Combine(cacheDirectory, $"{DateTime.UtcNow:yyyyMMddThhmmss}.{ext}");
+            var cachedPath = Path.Combine(Rest.DownloadCacheDirectory, $"{request.Voice}-{DateTime.UtcNow:yyyyMMddThhmmss}.{ext}");
             await File.WriteAllBytesAsync(cachedPath, response.Data, cancellationToken).ConfigureAwait(true);
             var clip = await Rest.DownloadAudioClipAsync($"file://{cachedPath}", audioFormat, cancellationToken: cancellationToken);
             return new Tuple<string, AudioClip>(cachedPath, clip);

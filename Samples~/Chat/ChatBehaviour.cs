@@ -1,5 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using OpenAI.Audio;
 using OpenAI.Chat;
 using OpenAI.Models;
 using System;
@@ -16,6 +17,9 @@ namespace OpenAI.Samples.Chat
     public class ChatBehaviour : MonoBehaviour
     {
         [SerializeField]
+        private bool enableDebug;
+
+        [SerializeField]
         private Button submitButton;
 
         [SerializeField]
@@ -26,6 +30,9 @@ namespace OpenAI.Samples.Chat
 
         [SerializeField]
         private ScrollRect scrollView;
+
+        [SerializeField]
+        private AudioSource audioSource;
 
         private OpenAIClient openAI;
 
@@ -38,6 +45,7 @@ namespace OpenAI.Samples.Chat
             inputField.Validate();
             contentArea.Validate();
             submitButton.Validate();
+            audioSource.Validate();
         }
 
         private void Awake()
@@ -74,22 +82,20 @@ namespace OpenAI.Samples.Chat
             var userMessageContent = AddNewTextMessageContent();
             userMessageContent.text = $"User: {inputField.text}";
             inputField.text = string.Empty;
-
             var assistantMessageContent = AddNewTextMessageContent();
             assistantMessageContent.text = "Assistant: ";
 
             try
             {
-                await openAI.ChatEndpoint.StreamCompletionAsync(
-                      new ChatRequest(chatMessages, Model.GPT3_5_Turbo),
-                      response =>
-                      {
-                          if (response.FirstChoice?.Delta != null)
-                          {
-                              assistantMessageContent.text += response.ToString();
-                              scrollView.verticalNormalizedPosition = 0f;
-                          }
-                      }, lifetimeCancellationTokenSource.Token);
+                var request = new ChatRequest(chatMessages, Model.GPT3_5_Turbo);
+                openAI.ChatEndpoint.EnableDebug = enableDebug;
+                var response = await openAI.ChatEndpoint.StreamCompletionAsync(request, resultHandler: deltaResponse =>
+                {
+                    if (deltaResponse?.FirstChoice?.Delta == null) { return; }
+                    assistantMessageContent.text += deltaResponse.FirstChoice.Delta.ToString();
+                    scrollView.verticalNormalizedPosition = 0f;
+                }, lifetimeCancellationTokenSource.Token);
+                GenerateSpeech(response);
             }
             catch (Exception e)
             {
@@ -97,7 +103,7 @@ namespace OpenAI.Samples.Chat
             }
             finally
             {
-                if (lifetimeCancellationTokenSource != null)
+                if (lifetimeCancellationTokenSource is { IsCancellationRequested: false })
                 {
                     inputField.interactable = true;
                     EventSystem.current.SetSelectedGameObject(inputField.gameObject);
@@ -105,6 +111,22 @@ namespace OpenAI.Samples.Chat
                 }
 
                 isChatPending = false;
+            }
+        }
+
+        private async void GenerateSpeech(ChatResponse response)
+        {
+            try
+            {
+                var request = new SpeechRequest(response.FirstChoice.ToString(), Model.TTS_1);
+                openAI.AudioEndpoint.EnableDebug = enableDebug;
+                var (clipPath, clip) = await openAI.AudioEndpoint.CreateSpeechAsync(request, lifetimeCancellationTokenSource.Token);
+                audioSource.PlayOneShot(clip);
+                Debug.Log(clipPath);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
             }
         }
 

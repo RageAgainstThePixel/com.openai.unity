@@ -13,6 +13,7 @@ namespace OpenAI.Chat
     public sealed class ChatRequest
     {
         /// <inheritdoc />
+        [Preserve]
         [Obsolete("Use new constructor arguments")]
         public ChatRequest(
             IEnumerable<Message> messages,
@@ -354,7 +355,7 @@ namespace OpenAI.Chat
         /// </summary>
         [Preserve]
         [JsonProperty("tool_choice")]
-        public dynamic ToolChoice { get; }
+        public object ToolChoice { get; }
 
         /// <summary>
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
@@ -370,7 +371,7 @@ namespace OpenAI.Chat
         [Preserve]
         [Obsolete("Use ToolChoice")]
         [JsonProperty("function_call")]
-        public dynamic FunctionCall { get; }
+        public object FunctionCall { get; }
 
         /// <summary>
         /// An optional list of functions to get arguments for.
@@ -381,6 +382,7 @@ namespace OpenAI.Chat
         public IReadOnlyList<Function> Functions { get; }
 
         /// <inheritdoc />
+        [Preserve]
         public override string ToString() => JsonConvert.SerializeObject(this, OpenAIClient.JsonSerializationOptions);
     }
 }

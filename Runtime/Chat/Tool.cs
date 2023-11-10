@@ -1,14 +1,20 @@
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
 using Newtonsoft.Json;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Chat
 {
+    [Preserve]
     public sealed class Tool
     {
+        [Preserve]
         public Tool() { }
 
+        [Preserve]
         public Tool(Tool other) => CopyFrom(other);
 
+        [Preserve]
         public Tool(Function function)
         {
             Function = function;
@@ -31,8 +37,10 @@ namespace OpenAI.Chat
         [JsonProperty("function")]
         public Function Function { get; private set; }
 
+        [Preserve]
         public static implicit operator Tool(Function function) => new Tool(function);
 
+        [Preserve]
         internal void CopyFrom(Tool other)
         {
             if (!string.IsNullOrWhiteSpace(other?.Id))

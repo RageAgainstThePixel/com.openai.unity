@@ -9,7 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEditor;
 using UnityEngine;
+using Tool = OpenAI.Chat.Tool;
 
 namespace OpenAI.Tests
 {
@@ -82,7 +84,7 @@ namespace OpenAI.Tests
             for (var i = 0; i < choiceCount; i++)
             {
                 var choice = response.Choices[i];
-                Assert.IsFalse(string.IsNullOrEmpty(choice?.Message?.Content));
+                Assert.IsFalse(string.IsNullOrEmpty(choice?.Message?.ToString()));
                 Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
                 Assert.IsTrue(choice.Message.Role == Role.Assistant);
                 var deltaContent = cumulativeDelta[i];
@@ -154,7 +156,7 @@ namespace OpenAI.Tests
             Assert.IsTrue(result.Choices.Count == 1);
             messages.Add(result.FirstChoice.Message);
 
-            if (!string.IsNullOrEmpty(result.FirstChoice.Message.Content))
+            if (!string.IsNullOrEmpty(result.FirstChoice.Message.ToString()))
             {
                 Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishReason}");
 
@@ -236,7 +238,7 @@ namespace OpenAI.Tests
                     Debug.Log($"{choice.Delta.Content}");
                 }
 
-                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrEmpty(choice.Message?.Content)))
+                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrEmpty(choice.Message?.Content?.ToString())))
                 {
                     Debug.Log($"{choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
                 }
@@ -261,7 +263,7 @@ namespace OpenAI.Tests
                     Debug.Log($"[{choice.Index}] {choice.Delta.Content}");
                 }
 
-                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrEmpty(choice.Message?.Content)))
+                foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrEmpty(choice.Message?.Content?.ToString())))
                 {
                     Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
                 }
@@ -271,7 +273,7 @@ namespace OpenAI.Tests
             Assert.IsTrue(result.Choices.Count == 1);
             messages.Add(result.FirstChoice.Message);
 
-            if (!string.IsNullOrEmpty(result.FirstChoice.Message.Content))
+            if (!string.IsNullOrEmpty(result.FirstChoice.Message?.ToString()))
             {
                 Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishReason}");
 
@@ -290,7 +292,7 @@ namespace OpenAI.Tests
                         Debug.Log($"{choice.Delta.Content}");
                     }
 
-                    foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrEmpty(choice.Message?.Content)))
+                    foreach (var choice in partialResponse.Choices.Where(choice => !string.IsNullOrEmpty(choice.Message?.ToString())))
                     {
                         Debug.Log($"{choice.Message.Role}: {choice.Message.Content} | Finish Reason: {choice.FinishReason}");
                     }
@@ -452,7 +454,7 @@ namespace OpenAI.Tests
             Assert.IsTrue(result.Choices.Count == 1);
             messages.Add(result.FirstChoice.Message);
 
-            if (!string.IsNullOrEmpty(result.FirstChoice.Message.Content))
+            if (!string.IsNullOrEmpty(result.FirstChoice.Message.ToString()))
             {
                 Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishReason}");
 
@@ -549,7 +551,7 @@ namespace OpenAI.Tests
             Assert.IsTrue(result.Choices.Count == 1);
             messages.Add(result.FirstChoice.Message);
 
-            if (!string.IsNullOrEmpty(result.FirstChoice.Message.Content))
+            if (!string.IsNullOrEmpty(result.FirstChoice.Message.ToString()))
             {
                 Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishReason}");
 
@@ -705,5 +707,30 @@ namespace OpenAI.Tests
             Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishDetails}");
             result.GetUsage();
         }
+
+        [Test]
+        public async Task Test_12_GetChatVision_Texture()
+        {
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
+            Assert.IsNotNull(api.ChatEndpoint);
+            var imageAssetPath = AssetDatabase.GUIDToAssetPath("230fd778637d3d84d81355c8c13b1999");
+            var image = AssetDatabase.LoadAssetAtPath<Texture2D>(imageAssetPath);
+            var messages = new List<Message>
+            {
+                new Message(Role.System, "You are a helpful assistant."),
+                new Message(Role.User, new List<Content>
+                {
+                    new Content(ContentType.Text, "What's in this image?"),
+                    new Content(image)
+                })
+            };
+            var chatRequest = new ChatRequest(messages, model: "gpt-4-vision-preview");
+            var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Choices);
+            Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishDetails}");
+            result.GetUsage();
+        }
+
     }
 }
