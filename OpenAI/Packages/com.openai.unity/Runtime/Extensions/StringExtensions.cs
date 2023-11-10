@@ -23,14 +23,14 @@ namespace OpenAI.Extensions
                 throw new ArgumentNullException(nameof(newDirectoryName));
             }
 
-            var voiceDirectory = Path.Combine(parentDirectory, newDirectoryName);
+            var directory = Path.Combine(parentDirectory, newDirectoryName);
 
-            if (!Directory.Exists(voiceDirectory))
+            if (!Directory.Exists(directory))
             {
-                Directory.CreateDirectory(voiceDirectory);
+                Directory.CreateDirectory(directory);
             }
 
-            return voiceDirectory;
+            return directory;
         }
     }
 }

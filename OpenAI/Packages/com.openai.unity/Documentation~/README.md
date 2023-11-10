@@ -62,31 +62,32 @@ The recommended installation method is though the unity package manager and [Ope
 - [Chat](#chat)
   - [Chat Completions](#chat-completions)
   - [Streaming](#chat-streaming)
-  - [Functions](#chat-functions)
+  - [Tools](#chat-tools) :new:
+  - [Vision](#chat-vision) :new:
 - [Edits](#edits)
   - [Create Edit](#create-edit)
 - [Embeddings](#embeddings)
   - [Create Embedding](#create-embeddings)
-- [Audio](#audio) :construction:
-  - [Create Speech](#create-speech) :new:
+- [Audio](#audio)
+  - [Create Speech](#create-speech)
   - [Create Transcription](#create-transcription)
   - [Create Translation](#create-translation)
-- [Images](#images) :construction:
-  - [Create Image](#create-image) :new:
-  - [Edit Image](#edit-image) :new:
-  - [Create Image Variation](#create-image-variation) :new:
+- [Images](#images)
+  - [Create Image](#create-image)
+  - [Edit Image](#edit-image)
+  - [Create Image Variation](#create-image-variation)
 - [Files](#files)
   - [List Files](#list-files)
   - [Upload File](#upload-file)
   - [Delete File](#delete-file)
   - [Retrieve File Info](#retrieve-file-info)
   - [Download File Content](#download-file-content)
-- [Fine Tuning](#fine-tuning) :construction:
-  - [Create Fine Tune Job](#create-fine-tune-job) :new:
-  - [List Fine Tune Jobs](#list-fine-tune-jobs) :new:
-  - [Retrieve Fine Tune Job Info](#retrieve-fine-tune-job-info) :new:
-  - [Cancel Fine Tune Job](#cancel-fine-tune-job) :new:
-  - [List Fine Tune Job Events](#list-fine-tune-job-events) :new:
+- [Fine Tuning](#fine-tuning)
+  - [Create Fine Tune Job](#create-fine-tune-job)
+  - [List Fine Tune Jobs](#list-fine-tune-jobs)
+  - [Retrieve Fine Tune Job Info](#retrieve-fine-tune-job-info)
+  - [Cancel Fine Tune Job](#cancel-fine-tune-job)
+  - [List Fine Tune Job Events](#list-fine-tune-job-events)
 - [Moderations](#moderations)
   - [Create Moderation](#create-moderation)
 
@@ -98,6 +99,8 @@ There are 4 ways to provide your API keys, in order of precedence:
 2. [Unity Scriptable Object](#unity-scriptable-object)
 3. [Load key from configuration file](#load-key-from-configuration-file)
 4. [Use System Environment Variables](#use-system-environment-variables)
+
+You use the `OpenAIAuthentication` when you initialize the API as shown:
 
 #### Pass keys directly with constructor
 
@@ -408,7 +411,7 @@ await api.ChatEndpoint.StreamCompletionAsync(chatRequest, result =>
 });
 ```
 
-##### [Chat Functions](https://platform.openai.com/docs/api-reference/chat/create#chat/create-functions)
+##### [Chat Tools](https://platform.openai.com/docs/guides/function-calling)
 
 > Only available with the latest 0613 model series!
 
@@ -425,8 +428,8 @@ foreach (var message in messages)
     Debug.Log($"{message.Role}: {message.Content}");
 }
 
-// Define the functions that the assistant is able to use:
-var functions = new List<Function>
+// Define the tools that the assistant is able to use:
+var tools = new List<Tool>
 {
     new Function(
         nameof(WeatherService.GetCurrentWeather),
@@ -451,45 +454,88 @@ var functions = new List<Function>
             })
 };
 
-var chatRequest = new ChatRequest(messages, functions: functions, functionCall: "auto", model: "gpt-3.5-turbo");
+var chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
 var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
 messages.Add(result.FirstChoice.Message);
+
 Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishReason}");
+
 var locationMessage = new Message(Role.User, "I'm in Glasgow, Scotland");
 messages.Add(locationMessage);
 Debug.Log($"{locationMessage.Role}: {locationMessage.Content}");
-chatRequest = new ChatRequest(messages, functions: functions, functionCall: "auto", model: "gpt-3.5-turbo");
+chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
 result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+
 messages.Add(result.FirstChoice.Message);
 
 if (!string.IsNullOrEmpty(result.FirstChoice.Message.Content))
 {
-    // It's possible that the assistant will also ask you which units you want the temperature in.
     Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishReason}");
 
     var unitMessage = new Message(Role.User, "celsius");
     messages.Add(unitMessage);
     Debug.Log($"{unitMessage.Role}: {unitMessage.Content}");
-    chatRequest = new ChatRequest(messages, functions: functions, functionCall: "auto", model: "gpt-3.5-turbo");
+    chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
     result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
 }
 
-Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Function.Name} | Finish Reason: {result.FirstChoice.FinishReason}");
-Debug.Log($"{result.FirstChoice.Message.Function.Arguments}");
-var functionArgs = JsonConvert.DeserializeObject<WeatherArgs>(result.FirstChoice.Message.Function.Arguments.ToString());
+var usedTool = result.FirstChoice.Message.ToolCalls[0];
+Debug.Log($"{result.FirstChoice.Message.Role}: {usedTool.Function.Name} | Finish Reason: {result.FirstChoice.FinishReason}");
+Debug.Log($"{usedTool.Function.Arguments}");
+var functionArgs = JsonSerializer.Deserialize<WeatherArgs>(usedTool.Function.Arguments.ToString());
 var functionResult = WeatherService.GetCurrentWeather(functionArgs);
-messages.Add(new Message(Role.Function, functionResult, nameof(WeatherService.GetCurrentWeather)));
-Debug.Log($"{Role.Function}: {functionResult}");
+messages.Add(new Message(usedTool, functionResult));
+Debug.Log($"{Role.Tool}: {functionResult}");
 // System: You are a helpful weather assistant.
 // User: What's the weather like today?
 // Assistant: Sure, may I know your current location? | Finish Reason: stop
 // User: I'm in Glasgow, Scotland
-// Assistant: GetCurrentWeather | Finish Reason: function_call
+// Assistant: GetCurrentWeather | Finish Reason: tool_calls
 // {
 //   "location": "Glasgow, Scotland",
 //   "unit": "celsius"
 // }
-// Function: The current weather in Glasgow, Scotland is 20 celsius
+// Tool: The current weather in Glasgow, Scotland is 20 celsius
+```
+
+##### [Chat Vision](https://platform.openai.com/docs/guides/vision)
+
+:construction: This feature is in beta!
+
+> Currently, GPT-4 with vision does not support the message.name parameter, functions/tools, nor the response_format parameter.
+
+```csharp
+var api = new OpenAIClient();
+var messages = new List<Message>
+{
+    new Message(Role.System, "You are a helpful assistant."),
+    new Message(Role.User, new List<Content>
+    {
+        new Content(ContentType.Text, "What's in this image?"),
+        new Content(ContentType.ImageUrl, "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg")
+    })
+};
+var chatRequest = new ChatRequest(messages, model: "gpt-4-vision-preview");
+var result = await apiChatEndpoint.GetCompletionAsync(chatRequest);
+Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishDetails}");
+```
+
+You can even pass in a `Texture2D`!
+
+```csharp
+var api = new OpenAIClient();
+var messages = new List<Message>
+{
+    new Message(Role.System, "You are a helpful assistant."),
+    new Message(Role.User, new List<Content>
+    {
+        new Content(ContentType.Text, "What's in this image?"),
+        new Content(texture)
+    })
+};
+var chatRequest = new ChatRequest(messages, model: "gpt-4-vision-preview");
+var result = await apiChatEndpoint.GetCompletionAsync(chatRequest);
+Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishDetails}");
 ```
 
 ### [Edits](https://platform.openai.com/docs/api-reference/edits)

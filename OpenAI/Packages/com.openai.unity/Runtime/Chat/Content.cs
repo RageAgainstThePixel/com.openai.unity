@@ -1,4 +1,8 @@
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
 using Newtonsoft.Json;
+using System;
+using UnityEngine;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Chat
@@ -6,6 +10,22 @@ namespace OpenAI.Chat
     [Preserve]
     public sealed class Content
     {
+        [Preserve]
+        public static implicit operator Content(string content) => new Content(content);
+
+        [Preserve]
+        public Content(string text)
+            : this(ContentType.Text, text)
+        {
+        }
+
+        [Preserve]
+        public Content(Texture2D texture)
+            : this(ContentType.ImageUrl, $"data:image/jpeg;base64,{Convert.ToBase64String(texture.EncodeToPNG())}")
+        {
+        }
+
+        [Preserve]
         public Content(ContentType type, string input)
         {
             Type = type;

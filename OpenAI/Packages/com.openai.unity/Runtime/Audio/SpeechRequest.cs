@@ -6,6 +6,7 @@ using UnityEngine.Scripting;
 
 namespace OpenAI.Audio
 {
+    [Preserve]
     public sealed class SpeechRequest
     {
         /// <summary>
@@ -16,6 +17,7 @@ namespace OpenAI.Audio
         /// <param name="voice">The voice to use when generating the audio.</param>
         /// <param name="responseFormat">The format to audio in. Supported formats are mp3, opus, aac, and flac.</param>
         /// <param name="speed">The speed of the generated audio. Select a value from 0.25 to 4.0. 1.0 is the default.</param>
+        [Preserve]
         public SpeechRequest(string input, Model model = null, SpeechVoice voice = SpeechVoice.Alloy, SpeechResponseFormat responseFormat = SpeechResponseFormat.MP3, float? speed = null)
         {
             Input = input;

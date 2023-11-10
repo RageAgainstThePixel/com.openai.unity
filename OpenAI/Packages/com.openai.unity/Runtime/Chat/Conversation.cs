@@ -28,10 +28,13 @@ namespace OpenAI.Chat
         /// Appends <see cref="Message"/> to the end of <see cref="Messages"/>.
         /// </summary>
         /// <param name="message">The message to add to the <see cref="Conversation"/>.</param>
+        [Preserve]
         public void AppendMessage(Message message) => messages.Add(message);
 
+        [Preserve]
         public override string ToString() => JsonConvert.SerializeObject(this, OpenAIClient.JsonSerializationOptions);
 
+        [Preserve]
         public static implicit operator string(Conversation conversation) => conversation.ToString();
     }
 }
