@@ -3,7 +3,7 @@
 using System;
 using System.IO;
 using UnityEngine;
-using Utilities.Encoding.Wav;
+using Utilities.Encoding.OggVorbis;
 
 namespace OpenAI.Audio
 {
@@ -13,10 +13,10 @@ namespace OpenAI.Audio
         /// Constructor.
         /// </summary>
         /// <param name="audioPath">
-        /// The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm
+        /// The audio file to translate, in one of these formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.
         /// </param>
         /// <param name="model">
-        /// ID of the model to use. Only whisper-1 is currently available.
+        /// ID of the model to use.
         /// </param>
         /// <param name="prompt">
         /// Optional, An optional text to guide the model's style or continue a previous audio segment.<br/>
@@ -49,7 +49,7 @@ namespace OpenAI.Audio
         /// The <see cref="AudioClip"/> to translate.
         /// </param>
         /// <param name="model">
-        /// ID of the model to use. Only whisper-1 is currently available.
+        /// ID of the model to use.
         /// </param>
         /// <param name="prompt">
         /// Optional, An optional text to guide the model's style or continue a previous audio segment.<br/>
@@ -70,8 +70,8 @@ namespace OpenAI.Audio
             string model = null,
             string prompt = null,
             AudioResponseFormat responseFormat = AudioResponseFormat.Json,
-            int? temperature = null)
-            : this(new MemoryStream(audio.EncodeToWav()), $"{audio.name}.wav", model, prompt, responseFormat, temperature)
+            float? temperature = null)
+            : this(new MemoryStream(audio.EncodeToOggVorbis()), $"{audio.name}.ogg", model, prompt, responseFormat, temperature)
         {
         }
 
@@ -79,7 +79,7 @@ namespace OpenAI.Audio
         /// Constructor.
         /// </summary>
         /// <param name="audio">
-        /// The audio file to translate, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+        /// The audio file to translate, in one of these formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.
         /// </param>
         /// <param name="audioName">
         /// The name of the audio file to translate.
@@ -107,7 +107,7 @@ namespace OpenAI.Audio
             string model = null,
             string prompt = null,
             AudioResponseFormat responseFormat = AudioResponseFormat.Json,
-            int? temperature = null)
+            float? temperature = null)
         {
             Audio = audio;
 
@@ -136,7 +136,7 @@ namespace OpenAI.Audio
         public string AudioName { get; }
 
         /// <summary>
-        /// ID of the model to use. Only whisper-1 is currently available.
+        /// ID of the model to use.
         /// </summary>
         public string Model { get; }
 
@@ -158,7 +158,7 @@ namespace OpenAI.Audio
         /// the model will use log probability to automatically increase the temperature until certain thresholds are hit.<br/>
         /// Defaults to 0
         /// </summary>
-        public int? Temperature { get; }
+        public float? Temperature { get; }
 
         private void Dispose(bool disposing)
         {
