@@ -3,7 +3,7 @@
 using System;
 using System.IO;
 using UnityEngine;
-using Utilities.Encoding.Wav;
+using Utilities.Encoding.OggVorbis;
 
 namespace OpenAI.Audio
 {
@@ -13,7 +13,7 @@ namespace OpenAI.Audio
         /// Constructor.
         /// </summary>
         /// <param name="audioPath">
-        /// The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+        /// The audio file to transcribe, in one of these formats flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.
         /// </param>
         /// <param name="model">
         /// ID of the model to use.
@@ -59,7 +59,7 @@ namespace OpenAI.Audio
         /// The <see cref="AudioClip"/> to transcribe.
         /// </param>
         /// <param name="model">
-        /// ID of the model to use. Only whisper-1 is currently available.
+        /// ID of the model to use.
         /// </param>
         /// <param name="prompt">
         /// Optional, An optional text to guide the model's style or continue a previous audio segment.<br/>
@@ -91,7 +91,7 @@ namespace OpenAI.Audio
             AudioResponseFormat responseFormat = AudioResponseFormat.Json,
             float? temperature = null,
             string language = null)
-            : this(new MemoryStream(audio.EncodeToWav()), $"{audio.name}.wav", model, prompt, responseFormat, temperature, language)
+            : this(new MemoryStream(audio.EncodeToOggVorbis()), $"{audio.name}.ogg", model, prompt, responseFormat, temperature, language)
         {
         }
 
@@ -105,7 +105,7 @@ namespace OpenAI.Audio
         /// The name of the audio file to transcribe.
         /// </param>
         /// <param name="model">
-        /// ID of the model to use. Only whisper-1 is currently available.
+        /// ID of the model to use.
         /// </param>
         /// <param name="prompt">
         /// Optional, An optional text to guide the model's style or continue a previous audio segment.<br/>
@@ -157,7 +157,7 @@ namespace OpenAI.Audio
         ~AudioTranscriptionRequest() => Dispose(false);
 
         /// <summary>
-        /// The audio file to transcribe, in one of these formats: mp3, mp4, mpeg, mpga, m4a, wav, or webm.
+        /// The audio file to transcribe, in one of these formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.
         /// </summary>
         public Stream Audio { get; }
 
@@ -167,7 +167,7 @@ namespace OpenAI.Audio
         public string AudioName { get; }
 
         /// <summary>
-        /// ID of the model to use. Only whisper-1 is currently available.
+        /// ID of the model to use.
         /// </summary>
         public string Model { get; }
 
