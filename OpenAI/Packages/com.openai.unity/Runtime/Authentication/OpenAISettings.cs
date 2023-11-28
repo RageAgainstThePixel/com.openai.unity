@@ -11,23 +11,26 @@ namespace OpenAI
         /// <summary>
         /// Creates a new instance of <see cref="OpenAISettings"/> for use with OpenAI.
         /// </summary>
-        public OpenAISettings()
+        public OpenAISettings(OpenAIConfiguration configuration = null)
         {
             if (cachedDefault != null) { return; }
 
-            var config = Resources.LoadAll<OpenAIConfiguration>(string.Empty)
-                .FirstOrDefault(asset => asset != null);
-
-            if (config != null)
+            if (configuration == null)
             {
-                if (config.UseAzureOpenAI)
+                Debug.LogWarning($"You can speed this up by passing in your {nameof(OpenAIConfiguration)} in {nameof(OpenAISettings)}.ctr");
+                configuration = Resources.LoadAll<OpenAIConfiguration>(string.Empty).FirstOrDefault(asset => asset != null);
+            }
+
+            if (configuration != null)
+            {
+                if (configuration.UseAzureOpenAI)
                 {
-                    Info = new OpenAISettingsInfo(config.ResourceName, config.DeploymentId, config.ApiVersion, config.UseAzureActiveDirectory);
+                    Info = new OpenAISettingsInfo(configuration.ResourceName, configuration.DeploymentId, configuration.ApiVersion, configuration.UseAzureActiveDirectory);
                     cachedDefault = new OpenAISettings(Info);
                 }
                 else
                 {
-                    Info = new OpenAISettingsInfo(domain: config.ProxyDomain, apiVersion: config.ApiVersion);
+                    Info = new OpenAISettingsInfo(domain: configuration.ProxyDomain, apiVersion: configuration.ApiVersion);
                     cachedDefault = new OpenAISettings(Info);
                 }
             }

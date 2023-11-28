@@ -64,6 +64,12 @@ namespace OpenAI
         /// <param name="authInfo"></param>
         public OpenAIAuthentication(OpenAIAuthInfo authInfo) => Info = authInfo;
 
+        /// <summary>
+        /// Instantiates a new Authentication object with the given <see cref="configuration"/>.
+        /// </summary>
+        /// <param name="configuration"><see cref="OpenAIConfiguration"/>.</param>
+        public OpenAIAuthentication(OpenAIConfiguration configuration) : this(configuration.ApiKey, configuration.organizationId) { }
+
         /// <inheritdoc />
         public override OpenAIAuthInfo Info { get; }
 
@@ -81,15 +87,18 @@ namespace OpenAI
         }
 
         /// <inheritdoc />
-        public override OpenAIAuthentication LoadFromAsset<T>()
-            => Resources.LoadAll<T>(string.Empty)
-                .Where(asset => asset != null)
-                .Where(asset => asset is OpenAIConfiguration config &&
-                                !string.IsNullOrWhiteSpace(config.ApiKey))
-                .Select(asset => asset is OpenAIConfiguration config
-                    ? new OpenAIAuthentication(config.ApiKey, config.OrganizationId)
-                    : null)
-                .FirstOrDefault();
+        public override OpenAIAuthentication LoadFromAsset<T>(T asset = null)
+        {
+            if (asset == null)
+            {
+                Debug.LogWarning($"You can speed this up by passing in your {nameof(OpenAIConfiguration)} in {nameof(OpenAIAuthentication)}.ctr");
+                asset = Resources.LoadAll<T>(string.Empty).FirstOrDefault();
+            }
+
+            return asset is OpenAIConfiguration configuration
+                ? new OpenAIAuthentication(configuration)
+                : null;
+        }
 
         /// <inheritdoc />
         public override OpenAIAuthentication LoadFromEnvironment()
