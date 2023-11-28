@@ -11,68 +11,63 @@ namespace OpenAI.Completions
     /// <summary>
     /// Represents a result from calling the <see cref="CompletionsEndpoint"/>.
     /// </summary>
-    [Preserve]
-    [Obsolete("use CompletionResponse")]
-    public sealed class CompletionResult : BaseResponse
+    public sealed class CompletionResponse : BaseResponse
     {
-        [Preserve]
-        [JsonConstructor]
-        public CompletionResult(
-            [JsonProperty("id")] string id,
-            [JsonProperty("object")] string @object,
-            [JsonProperty("created")] int createdUnixTime,
-            [JsonProperty("model")] string model,
-            [JsonProperty("choices")] IReadOnlyList<Choice> completions)
+        public CompletionResponse()
         {
-            Id = id;
-            Object = @object;
-            CreatedUnixTime = createdUnixTime;
-            Model = model;
-            Completions = completions;
         }
+
+#pragma warning disable CS0618 // Type or member is obsolete
+        internal CompletionResponse(CompletionResult result)
+        {
+            Id = result.Id;
+            Object = result.Object;
+            CreatedUnixTimeSeconds = result.CreatedUnixTime;
+            Model = result.Model;
+            Completions = result.Completions;
+        }
+#pragma warning restore CS0618 // Type or member is obsolete
 
         /// <summary>
         /// The identifier of the result, which may be used during troubleshooting
         /// </summary>
         [Preserve]
         [JsonProperty("id")]
-        public string Id { get; }
+        public string Id { get; private set; }
 
         [Preserve]
         [JsonProperty("object")]
-        public string Object { get; }
+        public string Object { get; private set; }
 
         /// <summary>
         /// The time when the result was generated in unix epoch format
         /// </summary>
         [Preserve]
         [JsonProperty("created")]
-        public int CreatedUnixTime { get; }
+        public int CreatedUnixTimeSeconds { get; private set; }
 
         /// <summary>
-        /// The time when the result was generated
+        /// The time when the result was generated.
         /// </summary>
-        [Preserve]
         [JsonIgnore]
-        public DateTime Created => DateTimeOffset.FromUnixTimeSeconds(CreatedUnixTime).DateTime;
+        public DateTime Created => DateTimeOffset.FromUnixTimeSeconds(CreatedUnixTimeSeconds).DateTime;
 
         [Preserve]
         [JsonProperty("model")]
-        public string Model { get; }
+        public string Model { get; private set; }
 
         /// <summary>
         /// The completions returned by the API.  Depending on your request, there may be 1 or many choices.
         /// </summary>
         [Preserve]
         [JsonProperty("choices")]
-        public IReadOnlyList<Choice> Completions { get; }
+        public IReadOnlyList<Choice> Completions { get; private set; }
 
-        [Preserve]
         [JsonIgnore]
         public Choice FirstChoice => Completions?.FirstOrDefault(choice => choice.Index == 0);
 
         public override string ToString() => FirstChoice?.ToString() ?? string.Empty;
 
-        public static implicit operator string(CompletionResult response) => response.ToString();
+        public static implicit operator string(CompletionResponse response) => response?.ToString();
     }
 }

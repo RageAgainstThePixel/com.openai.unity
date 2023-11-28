@@ -58,41 +58,42 @@ The recommended installation method is though the unity package manager and [Ope
   - [List Models](#list-models)
   - [Retrieve Models](#retrieve-model)
   - [Delete Fine Tuned Model](#delete-fine-tuned-model)
-- [Completions](#completions)
-  - [Streaming](#completion-streaming)
 - [Chat](#chat)
   - [Chat Completions](#chat-completions)
   - [Streaming](#chat-streaming)
   - [Tools](#chat-tools) :new:
   - [Vision](#chat-vision) :new:
-- [Edits](#edits)
-  - [Create Edit](#create-edit)
-- [Embeddings](#embeddings)
-  - [Create Embedding](#create-embeddings)
+  - [Json Mode](#chat-json-mode) :new:
 - [Audio](#audio)
   - [Create Speech](#create-speech)
   - [Create Transcription](#create-transcription)
   - [Create Translation](#create-translation)
-- [Images](#images)
-  - [Create Image](#create-image)
-  - [Edit Image](#edit-image)
-  - [Create Image Variation](#create-image-variation)
-- [Files](#files)
-  - [List Files](#list-files)
+- [Images](#images) :construction:
+  - [Create Image](#create-image) :construction:
+  - [Edit Image](#edit-image) :construction:
+  - [Create Image Variation](#create-image-variation) :construction:
+- [Files](#files) :construction:
+  - [List Files](#list-files) :construction:
   - [Upload File](#upload-file)
   - [Delete File](#delete-file)
-  - [Retrieve File Info](#retrieve-file-info)
+  - [Retrieve File](#retrieve-file-info) :construction:
   - [Download File Content](#download-file-content)
-- [Fine Tuning](#fine-tuning)
-  - [Create Fine Tune Job](#create-fine-tune-job)
-  - [List Fine Tune Jobs](#list-fine-tune-jobs)
-  - [Retrieve Fine Tune Job Info](#retrieve-fine-tune-job-info)
+- [Fine Tuning](#fine-tuning) :construction:
+  - [Create Fine Tune Job](#create-fine-tune-job) :construction:
+  - [List Fine Tune Jobs](#list-fine-tune-jobs) :construction:
+  - [Retrieve Fine Tune Job Info](#retrieve-fine-tune-job-info) :construction:
   - [Cancel Fine Tune Job](#cancel-fine-tune-job)
-  - [List Fine Tune Job Events](#list-fine-tune-job-events)
+  - [List Fine Tune Job Events](#list-fine-tune-job-events) :construction:
+- [Embeddings](#embeddings)
+  - [Create Embedding](#create-embeddings)
+- [Completions](#completions) :construction:
+  - [Streaming](#completion-streaming) :construction:
 - [Moderations](#moderations)
   - [Create Moderation](#create-moderation)
+- ~~[Edits](#edits)~~ :warning: Deprecated
+  - ~~[Create Edit](#create-edit)~~  :warning: Deprecated
 
-### Authentication
+### [Authentication](https://platform.openai.com/docs/api-reference/authentication)
 
 There are 4 ways to provide your API keys, in order of precedence:
 
@@ -176,7 +177,7 @@ Use your system's environment variables specify an api key and organization to u
 var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
 ```
 
-### [Azure OpenAI](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/)
+### [Azure OpenAI](https://learn.microsoft.com/en-us/azure/cognitive-services/openai)
 
 You can also choose to use Microsoft's Azure OpenAI deployments as well.
 
@@ -326,38 +327,8 @@ Delete a fine-tuned model. You must have the Owner role in your organization.
 
 ```csharp
 var api = new OpenAIClient();
-var result = await api.ModelsEndpoint.DeleteFineTuneModelAsync("your-fine-tuned-model");
-Assert.IsTrue(result);
-```
-
-### [Completions](https://platform.openai.com/docs/api-reference/completions)
-
-Given a prompt, the model will return one or more predicted completions, and can also return the probabilities of alternative tokens at each position.
-
-The Completions API is accessed via `OpenAIClient.CompletionsEndpoint`
-
-```csharp
-var api = new OpenAIClient();
-var result = await api.CompletionsEndpoint.CreateCompletionAsync("One Two Three One Two", temperature: 0.1, model: Model.Davinci);
-Debug.Log(result);
-```
-
-> To get the `CompletionResult` (which is mostly metadata), use its implicit string operator to get the text if all you want is the completion choice.
-
-#### Completion Streaming
-
-Streaming allows you to get results are they are generated, which can help your application feel more responsive, especially on slow models like Davinci.
-
-```csharp
-var api = new OpenAIClient();
-
-await api.CompletionsEndpoint.StreamCompletionAsync(result =>
-{
-    foreach (var choice in result.Completions)
-    {
-        Debug.Log(choice);
-    }
-}, "My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", maxTokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci);
+var isDeleted = await api.ModelsEndpoint.DeleteFineTuneModelAsync("your-fine-tuned-model");
+Assert.IsTrue(isDeleted);
 ```
 
 ### [Chat](https://platform.openai.com/docs/api-reference/chat)
@@ -379,12 +350,13 @@ var messages = new List<Message>
     new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
     new Message(Role.User, "Where was it played?"),
 };
-var chatRequest = new ChatRequest(messages, Model.GPT3_5_Turbo);
-var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
-Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content}");
+var chatRequest = new ChatRequest(messages, Model.GPT4);
+var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+var choice = response.FirstChoice;
+Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message} | Finish Reason: {choice.FinishReason}");
 ```
 
-##### [Chat Streaming](https://platform.openai.com/docs/api-reference/chat/create#chat/create-stream)
+#### [Chat Streaming](https://platform.openai.com/docs/api-reference/chat/create#chat/create-stream)
 
 ```csharp
 var api = new OpenAIClient();
@@ -395,24 +367,16 @@ var messages = new List<Message>
     new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
     new Message(Role.User, "Where was it played?"),
 };
-var chatRequest = new ChatRequest(messages, Model.GPT3_5_Turbo, number: 2);
-await api.ChatEndpoint.StreamCompletionAsync(chatRequest, result =>
+var chatRequest = new ChatRequest(messages);
+var response = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
 {
-    foreach (var choice in result.Choices.Where(choice => !string.IsNullOrEmpty(choice.Delta?.Content)))
-    {
-        // Partial response content
-        Debug.Log(choice.Delta.Content);
-    }
-
-    foreach (var choice in result.Choices.Where(choice => !string.IsNullOrEmpty(choice.Message?.Content)))
-    {
-        // Completed response content
-        Debug.Log($"{choice.Message.Role}: {choice.Message.Content}");
-    }
+    Console.Write(choice.Delta.ToString());
 });
+var choice = response.FirstChoice;
+Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message} | Finish Reason: {choice.FinishReason}");
 ```
 
-##### [Chat Tools](https://platform.openai.com/docs/guides/function-calling)
+#### [Chat Tools](https://platform.openai.com/docs/guides/function-calling)
 
 > Only available with the latest 0613 model series!
 
@@ -426,7 +390,7 @@ var messages = new List<Message>
 
 foreach (var message in messages)
 {
-    Debug.Log($"{message.Role}: {message.Content}");
+    Debug.Log($"{message.Role}: {message}");
 }
 
 // Define the tools that the assistant is able to use:
@@ -456,32 +420,32 @@ var tools = new List<Tool>
 };
 
 var chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
-var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
-messages.Add(result.FirstChoice.Message);
+var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+messages.Add(response.FirstChoice.Message);
 
-Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishReason}");
+Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishReason}");
 
 var locationMessage = new Message(Role.User, "I'm in Glasgow, Scotland");
 messages.Add(locationMessage);
 Debug.Log($"{locationMessage.Role}: {locationMessage.Content}");
 chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
-result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
 
-messages.Add(result.FirstChoice.Message);
+messages.Add(response.FirstChoice.Message);
 
-if (!string.IsNullOrEmpty(result.FirstChoice.Message.Content))
+if (!string.IsNullOrEmpty(response.ToString()))
 {
-    Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishReason}");
+    Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishReason}");
 
     var unitMessage = new Message(Role.User, "celsius");
     messages.Add(unitMessage);
     Debug.Log($"{unitMessage.Role}: {unitMessage.Content}");
     chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
-    result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+    response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
 }
 
-var usedTool = result.FirstChoice.Message.ToolCalls[0];
-Debug.Log($"{result.FirstChoice.Message.Role}: {usedTool.Function.Name} | Finish Reason: {result.FirstChoice.FinishReason}");
+var usedTool = response.FirstChoice.Message.ToolCalls[0];
+Debug.Log($"{response.FirstChoice.Message.Role}: {usedTool.Function.Name} | Finish Reason: {response.FirstChoice.FinishReason}");
 Debug.Log($"{usedTool.Function.Arguments}");
 var functionArgs = JsonSerializer.Deserialize<WeatherArgs>(usedTool.Function.Arguments.ToString());
 var functionResult = WeatherService.GetCurrentWeather(functionArgs);
@@ -499,11 +463,10 @@ Debug.Log($"{Role.Tool}: {functionResult}");
 // Tool: The current weather in Glasgow, Scotland is 20 celsius
 ```
 
-##### [Chat Vision](https://platform.openai.com/docs/guides/vision)
+#### [Chat Vision](https://platform.openai.com/docs/guides/vision)
 
-:construction: This feature is in beta!
-
-> Currently, GPT-4 with vision does not support the message.name parameter, functions/tools, nor the response_format parameter.
+> :warning: Beta Feature
+> Currently, GPT-4 with vision does not support the `message.name` parameter, functions/tools, nor the `response_format` parameter.
 
 ```csharp
 var api = new OpenAIClient();
@@ -512,13 +475,13 @@ var messages = new List<Message>
     new Message(Role.System, "You are a helpful assistant."),
     new Message(Role.User, new List<Content>
     {
-        new Content(ContentType.Text, "What's in this image?"),
-        new Content(ContentType.ImageUrl, "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg")
+        "What's in this image?",
+        new ImageUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg", ImageDetail.Low)
     })
 };
 var chatRequest = new ChatRequest(messages, model: "gpt-4-vision-preview");
-var result = await apiChatEndpoint.GetCompletionAsync(chatRequest);
-Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishDetails}");
+var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice.Message.Content} | Finish Reason: {response.FirstChoice.FinishDetails}");
 ```
 
 You can even pass in a `Texture2D`!
@@ -530,50 +493,40 @@ var messages = new List<Message>
     new Message(Role.System, "You are a helpful assistant."),
     new Message(Role.User, new List<Content>
     {
-        new Content(ContentType.Text, "What's in this image?"),
-        new Content(texture)
+        "What's in this image?",
+        texture
     })
 };
 var chatRequest = new ChatRequest(messages, model: "gpt-4-vision-preview");
 var result = await apiChatEndpoint.GetCompletionAsync(chatRequest);
-Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice.Message.Content} | Finish Reason: {result.FirstChoice.FinishDetails}");
+Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice} | Finish Reason: {result.FirstChoice.FinishDetails}");
 ```
 
-### [Edits](https://platform.openai.com/docs/api-reference/edits)
+#### [Chat Json Mode](https://platform.openai.com/docs/guides/text-generation/json-mode)
 
-> Deprecated, and soon to be removed.
+> :warning: Beta Feature
 
-Given a prompt and an instruction, the model will return an edited version of the prompt.
+Important notes:
 
-The Edits API is accessed via `OpenAIClient.EditsEndpoint`
-
-#### [Create Edit](https://platform.openai.com/docs/api-reference/edits/create)
-
-Creates a new edit for the provided input, instruction, and parameters using the provided input and instruction.
+- When using JSON mode, always instruct the model to produce JSON via some message in the conversation, for example via your system message. If you don't include an explicit instruction to generate JSON, the model may generate an unending stream of whitespace and the request may run continually until it reaches the token limit. To help ensure you don't forget, the API will throw an error if the string "JSON" does not appear somewhere in the context.
+- The JSON in the message the model returns may be partial (i.e. cut off) if `finish_reason` is length, which indicates the generation exceeded max_tokens or the conversation exceeded the token limit. To guard against this, check `finish_reason` before parsing the response.
+- JSON mode will not guarantee the output matches any specific schema, only that it is valid and parses without errors.
 
 ```csharp
-var api = new OpenAIClient();
-var request = new EditRequest("What day of the wek is it?", "Fix the spelling mistakes");
-var result = await api.EditsEndpoint.CreateEditAsync(request);
-Debug.Log(result);
-```
+var messages = new List<Message>
+{
+    new Message(Role.System, "You are a helpful assistant designed to output JSON."),
+    new Message(Role.User, "Who won the world series in 2020?"),
+};
+var chatRequest = new ChatRequest(messages, "gpt-4-1106-preview", responseFormat: ChatResponseFormat.Json);
+var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
 
-### [Embeddings](https://platform.openai.com/docs/api-reference/embeddings)
+foreach (var choice in response.Choices)
+{
+    Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice} | Finish Reason: {choice.FinishReason}");
+}
 
-Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.
-
-Related guide: [Embeddings](https://platform.openai.com/docs/guides/embeddings)
-
-The Edits API is accessed via `OpenAIClient.EmbeddingsEndpoint`
-
-#### [Create Embeddings](https://platform.openai.com/docs/api-reference/embeddings/create)
-
-Creates an embedding vector representing the input text.
-
-```csharp
-var api = new OpenAIClient();
-var result = await api.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was delicious and the waiter...", Models.Embedding_Ada_002);
-Debug.Log(result);
+response.GetUsage();
 ```
 
 ### [Audio](https://platform.openai.com/docs/api-reference/audio)
@@ -627,8 +580,8 @@ Creates an image given a prompt.
 
 ```csharp
 var api = new OpenAIClient();
-var request = new ImageGenerationRequest("A house riding a velociraptor", Model.DallE_3);
-var results = await api.ImagesEndPoint.GenerateImageAsync(request);
+var request = new ImageGenerationRequest("A house riding a velociraptor", Models.Model.DallE_3);
+var imageResults = await api.ImagesEndPoint.GenerateImageAsync(request);
 
 foreach (var (path, texture) in results)
 {
@@ -646,9 +599,9 @@ Creates an edited or extended image given an original image and a prompt.
 ```csharp
 var api = new OpenAIClient();
 var request = new ImageEditRequest(Path.GetFullPath(imageAssetPath), Path.GetFullPath(maskAssetPath), "A sunlit indoor lounge area with a pool containing a flamingo", size: ImageSize.Small);
-var results = await api.ImagesEndPoint.CreateImageEditAsync(request);
+var imageResults = await api.ImagesEndPoint.CreateImageEditAsync(request);
 
-foreach (var (path, texture) in results)
+foreach (var (path, texture) in imageResults)
 {
     Debug.Log(path);
     // path == file://path/to/image.png
@@ -664,9 +617,9 @@ Creates a variation of a given image.
 ```csharp
 var api = new OpenAIClient();
 var request = new ImageVariationRequest(imageTexture, size: ImageSize.Small);
-var results = await api.ImagesEndPoint.CreateImageVariationAsync(request);
+var imageResults = await api.ImagesEndPoint.CreateImageVariationAsync(request);
 
-foreach (var (path, texture) in results)
+foreach (var (path, texture) in imageResults)
 {
     Debug.Log(path);
     // path == file://path/to/image.png
@@ -703,17 +656,19 @@ Returns a list of files that belong to the user's organization.
 
 ```csharp
 var api = new OpenAIClient();
-var files = await api.FilesEndpoint.ListFilesAsync();
+var fileList = await api.FilesEndpoint.ListFilesAsync();
 
-foreach (var file in files)
+foreach (var file in fileList)
 {
     Debug.Log($"{file.Id} -> {file.Object}: {file.FileName} | {file.Size} bytes");
 }
 ```
 
-#### [Upload File](https://platform.openai.com/docs/api-reference/files/upload)
+#### [Upload File](https://platform.openai.com/docs/api-reference/files/create)
 
-Upload a file that contains document(s) to be used across various endpoints/features. Currently, the size of all the files uploaded by one organization can be up to 1 GB. Please contact us if you need to increase the storage limit.
+Upload a file that can be used across various endpoints. The size of all the files uploaded by one organization can be up to 100 GB.
+
+The size of individual files can be a maximum of 512 MB. See the Assistants Tools guide to learn more about the types of files supported. The Fine-tuning API only supports .jsonl files.
 
 ```csharp
 var api = new OpenAIClient();
@@ -727,8 +682,8 @@ Delete a file.
 
 ```csharp
 var api = new OpenAIClient();
-var result = await api.FilesEndpoint.DeleteFileAsync(fileData);
-Assert.IsTrue(result);
+var isDeleted = await api.FilesEndpoint.DeleteFileAsync(fileId);
+Assert.IsTrue(isDeleted);
 ```
 
 #### [Retrieve File Info](https://platform.openai.com/docs/api-reference/files/retrieve)
@@ -737,13 +692,13 @@ Returns information about a specific file.
 
 ```csharp
 var api = new OpenAIClient();
-var fileData = await GetFileInfoAsync(fileId);
-Debug.Log($"{fileData.Id} -> {fileData.Object}: {fileData.FileName} | {fileData.Size} bytes");
+var file = await GetFileInfoAsync(fileId);
+Debug.Log($"{file.Id} -> {file.Object}: {file.FileName} | {file.Size} bytes");
 ```
 
 #### [Download File Content](https://platform.openai.com/docs/api-reference/files/retrieve-content)
 
-Downloads the specified file.
+Downloads the file content to the specified directory.
 
 ```csharp
 var api = new OpenAIClient();
@@ -780,11 +735,11 @@ List your organization's fine-tuning jobs.
 
 ```csharp
 var api = new OpenAIClient();
-var list = await api.FineTuningEndpoint.ListJobsAsync();
+var jobList = await api.FineTuningEndpoint.ListJobsAsync();
 
-foreach (var job in list.Jobs)
+foreach (var job in jobList.Items.OrderByDescending(job => job.CreatedAt)))
 {
-    Debug.Log($"{job.Id} -> {job.Status}");
+    Debug.Log($"{job.Id} -> {job.CreatedAt} | {job.Status}");
 }
 ```
 
@@ -795,7 +750,7 @@ Gets info about the fine-tune job.
 ```csharp
 var api = new OpenAIClient();
 var job = await api.FineTuningEndpoint.GetJobInfoAsync(fineTuneJob);
-Debug.Log($"{job.Id} -> {job.Status}");
+Debug.Log($"{job.Id} -> {job.CreatedAt} | {job.Status}");
 ```
 
 #### [Cancel Fine Tune Job](https://platform.openai.com/docs/api-reference/fine-tuning/cancel)
@@ -804,8 +759,8 @@ Immediately cancel a fine-tune job.
 
 ```csharp
 var api = new OpenAIClient();
-var result = await api.FineTuningEndpoint.CancelFineTuneJobAsync(fineTuneJob);
-Assert.IsTrue(result);
+var isCancelled = await api.FineTuningEndpoint.CancelFineTuneJobAsync(fineTuneJob);
+Assert.IsTrue(isCancelled);
 ```
 
 #### [List Fine Tune Job Events](https://platform.openai.com/docs/api-reference/fine-tuning/list-events)
@@ -817,10 +772,58 @@ var api = new OpenAIClient();
 var eventList = await api.FineTuningEndpoint.ListJobEventsAsync(fineTuneJob);
 Debug.Log($"{fineTuneJob.Id} -> status: {fineTuneJob.Status} | event count: {eventList.Events.Count}");
 
-foreach (var @event in eventList.Events.OrderByDescending(@event => @event.CreatedAt))
+foreach (var @event in eventList.Items.OrderByDescending(@event => @event.CreatedAt))
 {
-    Debug.Log($"  {@event.CreatedAt} [{@event.Level}] {@event.Message.Replace("\n", " ")}");
+    Debug.Log($"  {@event.CreatedAt} [{@event.Level}] {@event.Message}");
 }
+```
+
+### [Embeddings](https://platform.openai.com/docs/api-reference/embeddings)
+
+Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.
+
+Related guide: [Embeddings](https://platform.openai.com/docs/guides/embeddings)
+
+The Edits API is accessed via `OpenAIClient.EmbeddingsEndpoint`
+
+#### [Create Embeddings](https://platform.openai.com/docs/api-reference/embeddings/create)
+
+Creates an embedding vector representing the input text.
+
+```csharp
+var api = new OpenAIClient();
+var response = await api.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was delicious and the waiter...", Models.Embedding_Ada_002);
+Debug.Log(response);
+```
+
+### [Completions](https://platform.openai.com/docs/api-reference/completions)
+
+Given a prompt, the model will return one or more predicted completions, and can also return the probabilities of alternative tokens at each position.
+
+The Completions API is accessed via `OpenAIClient.CompletionsEndpoint`
+
+```csharp
+var api = new OpenAIClient();
+var response = await api.CompletionsEndpoint.CreateCompletionAsync("One Two Three One Two", temperature: 0.1, model: Model.Davinci);
+Debug.Log(response);
+```
+
+> To get the `CompletionResponse` (which is mostly metadata), use its implicit string operator to get the text if all you want is the completion choice.
+
+#### Completion Streaming
+
+Streaming allows you to get results are they are generated, which can help your application feel more responsive, especially on slow models like Davinci.
+
+```csharp
+var api = new OpenAIClient();
+
+await api.CompletionsEndpoint.StreamCompletionAsync(response =>
+{
+    foreach (var choice in response.Completions)
+    {
+        Debug.Log(choice);
+    }
+}, "My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", maxTokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci);
 ```
 
 ### [Moderations](https://platform.openai.com/docs/api-reference/moderations)
@@ -837,6 +840,35 @@ Classifies if text violates OpenAI's Content Policy.
 
 ```csharp
 var api = new OpenAIClient();
-var response = await api.ModerationsEndpoint.GetModerationAsync("I want to kill them.");
-Assert.IsTrue(response);
+var isViolation = await api.ModerationsEndpoint.GetModerationAsync("I want to kill them.");
+Assert.IsTrue(isViolation);
+```
+
+Additionally you can also get the scores of a given input.
+
+```csharp
+var response = await OpenAIClient.ModerationsEndpoint.CreateModerationAsync(new ModerationsRequest("I love you"));
+Assert.IsNotNull(response);
+Debug.Log(response.Results?[0]?.Scores?.ToString());
+```
+
+---
+
+### [Edits](https://platform.openai.com/docs/api-reference/edits)
+
+> Deprecated, and soon to be removed.
+
+Given a prompt and an instruction, the model will return an edited version of the prompt.
+
+The Edits API is accessed via `OpenAIClient.EditsEndpoint`
+
+#### [Create Edit](https://platform.openai.com/docs/api-reference/edits/create)
+
+Creates a new edit for the provided input, instruction, and parameters using the provided input and instruction.
+
+```csharp
+var api = new OpenAIClient();
+var request = new EditRequest("What day of the wek is it?", "Fix the spelling mistakes");
+var response = await api.EditsEndpoint.CreateEditAsync(request);
+Debug.Log(response);
 ```

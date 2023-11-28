@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Images
 {
     [Preserve]
-    internal class ImageResult
+    internal sealed class ImageResult
     {
         [Preserve]
         [JsonConstructor]

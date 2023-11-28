@@ -20,11 +20,9 @@ namespace OpenAI.Tests
             await File.WriteAllTextAsync("test.jsonl", testData);
             Assert.IsTrue(File.Exists("test.jsonl"));
             var result = await api.FilesEndpoint.UploadFileAsync("test.jsonl", "fine-tune");
-
             Assert.IsNotNull(result);
             Assert.IsTrue(result.FileName == "test.jsonl");
             Debug.Log($"{result.Id} -> {result.Object}");
-
             File.Delete("test.jsonl");
             Assert.IsFalse(File.Exists("test.jsonl"));
         }
@@ -34,17 +32,15 @@ namespace OpenAI.Tests
         {
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FilesEndpoint);
+            var fileList = await api.FilesEndpoint.ListFilesAsync();
 
-            var result = await api.FilesEndpoint.ListFilesAsync();
+            Assert.IsNotNull(fileList);
+            Assert.IsNotEmpty(fileList);
 
-            Assert.IsNotNull(result);
-            Assert.IsNotEmpty(result);
-
-            foreach (var file in result)
+            foreach (var file in fileList)
             {
                 var fileInfo = await api.FilesEndpoint.GetFileInfoAsync(file);
                 Assert.IsNotNull(fileInfo);
-
                 Debug.Log($"{fileInfo.Id} -> {fileInfo.Object}: {fileInfo.FileName} | {fileInfo.Size} bytes");
             }
         }
@@ -54,13 +50,12 @@ namespace OpenAI.Tests
         {
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FilesEndpoint);
+            var fileList = await api.FilesEndpoint.ListFilesAsync();
 
-            var files = await api.FilesEndpoint.ListFilesAsync();
+            Assert.IsNotNull(fileList);
+            Assert.IsNotEmpty(fileList);
 
-            Assert.IsNotNull(files);
-            Assert.IsNotEmpty(files);
-
-            var testFileData = files[0];
+            var testFileData = fileList[0];
             var result = await api.FilesEndpoint.DownloadFileAsync(testFileData);
 
             Assert.IsNotNull(result);
@@ -76,21 +71,20 @@ namespace OpenAI.Tests
         {
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FilesEndpoint);
+            var fileList = await api.FilesEndpoint.ListFilesAsync();
+            Assert.IsNotNull(fileList);
+            Assert.IsNotEmpty(fileList);
 
-            var files = await api.FilesEndpoint.ListFilesAsync();
-            Assert.IsNotNull(files);
-            Assert.IsNotEmpty(files);
-
-            foreach (var file in files)
+            foreach (var file in fileList)
             {
-                var result = await api.FilesEndpoint.DeleteFileAsync(file);
-                Assert.IsTrue(result);
+                var isDeleted = await api.FilesEndpoint.DeleteFileAsync(file);
+                Assert.IsTrue(isDeleted);
                 Debug.Log($"{file.Id} -> deleted");
             }
 
-            files = await api.FilesEndpoint.ListFilesAsync();
-            Assert.IsNotNull(files);
-            Assert.IsEmpty(files);
+            fileList = await api.FilesEndpoint.ListFilesAsync();
+            Assert.IsNotNull(fileList);
+            Assert.IsEmpty(fileList);
         }
     }
 }

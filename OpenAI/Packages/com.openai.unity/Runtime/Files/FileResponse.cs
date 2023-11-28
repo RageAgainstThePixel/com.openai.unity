@@ -6,17 +6,15 @@ using UnityEngine.Scripting;
 
 namespace OpenAI.Files
 {
-    [Preserve]
-    [Obsolete("Use FileResponse")]
-    public sealed class FileData
+    public sealed class FileResponse
     {
         [Preserve]
         [JsonConstructor]
-        public FileData(
+        public FileResponse(
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
             [JsonProperty("bytes")] int size,
-            [JsonProperty("created_at")] int createdUnixTime,
+            [JsonProperty("created_at")] int createdUnixTimeSeconds,
             [JsonProperty("filename")] string fileName,
             [JsonProperty("purpose")] string purpose,
             [JsonProperty("status")] string status)
@@ -24,7 +22,7 @@ namespace OpenAI.Files
             Id = id;
             Object = @object;
             Size = size;
-            CreatedUnixTime = createdUnixTime;
+            CreatedUnixTimeSeconds = createdUnixTimeSeconds;
             FileName = fileName;
             Purpose = purpose;
             Status = status;
@@ -44,11 +42,11 @@ namespace OpenAI.Files
 
         [Preserve]
         [JsonProperty("created_at")]
-        public int CreatedUnixTime { get; }
+        public int CreatedUnixTimeSeconds { get; }
 
         [Preserve]
         [JsonIgnore]
-        public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedUnixTime).DateTime;
+        public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedUnixTimeSeconds).DateTime;
 
         [Preserve]
         [JsonProperty("filename")]
@@ -62,6 +60,6 @@ namespace OpenAI.Files
         [JsonProperty("status")]
         public string Status { get; }
 
-        public static implicit operator string(FileData fileData) => fileData.Id;
+        public static implicit operator string(FileResponse fileData) => fileData.Id;
     }
 }

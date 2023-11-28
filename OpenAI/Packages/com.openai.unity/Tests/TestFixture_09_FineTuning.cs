@@ -16,10 +16,9 @@ namespace OpenAI.Tests
 {
     internal class TestFixture_09_FineTuning
     {
-        private async Task<FileData> CreateTestTrainingDataAsync(OpenAIClient api)
+        private async Task<FileResponse> CreateTestTrainingDataAsync()
         {
-            var fineTuningTrainingData = ScriptableObject.CreateInstance<FineTuningTrainingDataSet>();
-            fineTuningTrainingData.ConversationTrainingData = new List<Conversation>
+            var conversations = new List<Conversation>
             {
                 new Conversation(new List<Message>
                 {
@@ -82,10 +81,9 @@ namespace OpenAI.Tests
                     new Message(Role.Assistant, "Around 384,400 kilometers. Give or take a few, like that really matters.")
                 })
             };
-
             const string localTrainingDataPath = "fineTunesTestTrainingData.jsonl";
-            await File.WriteAllLinesAsync(localTrainingDataPath, fineTuningTrainingData.ConversationTrainingToJsonl());
-
+            await File.WriteAllLinesAsync(localTrainingDataPath, conversations.Select(conversation => conversation.ToString()));
+            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             var fileData = await api.FilesEndpoint.UploadFileAsync(localTrainingDataPath, "fine-tune");
             File.Delete(localTrainingDataPath);
             Assert.IsFalse(File.Exists(localTrainingDataPath));
@@ -97,11 +95,9 @@ namespace OpenAI.Tests
         {
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
-
-            var fileData = await CreateTestTrainingDataAsync(api);
+            var fileData = await CreateTestTrainingDataAsync();
             Assert.IsNotNull(fileData);
             var request = new CreateFineTuneJobRequest(Model.GPT3_5_Turbo, fileData);
-            api.FineTuningEndpoint.EnableDebug = true;
             var job = await api.FineTuningEndpoint.CreateJobAsync(request);
 
             Assert.IsNotNull(job);
@@ -113,13 +109,14 @@ namespace OpenAI.Tests
         {
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
+            var jobList = await api.FineTuningEndpoint.ListJobsAsync();
+            Assert.IsNotNull(jobList);
+            Assert.IsNotEmpty(jobList.Items);
 
-            var list = await api.FineTuningEndpoint.ListJobsAsync();
-            Assert.IsNotNull(list);
-            Assert.IsNotEmpty(list.Jobs);
-
-            foreach (var job in list.Jobs.OrderByDescending(job => job.CreatedAt))
+            foreach (var job in jobList.Items.OrderByDescending(job => job.CreatedAt))
             {
+                Assert.IsNotNull(job);
+                Assert.IsNotNull(job.Client);
                 Debug.Log($"{job.Id} -> {job.CreatedAt} | {job.Status}");
             }
         }
@@ -130,15 +127,15 @@ namespace OpenAI.Tests
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
 
-            var list = await api.FineTuningEndpoint.ListJobsAsync();
-            Assert.IsNotNull(list);
-            Assert.IsNotEmpty(list.Jobs);
+            var jobList = await api.FineTuningEndpoint.ListJobsAsync();
+            Assert.IsNotNull(jobList);
+            Assert.IsNotEmpty(jobList.Items);
 
-            foreach (var job in list.Jobs.OrderByDescending(job => job.CreatedAt))
+            foreach (var job in jobList.Items.OrderByDescending(job => job.CreatedAt))
             {
-                var result = await api.FineTuningEndpoint.GetJobInfoAsync(job);
-                Assert.IsNotNull(result);
-                Debug.Log($"{result.Id} -> {result.Status}");
+                var response = await api.FineTuningEndpoint.GetJobInfoAsync(job);
+                Assert.IsNotNull(response);
+                Debug.Log($"{job.Id} -> {job.CreatedAt} | {job.Status}");
             }
         }
 
@@ -147,27 +144,24 @@ namespace OpenAI.Tests
         {
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
+            var jobList = await api.FineTuningEndpoint.ListJobsAsync();
+            Assert.IsNotNull(jobList);
+            Assert.IsNotEmpty(jobList.Items);
 
-            var list = await api.FineTuningEndpoint.ListJobsAsync();
-            Assert.IsNotNull(list);
-            Assert.IsNotEmpty(list.Jobs);
-
-            foreach (var job in list.Jobs)
+            foreach (var job in jobList.Items)
             {
-                if (job.Status == JobStatus.Cancelled)
-                {
-                    continue;
-                }
+                if (job.Status == JobStatus.Cancelled) { continue; }
 
                 var eventList = await api.FineTuningEndpoint.ListJobEventsAsync(job);
                 Assert.IsNotNull(eventList);
-                Assert.IsNotEmpty(eventList.Events);
+                Assert.IsNotEmpty(eventList.Items);
+                Debug.Log($"{job.Id} -> status: {job.Status} | event count: {eventList.Items.Count}");
 
-                Debug.Log($"{job.Id} -> status: {job.Status} | event count: {eventList.Events.Count} | date: {job.CreatedAt}");
-
-                foreach (var @event in eventList.Events.OrderByDescending(@event => @event.CreatedAt))
+                foreach (var @event in eventList.Items.OrderByDescending(@event => @event.CreatedAt))
                 {
-                    Debug.Log($"  {@event.CreatedAt} [{@event.Level}] {@event.Message.Replace("\n", " ")}");
+                    Assert.IsNotNull(@event);
+                    Assert.IsNotNull(@event.Client);
+                    Debug.Log($"  {@event.CreatedAt} [{@event.Level}] {@event.Message}");
                 }
             }
         }
@@ -177,12 +171,11 @@ namespace OpenAI.Tests
         {
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.FineTuningEndpoint);
+            var jobList = await api.FineTuningEndpoint.ListJobsAsync();
+            Assert.IsNotNull(jobList);
+            Assert.IsNotEmpty(jobList.Items);
 
-            var list = await api.FineTuningEndpoint.ListJobsAsync();
-            Assert.IsNotNull(list);
-            Assert.IsNotEmpty(list.Jobs);
-
-            foreach (var job in list.Jobs)
+            foreach (var job in jobList.Items)
             {
                 if (job.Status is > JobStatus.NotStarted and < JobStatus.Succeeded)
                 {
@@ -198,7 +191,7 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_07_DeleteFineTunedModel()
+        public async Task Test_06_DeleteFineTunedModel()
         {
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.ModelsEndpoint);

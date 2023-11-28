@@ -27,6 +27,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(api.ModelsEndpoint);
             var models = await api.ModelsEndpoint.GetModelsAsync();
             Assert.IsNotEmpty(models);
+            Debug.Log($"Found {models.Count} models!");
 
             foreach (var model in models.OrderBy(model => model.Id))
             {

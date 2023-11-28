@@ -12,9 +12,9 @@ namespace OpenAI.Tests
         {
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
             Assert.IsNotNull(api.EmbeddingsEndpoint);
-            var result = await api.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was delicious and the waiter...");
-            Assert.IsNotNull(result);
-            Assert.IsNotEmpty(result.Data);
+            var embedding = await api.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was delicious and the waiter...");
+            Assert.IsNotNull(embedding);
+            Assert.IsNotEmpty(embedding.Data);
         }
 
         [Test]
@@ -27,9 +27,9 @@ namespace OpenAI.Tests
                 "The food was delicious and the waiter...",
                 "The food was terrible and the waiter..."
             };
-            var result = await api.EmbeddingsEndpoint.CreateEmbeddingAsync(embeddings);
-            Assert.IsNotNull(result);
-            Assert.AreEqual(result.Data.Count, 2);
+            var embedding = await api.EmbeddingsEndpoint.CreateEmbeddingAsync(embeddings);
+            Assert.IsNotNull(embedding);
+            Assert.AreEqual(embedding.Data.Count, 2);
         }
     }
 }

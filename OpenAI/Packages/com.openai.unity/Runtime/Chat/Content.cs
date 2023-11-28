@@ -11,9 +11,6 @@ namespace OpenAI.Chat
     public sealed class Content
     {
         [Preserve]
-        public static implicit operator Content(string content) => new Content(content);
-
-        [Preserve]
         public Content(string text)
             : this(ContentType.Text, text)
         {
@@ -23,6 +20,13 @@ namespace OpenAI.Chat
         public Content(Texture2D texture)
             : this(ContentType.ImageUrl, $"data:image/png;base64,{Convert.ToBase64String(texture.EncodeToPNG())}")
         {
+        }
+
+        [Preserve]
+        public Content(ImageUrl imageUrl)
+        {
+            Type = ContentType.ImageUrl;
+            ImageUrl = imageUrl;
         }
 
         [Preserve]
@@ -52,5 +56,14 @@ namespace OpenAI.Chat
         [Preserve]
         [JsonProperty("image_url")]
         public ImageUrl ImageUrl { get; private set; }
+
+        [Preserve]
+        public static implicit operator Content(string input) => new Content(ContentType.Text, input);
+
+        [Preserve]
+        public static implicit operator Content(ImageUrl imageUrl) => new Content(imageUrl);
+
+        [Preserve]
+        public static implicit operator Content(Texture2D texture) => new Content(texture);
     }
 }

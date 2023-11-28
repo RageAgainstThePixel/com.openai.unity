@@ -11,7 +11,6 @@ namespace OpenAI.Tests
     [Obsolete]
     internal class TestFixture_04_Edits
     {
-        [Test]
         public async Task Test_1_GetBasicEdit()
         {
             var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
