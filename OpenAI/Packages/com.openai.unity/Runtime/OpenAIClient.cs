@@ -88,6 +88,11 @@ namespace OpenAI
 
         protected override void ValidateAuthentication()
         {
+            if (Authentication?.Info == null)
+            {
+                throw new InvalidCredentialException($"Invalid {nameof(OpenAIAuthentication)}");
+            }
+
             if (!HasValidAuthentication)
             {
                 throw new InvalidCredentialException($"Missing API key for {nameof(OpenAIClient)}");

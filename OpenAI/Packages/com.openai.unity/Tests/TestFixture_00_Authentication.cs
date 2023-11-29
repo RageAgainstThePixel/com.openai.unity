@@ -22,7 +22,7 @@ namespace OpenAI.Tests
         [Test]
         public void Test_01_GetAuthFromEnv()
         {
-            var auth = OpenAIAuthentication.Default.LoadFromEnvironment();
+            var auth = new OpenAIAuthentication().LoadFromEnvironment();
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.Info.ApiKey);
             Assert.IsNotEmpty(auth.Info.ApiKey);
@@ -33,7 +33,7 @@ namespace OpenAI.Tests
         [Test]
         public void Test_02_GetAuthFromFile()
         {
-            var auth = OpenAIAuthentication.Default.LoadFromPath(Path.GetFullPath(OpenAIAuthentication.CONFIG_FILE));
+            var auth = new OpenAIAuthentication().LoadFromPath(Path.GetFullPath(OpenAIAuthentication.CONFIG_FILE));
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.Info.ApiKey);
             Assert.AreEqual("sk-test12", auth.Info.ApiKey);
@@ -44,7 +44,7 @@ namespace OpenAI.Tests
         [Test]
         public void Test_03_GetAuthFromNonExistentFile()
         {
-            var auth = OpenAIAuthentication.Default.LoadFromDirectory(filename: "bad.config");
+            var auth = new OpenAIAuthentication().LoadFromDirectory(filename: "bad.config");
             Assert.IsNull(auth);
         }
 
@@ -68,14 +68,14 @@ namespace OpenAI.Tests
                 cleanup = true;
             }
 
-            var config = AssetDatabase.LoadAssetAtPath<OpenAIConfiguration>(configPath);
-            var auth = OpenAIAuthentication.Default.LoadFromAsset<OpenAIConfiguration>();
+            var configuration = AssetDatabase.LoadAssetAtPath<OpenAIConfiguration>(configPath);
+            var auth = new OpenAIAuthentication(configuration);
 
             Assert.IsNotNull(auth);
             Assert.IsNotNull(auth.Info.ApiKey);
             Assert.IsNotEmpty(auth.Info.ApiKey);
-            Assert.AreEqual(auth.Info.ApiKey, config.ApiKey);
-            Assert.AreEqual(auth.Info.OrganizationId, config.OrganizationId);
+            Assert.AreEqual(auth.Info.ApiKey, configuration.ApiKey);
+            Assert.AreEqual(auth.Info.OrganizationId, configuration.OrganizationId);
 
             if (cleanup)
             {
@@ -87,17 +87,19 @@ namespace OpenAI.Tests
         [Test]
         public void Test_05_Authentication()
         {
-            var defaultAuth = OpenAIAuthentication.Default;
-            var manualAuth = new OpenAIAuthentication("sk-testAA", "org-testAA");
+            OpenAIAuthentication.Default = null;
+            var defaultAuth = OpenAIAuthentication.Default = new OpenAIAuthentication().LoadDefault();
 
             Assert.IsNotNull(defaultAuth);
+            Assert.IsNotNull(defaultAuth.Info);
             Assert.IsNotNull(defaultAuth.Info.ApiKey);
             Assert.IsNotNull(defaultAuth.Info.OrganizationId);
             Assert.AreEqual(defaultAuth.Info.ApiKey, OpenAIAuthentication.Default.Info.ApiKey);
             Assert.AreEqual(defaultAuth.Info.OrganizationId, OpenAIAuthentication.Default.Info.OrganizationId);
 
-            OpenAIAuthentication.Default = new OpenAIAuthentication("sk-testAA", "org-testAA");
+            var manualAuth = new OpenAIAuthentication("sk-testAA", "org-testAA");
             Assert.IsNotNull(manualAuth);
+            Assert.IsNotNull(manualAuth.Info);
             Assert.IsNotNull(manualAuth.Info.ApiKey);
             Assert.IsNotNull(manualAuth.Info.OrganizationId);
             Assert.AreEqual(manualAuth.Info.ApiKey, OpenAIAuthentication.Default.Info.ApiKey);
@@ -189,7 +191,7 @@ namespace OpenAI.Tests
         public void Test_12_CustomDomainConfigurationSettings()
         {
             var auth = new OpenAIAuthentication("sess-customIssuedToken");
-            var settings = new OpenAISettings(domain: "api.your-custom-domain.com");
+            var settings = new OpenAISettings(domain: "OpenAIClient.your-custom-domain.com");
             var api = new OpenAIClient(auth, settings);
             Debug.Log(api.Settings.Info.BaseRequest);
             Debug.Log(api.Settings.Info.BaseRequestUrlFormat);
@@ -202,6 +204,9 @@ namespace OpenAI.Tests
             {
                 File.Delete(OpenAIAuthentication.CONFIG_FILE);
             }
+
+            OpenAIAuthentication.Default = null;
+            OpenAISettings.Default = null;
         }
     }
 }

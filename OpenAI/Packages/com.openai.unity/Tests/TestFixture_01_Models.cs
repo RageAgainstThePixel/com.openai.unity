@@ -8,14 +8,13 @@ using UnityEngine;
 
 namespace OpenAI.Tests
 {
-    internal class TestFixture_01_Models
+    internal class TestFixture_01_Models : AbstractTestFixture
     {
         [Test]
         public async Task Test_1_GetModels()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.ModelsEndpoint);
-            var results = await api.ModelsEndpoint.GetModelsAsync();
+            Assert.IsNotNull(OpenAIClient.ModelsEndpoint);
+            var results = await OpenAIClient.ModelsEndpoint.GetModelsAsync();
             Assert.IsNotNull(results);
             Assert.NotZero(results.Count);
         }
@@ -23,9 +22,8 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_2_RetrieveModelDetails()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.ModelsEndpoint);
-            var models = await api.ModelsEndpoint.GetModelsAsync();
+            Assert.IsNotNull(OpenAIClient.ModelsEndpoint);
+            var models = await OpenAIClient.ModelsEndpoint.GetModelsAsync();
             Assert.IsNotEmpty(models);
             Debug.Log($"Found {models.Count} models!");
 
@@ -35,7 +33,7 @@ namespace OpenAI.Tests
 
                 try
                 {
-                    var result = await api.ModelsEndpoint.GetModelDetailsAsync(model.Id);
+                    var result = await OpenAIClient.ModelsEndpoint.GetModelDetailsAsync(model.Id);
                     Assert.IsNotNull(result);
                 }
                 catch (Exception e)

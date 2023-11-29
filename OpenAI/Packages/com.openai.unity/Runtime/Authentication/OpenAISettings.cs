@@ -9,35 +9,39 @@ namespace OpenAI
     public sealed class OpenAISettings : ISettings<OpenAISettingsInfo>
     {
         /// <summary>
-        /// Creates a new instance of <see cref="OpenAISettings"/> for use with OpenAI.
+        /// Creates a new instance of <see cref="OpenAISettings"/> for use with OpenAI with default <see cref="OpenAISettingsInfo"/>.
         /// </summary>
-        public OpenAISettings(OpenAIConfiguration configuration = null)
+        public OpenAISettings()
         {
-            if (cachedDefault != null) { return; }
+            Info = new OpenAISettingsInfo();
+            cachedDefault = this;
+        }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="OpenAISettings"/> for use with OpenAI with provided <see cref="OpenAIConfiguration"/>.
+        /// </summary>
+        public OpenAISettings(OpenAIConfiguration configuration)
+        {
             if (configuration == null)
             {
-                Debug.LogWarning($"You can speed this up by passing in your {nameof(OpenAIConfiguration)} in {nameof(OpenAISettings)}.ctr");
+                Debug.LogWarning($"You can speed this up by passing a {nameof(OpenAIConfiguration)} to the {nameof(OpenAISettings)}.ctr");
                 configuration = Resources.LoadAll<OpenAIConfiguration>(string.Empty).FirstOrDefault(asset => asset != null);
             }
 
-            if (configuration != null)
+            if (configuration == null)
             {
-                if (configuration.UseAzureOpenAI)
-                {
-                    Info = new OpenAISettingsInfo(configuration.ResourceName, configuration.DeploymentId, configuration.ApiVersion, configuration.UseAzureActiveDirectory);
-                    cachedDefault = new OpenAISettings(Info);
-                }
-                else
-                {
-                    Info = new OpenAISettingsInfo(domain: configuration.ProxyDomain, apiVersion: configuration.ApiVersion);
-                    cachedDefault = new OpenAISettings(Info);
-                }
+                throw new MissingReferenceException($"Failed to find a valid {nameof(OpenAIConfiguration)}!");
+            }
+
+            if (configuration.UseAzureOpenAI)
+            {
+                Info = new OpenAISettingsInfo(configuration.ResourceName, configuration.DeploymentId, configuration.ApiVersion, configuration.UseAzureActiveDirectory);
+                cachedDefault = this;
             }
             else
             {
-                Info = new OpenAISettingsInfo();
-                cachedDefault = new OpenAISettings(Info);
+                Info = new OpenAISettingsInfo(domain: configuration.ProxyDomain, apiVersion: configuration.ApiVersion);
+                cachedDefault = this;
             }
         }
 
@@ -46,7 +50,10 @@ namespace OpenAI
         /// </summary>
         /// <param name="settingsInfo"></param>
         public OpenAISettings(OpenAISettingsInfo settingsInfo)
-            => Info = settingsInfo;
+        {
+            Info = settingsInfo;
+            cachedDefault = this;
+        }
 
         /// <summary>
         /// Creates a new instance of <see cref="OpenAISettings"/> for use with OpenAI.
@@ -54,7 +61,10 @@ namespace OpenAI
         /// <param name="domain">Base api domain.</param>
         /// <param name="apiVersion">The version of the OpenAI api you want to use.</param>
         public OpenAISettings(string domain, string apiVersion = OpenAISettingsInfo.DefaultOpenAIApiVersion)
-            => Info = new OpenAISettingsInfo(domain, apiVersion);
+        {
+            Info = new OpenAISettingsInfo(domain, apiVersion);
+            cachedDefault = this;
+        }
 
         /// <summary>
         /// Creates a new instance of the <see cref="OpenAISettings"/> for use with Azure OpenAI.<br/>
@@ -73,13 +83,16 @@ namespace OpenAI
         /// Optional, set to true if you want to use Azure Active Directory for Authentication.
         /// </param>
         public OpenAISettings(string resourceName, string deploymentId, string apiVersion = OpenAISettingsInfo.DefaultAzureApiVersion, bool useActiveDirectoryAuthentication = false)
-            => Info = new OpenAISettingsInfo(resourceName, deploymentId, apiVersion, useActiveDirectoryAuthentication);
+        {
+            Info = new OpenAISettingsInfo(resourceName, deploymentId, apiVersion, useActiveDirectoryAuthentication);
+            cachedDefault = this;
+        }
 
         private static OpenAISettings cachedDefault;
 
         public static OpenAISettings Default
         {
-            get => cachedDefault ?? new OpenAISettings();
+            get => cachedDefault ??= new OpenAISettings(configuration: null);
             internal set => cachedDefault = value;
         }
 

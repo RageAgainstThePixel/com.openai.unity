@@ -15,13 +15,12 @@ using Tool = OpenAI.Chat.Tool;
 
 namespace OpenAI.Tests
 {
-    internal class TestFixture_03_Chat
+    internal class TestFixture_03_Chat : AbstractTestFixture
     {
         [Test]
         public async Task Test_01_01_GetChatCompletion()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.ChatEndpoint);
+            Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
                 new Message(Role.System, "You are a helpful assistant."),
@@ -30,7 +29,7 @@ namespace OpenAI.Tests
                 new Message(Role.User, "Where was it played?"),
             };
             var chatRequest = new ChatRequest(messages, Model.GPT4);
-            var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+            var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             Assert.IsNotEmpty(response.Choices);
@@ -46,8 +45,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_01_02_GetChatStreamingCompletion()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.ChatEndpoint);
+            Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
                 new Message(Role.System, "You are a helpful assistant."),
@@ -57,7 +55,7 @@ namespace OpenAI.Tests
             };
             var chatRequest = new ChatRequest(messages);
             var cumulativeDelta = string.Empty;
-            var response = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
+            var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
                 Assert.NotNull(partialResponse.Choices);
@@ -84,14 +82,14 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_01_03_JsonMode()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
+            Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
                 new Message(Role.System, "You are a helpful assistant designed to output JSON."),
                 new Message(Role.User, "Who won the world series in 2020?"),
             };
             var chatRequest = new ChatRequest(messages, "gpt-4-1106-preview", responseFormat: ChatResponseFormat.Json);
-            var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+            var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             Assert.IsNotEmpty(response.Choices);
@@ -107,8 +105,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_02_01_GetChatToolCompletion()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.ChatEndpoint);
+            Assert.IsNotNull(OpenAIClient.ChatEndpoint);
 
             var messages = new List<Message>
             {
@@ -146,7 +143,7 @@ namespace OpenAI.Tests
                      })
             };
             var chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
-            var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+            var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             Assert.IsTrue(response.Choices.Count == 1);
@@ -158,7 +155,7 @@ namespace OpenAI.Tests
             messages.Add(locationMessage);
             Debug.Log($"{locationMessage.Role}: {locationMessage.Content}");
             chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
-            response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+            response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
 
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
@@ -173,7 +170,7 @@ namespace OpenAI.Tests
                 messages.Add(unitMessage);
                 Debug.Log($"{unitMessage.Role}: {unitMessage.Content}");
                 chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
-                response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+                response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
                 Assert.IsNotNull(response);
                 Assert.IsNotNull(response.Choices);
                 Assert.IsTrue(response.Choices.Count == 1);
@@ -191,15 +188,14 @@ namespace OpenAI.Tests
             messages.Add(new Message(usedTool, functionResult));
             Debug.Log($"{Role.Tool}: {functionResult}");
             chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
-            response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+            response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Debug.Log(response);
         }
 
         [Test]
         public async Task Test_02_02_GetChatToolCompletion_Streaming()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.ChatEndpoint);
+            Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
                 new Message(Role.System, "You are a helpful weather assistant."),
@@ -236,7 +232,7 @@ namespace OpenAI.Tests
                     })
             };
             var chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
-            var response = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
+            var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
                 Assert.NotNull(partialResponse.Choices);
@@ -251,7 +247,7 @@ namespace OpenAI.Tests
             messages.Add(locationMessage);
             Debug.Log($"{locationMessage.Role}: {locationMessage.Content}");
             chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
-            response = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
+            response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
                 Assert.NotNull(partialResponse.Choices);
@@ -270,7 +266,7 @@ namespace OpenAI.Tests
                 messages.Add(unitMessage);
                 Debug.Log($"{unitMessage.Role}: {unitMessage.Content}");
                 chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
-                response = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
+                response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
                 {
                     Assert.IsNotNull(partialResponse);
                     Assert.NotNull(partialResponse.Choices);
@@ -295,7 +291,7 @@ namespace OpenAI.Tests
             Debug.Log($"{Role.Tool}: {functionResult}");
 
             chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
-            response = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
+            response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
                 Assert.NotNull(partialResponse.Choices);
@@ -307,8 +303,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_02_03_ChatCompletion_Multiple_Tools_Streaming()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.ChatEndpoint);
+            Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
                 new Message(Role.System, "You are a helpful weather assistant."),
@@ -341,7 +336,7 @@ namespace OpenAI.Tests
             };
 
             var chatRequest = new ChatRequest(messages, model: "gpt-4-1106-preview", tools: tools, toolChoice: "auto");
-            var response = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
+            var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
                 Assert.NotNull(partialResponse.Choices);
@@ -361,7 +356,7 @@ namespace OpenAI.Tests
             }
 
             chatRequest = new ChatRequest(messages, model: "gpt-4-1106-preview", tools: tools, toolChoice: "auto");
-            response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+            response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
 
             Assert.IsNotNull(response);
         }
@@ -369,8 +364,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_02_04_GetChatToolForceCompletion()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.ChatEndpoint);
+            Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
                 new Message(Role.System, "You are a helpful weather assistant."),
@@ -407,7 +401,7 @@ namespace OpenAI.Tests
                      })
             };
             var chatRequest = new ChatRequest(messages, tools: tools);
-            var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+            var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             Assert.IsTrue(response.Choices.Count == 1);
@@ -422,7 +416,7 @@ namespace OpenAI.Tests
                 messages,
                 tools: tools,
                 toolChoice: nameof(WeatherService.GetCurrentWeather));
-            response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+            response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
 
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
@@ -445,8 +439,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_03_01_GetChatVision()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.ChatEndpoint);
+            Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
                 new Message(Role.System, "You are a helpful assistant."),
@@ -457,7 +450,7 @@ namespace OpenAI.Tests
                 })
             };
             var chatRequest = new ChatRequest(messages, model: "gpt-4-vision-preview");
-            var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+            var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishDetails}");
@@ -467,8 +460,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_03_02_GetChatVisionStreaming()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.ChatEndpoint);
+            Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
                 new Message(Role.System, "You are a helpful assistant."),
@@ -479,7 +471,7 @@ namespace OpenAI.Tests
                 })
             };
             var chatRequest = new ChatRequest(messages, model: "gpt-4-vision-preview");
-            var response = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
+            var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
                 Assert.NotNull(partialResponse.Choices);
@@ -494,8 +486,7 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_03_03_GetChatVision_Texture()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.ChatEndpoint);
+            Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var imageAssetPath = AssetDatabase.GUIDToAssetPath("230fd778637d3d84d81355c8c13b1999");
             var image = AssetDatabase.LoadAssetAtPath<Texture2D>(imageAssetPath);
             var messages = new List<Message>
@@ -508,7 +499,7 @@ namespace OpenAI.Tests
                 })
             };
             var chatRequest = new ChatRequest(messages, model: "gpt-4-vision-preview");
-            var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+            var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishDetails}");
