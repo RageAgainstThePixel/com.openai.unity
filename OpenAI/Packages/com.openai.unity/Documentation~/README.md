@@ -50,7 +50,7 @@ The recommended installation method is though the unity package manager and [Ope
 
 ### Table of Contents
 
-- [Authentication](#authentication)
+- [Authentication](#authentication) :construction:
 - [Azure OpenAI](#azure-openai)
   - [Azure Active Directory Authentication](#azure-active-directory-authentication)
 - [OpenAI API Proxy](#openai-api-proxy)
