@@ -9,22 +9,19 @@ using UnityEngine;
 
 namespace OpenAI.Tests
 {
-    internal class TestFixture_08_Files
+    internal class TestFixture_08_Files : AbstractTestFixture
     {
         [Test]
         public async Task Test_01_UploadFile()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.FilesEndpoint);
+            Assert.IsNotNull(OpenAIClient.FilesEndpoint);
             var testData = new Conversation(new List<Message> { new Message(Role.Assistant, "I'm a learning language model") });
             await File.WriteAllTextAsync("test.jsonl", testData);
             Assert.IsTrue(File.Exists("test.jsonl"));
-            var result = await api.FilesEndpoint.UploadFileAsync("test.jsonl", "fine-tune");
-
+            var result = await OpenAIClient.FilesEndpoint.UploadFileAsync("test.jsonl", "fine-tune");
             Assert.IsNotNull(result);
             Assert.IsTrue(result.FileName == "test.jsonl");
             Debug.Log($"{result.Id} -> {result.Object}");
-
             File.Delete("test.jsonl");
             Assert.IsFalse(File.Exists("test.jsonl"));
         }
@@ -32,19 +29,16 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_02_ListFiles()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.FilesEndpoint);
+            Assert.IsNotNull(OpenAIClient.FilesEndpoint);
+            var fileList = await OpenAIClient.FilesEndpoint.ListFilesAsync();
 
-            var result = await api.FilesEndpoint.ListFilesAsync();
+            Assert.IsNotNull(fileList);
+            Assert.IsNotEmpty(fileList);
 
-            Assert.IsNotNull(result);
-            Assert.IsNotEmpty(result);
-
-            foreach (var file in result)
+            foreach (var file in fileList)
             {
-                var fileInfo = await api.FilesEndpoint.GetFileInfoAsync(file);
+                var fileInfo = await OpenAIClient.FilesEndpoint.GetFileInfoAsync(file);
                 Assert.IsNotNull(fileInfo);
-
                 Debug.Log($"{fileInfo.Id} -> {fileInfo.Object}: {fileInfo.FileName} | {fileInfo.Size} bytes");
             }
         }
@@ -52,16 +46,14 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_03_DownloadFile()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.FilesEndpoint);
+            Assert.IsNotNull(OpenAIClient.FilesEndpoint);
+            var fileList = await OpenAIClient.FilesEndpoint.ListFilesAsync();
 
-            var files = await api.FilesEndpoint.ListFilesAsync();
+            Assert.IsNotNull(fileList);
+            Assert.IsNotEmpty(fileList);
 
-            Assert.IsNotNull(files);
-            Assert.IsNotEmpty(files);
-
-            var testFileData = files[0];
-            var result = await api.FilesEndpoint.DownloadFileAsync(testFileData);
+            var testFileData = fileList[0];
+            var result = await OpenAIClient.FilesEndpoint.DownloadFileAsync(testFileData);
 
             Assert.IsNotNull(result);
             Debug.Log(result);
@@ -74,23 +66,21 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_04_DeleteFiles()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.FilesEndpoint);
+            Assert.IsNotNull(OpenAIClient.FilesEndpoint);
+            var fileList = await OpenAIClient.FilesEndpoint.ListFilesAsync();
+            Assert.IsNotNull(fileList);
+            Assert.IsNotEmpty(fileList);
 
-            var files = await api.FilesEndpoint.ListFilesAsync();
-            Assert.IsNotNull(files);
-            Assert.IsNotEmpty(files);
-
-            foreach (var file in files)
+            foreach (var file in fileList)
             {
-                var result = await api.FilesEndpoint.DeleteFileAsync(file);
-                Assert.IsTrue(result);
+                var isDeleted = await OpenAIClient.FilesEndpoint.DeleteFileAsync(file);
+                Assert.IsTrue(isDeleted);
                 Debug.Log($"{file.Id} -> deleted");
             }
 
-            files = await api.FilesEndpoint.ListFilesAsync();
-            Assert.IsNotNull(files);
-            Assert.IsEmpty(files);
+            fileList = await OpenAIClient.FilesEndpoint.ListFilesAsync();
+            Assert.IsNotNull(fileList);
+            Assert.IsEmpty(fileList);
         }
     }
 }

@@ -7,7 +7,8 @@ using UnityEngine.Scripting;
 namespace OpenAI
 {
     [Preserve]
-    public sealed class Event
+    [Obsolete("use EventResponse")]
+    public sealed class Event : BaseResponse
     {
         [Preserve]
         [JsonConstructor]
@@ -42,5 +43,7 @@ namespace OpenAI
         [Preserve]
         [JsonProperty("message")]
         public string Message { get; }
+
+        public static implicit operator EventResponse(Event @event) => new EventResponse(@event);
     }
 }

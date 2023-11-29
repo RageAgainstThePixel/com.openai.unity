@@ -11,7 +11,7 @@ namespace OpenAI
     /// <summary>
     /// Represents authentication for OpenAI
     /// </summary>
-    public sealed class OpenAIAuthentication : AbstractAuthentication<OpenAIAuthentication, OpenAIAuthInfo>
+    public sealed class OpenAIAuthentication : AbstractAuthentication<OpenAIAuthentication, OpenAIAuthInfo, OpenAIConfiguration>
     {
         internal const string CONFIG_FILE = ".openai";
         private const string OPENAI_KEY = nameof(OPENAI_KEY);
@@ -29,24 +29,19 @@ namespace OpenAI
         public static implicit operator OpenAIAuthentication(string key) => new OpenAIAuthentication(key);
 
         /// <summary>
-        /// Instantiates a new Authentication object that will load the default config.
+        /// Instantiates an empty Authentication object.
         /// </summary>
-        public OpenAIAuthentication()
-        {
-            if (cachedDefault != null) { return; }
-
-            cachedDefault = (LoadFromAsset<OpenAIConfiguration>() ??
-                             LoadFromDirectory()) ??
-                             LoadFromDirectory(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)) ??
-                             LoadFromEnvironment();
-            Info = cachedDefault?.Info;
-        }
+        public OpenAIAuthentication() { }
 
         /// <summary>
         /// Instantiates a new Authentication object with the given <paramref name="apiKey"/>, which may be <see langword="null"/>.
         /// </summary>
         /// <param name="apiKey">The API key, required to access the API endpoint.</param>
-        public OpenAIAuthentication(string apiKey) => Info = new OpenAIAuthInfo(apiKey);
+        public OpenAIAuthentication(string apiKey)
+        {
+            Info = new OpenAIAuthInfo(apiKey);
+            cachedDefault = this;
+        }
 
         /// <summary>
         /// Instantiates a new Authentication object with the given <paramref name="apiKey"/>, which may be <see langword="null"/>.
@@ -56,13 +51,27 @@ namespace OpenAI
         /// For users who belong to multiple organizations, you can pass a header to specify which organization is used for an API request.
         /// Usage from these API requests will count against the specified organization's subscription quota.
         /// </param>
-        public OpenAIAuthentication(string apiKey, string organization) => Info = new OpenAIAuthInfo(apiKey, organization);
+        public OpenAIAuthentication(string apiKey, string organization)
+        {
+            Info = new OpenAIAuthInfo(apiKey, organization);
+            cachedDefault = this;
+        }
 
         /// <summary>
         /// Instantiates a new Authentication object with the given <paramref name="authInfo"/>, which may be <see langword="null"/>.
         /// </summary>
         /// <param name="authInfo"></param>
-        public OpenAIAuthentication(OpenAIAuthInfo authInfo) => Info = authInfo;
+        public OpenAIAuthentication(OpenAIAuthInfo authInfo)
+        {
+            Info = authInfo;
+            cachedDefault = this;
+        }
+
+        /// <summary>
+        /// Instantiates a new Authentication object with the given <see cref="configuration"/>.
+        /// </summary>
+        /// <param name="configuration"><see cref="OpenAIConfiguration"/>.</param>
+        public OpenAIAuthentication(OpenAIConfiguration configuration) : this(configuration.ApiKey, configuration.organizationId) { }
 
         /// <inheritdoc />
         public override OpenAIAuthInfo Info { get; }
@@ -76,20 +85,21 @@ namespace OpenAI
         /// </summary>
         public static OpenAIAuthentication Default
         {
-            get => cachedDefault ?? new OpenAIAuthentication();
+            get => cachedDefault ??= new OpenAIAuthentication().LoadDefault();
             internal set => cachedDefault = value;
         }
 
         /// <inheritdoc />
-        public override OpenAIAuthentication LoadFromAsset<T>()
-            => Resources.LoadAll<T>(string.Empty)
-                .Where(asset => asset != null)
-                .Where(asset => asset is OpenAIConfiguration config &&
-                                !string.IsNullOrWhiteSpace(config.ApiKey))
-                .Select(asset => asset is OpenAIConfiguration config
-                    ? new OpenAIAuthentication(config.ApiKey, config.OrganizationId)
-                    : null)
-                .FirstOrDefault();
+        public override OpenAIAuthentication LoadFromAsset(OpenAIConfiguration configuration = null)
+        {
+            if (configuration == null)
+            {
+                Debug.LogWarning($"You can speed this up by passing a {nameof(OpenAIConfiguration)} to the {nameof(OpenAIAuthentication)}.ctr");
+                configuration = Resources.LoadAll<OpenAIConfiguration>(string.Empty).FirstOrDefault(o => o != null);
+            }
+
+            return configuration != null ? new OpenAIAuthentication(configuration) : null;
+        }
 
         /// <inheritdoc />
         public override OpenAIAuthentication LoadFromEnvironment()
@@ -130,13 +140,21 @@ namespace OpenAI
         /// ReSharper disable once OptionalParameterHierarchyMismatch
         public override OpenAIAuthentication LoadFromDirectory(string directory = null, string filename = CONFIG_FILE, bool searchUp = true)
         {
-            directory ??= Environment.CurrentDirectory;
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                directory = Environment.CurrentDirectory;
+            }
+
+            if (string.IsNullOrWhiteSpace(filename))
+            {
+                filename = CONFIG_FILE;
+            }
 
             OpenAIAuthInfo tempAuth = null;
 
             var currentDirectory = new DirectoryInfo(directory);
 
-            while (tempAuth == null && currentDirectory.Parent != null)
+            while (tempAuth == null && currentDirectory?.Parent != null)
             {
                 var filePath = Path.Combine(currentDirectory.FullName, filename);
 
@@ -195,13 +213,7 @@ namespace OpenAI
                 }
             }
 
-            if (tempAuth == null ||
-                string.IsNullOrEmpty(tempAuth.ApiKey))
-            {
-                return null;
-            }
-
-            return new OpenAIAuthentication(tempAuth);
+            return string.IsNullOrEmpty(tempAuth?.ApiKey) ? null : new OpenAIAuthentication(tempAuth);
         }
     }
 }

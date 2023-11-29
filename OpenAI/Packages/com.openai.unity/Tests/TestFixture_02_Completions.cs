@@ -10,16 +10,15 @@ using UnityEngine;
 
 namespace OpenAI.Tests
 {
-    internal class TestFixture_02_Completions
+    internal class TestFixture_02_Completions : AbstractTestFixture
     {
         private const string CompletionPrompts = "One Two Three Four Five Six Seven Eight Nine One Two Three Four Five Six Seven Eight";
 
         [Test]
-        public async Task Test_1_GetBasicCompletion()
+        public async Task Test_01_GetBasicCompletion()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.CompletionsEndpoint);
-            var result = await api.CompletionsEndpoint.CreateCompletionAsync(
+            Assert.IsNotNull(OpenAIClient.CompletionsEndpoint);
+            var result = await OpenAIClient.CompletionsEndpoint.CreateCompletionAsync(
                 CompletionPrompts,
                 temperature: 0.1,
                 maxTokens: 5,
@@ -33,13 +32,12 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_2_GetStreamingCompletion()
+        public async Task Test_02_GetStreamingCompletion()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            Assert.IsNotNull(api.CompletionsEndpoint);
+            Assert.IsNotNull(OpenAIClient.CompletionsEndpoint);
             var allCompletions = new List<Choice>();
 
-            await api.CompletionsEndpoint.StreamCompletionAsync(result =>
+            await OpenAIClient.CompletionsEndpoint.StreamCompletionAsync(result =>
             {
                 Assert.IsNotNull(result);
                 Assert.NotNull(result.Completions);

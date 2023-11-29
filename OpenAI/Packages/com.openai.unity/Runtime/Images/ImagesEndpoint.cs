@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Unity.Collections;
 using UnityEngine;
 using Utilities.Async;
 using Utilities.WebRequestRest;
@@ -69,9 +68,8 @@ namespace OpenAI.Images
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
         public async Task<IReadOnlyDictionary<string, Texture2D>> GenerateImageAsync(ImageGenerationRequest request, CancellationToken cancellationToken = default)
         {
-            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var endpoint = GetUrl($"/generations{(client.Settings.Info.IsAzureDeployment ? ":submit" : string.Empty)}");
-            var response = await Rest.PostAsync(endpoint, payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl("/generations"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             return await DeserializeResponseAsync(response, cancellationToken);
         }
 
@@ -297,7 +295,7 @@ namespace OpenAI.Images
         {
             response.Validate(EnableDebug);
 
-            var imagesResponse = response.DeserializeResponse<ImagesResponse>(response.Body);
+            var imagesResponse = response.Deserialize<ImagesResponse>(response.Body, client);
 
             if (imagesResponse?.Results is not { Count: not 0 })
             {

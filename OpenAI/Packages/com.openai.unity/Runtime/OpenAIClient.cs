@@ -1,6 +1,5 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -14,6 +13,7 @@ using OpenAI.FineTuning;
 using OpenAI.Images;
 using OpenAI.Models;
 using OpenAI.Moderations;
+using System;
 using System.Collections.Generic;
 using System.Security.Authentication;
 using Utilities.Rest.Extensions;
@@ -88,6 +88,11 @@ namespace OpenAI
 
         protected override void ValidateAuthentication()
         {
+            if (Authentication?.Info == null)
+            {
+                throw new InvalidCredentialException($"Invalid {nameof(OpenAIAuthentication)}");
+            }
+
             if (!HasValidAuthentication)
             {
                 throw new InvalidCredentialException($"Missing API key for {nameof(OpenAIClient)}");

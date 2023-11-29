@@ -41,7 +41,7 @@ namespace OpenAI.Chat
         }
 
         /// <summary>
-        /// The <see cref="Chat.Role"/> of the author of this message.
+        /// The <see cref="OpenAI.Role"/> of the author of this message.
         /// </summary>
         [Preserve]
         [JsonProperty("role")]
@@ -79,6 +79,6 @@ namespace OpenAI.Chat
 
         public override string ToString() => Content ?? string.Empty;
 
-        public static implicit operator string(Delta delta) => delta.ToString();
+        public static implicit operator string(Delta delta) => delta?.ToString();
     }
 }

@@ -102,7 +102,7 @@ namespace OpenAI.Chat
                 if (arguments == null &&
                     !string.IsNullOrWhiteSpace(argumentsString))
                 {
-                    arguments = JToken.Parse(argumentsString);
+                    arguments = JToken.FromObject(argumentsString);
                 }
 
                 return arguments;

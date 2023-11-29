@@ -32,34 +32,6 @@ namespace OpenAI.Models
             public List<Model> Data { get; }
         }
 
-        [Preserve]
-        private class DeleteModelResponse
-        {
-            [Preserve]
-            [JsonConstructor]
-            public DeleteModelResponse(
-                [JsonProperty("id")] string id,
-                [JsonProperty("object")] string @object,
-                [JsonProperty("deleted")] bool deleted)
-            {
-                Id = id;
-                Object = @object;
-                Deleted = deleted;
-            }
-
-            [Preserve]
-            [JsonProperty("id")]
-            public string Id { get; }
-
-            [Preserve]
-            [JsonProperty("object")]
-            public string Object { get; }
-
-            [Preserve]
-            [JsonProperty("deleted")]
-            public bool Deleted { get; }
-        }
-
         /// <inheritdoc />
         public ModelsEndpoint(OpenAIClient client) : base(client) { }
 
@@ -113,12 +85,11 @@ namespace OpenAI.Models
             {
                 var response = await Rest.DeleteAsync(GetUrl($"/{model.Id}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
                 response.Validate(EnableDebug);
-                return JsonConvert.DeserializeObject<DeleteModelResponse>(response.Body, OpenAIClient.JsonSerializationOptions)?.Deleted ?? false;
+                return JsonConvert.DeserializeObject<DeletedResponse>(response.Body, OpenAIClient.JsonSerializationOptions)?.Deleted ?? false;
             }
             catch (RestException e)
             {
-                if (e.Response.Code == 403 ||
-                    e.Message.Contains("You have insufficient permissions for this operation. You need to be this role: Owner."))
+                if (e.Message.Contains("You have insufficient permissions for this operation. You need to be this role: Owner."))
                 {
                     throw new UnauthorizedAccessException("You have insufficient permissions for this operation. You need to be this role: Owner.");
                 }

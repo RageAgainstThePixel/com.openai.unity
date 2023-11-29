@@ -7,6 +7,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Files
 {
     [Preserve]
+    [Obsolete("Use FileResponse")]
     public sealed class FileData
     {
         [Preserve]
