@@ -18,8 +18,9 @@ namespace OpenAI
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="OpenAISettings"/> with provided <see cref="OpenAIConfiguration"/>.
+        /// Creates a new instance of <see cref="OpenAISettings"/> with provided <see cref="configuration"/>.
         /// </summary>
+        /// <param name="configuration"><see cref="OpenAIConfiguration"/>.</param>
         public OpenAISettings(OpenAIConfiguration configuration)
         {
             if (configuration == null)
@@ -46,9 +47,9 @@ namespace OpenAI
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="OpenAISettings"/> with the provided <see cref="OpenAISettingsInfo"/>.
+        /// Creates a new instance of <see cref="OpenAISettings"/> with the provided <see cref="settingsInfo"/>.
         /// </summary>
-        /// <param name="settingsInfo"></param>
+        /// <param name="settingsInfo"><see cref="OpenAISettingsInfo"/>.</param>
         public OpenAISettings(OpenAISettingsInfo settingsInfo)
         {
             Info = settingsInfo;
@@ -56,7 +57,7 @@ namespace OpenAI
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="OpenAISettings"/> for use with OpenAI.
+        /// Creates a new instance of <see cref="OpenAISettings"/>.
         /// </summary>
         /// <param name="domain">Base api domain.</param>
         /// <param name="apiVersion">The version of the OpenAI api you want to use.</param>

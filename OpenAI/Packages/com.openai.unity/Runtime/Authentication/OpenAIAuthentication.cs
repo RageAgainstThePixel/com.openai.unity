@@ -98,7 +98,7 @@ namespace OpenAI
                 configuration = Resources.LoadAll<OpenAIConfiguration>(string.Empty).FirstOrDefault(o => o != null);
             }
 
-            return new OpenAIAuthentication(configuration);
+            return configuration != null ? new OpenAIAuthentication(configuration) : null;
         }
 
         /// <inheritdoc />
