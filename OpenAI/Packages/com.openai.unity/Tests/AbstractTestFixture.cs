@@ -8,10 +8,10 @@ namespace OpenAI.Tests
 
         protected AbstractTestFixture()
         {
-            var auth = new OpenAIAuthentication().LoadFromEnvironment();
+            var auth = new OpenAIAuthentication().LoadDefaultsReversed();
             var settings = new OpenAISettings();
             OpenAIClient = new OpenAIClient(auth, settings);
-            OpenAIClient.EnableDebug = true;
+            //OpenAIClient.EnableDebug = true;
         }
     }
 }

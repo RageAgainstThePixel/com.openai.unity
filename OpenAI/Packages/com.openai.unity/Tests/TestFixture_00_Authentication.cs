@@ -87,7 +87,6 @@ namespace OpenAI.Tests
         [Test]
         public void Test_05_Authentication()
         {
-            OpenAIAuthentication.Default = null;
             var defaultAuth = OpenAIAuthentication.Default = new OpenAIAuthentication().LoadDefault();
 
             Assert.IsNotNull(defaultAuth);

@@ -9,7 +9,7 @@ namespace OpenAI
     public sealed class OpenAISettings : ISettings<OpenAISettingsInfo>
     {
         /// <summary>
-        /// Creates a new instance of <see cref="OpenAISettings"/> for use with OpenAI with default <see cref="OpenAISettingsInfo"/>.
+        /// Creates a new instance of <see cref="OpenAISettings"/> with default <see cref="OpenAISettingsInfo"/>.
         /// </summary>
         public OpenAISettings()
         {
@@ -18,7 +18,7 @@ namespace OpenAI
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="OpenAISettings"/> for use with OpenAI with provided <see cref="OpenAIConfiguration"/>.
+        /// Creates a new instance of <see cref="OpenAISettings"/> with provided <see cref="OpenAIConfiguration"/>.
         /// </summary>
         public OpenAISettings(OpenAIConfiguration configuration)
         {

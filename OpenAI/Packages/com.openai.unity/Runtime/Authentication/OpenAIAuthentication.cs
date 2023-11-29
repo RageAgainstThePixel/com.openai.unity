@@ -140,13 +140,21 @@ namespace OpenAI
         /// ReSharper disable once OptionalParameterHierarchyMismatch
         public override OpenAIAuthentication LoadFromDirectory(string directory = null, string filename = CONFIG_FILE, bool searchUp = true)
         {
-            directory ??= Environment.CurrentDirectory;
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                directory = Environment.CurrentDirectory;
+            }
+
+            if (string.IsNullOrWhiteSpace(filename))
+            {
+                filename = CONFIG_FILE;
+            }
 
             OpenAIAuthInfo tempAuth = null;
 
             var currentDirectory = new DirectoryInfo(directory);
 
-            while (tempAuth == null && currentDirectory.Parent != null)
+            while (tempAuth == null && currentDirectory?.Parent != null)
             {
                 var filePath = Path.Combine(currentDirectory.FullName, filename);
 
