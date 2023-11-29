@@ -7,18 +7,31 @@ using UnityEngine;
 
 namespace OpenAI.Tests
 {
-    internal class TestFixture_10_Moderations
+    internal class TestFixture_10_Moderations : AbstractTestFixture
     {
         [Test]
-        public async Task Test_1_Moderate()
+        public async Task Test_01_Moderate()
         {
-            var api = new OpenAIClient(OpenAIAuthentication.Default.LoadFromEnvironment());
-            var violationResponse = await api.ModerationsEndpoint.GetModerationAsync("I want to kill them.");
-            Assert.IsTrue(violationResponse);
+            Assert.IsNotNull(OpenAIClient.ModerationsEndpoint);
+            var isViolation = await OpenAIClient.ModerationsEndpoint.GetModerationAsync("I want to kill them.");
+            Assert.IsTrue(isViolation);
+        }
 
-            var response = await api.ModerationsEndpoint.CreateModerationAsync(new ModerationsRequest("I love you"));
+        [Test]
+        public async Task Test_02_Moderate_Scores()
+        {
+            Assert.IsNotNull(OpenAIClient.ModerationsEndpoint);
+            var response = await OpenAIClient.ModerationsEndpoint.CreateModerationAsync(new ModerationsRequest("I love you"));
             Assert.IsNotNull(response);
             Debug.Log(response.Results?[0]?.Scores?.ToString());
+        }
+
+        [Test]
+        public async Task Test_03_Moderation_Chunked()
+        {
+            Assert.IsNotNull(OpenAIClient.ModerationsEndpoint);
+            var isViolation = await OpenAIClient.ModerationsEndpoint.GetModerationChunkedAsync("I don't want to kill them. I want to kill them. I want to kill them.", chunkSize: "I don't want to kill them.".Length, chunkOverlap: 4);
+            Assert.IsTrue(isViolation);
         }
     }
 }

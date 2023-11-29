@@ -12,6 +12,7 @@ namespace OpenAI.Completions
     /// Represents a result from calling the <see cref="CompletionsEndpoint"/>.
     /// </summary>
     [Preserve]
+    [Obsolete("use CompletionResponse")]
     public sealed class CompletionResult : BaseResponse
     {
         [Preserve]

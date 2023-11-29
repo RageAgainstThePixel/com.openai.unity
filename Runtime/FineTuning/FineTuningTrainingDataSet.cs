@@ -133,9 +133,9 @@ namespace OpenAI.FineTuning
         }
 
         [NonSerialized]
-        private FineTuneJob fineTuneJob;
+        private FineTuneJobResponse fineTuneJob;
 
-        internal FineTuneJob FineTuneJob
+        internal FineTuneJobResponse FineTuneJob
         {
             get => fineTuneJob;
             set

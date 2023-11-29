@@ -23,14 +23,14 @@ namespace OpenAI.Files
         {
             [Preserve]
             [JsonConstructor]
-            public FilesList([JsonProperty("data")] List<FileData> data)
+            public FilesList([JsonProperty("data")] List<FileResponse> data)
             {
-                Data = data;
+                Files = data;
             }
 
             [Preserve]
             [JsonProperty("data")]
-            public List<FileData> Data { get; }
+            public List<FileResponse> Files { get; }
         }
 
         /// <inheritdoc />
@@ -42,12 +42,12 @@ namespace OpenAI.Files
         /// <summary>
         /// Returns a list of files that belong to the user's organization.
         /// </summary>
-        /// <returns>List of <see cref="FileData"/>.</returns>
-        public async Task<IReadOnlyList<FileData>> ListFilesAsync(CancellationToken cancellationToken = default)
+        /// <returns>List of <see cref="FileResponse"/>.</returns>
+        public async Task<IReadOnlyList<FileResponse>> ListFilesAsync(CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl(), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return JsonConvert.DeserializeObject<FilesList>(response.Body, OpenAIClient.JsonSerializationOptions)?.Data;
+            return JsonConvert.DeserializeObject<FilesList>(response.Body, OpenAIClient.JsonSerializationOptions)?.Files;
         }
 
         /// <summary>
@@ -65,8 +65,8 @@ namespace OpenAI.Files
         /// </param>
         /// <param name="uploadProgress">Optional, <see cref="IProgress{T}"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="FileData"/>.</returns>
-        public async Task<FileData> UploadFileAsync(string filePath, string purpose, IProgress<Progress> uploadProgress = null, CancellationToken cancellationToken = default)
+        /// <returns><see cref="FileResponse"/>.</returns>
+        public async Task<FileResponse> UploadFileAsync(string filePath, string purpose, IProgress<Progress> uploadProgress = null, CancellationToken cancellationToken = default)
             => await UploadFileAsync(new FileUploadRequest(filePath, purpose), uploadProgress, cancellationToken);
 
         /// <summary>
@@ -77,18 +77,18 @@ namespace OpenAI.Files
         /// <param name="request"><see cref="FileUploadRequest"/>.</param>
         /// <param name="uploadProgress">Optional, <see cref="IProgress{T}"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="FileData"/>.</returns>
-        public async Task<FileData> UploadFileAsync(FileUploadRequest request, IProgress<Progress> uploadProgress = null, CancellationToken cancellationToken = default)
+        /// <returns><see cref="FileResponse"/>.</returns>
+        public async Task<FileResponse> UploadFileAsync(FileUploadRequest request, IProgress<Progress> uploadProgress = null, CancellationToken cancellationToken = default)
         {
-            var form = new WWWForm();
             using var fileData = new MemoryStream();
+            var content = new WWWForm();
             await request.File.CopyToAsync(fileData, cancellationToken);
-            form.AddField("purpose", request.Purpose);
-            form.AddBinaryData("file", fileData.ToArray(), request.FileName);
+            content.AddField("purpose", request.Purpose);
+            content.AddBinaryData("file", fileData.ToArray(), request.FileName);
             request.Dispose();
-            var response = await Rest.PostAsync(GetUrl(), form, new RestParameters(client.DefaultRequestHeaders, uploadProgress), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl(), content, new RestParameters(client.DefaultRequestHeaders, uploadProgress), cancellationToken);
             response.Validate(EnableDebug);
-            return JsonConvert.DeserializeObject<FileData>(response.Body, OpenAIClient.JsonSerializationOptions);
+            return JsonConvert.DeserializeObject<FileResponse>(response.Body, OpenAIClient.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace OpenAI.Files
                 }
 
                 response.Validate(EnableDebug);
-                return response.Successful;
+                return JsonConvert.DeserializeObject<DeletedResponse>(response.Body!, OpenAIClient.JsonSerializationOptions)?.Deleted ?? false;
             }
         }
 
@@ -130,12 +130,12 @@ namespace OpenAI.Files
         /// </summary>
         /// <param name="fileId">The ID of the file to use for this request.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="FileData"/>.</returns>
-        public async Task<FileData> GetFileInfoAsync(string fileId, CancellationToken cancellationToken = default)
+        /// <returns><see cref="FileResponse"/>.</returns>
+        public async Task<FileResponse> GetFileInfoAsync(string fileId, CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl($"/{fileId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return JsonConvert.DeserializeObject<FileData>(response.Body, OpenAIClient.JsonSerializationOptions);
+            return JsonConvert.DeserializeObject<FileResponse>(response.Body, OpenAIClient.JsonSerializationOptions);
         }
 
         /// <summary>
@@ -147,8 +147,8 @@ namespace OpenAI.Files
         /// <returns>The path to the downloaded file.</returns>
         public async Task<string> DownloadFileAsync(string fileId, IProgress<Progress> progress = null, CancellationToken cancellationToken = default)
         {
-            var fileData = await GetFileInfoAsync(fileId, cancellationToken);
-            return await Rest.DownloadFileAsync(GetUrl($"/{fileData.Id}/content"), fileData.FileName, new RestParameters(client.DefaultRequestHeaders, progress), cancellationToken: cancellationToken);
+            var file = await GetFileInfoAsync(fileId, cancellationToken);
+            return await Rest.DownloadFileAsync(GetUrl($"/{file.Id}/content"), file.FileName, new RestParameters(client.DefaultRequestHeaders, progress), cancellationToken: cancellationToken);
         }
     }
 }

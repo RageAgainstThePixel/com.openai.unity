@@ -33,7 +33,7 @@ namespace OpenAI.Editor.FineTuning
 
         private static readonly List<Model> organizationModels = new List<Model>();
 
-        private static readonly ConcurrentDictionary<string, FineTuneJob> fineTuneJobs = new ConcurrentDictionary<string, FineTuneJob>();
+        private static readonly ConcurrentDictionary<string, FineTuneJobResponse> fineTuneJobs = new ConcurrentDictionary<string, FineTuneJobResponse>();
 
         private static OpenAIClient openAI;
 
@@ -298,7 +298,7 @@ namespace OpenAI.Editor.FineTuning
                         (int)JobStatus.Cancelled or
                         (int)JobStatus.Succeeded)
                     {
-                        FineTuneJob fineTuneJob = null;
+                        FineTuneJobResponse fineTuneJob = null;
 
                         if (jobStatus.intValue == (int)JobStatus.Succeeded)
                         {
@@ -506,7 +506,7 @@ namespace OpenAI.Editor.FineTuning
 
             if (fineTuneJobList is { HasMore: true } && GUILayout.Button("Next Page", defaultColumnWidthOption))
             {
-                EditorApplication.delayCall += () => FetchTrainingJobs(fineTuneJobList.Jobs.LastOrDefault());
+                EditorApplication.delayCall += () => FetchTrainingJobs(fineTuneJobList.Items.LastOrDefault());
             }
 
             if (GUILayout.Button(refreshContent, defaultColumnWidthOption))
@@ -588,7 +588,7 @@ namespace OpenAI.Editor.FineTuning
             EditorGUI.indentLevel--;
         }
 
-        private static FineTuneJobList fineTuneJobList;
+        private static ListResponse<FineTuneJobResponse> fineTuneJobList;
         private static int trainingJobCount = 25;
         private static readonly Stack<string> trainingJobIds = new Stack<string>();
 
@@ -622,12 +622,12 @@ namespace OpenAI.Editor.FineTuning
                 }
 
                 fineTuneJobList = null;
-                var list = await openAI.FineTuningEndpoint.ListJobsAsync(limit: trainingJobCount, after: trainingJobId);
+                var list = await openAI.FineTuningEndpoint.ListJobsAsync(new ListQuery(limit: trainingJobCount, after: trainingJobId));
                 fineTuneJobs.Clear();
-                await Task.WhenAll(list.Jobs.Select(SyncJobDataAsync));
+                await Task.WhenAll(list.Items.Select(SyncJobDataAsync));
                 fineTuneJobList = list;
 
-                static async Task SyncJobDataAsync(FineTuneJob job)
+                static async Task SyncJobDataAsync(FineTuneJobResponse job)
                 {
                     var jobDetails = await openAI.FineTuningEndpoint.GetJobInfoAsync(job);
                     fineTuneJobs.TryAdd(jobDetails.Id, jobDetails);

@@ -19,6 +19,6 @@ namespace OpenAI.Chat
         public override string ToString() => Type;
 
         [Preserve]
-        public static implicit operator string(FinishDetails details) => details.ToString();
+        public static implicit operator string(FinishDetails details) => details?.ToString();
     }
 }

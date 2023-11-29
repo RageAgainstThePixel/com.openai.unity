@@ -1,12 +1,14 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using UnityEngine.Scripting;
 
 namespace OpenAI.FineTuning
 {
     [Preserve]
+    [Obsolete("Use ListResponse<EventResponse>")]
     public sealed class EventList
     {
         [Preserve]

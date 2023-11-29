@@ -32,7 +32,7 @@ namespace OpenAI.Chat
         /// Creates a new message to insert into a chat conversation.
         /// </summary>
         /// <param name="role">
-        /// The <see cref="Chat.Role"/> of the author of this message.
+        /// The <see cref="OpenAI.Role"/> of the author of this message.
         /// </param>
         /// <param name="content">
         /// The contents of the message.
@@ -50,7 +50,7 @@ namespace OpenAI.Chat
         /// Creates a new message to insert into a chat conversation.
         /// </summary>
         /// <param name="role">
-        /// The <see cref="Chat.Role"/> of the author of this message.
+        /// The <see cref="OpenAI.Role"/> of the author of this message.
         /// </param>
         /// <param name="content">
         /// The contents of the message.
@@ -104,7 +104,7 @@ namespace OpenAI.Chat
         private Role role;
 
         /// <summary>
-        /// The <see cref="Chat.Role"/> of the author of this message.
+        /// The <see cref="OpenAI.Role"/> of the author of this message.
         /// </summary>
         [Preserve]
         [JsonProperty("role")]
@@ -170,7 +170,7 @@ namespace OpenAI.Chat
         public override string ToString() => Content?.ToString() ?? string.Empty;
 
         [Preserve]
-        public static implicit operator string(Message message) => message.ToString();
+        public static implicit operator string(Message message) => message?.ToString();
 
         [Preserve]
         internal void CopyFrom(Delta other)
@@ -201,14 +201,12 @@ namespace OpenAI.Chat
 
                     if (otherToolCall.Index.HasValue)
                     {
-                        if (toolCalls.Count == 0)
+                        if (otherToolCall.Index + 1 > toolCalls.Count)
                         {
                             toolCalls.Insert(otherToolCall.Index.Value, new Tool(otherToolCall));
                         }
-                        else
-                        {
-                            toolCalls[otherToolCall.Index.Value].CopyFrom(otherToolCall);
-                        }
+
+                        toolCalls[otherToolCall.Index.Value].CopyFrom(otherToolCall);
                     }
                     else
                     {
