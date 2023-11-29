@@ -177,6 +177,28 @@ Use your system's environment variables specify an api key and organization to u
 var api = new OpenAIClient(new OpenAIAuthentication().LoadFromEnvironment());
 ```
 
+### [Azure OpenAI](https://learn.microsoft.com/en-us/azure/cognitive-services/openai)
+
+You can also choose to use Microsoft's Azure OpenAI deployments as well.
+
+You can find the required information in the Azure Playground by clicking the `View Code` button and view a URL like this:
+
+```markdown
+https://{your-resource-name}.openai.azure.com/openai/deployments/{deployment-id}/chat/completions?api-version={api-version}
+```
+
+- `your-resource-name` The name of your Azure OpenAI Resource.
+- `deployment-id` The deployment name you chose when you deployed the model.
+- `api-version` The API version to use for this operation. This follows the YYYY-MM-DD format.
+
+To setup the client to use your deployment, you'll need to pass in `OpenAISettings` into the client constructor.
+
+```csharp
+var auth = new OpenAIAuthentication("sk-apiKey");
+var settings = new OpenAISettings(resourceName: "your-resource-name", deploymentId: "deployment-id", apiVersion: "api-version");
+var api = new OpenAIClient(auth, settings);
+```
+
 #### [Azure Active Directory Authentication](https://learn.microsoft.com/en-us/azure/cognitive-services/openai/reference#authentication)
 
 [Authenticate with MSAL](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet) as usual and get access token, then use the access token when creating your `OpenAIAuthentication`. Then be sure to set useAzureActiveDirectory to true when creating your `OpenAISettings`.
