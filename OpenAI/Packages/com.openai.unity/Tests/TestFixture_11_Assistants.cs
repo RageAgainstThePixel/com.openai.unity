@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace OpenAI.Tests
 {
@@ -45,7 +46,7 @@ namespace OpenAI.Tests
             Assert.AreEqual("gpt-3.5-turbo-1106", assistant.Model);
             Assert.IsNotEmpty(assistant.Metadata);
             testAssistant = assistant;
-            Console.WriteLine($"{assistant} -> {assistant.Metadata["test"]}");
+            Debug.Log($"{assistant} -> {assistant.Metadata["test"]}");
         }
 
         [Test]
@@ -60,7 +61,7 @@ namespace OpenAI.Tests
             {
                 var retrieved = OpenAIClient.AssistantsEndpoint.RetrieveAssistantAsync(assistant);
                 Assert.IsNotNull(retrieved);
-                Console.WriteLine($"{assistant} -> {assistant.CreatedAt}");
+                Debug.Log($"{assistant} -> {assistant.CreatedAt}");
             }
         }
 
@@ -81,7 +82,7 @@ namespace OpenAI.Tests
             Assert.AreEqual("You are modified test assistant", assistant.Instructions);
             Assert.AreEqual("gpt-4-1106-preview", assistant.Model);
             Assert.IsTrue(assistant.Metadata.ContainsKey("test"));
-            Console.WriteLine($"{assistant.Id} -> modified");
+            Debug.Log($"{assistant.Id} -> modified");
         }
 
         [Test]
@@ -111,10 +112,10 @@ namespace OpenAI.Tests
                 var retrieved = await testAssistant.RetrieveFileAsync(file);
                 Assert.IsNotNull(retrieved);
                 Assert.IsTrue(retrieved.Id == file.Id);
-                Console.WriteLine($"{retrieved.AssistantId}'s file -> {retrieved.Id}");
+                Debug.Log($"{retrieved.AssistantId}'s file -> {retrieved.Id}");
                 // TODO 400 Bad Request error when attempting to download assistant files. Likely OpenAI bug.
                 //var downloadPath = await retrieved.DownloadFileAsync(Directory.GetCurrentDirectory(), true);
-                //Console.WriteLine($"downloaded {retrieved} -> {downloadPath}");
+                //Debug.Log($"downloaded {retrieved} -> {downloadPath}");
                 //Assert.IsTrue(File.Exists(downloadPath));
                 //File.Delete(downloadPath);
                 //Assert.IsFalse(File.Exists(downloadPath));
@@ -135,7 +136,7 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(file);
                 var isDeleted = await testAssistant.DeleteFileAsync(file);
                 Assert.IsTrue(isDeleted);
-                Console.WriteLine($"Deleted {file.Id}");
+                Debug.Log($"Deleted {file.Id}");
             }
 
             filesList = await testAssistant.ListFilesAsync();
@@ -150,7 +151,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.AssistantsEndpoint);
             var result = await testAssistant.DeleteAsync();
             Assert.IsTrue(result);
-            Console.WriteLine($"{testAssistant.Id} -> deleted");
+            Debug.Log($"{testAssistant.Id} -> deleted");
         }
     }
 }

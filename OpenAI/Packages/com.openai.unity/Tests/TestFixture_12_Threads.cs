@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using OpenAI.Assistants;
 using OpenAI.Files;
@@ -11,7 +12,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
+using UnityEngine;
 
 namespace OpenAI.Tests
 {
@@ -43,7 +44,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(thread.Metadata);
             Assert.IsNotEmpty(thread.Metadata);
             testThread = thread;
-            Console.WriteLine($"Create thread {thread.Id} -> {thread.CreatedAt}");
+            Debug.Log($"Create thread {thread.Id} -> {thread.CreatedAt}");
         }
 
         [Test]
@@ -55,7 +56,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(thread);
             Assert.AreEqual(testThread.Id, thread.Id);
             Assert.IsNotNull(thread.Metadata);
-            Console.WriteLine($"Retrieve thread {thread.Id} -> {thread.CreatedAt}");
+            Debug.Log($"Retrieve thread {thread.Id} -> {thread.CreatedAt}");
         }
 
         [Test]
@@ -71,7 +72,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(thread);
             Assert.AreEqual(testThread.Id, thread.Id);
             Assert.IsNotNull(thread.Metadata);
-            Console.WriteLine($"Modify thread {thread.Id} -> {thread.Metadata["test"]}");
+            Debug.Log($"Modify thread {thread.Id} -> {thread.Metadata["test"]}");
         }
 
         [Test]
@@ -126,7 +127,7 @@ namespace OpenAI.Tests
                 Assert.NotNull(message);
                 var threadMessage = await testThread.RetrieveMessageAsync(message);
                 Assert.NotNull(threadMessage);
-                Console.WriteLine($"[{threadMessage.Id}] {threadMessage.Role}: {threadMessage.PrintContent()}");
+                Debug.Log($"[{threadMessage.Id}] {threadMessage.Role}: {threadMessage.PrintContent()}");
                 var updated = await message.UpdateAsync();
                 Assert.IsNotNull(updated);
             }
@@ -145,12 +146,12 @@ namespace OpenAI.Tests
             Assert.IsNotNull(modified);
             Assert.IsNotNull(modified.Metadata);
             Assert.IsTrue(modified.Metadata["test"].Equals(nameof(Test_04_03_ModifyMessage)));
-            Console.WriteLine($"Modify message metadata: {modified.Id} -> {modified.Metadata["test"]}");
+            Debug.Log($"Modify message metadata: {modified.Id} -> {modified.Metadata["test"]}");
             metadata.Add("test2", nameof(Test_04_03_ModifyMessage));
             var modifiedThreadMessage = await testThread.ModifyMessageAsync(modified, metadata);
             Assert.IsNotNull(modifiedThreadMessage);
             Assert.IsNotNull(modifiedThreadMessage.Metadata);
-            Console.WriteLine($"Modify message metadata: {modifiedThreadMessage.Id} -> {string.Join("\n", modifiedThreadMessage.Metadata.Select(meta => $"[{meta.Key}] {meta.Value}"))}");
+            Debug.Log($"Modify message metadata: {modifiedThreadMessage.Id} -> {string.Join("\n", modifiedThreadMessage.Metadata.Select(meta => $"[{meta.Key}] {meta.Value}"))}");
         }
 
         [Test]
@@ -172,7 +173,7 @@ namespace OpenAI.Tests
                 {
                     var retrieved = await message.RetrieveFileAsync(file);
                     Assert.IsNotNull(retrieved);
-                    Console.WriteLine(file.Id);
+                    Debug.Log(file.Id);
                     // TODO 400 bad request errors. Likely OpenAI bug downloading message file content.
                     //var filePath = await message.DownloadFileContentAsync(file, Directory.GetCurrentDirectory(), true);
                     //Assert.IsFalse(string.IsNullOrWhiteSpace(filePath));
@@ -207,7 +208,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ThreadsEndpoint);
             var isDeleted = await testThread.DeleteAsync();
             Assert.IsTrue(isDeleted);
-            Console.WriteLine($"Deleted thread {testThread.Id}");
+            Debug.Log($"Deleted thread {testThread.Id}");
         }
 
 
@@ -250,7 +251,7 @@ namespace OpenAI.Tests
             var threadRequest = new CreateThreadRequest(messages);
             var run = await testAssistant.CreateThreadAndRunAsync(threadRequest);
             Assert.IsNotNull(run);
-            Console.WriteLine($"Created thread and run: {run.ThreadId} -> {run.Id} -> {run.CreatedAt}");
+            Debug.Log($"Created thread and run: {run.ThreadId} -> {run.Id} -> {run.CreatedAt}");
             testRun = run;
             var thread = await run.GetThreadAsync();
             Assert.NotNull(thread);
@@ -272,7 +273,7 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(run.Client);
                 var retrievedRun = await run.UpdateAsync();
                 Assert.IsNotNull(retrievedRun);
-                Console.WriteLine($"[{retrievedRun.Id}] {retrievedRun.Status} | {retrievedRun.CreatedAt}");
+                Debug.Log($"[{retrievedRun.Id}] {retrievedRun.Status} | {retrievedRun.CreatedAt}");
             }
         }
 
@@ -319,7 +320,7 @@ namespace OpenAI.Tests
             {
                 // Sometimes runs will get stuck in Cancelling state,
                 // for now we just log when it happens.
-                Console.WriteLine(e);
+                Debug.Log(e);
             }
 
             Assert.IsTrue(run.Status is RunStatus.Cancelled or RunStatus.Cancelling);
@@ -386,7 +387,7 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(runStep.Client);
                 var retrievedRunStep = await runStep.UpdateAsync();
                 Assert.IsNotNull(retrievedRunStep);
-                Console.WriteLine($"[{runStep.Id}] {runStep.Status} {runStep.CreatedAt} -> {runStep.ExpiresAt}");
+                Debug.Log($"[{runStep.Id}] {runStep.Status} {runStep.CreatedAt} -> {runStep.ExpiresAt}");
                 var retrieveStepRunStep = await run.RetrieveRunStepAsync(runStep.Id);
                 Assert.IsNotNull(retrieveStepRunStep);
             }
@@ -396,7 +397,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(toolCall.FunctionCall);
             Assert.AreEqual(nameof(WeatherService.GetCurrentWeather), toolCall.FunctionCall.Name);
             Assert.IsNotNull(toolCall.FunctionCall.Arguments);
-            Console.WriteLine($"tool call arguments: {toolCall.FunctionCall.Arguments}");
+            Debug.Log($"tool call arguments: {toolCall.FunctionCall.Arguments}");
             var functionArgs = JsonConvert.DeserializeObject<WeatherArgs>(toolCall.FunctionCall.Arguments);
             var functionResult = WeatherService.GetCurrentWeather(functionArgs);
             var toolOutput = new ToolOutput(toolCall.Id, functionResult);
@@ -412,7 +413,7 @@ namespace OpenAI.Tests
             {
                 Assert.IsNotNull(message);
                 Assert.IsNotEmpty(message.Content);
-                Console.WriteLine($"{message.Role}: {message.PrintContent()}");
+                Debug.Log($"{message.Role}: {message.PrintContent()}");
             }
         }
 
