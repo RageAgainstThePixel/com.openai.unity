@@ -1,9 +1,9 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
 using Newtonsoft.Json;
 using OpenAI.Extensions;
 using OpenAI.Models;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Utilities.WebRequestRest;
@@ -17,8 +17,7 @@ namespace OpenAI.Edits
     [Obsolete]
     public sealed class EditsEndpoint : OpenAIBaseEndpoint
     {
-        /// <inheritdoc />
-        public EditsEndpoint(OpenAIClient client) : base(client) { }
+        internal EditsEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
         protected override string Root => "edits";

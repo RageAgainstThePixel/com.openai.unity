@@ -3,6 +3,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using OpenAI.Assistants;
 using OpenAI.Audio;
 using OpenAI.Chat;
 using OpenAI.Completions;
@@ -53,7 +54,7 @@ namespace OpenAI
             FineTuningEndpoint = new FineTuningEndpoint(this);
             ModerationsEndpoint = new ModerationsEndpoint(this);
             ThreadsEndpoint = new ThreadsEndpoint(this);
-            //AssistantsEndpoint = new AssistantsEndpoint(this);
+            AssistantsEndpoint = new AssistantsEndpoint(this);
         }
 
         protected override void SetupDefaultRequestHeaders()
@@ -191,10 +192,10 @@ namespace OpenAI
         /// </summary>
         public ThreadsEndpoint ThreadsEndpoint { get; }
 
-        ///// <summary>
-        ///// Build assistants that can call models and use tools to perform tasks.<br/>
-        ///// <see href="https://platform.openai.com/docs/api-reference/assistants"/>
-        ///// </summary>
-        //public AssistantsEndpoint AssistantsEndpoint { get; }
+        /// <summary>
+        /// Build assistants that can call models and use tools to perform tasks.<br/>
+        /// <see href="https://platform.openai.com/docs/api-reference/assistants"/>
+        /// </summary>
+        public AssistantsEndpoint AssistantsEndpoint { get; }
     }
 }

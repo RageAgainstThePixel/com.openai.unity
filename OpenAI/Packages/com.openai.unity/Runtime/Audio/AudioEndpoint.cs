@@ -32,8 +32,7 @@ namespace OpenAI.Audio
             public string Text { get; }
         }
 
-        /// <inheritdoc />
-        public AudioEndpoint(OpenAIClient client) : base(client) { }
+        internal AudioEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
         protected override string Root => "audio";

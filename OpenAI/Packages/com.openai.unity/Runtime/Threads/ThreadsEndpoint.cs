@@ -13,7 +13,7 @@ namespace OpenAI.Threads
     /// </summary>
     public sealed class ThreadsEndpoint : OpenAIBaseEndpoint
     {
-        public ThreadsEndpoint(OpenAIClient client) : base(client) { }
+        internal ThreadsEndpoint(OpenAIClient client) : base(client) { }
 
         protected override string Root => "threads";
 

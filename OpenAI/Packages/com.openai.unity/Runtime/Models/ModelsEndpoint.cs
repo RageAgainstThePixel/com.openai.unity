@@ -32,8 +32,7 @@ namespace OpenAI.Models
             public List<Model> Data { get; }
         }
 
-        /// <inheritdoc />
-        public ModelsEndpoint(OpenAIClient client) : base(client) { }
+        internal ModelsEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
         protected override string Root => "models";

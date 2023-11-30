@@ -15,8 +15,7 @@ namespace OpenAI.Embeddings
     /// </summary>
     public sealed class EmbeddingsEndpoint : OpenAIBaseEndpoint
     {
-        /// <inheritdoc />
-        public EmbeddingsEndpoint(OpenAIClient client) : base(client) { }
+        internal EmbeddingsEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
         protected override string Root => "embeddings";

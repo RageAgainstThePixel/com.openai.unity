@@ -16,8 +16,7 @@ namespace OpenAI.Moderations
     /// </summary>
     public sealed class ModerationsEndpoint : OpenAIBaseEndpoint
     {
-        /// <inheritdoc />
-        public ModerationsEndpoint(OpenAIClient client) : base(client) { }
+        internal ModerationsEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
         protected override string Root => "moderations";

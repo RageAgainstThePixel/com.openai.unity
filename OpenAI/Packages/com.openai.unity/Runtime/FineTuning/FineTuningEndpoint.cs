@@ -17,10 +17,8 @@ namespace OpenAI.FineTuning
     /// </summary>
     public sealed class FineTuningEndpoint : OpenAIBaseEndpoint
     {
-        /// <inheritdoc />
-        public FineTuningEndpoint(OpenAIClient client) : base(client) { }
+        internal FineTuningEndpoint(OpenAIClient client) : base(client) { }
 
-        /// <inheritdoc />
         protected override string Root => "fine_tuning";
 
         /// <summary>
