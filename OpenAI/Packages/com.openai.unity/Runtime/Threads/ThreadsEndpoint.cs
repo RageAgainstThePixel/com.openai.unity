@@ -1,11 +1,10 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
+using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using OpenAI.Extensions;
 using Utilities.WebRequestRest;
 
 namespace OpenAI.Threads
