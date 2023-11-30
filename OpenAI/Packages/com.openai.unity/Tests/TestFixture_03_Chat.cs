@@ -11,7 +11,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
-using Tool = OpenAI.Chat.Tool;
 
 namespace OpenAI.Tests
 {

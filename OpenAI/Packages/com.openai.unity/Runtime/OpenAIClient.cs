@@ -3,6 +3,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using OpenAI.Assistants;
 using OpenAI.Audio;
 using OpenAI.Chat;
 using OpenAI.Completions;
@@ -13,6 +14,7 @@ using OpenAI.FineTuning;
 using OpenAI.Images;
 using OpenAI.Models;
 using OpenAI.Moderations;
+using OpenAI.Threads;
 using System;
 using System.Collections.Generic;
 using System.Security.Authentication;
@@ -51,6 +53,8 @@ namespace OpenAI
             FilesEndpoint = new FilesEndpoint(this);
             FineTuningEndpoint = new FineTuningEndpoint(this);
             ModerationsEndpoint = new ModerationsEndpoint(this);
+            ThreadsEndpoint = new ThreadsEndpoint(this);
+            AssistantsEndpoint = new AssistantsEndpoint(this);
         }
 
         protected override void SetupDefaultRequestHeaders()
@@ -58,9 +62,11 @@ namespace OpenAI
             var headers = new Dictionary<string, string>
             {
 #if !UNITY_WEBGL
-                { "User-Agent", "com.openai.unity" }
+                { "User-Agent", "com.openai.unity" },
 #endif
+                { "OpenAI-Beta", "assistants=v1"}
             };
+
             if (!Settings.Info.BaseRequestUrlFormat.Contains(OpenAISettingsInfo.AzureOpenAIDomain) &&
                 (string.IsNullOrWhiteSpace(Authentication.Info.ApiKey) ||
                  (!Authentication.Info.ApiKey.Contains(OpenAIAuthInfo.SecretKeyPrefix) &&
@@ -181,5 +187,17 @@ namespace OpenAI
         /// <see href="https://platform.openai.com/docs/api-reference/moderations"/>
         /// </summary>
         public ModerationsEndpoint ModerationsEndpoint { get; }
+
+        /// <summary>
+        /// Create threads that assistants can interact with.<br/>
+        /// <see href="https://platform.openai.com/docs/api-reference/threads"/>
+        /// </summary>
+        public ThreadsEndpoint ThreadsEndpoint { get; }
+
+        /// <summary>
+        /// Build assistants that can call models and use tools to perform tasks.<br/>
+        /// <see href="https://platform.openai.com/docs/api-reference/assistants"/>
+        /// </summary>
+        public AssistantsEndpoint AssistantsEndpoint { get; }
     }
 }

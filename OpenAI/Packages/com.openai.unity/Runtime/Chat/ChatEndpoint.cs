@@ -16,8 +16,7 @@ namespace OpenAI.Chat
     /// </summary>
     public sealed class ChatEndpoint : OpenAIBaseEndpoint
     {
-        /// <inheritdoc />
-        public ChatEndpoint(OpenAIClient client) : base(client) { }
+        internal ChatEndpoint(OpenAIClient client) : base(client) { }
 
         /// <inheritdoc />
         protected override string Root => "chat";
@@ -39,7 +38,7 @@ namespace OpenAI.Chat
 
             var response = await Rest.PostAsync(GetUrl("/completions"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<ChatResponse>(response.Body, client);
+            return response.Deserialize<ChatResponse>(client);
         }
 
         /// <summary>

@@ -11,7 +11,7 @@ namespace OpenAI.Tests
             var auth = new OpenAIAuthentication().LoadDefaultsReversed();
             var settings = new OpenAISettings();
             OpenAIClient = new OpenAIClient(auth, settings);
-            //OpenAIClient.EnableDebug = true;
+            OpenAIClient.EnableDebug = true;
         }
     }
 }

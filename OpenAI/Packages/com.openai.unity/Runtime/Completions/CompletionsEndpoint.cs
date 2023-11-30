@@ -113,7 +113,7 @@ namespace OpenAI.Completions
             var payload = JsonConvert.SerializeObject(completionRequest, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<CompletionResponse>(response.Body, client);
+            return response.Deserialize<CompletionResponse>(client);
         }
 
         #endregion Non-Streaming

@@ -97,9 +97,9 @@ namespace OpenAI.Extensions
             }
         }
 
-        internal static T Deserialize<T>(this Response response, string json, OpenAIClient client) where T : BaseResponse
+        internal static T Deserialize<T>(this Response response, OpenAIClient client) where T : BaseResponse
         {
-            var result = JsonConvert.DeserializeObject<T>(json, OpenAIClient.JsonSerializationOptions);
+            var result = JsonConvert.DeserializeObject<T>(response.Body, OpenAIClient.JsonSerializationOptions);
             result.SetResponseData(response, client);
             return result;
         }

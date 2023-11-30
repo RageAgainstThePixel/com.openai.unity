@@ -4,7 +4,9 @@
 
 Based on [OpenAI-DotNet](https://github.com/RageAgainstThePixel/OpenAI-DotNet)
 
-A [OpenAI](https://openai.com/) package for the [Unity](https://unity.com/) Game Engine to use chat-gpt, GPT-4, GPT-3.5-Turbo and Dall-E though their RESTful API (currently in beta).  Independently developed, this is not an official library and I am not affiliated with OpenAI.  An OpenAI API account is required.
+A [OpenAI](https://openai.com/) package for the [Unity](https://unity.com/) to use though their RESTful API.
+Independently developed, this is not an official library and I am not affiliated with OpenAI.
+An OpenAI API account is required.
 
 ***All copyrights, trademarks, logos, and assets are the property of their respective owners.***
 
@@ -58,6 +60,41 @@ The recommended installation method is though the unity package manager and [Ope
   - [List Models](#list-models)
   - [Retrieve Models](#retrieve-model)
   - [Delete Fine Tuned Model](#delete-fine-tuned-model)
+- [Assistants](#assistants) :new:
+  - [List Assistants](#list-assistants) :new:
+  - [Create Assistant](#create-assistant) :new:
+  - [Retrieve Assistant](#retrieve-assistant) :new:
+  - [Modify Assistant](#modify-assistant) :new:
+  - [Delete Assistant](#delete-assistant) :new:
+  - [List Assistant Files](#list-assistant-files) :new:
+  - [Attach File to Assistant](#attach-file-to-assistant) :new:
+  - [Upload File to Assistant](#upload-file-to-assistant) :new:
+  - [Retrieve File from Assistant](#retrieve-file-from-assistant) :new:
+  - [Remove File from Assistant](#remove-file-from-assistant) :new:
+  - [Delete File from Assistant](#delete-file-from-assistant) :new:
+- [Threads](#threads) :new:
+  - [Create Thread](#create-thread) :new:
+  - [Create Thread and Run](#create-thread-and-run) :new:
+  - [Retrieve Thread](#retrieve-thread) :new:
+  - [Modify Thread](#modify-thread) :new:
+  - [Delete Thread](#delete-thread) :new:
+  - [Thread Messages](#thread-messages) :new:
+    - [List Messages](#list-thread-messages) :new:
+    - [Create Message](#create-thread-message) :new:
+    - [Retrieve Message](#retrieve-thread-message) :new:
+    - [Modify Message](#modify-thread-message) :new:
+    - [Thread Message Files](#thread-message-files) :new:
+      - [List Message Files](#list-thread-message-files) :new:
+      - [Retrieve Message File](#retrieve-thread-message-file) :new:
+  - [Thread Runs](#thread-runs) :new:
+    - [List Runs](#list-thread-runs) :new:
+    - [Create Run](#create-thread-run) :new:
+    - [Retrieve Run](#retrieve-thread-run) :new:
+    - [Modify Run](#modify-thread-run) :new:
+    - [Submit Tool Outputs to Run](#thread-submit-tool-outputs-to-run) :new:
+    - [List Run Steps](#list-thread-run-steps) :new:
+    - [Retrieve Run Step](#retrieve-thread-run-step) :new:
+    - [Cancel Run](#cancel-thread-run) :new:
 - [Chat](#chat)
   - [Chat Completions](#chat-completions)
   - [Streaming](#chat-streaming)
@@ -107,6 +144,8 @@ There are 4 ways to provide your API keys, in order of precedence:
 You use the `OpenAIAuthentication` when you initialize the API as shown:
 
 #### Pass keys directly with constructor
+
+:warning: We recommended using the environment variables to load the API key instead of having it hard coded in your source. It is not recommended use this method in production, but only for accepting user credentials, local testing and quick start scenarios.
 
 ```csharp
 var api = new OpenAIClient("sk-apiKey");
@@ -331,6 +370,491 @@ var isDeleted = await api.ModelsEndpoint.DeleteFineTuneModelAsync("your-fine-tun
 Assert.IsTrue(isDeleted);
 ```
 
+### [Assistants](https://platform.openai.com/docs/api-reference/assistants)
+
+> :warning: Beta Feature
+
+Build assistants that can call models and use tools to perform tasks.
+
+- [Assistants Guide](https://platform.openai.com/docs/assistants)
+- [OpenAI Assistants Cookbook](https://github.com/openai/openai-cookbook/blob/main/examples/Assistants_API_overview_python.ipynb)
+
+The Assistants API is accessed via `OpenAIClient.AssistantsEndpoint`
+
+#### [List Assistants](https://platform.openai.com/docs/api-reference/assistants/listAssistants)
+
+Returns a list of assistants.
+
+```csharp
+var api = new OpenAIClient();
+var assistantsList = await OpenAIClient.AssistantsEndpoint.ListAssistantsAsync();
+
+foreach (var assistant in assistantsList.Items)
+{
+    Debug.Log($"{assistant} -> {assistant.CreatedAt}");
+}
+```
+
+#### [Create Assistant](https://platform.openai.com/docs/api-reference/assistants/createAssistant)
+
+Create an assistant with a model and instructions.
+
+```csharp
+var api = new OpenAIClient();
+var request = new CreateAssistantRequest("gpt-3.5-turbo-1106");
+var assistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(request);
+```
+
+#### [Retrieve Assistant](https://platform.openai.com/docs/api-reference/assistants/getAssistant)
+
+Retrieves an assistant.
+
+```csharp
+var api = new OpenAIClient();
+var assistant = await OpenAIClient.AssistantsEndpoint.RetrieveAssistantAsync("assistant-id");
+Debug.Log($"{assistant} -> {assistant.CreatedAt}");
+```
+
+#### [Modify Assistant](https://platform.openai.com/docs/api-reference/assistants/modifyAssistant)
+
+Modifies an assistant.
+
+```csharp
+var api = new OpenAIClient();
+var createRequest = new CreateAssistantRequest("gpt-3.5-turbo-1106");
+var assistant = await api.AssistantsEndpoint.CreateAssistantAsync(createRequest);
+var modifyRequest = new CreateAssistantRequest("gpt-4-1106-preview");
+var modifiedAssistant = await api.AssistantsEndpoint.ModifyAsync(assistant.Id, modifyRequest);
+// OR AssistantExtension for easier use!
+var modifiedAssistantEx = await assistant.ModifyAsync(modifyRequest);
+```
+
+#### [Delete Assistant](https://platform.openai.com/docs/api-reference/assistants/deleteAssistant)
+
+Delete an assistant.
+
+```csharp
+var api = new OpenAIClient();
+var isDeleted = await api.AssistantsEndpoint.DeleteAssistantAsync("assistant-id");
+// OR AssistantExtension for easier use!
+var isDeleted = await assistant.DeleteAsync();
+Assert.IsTrue(isDeleted);
+```
+
+#### [List Assistant Files](https://platform.openai.com/docs/api-reference/assistants/listAssistantFiles)
+
+Returns a list of assistant files.
+
+```csharp
+var api = new OpenAIClient();
+var filesList = await api.AssistantsEndpoint.ListFilesAsync("assistant-id");
+// OR AssistantExtension for easier use!
+var filesList = await assistant.ListFilesAsync();
+
+foreach (var file in filesList.Items)
+{
+    Debug.Log($"{file.AssistantId}'s file -> {file.Id}");
+}
+```
+
+#### [Attach File to Assistant](https://platform.openai.com/docs/api-reference/assistants/createAssistantFile)
+
+Create an assistant file by attaching a File to an assistant.
+
+```csharp
+var api = new OpenAIClient();
+var filePath = "assistant_test_2.txt";
+await File.WriteAllTextAsync(filePath, "Knowledge is power!");
+var fileUploadRequest = new FileUploadRequest(filePath, "assistant");
+var file = await api.FilesEndpoint.UploadFileAsync(fileUploadRequest);
+var assistantFile = await api.AssistantsEndpoint.AttachFileAsync("assistant-id", file.Id);
+// OR use extension method for convenience!
+var assistantFIle = await assistant.AttachFileAsync(file);
+```
+
+#### [Upload File to Assistant](#upload-file)
+
+Uploads ***and*** attaches a file to an assistant.
+
+> Assistant extension method, for extra convenience!
+
+```csharp
+var api = new OpenAIClient();
+var filePath = "assistant_test_2.txt";
+await File.WriteAllTextAsync(filePath, "Knowledge is power!");
+var assistantFile = await assistant.UploadFileAsync(filePath);
+```
+
+#### [Retrieve File from Assistant](https://platform.openai.com/docs/api-reference/assistants/getAssistantFile)
+
+Retrieves an AssistantFile.
+
+```csharp
+var api = new OpenAIClient();
+var assistantFile = await api.AssistantsEndpoint.RetrieveFileAsync("assistant-id", "file-id");
+// OR AssistantExtension for easier use!
+var assistantFile = await assistant.RetrieveFileAsync(fileId);
+Debug.Log($"{assistantFile.AssistantId}'s file -> {assistantFile.Id}");
+```
+
+#### [Remove File from Assistant](https://platform.openai.com/docs/api-reference/assistants/deleteAssistantFile)
+
+Remove a file from an assistant.
+
+> Note: The file will remain in your organization until [deleted with FileEndpoint](#delete-file).
+
+```csharp
+var api = new OpenAIClient();
+var isRemoved = await api.AssistantsEndpoint.RemoveFileAsync("assistant-id", "file-id");
+// OR use extension method for convenience!
+var isRemoved = await assistant.RemoveFileAsync("file-id");
+Assert.IsTrue(isRemoved);
+```
+
+#### [Delete File from Assistant](#delete-file)
+
+Removes a file from the assistant and then deletes the file from the organization.
+
+> Assistant extension method, for extra convenience!
+
+```csharp
+var api = new OpenAIClient();
+var isDeleted = await assistant.DeleteFileAsync("file-id");
+Assert.IsTrue(isDeleted);
+```
+
+### [Threads](https://platform.openai.com/docs/api-reference/threads)
+
+> :warning: Beta Feature
+
+Create Threads that [Assistants](#assistants) can interact with.
+
+The Threads API is accessed via `OpenAIClient.ThreadsEndpoint`
+
+#### [Create Thread](https://platform.openai.com/docs/api-reference/threads/createThread)
+
+Create a thread.
+
+```csharp
+var api = new OpenAIClient();
+var thread = await api.ThreadsEndpoint.CreateThreadAsync();
+Debug.Log($"Create thread {thread.Id} -> {thread.CreatedAt}");
+```
+
+#### [Create Thread and Run](https://platform.openai.com/docs/api-reference/runs/createThreadAndRun)
+
+Create a thread and run it in one request.
+
+> See also: [Thread Runs](#thread-runs)
+
+```csharp
+var api = new OpenAIClient();
+var assistant = await api.AssistantsEndpoint.CreateAssistantAsync(
+    new CreateAssistantRequest(
+        name: "Math Tutor",
+        instructions: "You are a personal math tutor. Answer questions briefly, in a sentence or less.",
+        model: "gpt-4-1106-preview"));
+var messages = new List<Message> { "I need to solve the equation `3x + 11 = 14`. Can you help me?" };
+var threadRequest = new CreateThreadRequest(messages);
+var run = await assistant.CreateThreadAndRunAsync(threadRequest);
+Debug.Log($"Created thread and run: {run.ThreadId} -> {run.Id} -> {run.CreatedAt}");
+```
+
+#### [Retrieve Thread](https://platform.openai.com/docs/api-reference/threads/getThread)
+
+Retrieves a thread.
+
+```csharp
+var api = new OpenAIClient();
+var thread = await api.ThreadsEndpoint.RetrieveThreadAsync("thread-id");
+// OR if you simply wish to get the latest state of a thread
+thread = await thread.UpdateAsync();
+Debug.Log($"Retrieve thread {thread.Id} -> {thread.CreatedAt}");
+```
+
+#### [Modify Thread](https://platform.openai.com/docs/api-reference/threads/modifyThread)
+
+Modifies a thread.
+
+> Note: Only the metadata can be modified.
+
+```csharp
+var api = new OpenAIClient();
+var thread = await api.ThreadsEndpoint.CreateThreadAsync();
+var metadata = new Dictionary<string, string>
+{
+    { "key", "custom thread metadata" }
+}
+thread = await api.ThreadsEndpoint.ModifyThreadAsync(thread.Id, metadata);
+// OR use extension method for convenience!
+thread = await thread.ModifyAsync(metadata);
+Debug.Log($"Modify thread {thread.Id} -> {thread.Metadata["key"]}");
+```
+
+#### [Delete Thread](https://platform.openai.com/docs/api-reference/threads/deleteThread)
+
+Delete a thread.
+
+```csharp
+var api = new OpenAIClient();
+var isDeleted = await api.ThreadsEndpoint.DeleteThreadAsync("thread-id");
+// OR use extension method for convenience!
+var isDeleted = await thread.DeleteAsync();
+Assert.IsTrue(isDeleted);
+```
+
+#### [Thread Messages](https://platform.openai.com/docs/api-reference/messages)
+
+Create messages within threads.
+
+##### [List Thread Messages](https://platform.openai.com/docs/api-reference/messages/listMessages)
+
+Returns a list of messages for a given thread.
+
+```csharp
+var api = new OpenAIClient();
+var messageList = await api.ThreadsEndpoint.ListMessagesAsync("thread-id");
+// OR use extension method for convenience!
+var messageList = await thread.ListMessagesAsync();
+
+foreach (var message in messageList.Items)
+{
+    Debug.Log($"{message.Id}: {message.Role}: {message.PrintContent()}");
+}
+```
+
+##### [Create Thread Message](https://platform.openai.com/docs/api-reference/messages/createMessage)
+
+Create a message.
+
+```csharp
+var api = new OpenAIClient();
+var thread = await api.ThreadsEndpoint.CreateThreadAsync();
+var request = new CreateMessageRequest("Hello world!");
+var message = await api.ThreadsEndpoint.CreateMessageAsync(thread.Id, request);
+// OR use extension method for convenience!
+var message = await thread.CreateMessageAsync("Hello World!");
+Debug.Log($"{message.Id}: {message.Role}: {message.PrintContent()}");
+```
+
+##### [Retrieve Thread Message](https://platform.openai.com/docs/api-reference/messages/getMessage)
+
+Retrieve a message.
+
+```csharp
+var api = new OpenAIClient();
+var message = await api.ThreadsEndpoint.RetrieveMessageAsync("thread-id", "message-id");
+// OR use extension methods for convenience!
+var message = await thread.RetrieveMessageAsync("message-id");
+var message = await message.UpdateAsync();
+Debug.Log($"{message.Id}: {message.Role}: {message.PrintContent()}");
+```
+
+##### [Modify Thread Message](https://platform.openai.com/docs/api-reference/messages/modifyMessage)
+
+Modify a message.
+
+> Note: Only the message metadata can be modified.
+
+```csharp
+var api = new OpenAIClient();
+var metadata = new Dictionary<string, string>
+{
+    { "key", "custom message metadata" }
+};
+var message = await api.ThreadsEndpoint.ModifyMessageAsync("thread-id", "message-id", metadata);
+// OR use extension method for convenience!
+var message = await message.ModifyAsync(metadata);
+Debug.Log($"Modify message metadata: {message.Id} -> {message.Metadata["key"]}");
+```
+
+##### Thread Message Files
+
+###### [List Thread Message Files](https://platform.openai.com/docs/api-reference/messages/listMessageFiles)
+
+Returns a list of message files.
+
+```csharp
+var api = new OpenAIClient();
+var fileList = await api.ThreadsEndpoint.ListFilesAsync("thread-id", "message-Id");
+// OR use extension method for convenience!
+var fileList = await thread.ListFilesAsync("message-id");
+var fileList = await message.ListFilesAsync();
+
+foreach (var file in fileList.Items)
+{
+    Debug.Log(file.Id);
+}
+```
+
+###### [Retrieve Thread Message File](https://platform.openai.com/docs/api-reference/messages/getMessageFile)
+
+Retrieves a message file.
+
+```csharp
+var api = new OpenAIClient();
+var file = await api.ThreadsEndpoint.RetrieveFileAsync("thread-id", "message-id", "file-id");
+// OR use extension method for convenience!
+var file = await message.RetrieveFileAsync();
+Debug.Log(file.Id);
+```
+
+#### [Thread Runs](https://platform.openai.com/docs/api-reference/runs)
+
+Represents an execution run on a thread.
+
+##### [List Thread Runs](https://platform.openai.com/docs/api-reference/runs/listRuns)
+
+Returns a list of runs belonging to a thread.
+
+```csharp
+var api = new OpenAIClient();
+var runList = await api.ThreadsEndpoint.ListRunsAsync("thread-id");
+// OR use extension method for convenience!
+var runList = await thread.ListRunsAsync();
+
+foreach (var run in runList.Items)
+{
+    Debug.Log($"[{run.Id}] {run.Status} | {run.CreatedAt}");
+}
+```
+
+##### [Create Thread Run](https://platform.openai.com/docs/api-reference/runs/createRun)
+
+Create a run.
+
+```csharp
+var api = new OpenAIClient();
+var assistant = await api.AssistantsEndpoint.CreateAssistantAsync(
+    new CreateAssistantRequest(
+        name: "Math Tutor",
+        instructions: "You are a personal math tutor. Answer questions briefly, in a sentence or less.",
+        model: "gpt-4-1106-preview"));
+var thread = await OpenAIClient.ThreadsEndpoint.CreateThreadAsync();
+var message = await thread.CreateMessageAsync("I need to solve the equation `3x + 11 = 14`. Can you help me?");
+var run = await thread.CreateRunAsync(assistant);
+Debug.Log($"[{run.Id}] {run.Status} | {run.CreatedAt}");
+```
+
+##### [Retrieve Thread Run](https://platform.openai.com/docs/api-reference/runs/getRun)
+
+Retrieves a run.
+
+```csharp
+var api = new OpenAIClient();
+var run = await api.ThreadsEndpoint.RetrieveRunAsync("thread-id", "run-id");
+// OR use extension method for convenience!
+var run = await thread.RetrieveRunAsync("run-id");
+var run = await run.UpdateAsync();
+Debug.Log($"[{run.Id}] {run.Status} | {run.CreatedAt}");
+```
+
+##### [Modify Thread Run](https://platform.openai.com/docs/api-reference/runs/modifyRun)
+
+Modifies a run.
+
+> Note: Only the metadata can be modified.
+
+```csharp
+var api = new OpenAIClient();
+var metadata = new Dictionary<string, string>
+{
+    { "key", "custom run metadata" }
+};
+var run = await api.ThreadsEndpoint.ModifyRunAsync("thread-id", "run-id", metadata);
+// OR use extension method for convenience!
+var run = await run.ModifyAsync(metadata);
+Debug.Log($"Modify run {run.Id} -> {run.Metadata["key"]}");
+```
+
+##### [Thread Submit Tool Outputs to Run](https://platform.openai.com/docs/api-reference/runs/submitToolOutputs)
+
+When a run has the status: `requires_action` and `required_action.type` is `submit_tool_outputs`, this endpoint can be used to submit the outputs from the tool calls once they're all completed. All outputs must be submitted in a single request.
+
+```csharp
+var api = new OpenAIClient();
+var function = new Function(
+    nameof(WeatherService.GetCurrentWeather),
+    "Get the current weather in a given location",
+    new JObject
+    {
+        ["type"] = "object",
+        ["properties"] = new JObject
+        {
+            ["location"] = new JObject
+            {
+                ["type"] = "string",
+                ["description"] = "The city and state, e.g. San Francisco, CA"
+            },
+            ["unit"] = new JObject
+            {
+                ["type"] = "string",
+                ["enum"] = new JArray { "celsius", "fahrenheit" }
+            }
+        },
+        ["required"] = new JArray { "location", "unit" }
+    });
+testAssistant = await api.AssistantsEndpoint.CreateAssistantAsync(new CreateAssistantRequest(tools: new Tool[] { function }));
+var run = await testAssistant.CreateThreadAndRunAsync("I'm in Kuala-Lumpur, please tell me what's the temperature in celsius now?");
+// waiting while run is Queued and InProgress
+run = await run.WaitForStatusChangeAsync();
+var toolCall = run.RequiredAction.SubmitToolOutputs.ToolCalls[0];
+Debug.Log($"tool call arguments: {toolCall.FunctionCall.Arguments}");
+var functionArgs = JsonConvert.DeserializeObject<WeatherArgs>(toolCall.FunctionCall.Arguments);
+var functionResult = WeatherService.GetCurrentWeather(functionArgs);
+var toolOutput = new ToolOutput(toolCall.Id, functionResult);
+run = await run.SubmitToolOutputsAsync(toolOutput);
+// waiting while run in Queued and InProgress
+run = await run.WaitForStatusChangeAsync();
+var messages = await run.ListMessagesAsync();
+
+foreach (var message in messages.Items.OrderBy(response => response.CreatedAt))
+{
+    Debug.Log($"{message.Role}: {message.PrintContent()}");
+}
+```
+
+##### [List Thread Run Steps](https://platform.openai.com/docs/api-reference/runs/listRunSteps)
+
+Returns a list of run steps belonging to a run.
+
+```csharp
+var api = new OpenAIClient();
+var runStepList = await api.ThreadsEndpoint.ListRunStepsAsync("thread-id", "run-id");
+// OR use extension method for convenience!
+var runStepList = await run.ListRunStepsAsync();
+
+foreach (var runStep in runStepList.Items)
+{
+    Debug.Log($"[{runStep.Id}] {runStep.Status} {runStep.CreatedAt} -> {runStep.ExpiresAt}");
+}
+```
+
+##### [Retrieve Thread Run Step](https://platform.openai.com/docs/api-reference/runs/getRunStep)
+
+Retrieves a run step.
+
+```csharp
+var api = new OpenAIClient();
+var runStep = await api.ThreadsEndpoint.RetrieveRunStepAsync("thread-id", "run-id", "step-id");
+// OR use extension method for convenience!
+var runStep = await run.RetrieveRunStepAsync("step-id");
+var runStep = await runStep.UpdateAsync();
+Debug.Log($"[{runStep.Id}] {runStep.Status} {runStep.CreatedAt} -> {runStep.ExpiresAt}");
+```
+
+##### [Cancel Thread Run](https://platform.openai.com/docs/api-reference/runs/cancelRun)
+
+Cancels a run that is `in_progress`.
+
+```csharp
+var api = new OpenAIClient();
+var isCancelled = await api.ThreadsEndpoint.CancelRunAsync("thread-id", "run-id");
+// OR use extension method for convenience!
+var isCancelled = await run.CancelAsync();
+Assert.IsTrue(isCancelled);
+```
+
 ### [Chat](https://platform.openai.com/docs/api-reference/chat)
 
 Given a chat conversation, the model will return a chat completion response.
@@ -447,7 +971,7 @@ if (!string.IsNullOrEmpty(response.ToString()))
 var usedTool = response.FirstChoice.Message.ToolCalls[0];
 Debug.Log($"{response.FirstChoice.Message.Role}: {usedTool.Function.Name} | Finish Reason: {response.FirstChoice.FinishReason}");
 Debug.Log($"{usedTool.Function.Arguments}");
-var functionArgs = JsonSerializer.Deserialize<WeatherArgs>(usedTool.Function.Arguments.ToString());
+var functionArgs = JsonConvert.DeserializeObject<WeatherArgs>(usedTool.Function.Arguments.ToString());
 var functionResult = WeatherService.GetCurrentWeather(functionArgs);
 messages.Add(new Message(usedTool, functionResult));
 Debug.Log($"{Role.Tool}: {functionResult}");
