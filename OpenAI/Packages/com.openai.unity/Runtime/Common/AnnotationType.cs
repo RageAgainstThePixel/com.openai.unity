@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 namespace OpenAI
 {
     [Preserve]
-    public enum ContentType
+    public enum AnnotationType
     {
-        [EnumMember(Value = "text")]
-        Text,
-        [EnumMember(Value = "image_url")]
-        ImageUrl
+        [EnumMember(Value = "file_citation")]
+        FileCitation,
+        [EnumMember(Value = "file_path")]
+        FilePath
     }
 }

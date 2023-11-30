@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine.Scripting;
 
-namespace OpenAI.Chat
+namespace OpenAI
 {
     /// <summary>
     /// <see href="https://platform.openai.com/docs/guides/gpt/function-calling"/>

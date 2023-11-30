@@ -3,7 +3,7 @@
 using Newtonsoft.Json;
 using UnityEngine.Scripting;
 
-namespace OpenAI.Chat
+namespace OpenAI
 {
     [Preserve]
     public sealed class Tool

@@ -3,14 +3,14 @@
 using System.Runtime.Serialization;
 using UnityEngine.Scripting;
 
-namespace OpenAI
+namespace OpenAI.Threads
 {
     [Preserve]
-    public enum ContentType
+    public enum RunStepType
     {
-        [EnumMember(Value = "text")]
-        Text,
-        [EnumMember(Value = "image_url")]
-        ImageUrl
+        [EnumMember(Value = "message_creation")]
+        MessageCreation,
+        [EnumMember(Value = "tool_calls")]
+        ToolCalls
     }
 }
