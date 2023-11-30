@@ -27,7 +27,7 @@ namespace OpenAI.Threads
         /// <returns><see cref="ThreadResponse"/>.</returns>
         public async Task<ThreadResponse> CreateThreadAsync(CreateThreadRequest request = null, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.PostAsync(GetUrl(), jsonData: request != null ? JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions) : null, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl(), request == null ? string.Empty : JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<ThreadResponse>(client);
         }
@@ -347,7 +347,7 @@ namespace OpenAI.Threads
         /// <returns><see cref="RunResponse"/>.</returns>
         public async Task<RunResponse> CancelRunAsync(string threadId, string runId, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs/{runId}/cancel"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs/{runId}/cancel"), string.Empty, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<RunResponse>(client);
         }

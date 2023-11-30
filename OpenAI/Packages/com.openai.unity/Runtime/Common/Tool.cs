@@ -22,6 +22,17 @@ namespace OpenAI
         }
 
         [Preserve]
+        public static implicit operator Tool(Function function) => new Tool(function);
+
+        [Preserve]
+        [JsonIgnore]
+        public static Tool Retrieval { get; } = new Tool { Type = "retrieval" };
+
+        [Preserve]
+        [JsonIgnore]
+        public static Tool CodeInterpreter { get; } = new Tool { Type = "code_interpreter" };
+
+        [Preserve]
         [JsonProperty("id")]
         public string Id { get; private set; }
 
@@ -36,9 +47,6 @@ namespace OpenAI
         [Preserve]
         [JsonProperty("function")]
         public Function Function { get; private set; }
-
-        [Preserve]
-        public static implicit operator Tool(Function function) => new Tool(function);
 
         [Preserve]
         internal void CopyFrom(Tool other)

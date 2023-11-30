@@ -62,9 +62,11 @@ namespace OpenAI
             var headers = new Dictionary<string, string>
             {
 #if !UNITY_WEBGL
-                { "User-Agent", "com.openai.unity" }
+                { "User-Agent", "com.openai.unity" },
 #endif
+                { "OpenAI-Beta", "assistants=v1"}
             };
+
             if (!Settings.Info.BaseRequestUrlFormat.Contains(OpenAISettingsInfo.AzureOpenAIDomain) &&
                 (string.IsNullOrWhiteSpace(Authentication.Info.ApiKey) ||
                  (!Authentication.Info.ApiKey.Contains(OpenAIAuthInfo.SecretKeyPrefix) &&
