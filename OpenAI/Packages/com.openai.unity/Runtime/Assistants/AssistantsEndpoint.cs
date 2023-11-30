@@ -26,7 +26,7 @@ namespace OpenAI.Assistants
         {
             var response = await Rest.GetAsync(GetUrl(queryParameters: query), parameters: new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<ListResponse<AssistantResponse>>(response.Body, client);
+            return response.Deserialize<ListResponse<AssistantResponse>>(client);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace OpenAI.Assistants
             var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl(), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<AssistantResponse>(response.Body, client);
+            return response.Deserialize<AssistantResponse>(client);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace OpenAI.Assistants
         {
             var response = await Rest.GetAsync(GetUrl($"/{assistantId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<AssistantResponse>(response.Body, client);
+            return response.Deserialize<AssistantResponse>(client);
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace OpenAI.Assistants
             var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl($"/{assistantId}"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<AssistantResponse>(response.Body, client);
+            return response.Deserialize<AssistantResponse>(client);
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace OpenAI.Assistants
         {
             var response = await Rest.GetAsync(GetUrl($"/{assistantId}/files", query), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<ListResponse<AssistantFileResponse>>(response.Body, client);
+            return response.Deserialize<ListResponse<AssistantFileResponse>>(client);
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace OpenAI.Assistants
             var jsonContent = JsonConvert.SerializeObject(new { file_id = file.Id }, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl($"/{assistantId}/files"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<AssistantFileResponse>(response.Body, client);
+            return response.Deserialize<AssistantFileResponse>(client);
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace OpenAI.Assistants
         {
             var response = await Rest.GetAsync(GetUrl($"/{assistantId}/files/{fileId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<AssistantFileResponse>(response.Body, client);
+            return response.Deserialize<AssistantFileResponse>(client);
         }
 
         /// <summary>

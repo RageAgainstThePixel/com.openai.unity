@@ -295,7 +295,7 @@ namespace OpenAI.Images
         {
             response.Validate(EnableDebug);
 
-            var imagesResponse = response.Deserialize<ImagesResponse>(response.Body, client);
+            var imagesResponse = response.Deserialize<ImagesResponse>(client);
 
             if (imagesResponse?.Results is not { Count: not 0 })
             {

@@ -38,7 +38,7 @@ namespace OpenAI.Chat
 
             var response = await Rest.PostAsync(GetUrl("/completions"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<ChatResponse>(response.Body, client);
+            return response.Deserialize<ChatResponse>(client);
         }
 
         /// <summary>

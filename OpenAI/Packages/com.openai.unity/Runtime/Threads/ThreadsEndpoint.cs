@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using OpenAI.Extensions;
+using Utilities.WebRequestRest;
 
 namespace OpenAI.Threads
 {
@@ -25,8 +28,9 @@ namespace OpenAI.Threads
         /// <returns><see cref="ThreadResponse"/>.</returns>
         public async Task<ThreadResponse> CreateThreadAsync(CreateThreadRequest request = null, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var response = await Rest.PostAsync(GetUrl(), jsonData: request != null ? JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions) : null, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<ThreadResponse>(client);
         }
 
         /// <summary>
@@ -37,8 +41,9 @@ namespace OpenAI.Threads
         /// <returns><see cref="ThreadResponse"/>.</returns>
         public async Task<ThreadResponse> RetrieveThreadAsync(string threadId, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var response = await Rest.GetAsync(GetUrl($"/{threadId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<ThreadResponse>(client);
         }
 
         /// <summary>
@@ -56,8 +61,10 @@ namespace OpenAI.Threads
         /// <returns><see cref="ThreadResponse"/>.</returns>
         public async Task<ThreadResponse> ModifyThreadAsync(string threadId, IReadOnlyDictionary<string, string> metadata, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var jsonContent = JsonConvert.SerializeObject(new { metadata }, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{threadId}"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<ThreadResponse>(client);
         }
 
         /// <summary>
@@ -68,8 +75,9 @@ namespace OpenAI.Threads
         /// <returns>True, if was successfully deleted.</returns>
         public async Task<bool> DeleteThreadAsync(string threadId, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var response = await Rest.DeleteAsync(GetUrl($"/{threadId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return JsonConvert.DeserializeObject<DeletedResponse>(response.Body, OpenAIClient.JsonSerializationOptions)?.Deleted ?? false;
         }
 
         #region Messages
@@ -83,10 +91,11 @@ namespace OpenAI.Threads
         /// <returns><see cref="MessageResponse"/>.</returns>
         public async Task<MessageResponse> CreateMessageAsync(string threadId, CreateMessageRequest request, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{threadId}/messages"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<MessageResponse>(client);
         }
-
 
         /// <summary>
         /// Returns a list of messages for a given thread.
@@ -97,8 +106,9 @@ namespace OpenAI.Threads
         /// <returns><see cref="ListResponse{ThreadMessage}"/>.</returns>
         public async Task<ListResponse<MessageResponse>> ListMessagesAsync(string threadId, ListQuery query = null, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var response = await Rest.GetAsync(GetUrl($"/{threadId}/messages", query), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<ListResponse<MessageResponse>>(client);
         }
 
         /// <summary>
@@ -110,8 +120,9 @@ namespace OpenAI.Threads
         /// <returns><see cref="MessageResponse"/>.</returns>
         public async Task<MessageResponse> RetrieveMessageAsync(string threadId, string messageId, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var response = await Rest.GetAsync(GetUrl($"/{threadId}/messages/{messageId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<MessageResponse>(client);
         }
 
         /// <summary>
@@ -146,8 +157,10 @@ namespace OpenAI.Threads
         /// <returns><see cref="MessageResponse"/>.</returns>
         public async Task<MessageResponse> ModifyMessageAsync(string threadId, string messageId, IReadOnlyDictionary<string, string> metadata, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var jsonContent = JsonConvert.SerializeObject(new { metadata }, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{threadId}/messages/{messageId}"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<MessageResponse>(client);
         }
 
         #endregion Messages
@@ -164,8 +177,9 @@ namespace OpenAI.Threads
         /// <returns><see cref="ListResponse{ThreadMessageFile}"/>.</returns>
         public async Task<ListResponse<MessageFileResponse>> ListFilesAsync(string threadId, string messageId, ListQuery query = null, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var response = await Rest.GetAsync(GetUrl($"/{threadId}/messages/{messageId}/files", query), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<ListResponse<MessageFileResponse>>(client);
         }
 
         /// <summary>
@@ -178,8 +192,9 @@ namespace OpenAI.Threads
         /// <returns><see cref="MessageFileResponse"/>.</returns>
         public async Task<MessageFileResponse> RetrieveFileAsync(string threadId, string messageId, string fileId, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var response = await Rest.GetAsync(GetUrl($"/{threadId}/messages/{messageId}/files/{fileId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<MessageFileResponse>(client);
         }
 
         #endregion Files
@@ -195,8 +210,9 @@ namespace OpenAI.Threads
         /// <returns><see cref="ListResponse{RunResponse}"/></returns>
         public async Task<ListResponse<RunResponse>> ListRunsAsync(string threadId, ListQuery query = null, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var response = await Rest.GetAsync(GetUrl($"/{threadId}/runs", query), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<ListResponse<RunResponse>>(client);
         }
 
         /// <summary>
@@ -208,8 +224,16 @@ namespace OpenAI.Threads
         /// <returns><see cref="RunResponse"/>.</returns>
         public async Task<RunResponse> CreateRunAsync(string threadId, CreateRunRequest request = null, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            if (request == null || string.IsNullOrWhiteSpace(request.AssistantId))
+            {
+                var assistant = await client.AssistantsEndpoint.CreateAssistantAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                request = new CreateRunRequest(assistant, request);
+            }
+
+            var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<RunResponse>(client);
         }
 
         /// <summary>
@@ -220,8 +244,16 @@ namespace OpenAI.Threads
         /// <returns><see cref="RunResponse"/>.</returns>
         public async Task<RunResponse> CreateThreadAndRunAsync(CreateThreadAndRunRequest request = null, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            if (request == null || string.IsNullOrWhiteSpace(request.AssistantId))
+            {
+                var assistant = await client.AssistantsEndpoint.CreateAssistantAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                request = new CreateThreadAndRunRequest(assistant, request);
+            }
+
+            var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl("/runs"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<RunResponse>(client);
         }
 
         /// <summary>
@@ -233,8 +265,9 @@ namespace OpenAI.Threads
         /// <returns><see cref="RunResponse"/>.</returns>
         public async Task<RunResponse> RetrieveRunAsync(string threadId, string runId, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var response = await Rest.GetAsync(GetUrl($"/{threadId}/runs/{runId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<RunResponse>(client);
         }
 
         /// <summary>
@@ -252,8 +285,10 @@ namespace OpenAI.Threads
         /// <returns><see cref="RunResponse"/>.</returns>
         public async Task<RunResponse> ModifyRunAsync(string threadId, string runId, IReadOnlyDictionary<string, string> metadata, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var jsonContent = JsonConvert.SerializeObject(new { metadata }, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs/{runId}"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<RunResponse>(client);
         }
 
         /// <summary>
@@ -268,8 +303,10 @@ namespace OpenAI.Threads
         /// <returns><see cref="RunResponse"/>.</returns>
         public async Task<RunResponse> SubmitToolOutputsAsync(string threadId, string runId, SubmitToolOutputsRequest request, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs/{runId}/submit_tool_outputs"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<RunResponse>(client);
         }
 
         /// <summary>
@@ -282,8 +319,9 @@ namespace OpenAI.Threads
         /// <returns><see cref="ListResponse{RunStep}"/>.</returns>
         public async Task<ListResponse<RunStepResponse>> ListRunStepsAsync(string threadId, string runId, ListQuery query = null, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var response = await Rest.GetAsync(GetUrl($"/{threadId}/runs/{runId}/steps", query), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<ListResponse<RunStepResponse>>(client);
         }
 
         /// <summary>
@@ -296,8 +334,9 @@ namespace OpenAI.Threads
         /// <returns><see cref="RunStepResponse"/>.</returns>
         public async Task<RunStepResponse> RetrieveRunStepAsync(string threadId, string runId, string stepId, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var response = await Rest.GetAsync(GetUrl($"/{threadId}/runs/{runId}/steps/{stepId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<RunStepResponse>(client);
         }
 
         /// <summary>
@@ -309,8 +348,9 @@ namespace OpenAI.Threads
         /// <returns><see cref="RunResponse"/>.</returns>
         public async Task<RunResponse> CancelRunAsync(string threadId, string runId, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs/{runId}/cancel"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<RunResponse>(client);
         }
 
         #endregion Runs

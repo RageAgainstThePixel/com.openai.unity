@@ -67,7 +67,7 @@ namespace OpenAI.Edits
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<EditResponse>(response.Body, client);
+            return response.Deserialize<EditResponse>(client);
         }
     }
 }
