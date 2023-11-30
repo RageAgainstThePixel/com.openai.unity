@@ -81,7 +81,7 @@ namespace OpenAI.FineTuning
             var response = await Rest.GetAsync(GetUrl($"/jobs/{jobId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             var job = response.Deserialize<FineTuneJobResponse>(response.Body, client);
-            job.Events = (await ListJobEventsAsync(job, query: null, cancellationToken: cancellationToken).ConfigureAwait(false))?.Items;
+            job.Events = (await ListJobEventsAsync(job, query: null, cancellationToken: cancellationToken).ConfigureAwait(true))?.Items;
             return job;
         }
 
