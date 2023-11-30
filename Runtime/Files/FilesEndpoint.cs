@@ -33,10 +33,8 @@ namespace OpenAI.Files
             public List<FileResponse> Files { get; }
         }
 
-        /// <inheritdoc />
-        public FilesEndpoint(OpenAIClient client) : base(client) { }
+        internal FilesEndpoint(OpenAIClient client) : base(client) { }
 
-        /// <inheritdoc />
         protected override string Root => "files";
 
         /// <summary>
