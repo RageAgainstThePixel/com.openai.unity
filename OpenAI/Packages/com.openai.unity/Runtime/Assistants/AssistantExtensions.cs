@@ -75,7 +75,7 @@ namespace OpenAI.Assistants
         /// <returns><see cref="AssistantFileResponse"/>.</returns>
         public static async Task<AssistantFileResponse> UploadFileAsync(this AssistantResponse assistant, string filePath, CancellationToken cancellationToken = default)
         {
-            var file = await assistant.Client.FilesEndpoint.UploadFileAsync(new FileUploadRequest(filePath, "assistant"), uploadProgress: null, cancellationToken);
+            var file = await assistant.Client.FilesEndpoint.UploadFileAsync(new FileUploadRequest(filePath, "assistants"), uploadProgress: null, cancellationToken);
             return await assistant.AttachFileAsync(file, cancellationToken);
         }
 
