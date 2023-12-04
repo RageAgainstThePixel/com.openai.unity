@@ -61,9 +61,9 @@ namespace OpenAI
         /// </summary>
         /// <param name="domain">Base api domain.</param>
         /// <param name="apiVersion">The version of the OpenAI api you want to use.</param>
-        public OpenAISettings(string domain, string apiVersion = OpenAISettingsInfo.DefaultOpenAIApiVersion)
+        public OpenAISettings(string domain, string apiVersion = OpenAISettingsInfo.DefaultOpenAIApiVersion, bool https = true)
         {
-            Info = new OpenAISettingsInfo(domain, apiVersion);
+            Info = new OpenAISettingsInfo(domain, apiVersion, https);
             cachedDefault = this;
         }
 
