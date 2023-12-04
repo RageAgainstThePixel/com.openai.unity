@@ -4,6 +4,8 @@
 
 Based on [OpenAI-DotNet](https://github.com/RageAgainstThePixel/OpenAI-DotNet)
 
+Forked to allow HTTP support
+
 A [OpenAI](https://openai.com/) package for the [Unity](https://unity.com/) to use though their RESTful API.
 Independently developed, this is not an official library and I am not affiliated with OpenAI.
 An OpenAI API account is required.
