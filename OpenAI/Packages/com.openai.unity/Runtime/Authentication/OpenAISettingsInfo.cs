@@ -30,7 +30,7 @@ namespace OpenAI
         /// </summary>
         /// <param name="domain">Base api domain.</param>
         /// <param name="apiVersion">The version of the OpenAI api you want to use.</param>
-        public OpenAISettingsInfo(string domain, string apiVersion = DefaultOpenAIApiVersion)
+        public OpenAISettingsInfo(string domain, string apiVersion = DefaultOpenAIApiVersion, bool https = true)
         {
             if (string.IsNullOrWhiteSpace(domain))
             {
@@ -52,7 +52,12 @@ namespace OpenAI
             ApiVersion = apiVersion;
             DeploymentId = string.Empty;
             BaseRequest = $"/{ApiVersion}/";
-            BaseRequestUrlFormat = $"https://{ResourceName}{BaseRequest}{{0}}";
+            if(https) {
+                BaseRequestUrlFormat = $"https://{ResourceName}{BaseRequest}{{0}}";
+            } else {
+                BaseRequestUrlFormat = $"http://{ResourceName}{BaseRequest}{{0}}";
+            }
+            
             UseOAuthAuthentication = true;
         }
 
