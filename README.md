@@ -123,10 +123,10 @@ The recommended installation method is though the unity package manager and [Ope
   - [List Fine Tune Job Events](#list-fine-tune-job-events) :construction:
 - [Embeddings](#embeddings)
   - [Create Embedding](#create-embeddings)
-- [Completions](#completions) :construction:
-  - [Streaming](#completion-streaming) :construction:
 - [Moderations](#moderations)
   - [Create Moderation](#create-moderation)
+- ~~[Completions](#completions)~~ :warning: Deprecated
+  - ~~[Streaming](#completion-streaming)~~ :warning: Deprecated
 - ~~[Edits](#edits)~~ :warning: Deprecated
   - ~~[Create Edit](#create-edit)~~  :warning: Deprecated
 
@@ -894,7 +894,7 @@ var messages = new List<Message>
 var chatRequest = new ChatRequest(messages);
 var response = await api.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
 {
-    Console.Write(choice.Delta.ToString());
+    Console.Write(partialResponse.FirstChoice.Delta.ToString());
 });
 var choice = response.FirstChoice;
 Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message} | Finish Reason: {choice.FinishReason}");
@@ -1320,36 +1320,6 @@ var response = await api.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was d
 Debug.Log(response);
 ```
 
-### [Completions](https://platform.openai.com/docs/api-reference/completions)
-
-Given a prompt, the model will return one or more predicted completions, and can also return the probabilities of alternative tokens at each position.
-
-The Completions API is accessed via `OpenAIClient.CompletionsEndpoint`
-
-```csharp
-var api = new OpenAIClient();
-var response = await api.CompletionsEndpoint.CreateCompletionAsync("One Two Three One Two", temperature: 0.1, model: Model.Davinci);
-Debug.Log(response);
-```
-
-> To get the `CompletionResponse` (which is mostly metadata), use its implicit string operator to get the text if all you want is the completion choice.
-
-#### Completion Streaming
-
-Streaming allows you to get results are they are generated, which can help your application feel more responsive, especially on slow models like Davinci.
-
-```csharp
-var api = new OpenAIClient();
-
-await api.CompletionsEndpoint.StreamCompletionAsync(response =>
-{
-    foreach (var choice in response.Completions)
-    {
-        Debug.Log(choice);
-    }
-}, "My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", maxTokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci);
-```
-
 ### [Moderations](https://platform.openai.com/docs/api-reference/moderations)
 
 Given a input text, outputs if the model classifies it as violating OpenAI's content policy.
@@ -1378,9 +1348,43 @@ Debug.Log(response.Results?[0]?.Scores?.ToString());
 
 ---
 
+### [Completions](https://platform.openai.com/docs/api-reference/completions)
+
+> :warning: Deprecated, and soon to be removed.
+
+Given a prompt, the model will return one or more predicted completions, and can also return the probabilities of alternative tokens at each position.
+
+The Completions API is accessed via `OpenAIClient.CompletionsEndpoint`
+
+```csharp
+var api = new OpenAIClient();
+var response = await api.CompletionsEndpoint.CreateCompletionAsync("One Two Three One Two", temperature: 0.1, model: Model.Davinci);
+Debug.Log(response);
+```
+
+> To get the `CompletionResponse` (which is mostly metadata), use its implicit string operator to get the text if all you want is the completion choice.
+
+#### Completion Streaming
+
+> :warning: Deprecated, and soon to be removed.
+
+Streaming allows you to get results are they are generated, which can help your application feel more responsive, especially on slow models like Davinci.
+
+```csharp
+var api = new OpenAIClient();
+
+await api.CompletionsEndpoint.StreamCompletionAsync(response =>
+{
+    foreach (var choice in response.Completions)
+    {
+        Debug.Log(choice);
+    }
+}, "My name is Roger and I am a principal software engineer at Salesforce.  This is my resume:", maxTokens: 200, temperature: 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1, model: Model.Davinci);
+```
+
 ### [Edits](https://platform.openai.com/docs/api-reference/edits)
 
-> Deprecated, and soon to be removed.
+> :warning: Deprecated, and soon to be removed.
 
 Given a prompt and an instruction, the model will return an edited version of the prompt.
 

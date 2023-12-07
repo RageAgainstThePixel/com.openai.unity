@@ -3,6 +3,7 @@
 using NUnit.Framework;
 using OpenAI.Completions;
 using OpenAI.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,11 +11,12 @@ using UnityEngine;
 
 namespace OpenAI.Tests
 {
+    [Obsolete]
     internal class TestFixture_02_Completions : AbstractTestFixture
     {
         private const string CompletionPrompts = "One Two Three Four Five Six Seven Eight Nine One Two Three Four Five Six Seven Eight";
 
-        [Test]
+        //[Test]
         public async Task Test_01_GetBasicCompletion()
         {
             Assert.IsNotNull(OpenAIClient.CompletionsEndpoint);
@@ -31,7 +33,7 @@ namespace OpenAI.Tests
             Debug.Log(result);
         }
 
-        [Test]
+        //[Test]
         public async Task Test_02_GetStreamingCompletion()
         {
             Assert.IsNotNull(OpenAIClient.CompletionsEndpoint);

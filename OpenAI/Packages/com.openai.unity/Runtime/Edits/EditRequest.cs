@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace OpenAI.Edits
 {
-    [Obsolete]
     [Preserve]
+    [Obsolete("Deprecated")]
     public sealed class EditRequest
     {
         /// <summary>
