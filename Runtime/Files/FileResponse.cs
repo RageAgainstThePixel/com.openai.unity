@@ -13,7 +13,7 @@ namespace OpenAI.Files
         public FileResponse(
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
-            [JsonProperty("bytes")] int size,
+            [JsonProperty("bytes")] int? size,
             [JsonProperty("created_at")] int createdUnixTimeSeconds,
             [JsonProperty("filename")] string fileName,
             [JsonProperty("purpose")] string purpose,
@@ -38,7 +38,7 @@ namespace OpenAI.Files
 
         [Preserve]
         [JsonProperty("bytes")]
-        public int Size { get; }
+        public int? Size { get; }
 
         [Preserve]
         [JsonProperty("created_at")]
