@@ -14,11 +14,11 @@ namespace OpenAI.Threads
         public Content(
             [JsonProperty("type")] ContentType contentType,
             [JsonProperty("text")] TextContent text,
-            [JsonProperty("image_url")] ImageUrl imageUrl)
+            [JsonProperty("image_file")] ImageFile imageUrl)
         {
             Type = contentType;
             Text = text;
-            ImageUrl = imageUrl;
+            ImageFile = imageUrl;
         }
 
         [Preserve]
@@ -30,15 +30,15 @@ namespace OpenAI.Threads
         public TextContent Text { get; }
 
         [Preserve]
-        [JsonProperty("image_url")]
-        public ImageUrl ImageUrl { get; }
+        [JsonProperty("image_file")]
+        public ImageFile ImageFile { get; }
 
         [Preserve]
         public override string ToString()
             => Type switch
             {
                 ContentType.Text => Text.Value,
-                ContentType.ImageUrl => ImageUrl.Url,
+                ContentType.ImageFile => ImageFile.FileId,
                 _ => throw new ArgumentOutOfRangeException()
             };
     }

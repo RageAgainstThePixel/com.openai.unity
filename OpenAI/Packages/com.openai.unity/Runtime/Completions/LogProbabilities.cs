@@ -1,7 +1,8 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System.Collections.Generic;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Completions
@@ -10,6 +11,7 @@ namespace OpenAI.Completions
     /// Object belonging to a <see cref="Choice"/>
     /// </summary>
     [Preserve]
+    [Obsolete("Deprecated")]
     public sealed class LogProbabilities
     {
         [Preserve]
