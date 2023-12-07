@@ -59,9 +59,9 @@ namespace OpenAI.Tests
 
             foreach (var assistant in assistantsList.Items)
             {
-                var retrieved = OpenAIClient.AssistantsEndpoint.RetrieveAssistantAsync(assistant);
+                var retrieved = await OpenAIClient.AssistantsEndpoint.RetrieveAssistantAsync(assistant);
                 Assert.IsNotNull(retrieved);
-                Debug.Log($"{assistant} -> {assistant.CreatedAt}");
+                Debug.Log($"{retrieved} -> {retrieved.CreatedAt}");
             }
         }
 
@@ -123,25 +123,35 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_04_03_DeleteAssistantFiles()
+        public async Task Test_04_03_RemoveAssistantFile()
         {
             Assert.IsNotNull(testAssistant);
             Assert.IsNotNull(OpenAIClient.AssistantsEndpoint);
             var filesList = await testAssistant.ListFilesAsync();
             Assert.IsNotNull(filesList);
             Assert.IsNotEmpty(filesList.Items);
+            Assert.IsTrue(filesList.Items.Count == 2);
+            var assistantFile = filesList.Items[0];
+            Assert.IsNotNull(assistantFile);
+            var isRemoved = await testAssistant.RemoveFileAsync(assistantFile);
+            Assert.IsTrue(isRemoved);
+            var isDeleted = await OpenAIClient.FilesEndpoint.DeleteFileAsync(assistantFile);
+            Assert.IsTrue(isDeleted);
+        }
 
-            foreach (var file in filesList.Items)
-            {
-                Assert.IsNotNull(file);
-                var isDeleted = await testAssistant.DeleteFileAsync(file);
-                Assert.IsTrue(isDeleted);
-                Debug.Log($"Deleted {file.Id}");
-            }
-
-            filesList = await testAssistant.ListFilesAsync();
+        [Test]
+        public async Task Test_04_04_DeleteAssistantFiles()
+        {
+            Assert.IsNotNull(testAssistant);
+            Assert.IsNotNull(OpenAIClient.AssistantsEndpoint);
+            var filesList = await testAssistant.ListFilesAsync();
             Assert.IsNotNull(filesList);
-            Assert.IsEmpty(filesList.Items);
+            Assert.IsNotEmpty(filesList.Items);
+            Assert.IsTrue(filesList.Items.Count == 1);
+            var assistantFile = filesList.Items[0];
+            Assert.IsNotNull(assistantFile);
+            var isDeleted = await testAssistant.DeleteFileAsync(assistantFile);
+            Assert.IsTrue(isDeleted);
         }
 
         [Test]

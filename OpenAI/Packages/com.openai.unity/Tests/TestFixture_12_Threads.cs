@@ -211,8 +211,6 @@ namespace OpenAI.Tests
             Debug.Log($"Deleted thread {testThread.Id}");
         }
 
-
-
         [Test]
         public async Task Test_06_01_CreateRun()
         {
@@ -229,12 +227,13 @@ namespace OpenAI.Tests
 
             try
             {
-                var message = thread.CreateMessageAsync("I need to solve the equation `3x + 11 = 14`. Can you help me?");
+                var message = await thread.CreateMessageAsync("I need to solve the equation `3x + 11 = 14`. Can you help me?");
                 Assert.NotNull(message);
                 var run = await thread.CreateRunAsync(assistant);
                 Assert.IsNotNull(run);
-                var threadRun = thread.CreateRunAsync();
-                Assert.NotNull(threadRun);
+                run = await run.WaitForStatusChangeAsync();
+                Assert.IsNotNull(run);
+                Assert.IsTrue(run.Status == RunStatus.Completed);
             }
             finally
             {
@@ -273,6 +272,9 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(run.Client);
                 var retrievedRun = await run.UpdateAsync();
                 Assert.IsNotNull(retrievedRun);
+                var threadRun = await testThread.RetrieveRunAsync(run.Id);
+                Assert.IsNotNull(threadRun);
+                Assert.IsTrue(retrievedRun.Id == threadRun.Id);
                 Debug.Log($"[{retrievedRun.Id}] {retrievedRun.Status} | {retrievedRun.CreatedAt}");
             }
         }
