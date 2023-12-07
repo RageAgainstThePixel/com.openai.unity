@@ -42,11 +42,11 @@ namespace OpenAI
             : base(authentication ?? OpenAIAuthentication.Default, settings ?? OpenAISettings.Default)
         {
             ModelsEndpoint = new ModelsEndpoint(this);
-            CompletionsEndpoint = new CompletionsEndpoint(this);
             ChatEndpoint = new ChatEndpoint(this);
-#pragma warning disable CS0612 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
+            CompletionsEndpoint = new CompletionsEndpoint(this);
             EditsEndpoint = new EditsEndpoint(this);
-#pragma warning restore CS0612 // Type or member is obsolete
+#pragma warning restore CS0618 // Type or member is obsolete
             ImagesEndPoint = new ImagesEndpoint(this);
             EmbeddingsEndpoint = new EmbeddingsEndpoint(this);
             AudioEndpoint = new AudioEndpoint(this);
@@ -136,6 +136,7 @@ namespace OpenAI
         /// (see the prompt library for inspiration).<br/>
         /// <see href="https://platform.openai.com/docs/api-reference/completions"/>
         /// </summary>
+        [Obsolete("Deprecated")]
         public CompletionsEndpoint CompletionsEndpoint { get; }
 
         /// <summary>
@@ -148,7 +149,7 @@ namespace OpenAI
         /// Given a prompt and an instruction, the model will return an edited version of the prompt.<br/>
         /// <see href="https://platform.openai.com/docs/api-reference/edits"/>
         /// </summary>
-        [Obsolete]
+        [Obsolete("Deprecated")]
         public EditsEndpoint EditsEndpoint { get; }
 
         /// <summary>

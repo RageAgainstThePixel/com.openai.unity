@@ -1,6 +1,7 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Completions
@@ -9,6 +10,7 @@ namespace OpenAI.Completions
     /// Represents a completion choice returned by the <see cref="CompletionsEndpoint"/>.
     /// </summary>
     [Preserve]
+    [Obsolete("Deprecated")]
     public sealed class Choice
     {
         [Preserve]

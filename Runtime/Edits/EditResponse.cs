@@ -7,8 +7,8 @@ using UnityEngine.Scripting;
 
 namespace OpenAI.Edits
 {
-    [Obsolete]
     [Preserve]
+    [Obsolete("Deprecated")]
     public sealed class EditResponse : BaseResponse
     {
         [Preserve]
