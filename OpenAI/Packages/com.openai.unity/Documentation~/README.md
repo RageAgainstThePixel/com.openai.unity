@@ -387,7 +387,7 @@ Returns a list of assistants.
 
 ```csharp
 var api = new OpenAIClient();
-var assistantsList = await OpenAIClient.AssistantsEndpoint.ListAssistantsAsync();
+var assistantsList = await api.AssistantsEndpoint.ListAssistantsAsync();
 
 foreach (var assistant in assistantsList.Items)
 {
@@ -402,7 +402,7 @@ Create an assistant with a model and instructions.
 ```csharp
 var api = new OpenAIClient();
 var request = new CreateAssistantRequest("gpt-3.5-turbo-1106");
-var assistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(request);
+var assistant = await api.AssistantsEndpoint.CreateAssistantAsync(request);
 ```
 
 #### [Retrieve Assistant](https://platform.openai.com/docs/api-reference/assistants/getAssistant)
@@ -411,7 +411,7 @@ Retrieves an assistant.
 
 ```csharp
 var api = new OpenAIClient();
-var assistant = await OpenAIClient.AssistantsEndpoint.RetrieveAssistantAsync("assistant-id");
+var assistant = await api.AssistantsEndpoint.RetrieveAssistantAsync("assistant-id");
 Debug.Log($"{assistant} -> {assistant.CreatedAt}");
 ```
 
@@ -730,7 +730,7 @@ var assistant = await api.AssistantsEndpoint.CreateAssistantAsync(
         name: "Math Tutor",
         instructions: "You are a personal math tutor. Answer questions briefly, in a sentence or less.",
         model: "gpt-4-1106-preview"));
-var thread = await OpenAIClient.ThreadsEndpoint.CreateThreadAsync();
+var thread = await api.ThreadsEndpoint.CreateThreadAsync();
 var message = await thread.CreateMessageAsync("I need to solve the equation `3x + 11 = 14`. Can you help me?");
 var run = await thread.CreateRunAsync(assistant);
 Debug.Log($"[{run.Id}] {run.Status} | {run.CreatedAt}");
@@ -1043,7 +1043,7 @@ var messages = new List<Message>
     new Message(Role.User, "Who won the world series in 2020?"),
 };
 var chatRequest = new ChatRequest(messages, "gpt-4-1106-preview", responseFormat: ChatResponseFormat.Json);
-var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
+var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
 
 foreach (var choice in response.Choices)
 {
@@ -1341,7 +1341,8 @@ Assert.IsTrue(isViolation);
 Additionally you can also get the scores of a given input.
 
 ```csharp
-var response = await OpenAIClient.ModerationsEndpoint.CreateModerationAsync(new ModerationsRequest("I love you"));
+var api = new OpenAIClient();
+var response = await api.ModerationsEndpoint.CreateModerationAsync(new ModerationsRequest("I love you"));
 Assert.IsNotNull(response);
 Debug.Log(response.Results?[0]?.Scores?.ToString());
 ```
