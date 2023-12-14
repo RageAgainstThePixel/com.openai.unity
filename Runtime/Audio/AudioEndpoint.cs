@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.Scripting;
 using Utilities.WebRequestRest;
 
@@ -56,12 +57,17 @@ namespace OpenAI.Audio
                 _ => throw new NotSupportedException(request.ResponseFormat.ToString())
             };
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl("/speech"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(EnableDebug);
-            await Rest.ValidateCacheDirectoryAsync();
-            var cachedPath = Path.Combine(Rest.DownloadCacheDirectory, $"{request.Voice}-{DateTime.UtcNow:yyyyMMddThhmmss}.{ext}");
-            await File.WriteAllBytesAsync(cachedPath, response.Data, cancellationToken).ConfigureAwait(true);
-            var clip = await Rest.DownloadAudioClipAsync($"file://{cachedPath}", audioFormat, cancellationToken: cancellationToken);
+            var clipName = $"{request.Voice}-{DateTime.UtcNow:yyyyMMddThhmmss}.{ext}";
+            var clip = await Rest.DownloadAudioClipAsync(
+                GetUrl("/speech"),
+                audioFormat,
+                UnityWebRequest.kHttpVerbPOST,
+                clipName,
+                payload,
+                parameters: new RestParameters(client.DefaultRequestHeaders),
+                debug: EnableDebug,
+                cancellationToken: cancellationToken);
+            Rest.TryGetDownloadCacheItem(clipName, out var cachedPath);
             return new Tuple<string, AudioClip>(cachedPath, clip);
         }
 

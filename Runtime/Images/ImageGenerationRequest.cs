@@ -13,13 +13,6 @@ namespace OpenAI.Images
     [Preserve]
     public sealed class ImageGenerationRequest
     {
-        [Preserve]
-        [Obsolete("Use new constructor")]
-        public ImageGenerationRequest(string prompt, int numberOfResults = 1, ImageSize size = ImageSize.Large, string user = null, ResponseFormat responseFormat = ResponseFormat.Url)
-        {
-            throw new NotSupportedException();
-        }
-
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -59,22 +52,23 @@ namespace OpenAI.Images
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
+        [JsonConstructor]
         public ImageGenerationRequest(
-            string prompt,
-            Model model = null,
-            int numberOfResults = 1,
-            string quality = null,
-            ResponseFormat responseFormat = ResponseFormat.Url,
-            string size = null,
-            string style = null,
-            string user = null)
+            [JsonProperty("prompt")] string prompt,
+            [JsonProperty("model")] Model model = null,
+            [JsonProperty("n")] int numberOfResults = 1,
+            [JsonProperty("quality")] string quality = null,
+            [JsonProperty("response_format")] ResponseFormat responseFormat = ResponseFormat.Url,
+            [JsonProperty("size")] string size = null,
+            [JsonProperty("style")] string style = null,
+            [JsonProperty("user")] string user = null)
         {
             Prompt = prompt;
             Model = string.IsNullOrWhiteSpace(model?.Id) ? Models.Model.DallE_2 : model;
             Number = numberOfResults;
             Quality = quality;
             ResponseFormat = responseFormat;
-            Size = size;
+            Size = size ?? "1024x1024";
             Style = style;
             User = user;
         }
