@@ -1,12 +1,13 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using UnityEngine;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Images
 {
     [Preserve]
-    internal sealed class ImageResult
+    public sealed class ImageResult
     {
         [Preserve]
         [JsonConstructor]
@@ -31,5 +32,40 @@ namespace OpenAI.Images
         [Preserve]
         [JsonProperty("revised_prompt")]
         public string RevisedPrompt { get; private set; }
+
+        [Preserve]
+        [JsonIgnore]
+        public string CachedPath { get; internal set; }
+
+        [Preserve]
+        [JsonIgnore]
+        public Texture2D Texture { get; internal set; }
+
+        [Preserve]
+        public static implicit operator Texture2D(ImageResult imageResult) => imageResult.Texture;
+
+        [Preserve]
+        public static implicit operator string(ImageResult imageResult) => imageResult.ToString();
+
+        [Preserve]
+        public override string ToString()
+        {
+            if (!string.IsNullOrWhiteSpace(CachedPath))
+            {
+                return CachedPath;
+            }
+
+            if (!string.IsNullOrWhiteSpace(Url))
+            {
+                return Url;
+            }
+
+            if (!string.IsNullOrWhiteSpace(B64_Json))
+            {
+                return B64_Json;
+            }
+
+            return string.Empty;
+        }
     }
 }
