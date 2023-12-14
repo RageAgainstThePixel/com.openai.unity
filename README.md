@@ -1107,12 +1107,10 @@ var api = new OpenAIClient();
 var request = new ImageGenerationRequest("A house riding a velociraptor", Models.Model.DallE_3);
 var imageResults = await api.ImagesEndPoint.GenerateImageAsync(request);
 
-foreach (var (path, texture) in results)
+foreach (var result in imageResults)
 {
-    Debug.Log(path);
-    // path == file://path/to/image.png
-    Assert.IsNotNull(texture);
-    // texture == The preloaded Texture2D
+    Debug.Log(result.ToString());
+    Assert.IsNotNull(result.Texture);
 }
 ```
 
@@ -1125,12 +1123,10 @@ var api = new OpenAIClient();
 var request = new ImageEditRequest(Path.GetFullPath(imageAssetPath), Path.GetFullPath(maskAssetPath), "A sunlit indoor lounge area with a pool containing a flamingo", size: ImageSize.Small);
 var imageResults = await api.ImagesEndPoint.CreateImageEditAsync(request);
 
-foreach (var (path, texture) in imageResults)
+foreach (var result in imageResults)
 {
-    Debug.Log(path);
-    // path == file://path/to/image.png
-    Assert.IsNotNull(texture);
-    // texture == The preloaded Texture2D
+    Debug.Log(result.ToString());
+    Assert.IsNotNull(result.Texture);
 }
 ```
 
@@ -1143,12 +1139,10 @@ var api = new OpenAIClient();
 var request = new ImageVariationRequest(imageTexture, size: ImageSize.Small);
 var imageResults = await api.ImagesEndPoint.CreateImageVariationAsync(request);
 
-foreach (var (path, texture) in imageResults)
+foreach (var result in imageResults)
 {
-    Debug.Log(path);
-    // path == file://path/to/image.png
-    Assert.IsNotNull(texture);
-    // texture == The preloaded Texture2D
+    Debug.Log(result.ToString());
+    Assert.IsNotNull(result.Texture);
 }
 ```
 
@@ -1157,14 +1151,12 @@ Alternatively, the endpoint can directly take a Texture2D with Read/Write enable
 ```csharp
 var api = new OpenAIClient();
 var request = new ImageVariationRequest(imageTexture, size: ImageSize.Small);
-var results = await api.ImagesEndPoint.CreateImageVariationAsync(request);
-// imageTexture is of type Texture2D
-foreach (var (path, texture) in results)
+var imageResults = await api.ImagesEndPoint.CreateImageVariationAsync(request);
+
+foreach (var result in imageResults)
 {
-    Debug.Log(path);
-    // path == file://path/to/image.png
-    Assert.IsNotNull(texture);
-    // texture == The preloaded Texture2D
+    Debug.Log(result.ToString());
+    Assert.IsNotNull(result.Texture);
 }
 ```
 
