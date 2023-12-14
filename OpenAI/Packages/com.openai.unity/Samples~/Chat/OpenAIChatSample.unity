@@ -1962,12 +1962,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a891710bf1466924297c3b3b6f1b6e51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enableDebug: 0
+  enableDebug: 1
   submitButton: {fileID: 1094024334}
   inputField: {fileID: 1377121433}
   contentArea: {fileID: 250955499}
   scrollView: {fileID: 1974642466}
   audioSource: {fileID: 1711080862}
+  systemPrompt: 'You are a helpful assistant.
+
+    - If an image is requested then
+    use "![Image](output.jpg)" to display it.'
 --- !u!82 &1711080862
 AudioSource:
   m_ObjectHideFlags: 0

@@ -13,9 +13,9 @@ namespace OpenAI.Chat
     {
         [Preserve]
         [JsonConstructor]
-        public Conversation([JsonProperty("messages")] List<Message> messages)
+        public Conversation([JsonProperty("messages")] List<Message> messages = null)
         {
-            this.messages = messages;
+            this.messages = messages ?? new List<Message>();
         }
 
         private readonly List<Message> messages;
