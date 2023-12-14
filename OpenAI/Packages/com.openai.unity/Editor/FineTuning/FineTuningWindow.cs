@@ -101,7 +101,7 @@ namespace OpenAI.Editor.FineTuning
         [SerializeField]
         private int tab;
 
-        [MenuItem("Window/Dashboard/OpenAI/Fine Tuning")]
+        [MenuItem("Window/Dashboards/OpenAI/Fine Tuning")]
         private static void OpenWindow()
         {
             // Dock it next to the Scene View.
