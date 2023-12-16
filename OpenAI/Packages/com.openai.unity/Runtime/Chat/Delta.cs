@@ -51,7 +51,7 @@ namespace OpenAI.Chat
         /// The contents of the message.
         /// </summary>
         [Preserve]
-        [JsonProperty("content", DefaultValueHandling = DefaultValueHandling.Populate, NullValueHandling = NullValueHandling.Include, Required = Required.AllowNull)]
+        [JsonProperty("content", DefaultValueHandling = DefaultValueHandling.Populate, NullValueHandling = NullValueHandling.Include)]
         public string Content { get; private set; }
 
         /// <summary>

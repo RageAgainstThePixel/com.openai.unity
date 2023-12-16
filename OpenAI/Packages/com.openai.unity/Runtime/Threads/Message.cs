@@ -49,7 +49,7 @@ namespace OpenAI.Threads
         /// The content of the message.
         /// </summary>
         [Preserve]
-        [JsonProperty("content", DefaultValueHandling = DefaultValueHandling.Populate, NullValueHandling = NullValueHandling.Include, Required = Required.AllowNull)]
+        [JsonProperty("content", DefaultValueHandling = DefaultValueHandling.Populate, NullValueHandling = NullValueHandling.Include)]
         public string Content { get; }
 
         /// <summary>
