@@ -34,7 +34,7 @@ namespace OpenAI.Threads
         /// The text in the message content that needs to be replaced.
         /// </summary>
         [Preserve]
-        [JsonProperty("text")]
+        [JsonProperty("text", DefaultValueHandling = DefaultValueHandling.Populate, NullValueHandling = NullValueHandling.Include, Required = Required.AllowNull)]
         public string Text { get; }
 
         /// <summary>

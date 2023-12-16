@@ -23,7 +23,7 @@ namespace OpenAI.Threads
         /// The data that makes up the text.
         /// </summary>
         [Preserve]
-        [JsonProperty("value")]
+        [JsonProperty("value", DefaultValueHandling = DefaultValueHandling.Populate, NullValueHandling = NullValueHandling.Include, Required = Required.AllowNull)]
         public string Value { get; }
 
         /// <summary>
