@@ -22,8 +22,9 @@ namespace OpenAI.Threads
         /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
         /// </param>
         [Preserve]
-        public CreateThreadRequest(IEnumerable<Message> messages = null,
-            IReadOnlyDictionary<string, string> metadata = null)
+        public CreateThreadRequest(
+            [JsonProperty("messages")] IEnumerable<Message> messages = null,
+            [JsonProperty("metadata")] IReadOnlyDictionary<string, string> metadata = null)
         {
             Messages = messages?.ToList();
             Metadata = metadata;
@@ -45,6 +46,7 @@ namespace OpenAI.Threads
         [JsonProperty("metadata")]
         public IReadOnlyDictionary<string, string> Metadata { get; }
 
+        [Preserve]
         public static implicit operator CreateThreadRequest(string message) => new CreateThreadRequest(new[] { new Message(message) });
     }
 }

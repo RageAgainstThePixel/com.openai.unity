@@ -93,7 +93,7 @@ namespace OpenAI.Tests
             const string testFilePath = "assistant_test_2.txt";
             await File.WriteAllTextAsync(testFilePath, "Knowledge is power!");
             Assert.IsTrue(File.Exists(testFilePath));
-            var file = testAssistant.UploadFileAsync(testFilePath);
+            var file = await testAssistant.UploadFileAsync(testFilePath);
             Assert.IsNotNull(file);
         }
 
@@ -105,6 +105,7 @@ namespace OpenAI.Tests
             var filesList = await testAssistant.ListFilesAsync();
             Assert.IsNotNull(filesList);
             Assert.IsNotEmpty(filesList.Items);
+            Assert.IsTrue(filesList.Items.Count == 2);
 
             foreach (var file in filesList.Items)
             {

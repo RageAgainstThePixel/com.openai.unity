@@ -16,6 +16,7 @@ namespace OpenAI.Threads
     [Preserve]
     public sealed class MessageResponse : BaseResponse
     {
+        [Preserve]
         [JsonConstructor]
         public MessageResponse(
             [JsonProperty("id")] string id,
