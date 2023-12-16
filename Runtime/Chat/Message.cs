@@ -42,7 +42,7 @@ namespace OpenAI.Chat
         public Message(Role role, IEnumerable<Content> content, string name = null)
         {
             Role = role;
-            Content = content.ToList();
+            Content = content?.ToList();
             Name = name;
         }
 
