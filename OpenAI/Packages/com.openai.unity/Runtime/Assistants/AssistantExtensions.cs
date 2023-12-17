@@ -2,8 +2,8 @@
 
 using OpenAI.Files;
 using OpenAI.Threads;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace OpenAI.Assistants
 {

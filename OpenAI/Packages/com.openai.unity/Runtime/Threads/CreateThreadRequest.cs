@@ -24,7 +24,7 @@ namespace OpenAI.Threads
         [Preserve]
         public CreateThreadRequest(
             [JsonProperty("messages")] IEnumerable<Message> messages = null,
-            [JsonProperty("metadata")] IReadOnlyDictionary<string, string> metadata = null)
+            [JsonProperty("metadata")] Dictionary<string, string> metadata = null)
         {
             Messages = messages?.ToList();
             Metadata = metadata;
