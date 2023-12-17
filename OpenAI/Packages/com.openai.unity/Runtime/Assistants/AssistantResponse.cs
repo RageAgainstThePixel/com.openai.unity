@@ -1,8 +1,8 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Assistants
@@ -25,7 +25,7 @@ namespace OpenAI.Assistants
             string instructions,
             IReadOnlyList<Tool> tools,
             IReadOnlyList<string> fileIds,
-            IReadOnlyDictionary<string, string> metadata)
+            Dictionary<string, string> metadata)
         {
             Id = id;
             Object = @object;
