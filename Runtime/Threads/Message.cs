@@ -29,7 +29,7 @@ namespace OpenAI.Threads
         /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
         /// </param>
         [Preserve]
-        public Message(string content, IEnumerable<string> fileIds = null, IReadOnlyDictionary<string, string> metadata = null)
+        public Message(string content, IEnumerable<string> fileIds = null, Dictionary<string, string> metadata = null)
         {
             Role = Role.User;
             Content = content;

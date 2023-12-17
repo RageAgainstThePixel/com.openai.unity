@@ -35,7 +35,7 @@ namespace OpenAI.Threads
             [JsonProperty("instructions")] string instructions,
             [JsonProperty("tools")] IReadOnlyList<Tool> tools,
             [JsonProperty("file_ids")] IReadOnlyList<string> fileIds,
-            [JsonProperty("metadata")] IReadOnlyDictionary<string, string> metadata)
+            [JsonProperty("metadata")] Dictionary<string, string> metadata)
         {
             Id = id;
             Object = @object;
