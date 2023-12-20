@@ -117,8 +117,7 @@ namespace OpenAI
             Converters = new List<JsonConverter>
             {
                 new StringEnumConverter(new SnakeCaseNamingStrategy())
-            },
-            ContractResolver = new EmptyToNullStringContractResolver()
+            }
         };
 
         /// <summary>
