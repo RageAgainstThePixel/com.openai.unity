@@ -18,7 +18,6 @@ using OpenAI.Threads;
 using System;
 using System.Collections.Generic;
 using System.Security.Authentication;
-using Utilities.Rest.Extensions;
 using Utilities.WebRequestRest;
 
 namespace OpenAI

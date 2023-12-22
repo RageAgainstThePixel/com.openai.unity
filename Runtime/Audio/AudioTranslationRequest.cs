@@ -3,7 +3,7 @@
 using System;
 using System.IO;
 using UnityEngine;
-using Utilities.Encoding.OggVorbis;
+using Utilities.Encoding.Wav;
 
 namespace OpenAI.Audio
 {
@@ -71,7 +71,7 @@ namespace OpenAI.Audio
             string prompt = null,
             AudioResponseFormat responseFormat = AudioResponseFormat.Json,
             float? temperature = null)
-            : this(new MemoryStream(audio.EncodeToOggVorbis()), $"{audio.name}.ogg", model, prompt, responseFormat, temperature)
+            : this(new MemoryStream(audio.EncodeToWav()), $"{audio.name}.wav", model, prompt, responseFormat, temperature)
         {
         }
 

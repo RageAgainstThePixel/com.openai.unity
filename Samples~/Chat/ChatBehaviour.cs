@@ -15,6 +15,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Utilities.Audio;
+using Utilities.Encoding.Wav;
 using Utilities.Extensions;
 using Utilities.WebRequestRest;
 
@@ -27,6 +29,9 @@ namespace OpenAI.Samples.Chat
 
         [SerializeField]
         private Button submitButton;
+
+        [SerializeField]
+        private Button recordButton;
 
         [SerializeField]
         private TMP_InputField inputField;
@@ -94,6 +99,7 @@ namespace OpenAI.Samples.Chat
             inputField.Validate();
             contentArea.Validate();
             submitButton.Validate();
+            recordButton.Validate();
             audioSource.Validate();
         }
 
@@ -108,6 +114,7 @@ namespace OpenAI.Samples.Chat
             conversation.AppendMessage(new Message(Role.System, systemPrompt));
             inputField.onSubmit.AddListener(SubmitChat);
             submitButton.onClick.AddListener(SubmitChat);
+            recordButton.onClick.AddListener(ToggleRecording);
         }
 
         private void OnDestroy()
@@ -231,7 +238,11 @@ namespace OpenAI.Samples.Chat
             var request = new SpeechRequest(text, Model.TTS_1);
             var (clipPath, clip) = await openAI.AudioEndpoint.CreateSpeechAsync(request, lifetimeCancellationTokenSource.Token);
             audioSource.PlayOneShot(clip);
-            Debug.Log(clipPath);
+
+            if (enableDebug)
+            {
+                Debug.Log(clipPath);
+            }
         }
 
         private TextMeshProUGUI AddNewTextMessageContent(Role role)
@@ -262,6 +273,55 @@ namespace OpenAI.Samples.Chat
         {
             var results = await openAI.ImagesEndPoint.GenerateImageAsync(request);
             return results.FirstOrDefault();
+        }
+
+        private void ToggleRecording()
+        {
+            RecordingManager.EnableDebug = enableDebug;
+
+            if (RecordingManager.IsRecording)
+            {
+                RecordingManager.EndRecording();
+            }
+            else
+            {
+                inputField.interactable = false;
+                RecordingManager.StartRecording<WavEncoder>(callback: ProcessRecording);
+            }
+        }
+
+        private async void ProcessRecording(Tuple<string, AudioClip> recording)
+        {
+            var (path, clip) = recording;
+
+            if (enableDebug)
+            {
+                Debug.Log(path);
+            }
+
+            try
+            {
+                recordButton.interactable = false;
+                var request = new AudioTranscriptionRequest(clip, temperature: 0.1f, language: "en");
+                var userInput = await openAI.AudioEndpoint.CreateTranscriptionAsync(request, lifetimeCancellationTokenSource.Token);
+
+                if (enableDebug)
+                {
+                    Debug.Log(userInput);
+                }
+
+                inputField.text = userInput;
+                SubmitChat();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+                inputField.interactable = true;
+            }
+            finally
+            {
+                recordButton.interactable = true;
+            }
         }
     }
 }
