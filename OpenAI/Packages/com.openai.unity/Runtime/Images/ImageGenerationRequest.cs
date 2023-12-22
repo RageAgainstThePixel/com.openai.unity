@@ -2,7 +2,6 @@
 
 using Newtonsoft.Json;
 using OpenAI.Models;
-using System;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Images
