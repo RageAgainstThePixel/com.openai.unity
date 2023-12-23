@@ -55,14 +55,14 @@ namespace OpenAI.Images
                 return CachedPath;
             }
 
-            if (!string.IsNullOrWhiteSpace(Url))
-            {
-                return Url;
-            }
-
             if (!string.IsNullOrWhiteSpace(B64_Json))
             {
                 return B64_Json;
+            }
+
+            if (!string.IsNullOrWhiteSpace(Url))
+            {
+                return Url;
             }
 
             return string.Empty;
