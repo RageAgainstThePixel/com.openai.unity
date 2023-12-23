@@ -133,16 +133,21 @@ namespace OpenAI.Images
                     }
 
                     result.Texture = await Rest.DownloadTextureAsync(localFilePath, debug: EnableDebug, cancellationToken: cancellationToken);
+
+                    if (Rest.TryGetDownloadCacheItem(result.B64_Json, out var cachedPath))
+                    {
+                        result.CachedPath = cachedPath;
+                    }
 #endif
                 }
                 else
                 {
                     result.Texture = await Rest.DownloadTextureAsync(result.Url, debug: EnableDebug, cancellationToken: cancellationToken);
-                }
 
-                if (Rest.TryGetDownloadCacheItem(result, out var cachedPath))
-                {
-                    result.CachedPath = cachedPath;
+                    if (Rest.TryGetDownloadCacheItem(result.Url, out var cachedPath))
+                    {
+                        result.CachedPath = cachedPath;
+                    }
                 }
             }
 
