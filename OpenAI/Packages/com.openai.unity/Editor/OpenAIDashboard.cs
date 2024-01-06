@@ -13,123 +13,97 @@ using UnityEngine;
 using Utilities.Extensions.Editor;
 using Progress = Utilities.WebRequestRest.Progress;
 
-namespace OpenAI.Editor.FineTuning
+namespace OpenAI.Editor
 {
-    public class FineTuningWindow : EditorWindow
+    public class OpenAIDashboard : AbstractEditorDashboard
     {
-        private const int EndWidth = 10;
-        private const float WideColumnWidth = 128f;
-        private const float DefaultColumnWidth = 96f;
+        #region GUIContent
 
-        private static readonly GUIContent guiTitleContent = new GUIContent("OpenAI Fine Tuning");
-
+        private static readonly GUIContent dashboardTitleContent = new("OpenAI Dashboard");
         private static readonly string[] tabTitles = { "Training Data", "Training Jobs", "Models" };
-
-        private static readonly GUIContent deleteContent = new GUIContent("Delete");
-
-        private static readonly GUIContent refreshContent = new GUIContent("Refresh");
-
-        private static readonly List<SerializedObject> fineTuningTrainingDataSets = new List<SerializedObject>();
-
-        private static readonly List<Model> organizationModels = new List<Model>();
-
-        private static readonly ConcurrentDictionary<string, FineTuneJobResponse> fineTuneJobs = new ConcurrentDictionary<string, FineTuneJobResponse>();
-
-        private static OpenAIClient openAI;
-
-        private static GUIStyle boldCenteredHeaderStyle;
-
-        private static GUIStyle BoldCenteredHeaderStyle
-        {
-            get
-            {
-                if (boldCenteredHeaderStyle == null)
-                {
-                    var editorStyle = EditorGUIUtility.isProSkin ? EditorStyles.whiteLargeLabel : EditorStyles.largeLabel;
-
-                    if (editorStyle != null)
-                    {
-                        boldCenteredHeaderStyle = new GUIStyle(editorStyle)
-                        {
-                            alignment = TextAnchor.MiddleCenter,
-                            fontSize = 18,
-                            padding = new RectOffset(0, 0, -8, -8)
-                        };
-                    }
-                }
-
-                return boldCenteredHeaderStyle;
-            }
-        }
-
-        private static GUIStyle rightMiddleAlignedLabel;
-
-        private static GUIStyle RightMiddleAlignedLabel => rightMiddleAlignedLabel ??= new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleRight };
-
-        private static readonly GUILayoutOption[] defaultColumnWidthOption =
-        {
-            GUILayout.Width(DefaultColumnWidth)
-        };
-
-        private static readonly GUILayoutOption[] wideColumnWidthOption =
-        {
-            GUILayout.Width(WideColumnWidth)
-        };
-
-        private static readonly GUILayoutOption[] expandWidthOption =
-        {
-            GUILayout.ExpandWidth(true)
-        };
-
+        private static readonly string authError = $"No valid {nameof(OpenAIConfiguration)} was found. This tool requires that you set your API key.";
         private static readonly GUILayoutOption[] squareWidthOption =
         {
             GUILayout.Width(24)
         };
 
-        private static Vector2 scrollPosition = Vector2.zero;
+        #endregion GUIContent
+
+        #region GUIStyles
+
+        private static GUIStyle rightMiddleAlignedLabel;
+        private static GUIStyle RightMiddleAlignedLabel => rightMiddleAlignedLabel ??= new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleRight };
+
+        #endregion GUIStyles
+
+        #region Dashboad Overrides
+
+        protected override GUIContent DashboardTitleContent => dashboardTitleContent;
+        protected override string DefaultSaveDirectoryKey => $"{Application.productName}_{nameof(OpenAI)}_EditorDownloadDirectory";
+        protected override string EditorDownloadDirectory { get; set; }
+        protected override string[] DashboardTabs => tabTitles;
+
+        #endregion Dashboad Overrides
+
+        private static OpenAIClient openAI;
 
         private static bool hasFetchedModels;
-
         private static bool isFetchingModels;
-
         private static GUIContent[] modelOptions;
+        private static readonly List<Model> organizationModels = new();
 
         private static bool hasFetchedJobEvents;
-
         private static bool isFetchingJobs;
+        private static readonly List<SerializedObject> fineTuningTrainingDataSets = new();
+        private static readonly ConcurrentDictionary<string, FineTuneJobResponse> fineTuneJobs = new();
 
         [SerializeField]
-        private int tab;
+        private OpenAIConfiguration openAIConfiguration;
 
-        [MenuItem("Window/Dashboards/OpenAI/Fine Tuning")]
+        private OpenAISettings openAISettings;
+
+        private OpenAIAuthentication openAIAuthentication;
+
+        [MenuItem("Window/Dashboards/" + nameof(OpenAI), priority = 999)]
         private static void OpenWindow()
         {
             // Dock it next to the Scene View.
-            var instance = GetWindow<FineTuningWindow>(typeof(SceneView));
+            var instance = GetWindow<OpenAIDashboard>(typeof(SceneView));
             instance.Show();
-            instance.titleContent = guiTitleContent;
-            FetchAllModels();
+            instance.titleContent = dashboardTitleContent;
         }
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
-            titleContent = guiTitleContent;
+            titleContent = dashboardTitleContent;
             minSize = new Vector2(512, 256);
         }
 
         private void OnFocus()
         {
-            GatherTrainingDataSets();
+            if (openAIConfiguration == null)
+            {
+                openAIConfiguration = Resources.Load<OpenAIConfiguration>($"{nameof(OpenAIConfiguration)}.asset");
+            }
+
+            openAIAuthentication ??= openAIConfiguration == null
+                ? new OpenAIAuthentication().LoadDefaultsReversed()
+                : new OpenAIAuthentication(openAIConfiguration);
+            openAISettings ??= openAIConfiguration == null
+                ? new OpenAISettings()
+                : new OpenAISettings(openAIConfiguration);
 
             try
             {
-                openAI ??= new OpenAIClient();
+                openAI ??= new OpenAIClient(openAIAuthentication, openAISettings);
             }
             catch (Exception)
             {
                 // Ignored
                 return;
             }
+
+            GatherTrainingDataSets();
 
             if (!hasFetchedModels)
             {
@@ -144,27 +118,14 @@ namespace OpenAI.Editor.FineTuning
             }
         }
 
-        private void OnGUI()
+        protected override bool TryCheckDashboardConfiguration(out string errorMessage)
         {
-            EditorGUILayout.BeginVertical();
-            EditorGUILayout.Space();
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("OpenAI Model Fine Tuning", BoldCenteredHeaderStyle);
-            EditorGUILayout.EndHorizontal();
-            EditorGUILayout.Space();
+            errorMessage = authError;
+            return openAI is { HasValidAuthentication: true };
+        }
 
-            if (openAI is not { HasValidAuthentication: true })
-            {
-                EditorGUILayout.HelpBox($"No valid {nameof(OpenAIConfiguration)} was found. This tool requires that you set your API key.", MessageType.Error);
-                EditorGUILayout.EndVertical();
-                return;
-            }
-
-            tab = GUILayout.Toolbar(tab, tabTitles);
-
-            EditorGUILayout.Space();
-            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.ExpandWidth(true));
-
+        protected override void RenderTab(int tab)
+        {
             switch (tab)
             {
                 case 0:
@@ -177,9 +138,6 @@ namespace OpenAI.Editor.FineTuning
                     RenderOrganizationModels();
                     break;
             }
-
-            EditorGUILayout.EndScrollView();
-            EditorGUILayout.EndVertical();
         }
 
         private static void GatherTrainingDataSets()
@@ -493,7 +451,7 @@ namespace OpenAI.Editor.FineTuning
             GUILayout.FlexibleSpace();
 
             GUI.enabled = !isFetchingJobs;
-            if (fineTuneJobList is not null && trainingJobIds.Count > 0 && GUILayout.Button("Prev Page", defaultColumnWidthOption))
+            if (fineTuneJobList is not null && trainingJobIds.Count > 0 && GUILayout.Button("Prev Page", DefaultColumnWidthOption))
             {
                 EditorApplication.delayCall += () =>
                 {
@@ -504,12 +462,12 @@ namespace OpenAI.Editor.FineTuning
                 };
             }
 
-            if (fineTuneJobList is { HasMore: true } && GUILayout.Button("Next Page", defaultColumnWidthOption))
+            if (fineTuneJobList is { HasMore: true } && GUILayout.Button("Next Page", DefaultColumnWidthOption))
             {
                 EditorApplication.delayCall += () => FetchTrainingJobs(fineTuneJobList.Items.LastOrDefault());
             }
 
-            if (GUILayout.Button(refreshContent, defaultColumnWidthOption))
+            if (GUILayout.Button(RefreshContent, DefaultColumnWidthOption))
             {
                 EditorApplication.delayCall += () => FetchTrainingJobs();
             }
