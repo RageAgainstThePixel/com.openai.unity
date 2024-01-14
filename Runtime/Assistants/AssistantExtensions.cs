@@ -2,6 +2,7 @@
 
 using OpenAI.Files;
 using OpenAI.Threads;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -77,6 +78,21 @@ namespace OpenAI.Assistants
         {
             var file = await assistant.Client.FilesEndpoint.UploadFileAsync(new FileUploadRequest(filePath, "assistants"), uploadProgress: null, cancellationToken);
             return await assistant.AttachFileAsync(file, cancellationToken);
+        }
+
+        /// <summary>
+        /// Uploads a new file at the specified path and attaches it to the assistant.
+        /// </summary>
+        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
+        /// <param name="stream">The file contents to upload.</param>
+        /// <param name="fileName">The name of the file.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="AssistantFileResponse"/>.</returns>
+
+        public static async Task<AssistantFileResponse> UploadFileAsync(this AssistantResponse assistant, Stream stream, string fileName, CancellationToken cancellationToken = default)
+        {
+            var file = await assistant.Client.FilesEndpoint.UploadFileAsync(new FileUploadRequest(stream, fileName, "assistants"), uploadProgress: null, cancellationToken);
+            return await assistant.AttachFileAsync(file, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
