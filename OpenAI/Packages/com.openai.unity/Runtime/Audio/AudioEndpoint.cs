@@ -64,8 +64,7 @@ namespace OpenAI.Audio
                 UnityWebRequest.kHttpVerbPOST,
                 clipName,
                 payload,
-                parameters: new RestParameters(client.DefaultRequestHeaders),
-                debug: EnableDebug,
+                parameters: new RestParameters(client.DefaultRequestHeaders, debug: EnableDebug),
                 cancellationToken: cancellationToken);
             Rest.TryGetDownloadCacheItem(clipName, out var cachedPath);
             return new Tuple<string, AudioClip>(cachedPath, clip);
