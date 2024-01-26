@@ -27,6 +27,14 @@ namespace OpenAI
     /// </summary>
     public sealed class OpenAIClient : BaseClient<OpenAIAuthentication, OpenAISettings>
     {
+        /// <inheritdoc />
+        public OpenAIClient(OpenAIConfiguration configuration)
+            : this(
+                configuration != null ? new OpenAIAuthentication(configuration) : null,
+                configuration != null ? new OpenAISettings(configuration) : null)
+        {
+        }
+
         /// <summary>
         /// Creates a new entry point to the OpenAPI API, handling auth and allowing access to the various API endpoints
         /// </summary>

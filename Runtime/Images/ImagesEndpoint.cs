@@ -132,7 +132,7 @@ namespace OpenAI.Images
                         await File.WriteAllBytesAsync(localFilePath, imageData, cancellationToken).ConfigureAwait(true);
                     }
 
-                    result.Texture = await Rest.DownloadTextureAsync(localFilePath, debug: EnableDebug, cancellationToken: cancellationToken);
+                    result.Texture = await Rest.DownloadTextureAsync(localFilePath, parameters: new RestParameters(debug: EnableDebug), cancellationToken: cancellationToken);
 
                     if (Rest.TryGetDownloadCacheItem(result.B64_Json, out var cachedPath))
                     {
@@ -142,7 +142,7 @@ namespace OpenAI.Images
                 }
                 else
                 {
-                    result.Texture = await Rest.DownloadTextureAsync(result.Url, debug: EnableDebug, cancellationToken: cancellationToken);
+                    result.Texture = await Rest.DownloadTextureAsync(result.Url, parameters: new RestParameters(debug: EnableDebug), cancellationToken: cancellationToken);
 
                     if (Rest.TryGetDownloadCacheItem(result.Url, out var cachedPath))
                     {

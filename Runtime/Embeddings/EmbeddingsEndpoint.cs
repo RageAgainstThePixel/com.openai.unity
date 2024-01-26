@@ -35,10 +35,14 @@ namespace OpenAI.Embeddings
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
+        /// <param name="dimensions">
+        /// The number of dimensions the resulting output embeddings should have.
+        /// Only supported in text-embedding-3 and later models
+        /// </param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="EmbeddingsResponse"/></returns>
-        public async Task<EmbeddingsResponse> CreateEmbeddingAsync(string input, string model = null, string user = null, CancellationToken cancellationToken = default)
-            => await CreateEmbeddingAsync(new EmbeddingsRequest(input, model, user), cancellationToken);
+        public async Task<EmbeddingsResponse> CreateEmbeddingAsync(string input, string model = null, string user = null, int? dimensions = null, CancellationToken cancellationToken = default)
+            => await CreateEmbeddingAsync(new EmbeddingsRequest(input, model, user, dimensions), cancellationToken);
 
         /// <summary>
         /// Creates an embedding vector representing the input text.
@@ -55,10 +59,14 @@ namespace OpenAI.Embeddings
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
+        /// <param name="dimensions">
+        /// The number of dimensions the resulting output embeddings should have.
+        /// Only supported in text-embedding-3 and later models
+        /// </param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="EmbeddingsResponse"/></returns>
-        public async Task<EmbeddingsResponse> CreateEmbeddingAsync(IEnumerable<string> input, string model = null, string user = null, CancellationToken cancellationToken = default)
-            => await CreateEmbeddingAsync(new EmbeddingsRequest(input, model, user), cancellationToken);
+        public async Task<EmbeddingsResponse> CreateEmbeddingAsync(IEnumerable<string> input, string model = null, string user = null, int? dimensions = null, CancellationToken cancellationToken = default)
+            => await CreateEmbeddingAsync(new EmbeddingsRequest(input, model, user, dimensions), cancellationToken);
 
         /// <summary>
         /// Creates an embedding vector representing the input text.
