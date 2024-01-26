@@ -29,17 +29,31 @@ namespace OpenAI.Threads
         public string Id { get; }
 
         /// <summary>
-        /// The type of tool call the output is required for. For now, this is always 'function'.
+        /// The type of tool call the output is required for.
         /// </summary>
         [Preserve]
         [JsonProperty("type")]
         public string Type { get; }
 
         /// <summary>
-        /// The function definition.
+        /// The definition of the function that was called.
         /// </summary>
         [Preserve]
         [JsonProperty("function")]
         public FunctionCall FunctionCall { get; }
+
+        /// <summary>
+        /// The Code Interpreter tool call definition.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("code_interpreter")]
+        public CodeInterpreter CodeInterpreter { get; private set; }
+
+        /// <summary>
+        /// For now, this is always going to be an empty object.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("retrieval")]
+        public object Retrieval { get; private set; }
     }
 }

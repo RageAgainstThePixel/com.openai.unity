@@ -15,6 +15,9 @@ namespace OpenAI
             FileId = fileId;
         }
 
+        /// <summary>
+        /// The file ID of the image.
+        /// </summary>
         [Preserve]
         [JsonProperty("file_id")]
         public string FileId { get; private set; }

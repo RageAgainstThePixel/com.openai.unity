@@ -25,6 +25,9 @@ namespace OpenAI.Samples.Chat
     public class ChatBehaviour : MonoBehaviour
     {
         [SerializeField]
+        private OpenAIConfiguration configuration;
+
+        [SerializeField]
         private bool enableDebug;
 
         [SerializeField]
@@ -51,11 +54,11 @@ namespace OpenAI.Samples.Chat
 
         private OpenAIClient openAI;
 
-        private readonly Conversation conversation = new Conversation();
+        private readonly Conversation conversation = new();
 
         private CancellationTokenSource lifetimeCancellationTokenSource;
 
-        private readonly List<Tool> assistantTools = new List<Tool>
+        private readonly List<Tool> assistantTools = new()
         {
             new Function(
                 nameof(GenerateImageAsync),
@@ -107,7 +110,7 @@ namespace OpenAI.Samples.Chat
         {
             OnValidate();
             lifetimeCancellationTokenSource = new CancellationTokenSource();
-            openAI = new OpenAIClient
+            openAI = new OpenAIClient(configuration)
             {
                 EnableDebug = enableDebug
             };
@@ -251,7 +254,11 @@ namespace OpenAI.Samples.Chat
             textObject.transform.SetParent(contentArea, false);
             var textMesh = textObject.AddComponent<TextMeshProUGUI>();
             textMesh.fontSize = 24;
+#if UNITY_2023_1_OR_NEWER
+            textMesh.textWrappingMode = TextWrappingModes.Normal;
+#else
             textMesh.enableWordWrapping = true;
+#endif
             return textMesh;
         }
 
