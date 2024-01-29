@@ -6,8 +6,6 @@ using Newtonsoft.Json.Serialization;
 using OpenAI.Assistants;
 using OpenAI.Audio;
 using OpenAI.Chat;
-using OpenAI.Completions;
-using OpenAI.Edits;
 using OpenAI.Embeddings;
 using OpenAI.Files;
 using OpenAI.FineTuning;
@@ -15,7 +13,6 @@ using OpenAI.Images;
 using OpenAI.Models;
 using OpenAI.Moderations;
 using OpenAI.Threads;
-using System;
 using System.Collections.Generic;
 using System.Security.Authentication;
 using Utilities.WebRequestRest;
@@ -50,10 +47,6 @@ namespace OpenAI
         {
             ModelsEndpoint = new ModelsEndpoint(this);
             ChatEndpoint = new ChatEndpoint(this);
-#pragma warning disable CS0618 // Type or member is obsolete
-            CompletionsEndpoint = new CompletionsEndpoint(this);
-            EditsEndpoint = new EditsEndpoint(this);
-#pragma warning restore CS0618 // Type or member is obsolete
             ImagesEndPoint = new ImagesEndpoint(this);
             EmbeddingsEndpoint = new EmbeddingsEndpoint(this);
             AudioEndpoint = new AudioEndpoint(this);
@@ -135,28 +128,10 @@ namespace OpenAI
         public ModelsEndpoint ModelsEndpoint { get; }
 
         /// <summary>
-        /// Text generation is the core function of the API. You give the API a prompt, and it generates a completion.
-        /// The way you “program” the API to do a task is by simply describing the task in plain english or providing
-        /// a few written examples. This simple approach works for a wide range of use cases, including summarization,
-        /// translation, grammar correction, question answering, chatbots, composing emails, and much more
-        /// (see the prompt library for inspiration).<br/>
-        /// <see href="https://platform.openai.com/docs/api-reference/completions"/>
-        /// </summary>
-        [Obsolete("Deprecated")]
-        public CompletionsEndpoint CompletionsEndpoint { get; }
-
-        /// <summary>
         /// Given a chat conversation, the model will return a chat completion response.<br/>
         /// <see href="https://platform.openai.com/docs/api-reference/chat"/>
         /// </summary>
         public ChatEndpoint ChatEndpoint { get; }
-
-        /// <summary>
-        /// Given a prompt and an instruction, the model will return an edited version of the prompt.<br/>
-        /// <see href="https://platform.openai.com/docs/api-reference/edits"/>
-        /// </summary>
-        [Obsolete("Deprecated")]
-        public EditsEndpoint EditsEndpoint { get; }
 
         /// <summary>
         /// Given a prompt and/or an input image, the model will generate a new image.<br/>
