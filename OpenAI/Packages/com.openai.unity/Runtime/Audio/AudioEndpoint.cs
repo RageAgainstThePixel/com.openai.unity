@@ -38,6 +38,8 @@ namespace OpenAI.Audio
         /// <inheritdoc />
         protected override string Root => "audio";
 
+        private static readonly object mutex = new object();
+
         /// <summary>
         /// Generates audio from the input text.
         /// </summary>
@@ -57,7 +59,13 @@ namespace OpenAI.Audio
                 _ => throw new NotSupportedException(request.ResponseFormat.ToString())
             };
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var clipName = $"{request.Voice}-{DateTime.UtcNow:yyyyMMddThhmmss}.{ext}";
+            string clipName;
+
+            lock (mutex)
+            {
+                clipName = $"{request.Voice}-{DateTime.UtcNow:yyyyMMddThhmmssff}.{ext}";
+            }
+
             var clip = await Rest.DownloadAudioClipAsync(
                 GetUrl("/speech"),
                 audioFormat,

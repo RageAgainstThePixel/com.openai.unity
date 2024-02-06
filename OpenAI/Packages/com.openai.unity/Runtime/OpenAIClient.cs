@@ -67,7 +67,7 @@ namespace OpenAI
                 { "OpenAI-Beta", "assistants=v1"}
             };
 
-            if (!Settings.Info.BaseRequestUrlFormat.Contains(OpenAISettingsInfo.AzureOpenAIDomain) &&
+            if (Settings.Info.BaseRequestUrlFormat.Contains(OpenAISettingsInfo.OpenAIDomain) &&
                 (string.IsNullOrWhiteSpace(Authentication.Info.ApiKey) ||
                  (!Authentication.Info.ApiKey.Contains(OpenAIAuthInfo.SecretKeyPrefix) &&
                   !Authentication.Info.ApiKey.Contains(OpenAIAuthInfo.SessionKeyPrefix))))
