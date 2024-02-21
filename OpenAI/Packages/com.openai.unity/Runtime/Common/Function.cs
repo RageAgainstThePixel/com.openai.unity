@@ -22,7 +22,6 @@ namespace OpenAI
         private const string NameRegex = "^[a-zA-Z0-9_-]{1,64}$";
 
         [Preserve]
-        [JsonConstructor]
         public Function() { }
 
         /// <summary>
@@ -230,8 +229,6 @@ namespace OpenAI
 
                 if (requestedArgs.TryGetValue(parameter.Name, out var value))
                 {
-                    Debug.Log($"{nameof(ValidateFunctionArguments)}: {value} | {value.GetType()} -> {parameter.ParameterType}");
-
                     if (parameter.ParameterType == typeof(CancellationToken))
                     {
                         invokeArgs[i] = cancellationToken;

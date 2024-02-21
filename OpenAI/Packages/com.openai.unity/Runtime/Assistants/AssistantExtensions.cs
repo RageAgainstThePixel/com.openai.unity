@@ -246,7 +246,7 @@ namespace OpenAI.Assistants
         /// <param name="toolCalls">A collection of <see cref="ToolCall"/>s.</param>
         /// <returns>A collection of <see cref="ToolOutput"/>s.</returns>
         public static async Task<IReadOnlyList<ToolOutput>> GetToolOutputsAsync(this AssistantResponse assistant, IEnumerable<ToolCall> toolCalls)
-            => await Task.WhenAll(toolCalls.Select(async toolCall => await assistant.GetToolOutputAsync(toolCall)));
+            => await Task.WhenAll(toolCalls.Select(async toolCall => await assistant.GetToolOutputAsync(toolCall))).ConfigureAwait(true);
 
         #endregion Tools
     }
