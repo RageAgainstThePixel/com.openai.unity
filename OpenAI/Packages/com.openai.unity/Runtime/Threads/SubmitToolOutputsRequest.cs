@@ -26,11 +26,8 @@ namespace OpenAI.Threads
         /// <param name="toolOutputs">Collection of tools for which the outputs are being submitted.</param>
         [Preserve]
         [JsonConstructor]
-        public SubmitToolOutputsRequest(
-            [JsonProperty("tool_outputs")] IEnumerable<ToolOutput> toolOutputs)
-        {
-            ToolOutputs = toolOutputs?.ToList();
-        }
+        public SubmitToolOutputsRequest([JsonProperty("tool_outputs")] IEnumerable<ToolOutput> toolOutputs)
+            => ToolOutputs = toolOutputs?.ToList();
 
         /// <summary>
         /// A list of tools for which the outputs are being submitted.
@@ -40,6 +37,9 @@ namespace OpenAI.Threads
         public IReadOnlyList<ToolOutput> ToolOutputs { get; }
 
         [Preserve]
-        public static implicit operator SubmitToolOutputsRequest(ToolOutput toolOutput) => new SubmitToolOutputsRequest(toolOutput);
+        public static implicit operator SubmitToolOutputsRequest(ToolOutput toolOutput) => new(toolOutput);
+
+        [Preserve]
+        public static implicit operator SubmitToolOutputsRequest(ToolOutput[] toolOutputs) => new(toolOutputs);
     }
 }

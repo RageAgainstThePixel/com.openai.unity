@@ -548,7 +548,7 @@ namespace OpenAI.Editor
 
         private static ListResponse<FineTuneJobResponse> fineTuneJobList;
         private static int trainingJobCount = 25;
-        private static readonly Stack<string> trainingJobIds = new Stack<string>();
+        private static readonly Stack<string> trainingJobIds = new();
 
         private static async void FetchTrainingJobs(string trainingJobId = null)
         {

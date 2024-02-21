@@ -11,7 +11,7 @@ namespace OpenAI.Threads
     public sealed class CreateMessageRequest
     {
         [Preserve]
-        public static implicit operator CreateMessageRequest(string content) => new CreateMessageRequest(content);
+        public static implicit operator CreateMessageRequest(string content) => new(content);
 
         /// <summary>
         /// Constructor.

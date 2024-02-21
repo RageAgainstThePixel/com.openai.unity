@@ -38,7 +38,7 @@ namespace OpenAI.Audio
         /// <inheritdoc />
         protected override string Root => "audio";
 
-        private static readonly object mutex = new object();
+        private static readonly object mutex = new();
 
         /// <summary>
         /// Generates audio from the input text.

@@ -22,10 +22,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
-                new Message(Role.System, "You are a helpful assistant."),
-                new Message(Role.User, "Who won the world series in 2020?"),
-                new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
-                new Message(Role.User, "Where was it played?"),
+                new(Role.System, "You are a helpful assistant."),
+                new(Role.User, "Who won the world series in 2020?"),
+                new(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
+                new(Role.User, "Where was it played?"),
             };
             var chatRequest = new ChatRequest(messages, Model.GPT4);
             var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
@@ -47,10 +47,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
-                new Message(Role.System, "You are a helpful assistant."),
-                new Message(Role.User, "Who won the world series in 2020?"),
-                new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
-                new Message(Role.User, "Where was it played?"),
+                new(Role.System, "You are a helpful assistant."),
+                new(Role.User, "Who won the world series in 2020?"),
+                new(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
+                new(Role.User, "Where was it played?"),
             };
             var chatRequest = new ChatRequest(messages);
             var cumulativeDelta = string.Empty;
@@ -84,10 +84,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
-                new Message(Role.System, "You are a helpful assistant designed to output JSON."),
-                new Message(Role.User, "Who won the world series in 2020?"),
+                new(Role.System, "You are a helpful assistant designed to output JSON."),
+                new(Role.User, "Who won the world series in 2020?"),
             };
-            var chatRequest = new ChatRequest(messages, "gpt-4-1106-preview", responseFormat: ChatResponseFormat.Json);
+            var chatRequest = new ChatRequest(messages, "gpt-4-turbo-preview", responseFormat: ChatResponseFormat.Json);
             var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
@@ -108,8 +108,8 @@ namespace OpenAI.Tests
 
             var messages = new List<Message>
             {
-                new Message(Role.System, "You are a helpful weather assistant."),
-                new Message(Role.User, "What's the weather like today?"),
+                new(Role.System, "You are a helpful weather assistant."),
+                new(Role.User, "What's the weather like today?"),
             };
 
             foreach (var message in messages)
@@ -117,30 +117,7 @@ namespace OpenAI.Tests
                 Debug.Log($"{message.Role}: {message.Content}");
             }
 
-            var tools = new List<Tool>
-            {
-                new Function(
-                    nameof(WeatherService.GetCurrentWeather),
-                    "Get the current weather in a given location",
-                     new JObject
-                     {
-                         ["type"] = "object",
-                         ["properties"] = new JObject
-                         {
-                             ["location"] = new JObject
-                             {
-                                 ["type"] = "string",
-                                 ["description"] = "The city and state, e.g. San Francisco, CA"
-                             },
-                             ["unit"] = new JObject
-                             {
-                                 ["type"] = "string",
-                                 ["enum"] = new JArray {"celsius", "fahrenheit"}
-                             }
-                         },
-                         ["required"] = new JArray { "location", "unit" }
-                     })
-            };
+            var tools = Tool.GetAllAvailableTools(false);
             var chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
             var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
@@ -165,7 +142,7 @@ namespace OpenAI.Tests
             {
                 Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishReason}");
 
-                var unitMessage = new Message(Role.User, "celsius");
+                var unitMessage = new Message(Role.User, "Fahrenheit");
                 messages.Add(unitMessage);
                 Debug.Log($"{unitMessage.Role}: {unitMessage.Content}");
                 chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
@@ -178,11 +155,10 @@ namespace OpenAI.Tests
             Assert.IsTrue(response.FirstChoice.FinishReason == "tool_calls");
             var usedTool = response.FirstChoice.Message.ToolCalls[0];
             Assert.IsNotNull(usedTool);
-            Assert.IsTrue(usedTool.Function.Name == nameof(WeatherService.GetCurrentWeather));
+            Assert.IsTrue(usedTool.Function.Name.Contains(nameof(WeatherService.GetCurrentWeatherAsync)));
             Debug.Log($"{response.FirstChoice.Message.Role}: {usedTool.Function.Name} | Finish Reason: {response.FirstChoice.FinishReason}");
             Debug.Log($"{usedTool.Function.Arguments}");
-            var functionArgs = JsonConvert.DeserializeObject<WeatherArgs>(usedTool.Function.Arguments.ToString());
-            var functionResult = WeatherService.GetCurrentWeather(functionArgs);
+            var functionResult = await usedTool.InvokeFunctionAsync();
             Assert.IsNotNull(functionResult);
             messages.Add(new Message(usedTool, functionResult));
             Debug.Log($"{Role.Tool}: {functionResult}");
@@ -197,8 +173,8 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
-                new Message(Role.System, "You are a helpful weather assistant."),
-                new Message(Role.User, "What's the weather like today?"),
+                new(Role.System, "You are a helpful weather assistant."),
+                new(Role.User, "What's the weather like today?"),
             };
 
             foreach (var message in messages)
@@ -206,30 +182,7 @@ namespace OpenAI.Tests
                 Debug.Log($"{message.Role}: {message.Content}");
             }
 
-            var tools = new List<Tool>
-            {
-                new Function(
-                    nameof(WeatherService.GetCurrentWeather),
-                    "Get the current weather in a given location",
-                    new JObject
-                    {
-                        ["type"] = "object",
-                        ["properties"] = new JObject
-                        {
-                            ["location"] = new JObject
-                            {
-                                ["type"] = "string",
-                                ["description"] = "The city and state, e.g. San Francisco, CA"
-                            },
-                            ["unit"] = new JObject
-                            {
-                                ["type"] = "string",
-                                ["enum"] = new JArray {"celsius", "fahrenheit"}
-                            }
-                        },
-                        ["required"] = new JArray { "location", "unit" }
-                    })
-            };
+            var tools = Tool.GetAllAvailableTools(false);
             var chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
             var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
@@ -261,7 +214,7 @@ namespace OpenAI.Tests
             {
                 Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishReason}");
 
-                var unitMessage = new Message(Role.User, "celsius");
+                var unitMessage = new Message(Role.User, "Fahrenheit");
                 messages.Add(unitMessage);
                 Debug.Log($"{unitMessage.Role}: {unitMessage.Content}");
                 chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
@@ -279,12 +232,10 @@ namespace OpenAI.Tests
             Assert.IsTrue(response.FirstChoice.FinishReason == "tool_calls");
             var usedTool = response.FirstChoice.Message.ToolCalls[0];
             Assert.IsNotNull(usedTool);
-            Assert.IsTrue(usedTool.Function.Name == nameof(WeatherService.GetCurrentWeather));
+            Assert.IsTrue(usedTool.Function.Name.Contains(nameof(WeatherService.GetCurrentWeatherAsync)));
             Debug.Log($"{response.FirstChoice.Message.Role}: {usedTool.Function.Name} | Finish Reason: {response.FirstChoice.FinishReason}");
             Debug.Log($"{usedTool.Function.Arguments}");
-
-            var functionArgs = JsonConvert.DeserializeObject<WeatherArgs>(usedTool.Function.Arguments.ToString());
-            var functionResult = WeatherService.GetCurrentWeather(functionArgs);
+            var functionResult = await usedTool.InvokeFunctionAsync();
             Assert.IsNotNull(functionResult);
             messages.Add(new Message(usedTool, functionResult));
             Debug.Log($"{Role.Tool}: {functionResult}");
@@ -305,36 +256,12 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
-                new Message(Role.System, "You are a helpful weather assistant."),
-                new Message(Role.User, "What's the weather like today in San Diego and LA?"),
+                new(Role.System, "You are a helpful weather assistant. Use the appropriate unit based on geographical location."),
+                new(Role.User, "What's the weather like today in Los Angeles, USA and Tokyo, Japan?"),
             };
 
-            var tools = new List<Tool>
-            {
-                new Function(
-                    nameof(WeatherService.GetCurrentWeather),
-                    "Get the current weather in a given location",
-                    new JObject
-                    {
-                        ["type"] = "object",
-                        ["properties"] = new JObject
-                        {
-                            ["location"] = new JObject
-                            {
-                                ["type"] = "string",
-                                ["description"] = "The city and state, e.g. San Francisco, CA"
-                            },
-                            ["unit"] = new JObject
-                            {
-                                ["type"] = "string",
-                                ["enum"] = new JArray { "celsius", "fahrenheit" }
-                            }
-                        },
-                        ["required"] = new JArray { "location", "unit" }
-                    })
-            };
-
-            var chatRequest = new ChatRequest(messages, model: "gpt-4-1106-preview", tools: tools, toolChoice: "auto");
+            var tools = Tool.GetAllAvailableTools(false);
+            var chatRequest = new ChatRequest(messages, model: "gpt-4-turbo-preview", tools: tools, toolChoice: "auto");
             var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
@@ -351,10 +278,11 @@ namespace OpenAI.Tests
 
             foreach (var toolCall in toolCalls)
             {
-                messages.Add(new Message(toolCall, "Sunny!"));
+                var output = await toolCall.InvokeFunctionAsync();
+                messages.Add(new Message(toolCall, output));
             }
 
-            chatRequest = new ChatRequest(messages, model: "gpt-4-1106-preview", tools: tools, toolChoice: "auto");
+            chatRequest = new ChatRequest(messages, model: "gpt-4-turbo-preview", tools: tools, toolChoice: "auto");
             response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
 
             Assert.IsNotNull(response);
@@ -366,8 +294,8 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
-                new Message(Role.System, "You are a helpful weather assistant."),
-                new Message(Role.User, "What's the weather like today?"),
+                new(Role.System, "You are a helpful weather assistant. Use the appropriate unit based on geographical location."),
+                new(Role.User, "What's the weather like today?"),
             };
 
             foreach (var message in messages)
@@ -375,30 +303,7 @@ namespace OpenAI.Tests
                 Debug.Log($"{message.Role}: {message.Content}");
             }
 
-            var tools = new List<Tool>
-            {
-                new Function(
-                    nameof(WeatherService.GetCurrentWeather),
-                    "Get the current weather in a given location",
-                     new JObject
-                     {
-                         ["type"] = "object",
-                         ["properties"] = new JObject
-                         {
-                             ["location"] = new JObject
-                             {
-                                 ["type"] = "string",
-                                 ["description"] = "The city and state, e.g. San Francisco, CA"
-                             },
-                             ["unit"] = new JObject
-                             {
-                                 ["type"] = "string",
-                                 ["enum"] = new JArray {"celsius", "fahrenheit"}
-                             }
-                         },
-                         ["required"] = new JArray { "location", "unit" }
-                     })
-            };
+            var tools = Tool.GetAllAvailableTools(false);
             var chatRequest = new ChatRequest(messages, tools: tools);
             var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
@@ -408,13 +313,13 @@ namespace OpenAI.Tests
 
             Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishReason}");
 
-            var locationMessage = new Message(Role.User, "I'm in Glasgow, Scotland");
+            var locationMessage = new Message(Role.User, "I'm in New York, USA");
             messages.Add(locationMessage);
             Debug.Log($"{locationMessage.Role}: {locationMessage.Content}");
             chatRequest = new ChatRequest(
                 messages,
                 tools: tools,
-                toolChoice: nameof(WeatherService.GetCurrentWeather));
+                toolChoice: nameof(WeatherService.GetCurrentWeatherAsync));
             response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
 
             Assert.IsNotNull(response);
@@ -425,11 +330,10 @@ namespace OpenAI.Tests
             Assert.IsTrue(response.FirstChoice.FinishReason == "stop");
             var usedTool = response.FirstChoice.Message.ToolCalls[0];
             Assert.IsNotNull(usedTool);
-            Assert.IsTrue(usedTool.Function.Name == nameof(WeatherService.GetCurrentWeather));
+            Assert.IsTrue(usedTool.Function.Name.Contains(nameof(WeatherService.GetCurrentWeatherAsync)));
             Debug.Log($"{response.FirstChoice.Message.Role}: {usedTool.Function.Name} | Finish Reason: {response.FirstChoice.FinishReason}");
             Debug.Log($"{usedTool.Function.Arguments}");
-            var functionArgs = JsonConvert.DeserializeObject<WeatherArgs>(usedTool.Function.Arguments.ToString());
-            var functionResult = WeatherService.GetCurrentWeather(functionArgs);
+            var functionResult = await usedTool.InvokeFunctionAsync();
             Assert.IsNotNull(functionResult);
             messages.Add(new Message(usedTool, functionResult));
             Debug.Log($"{Role.Tool}: {functionResult}");
@@ -441,8 +345,8 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
-                new Message(Role.System, "You are a helpful assistant."),
-                new Message(Role.User, new List<Content>
+                new(Role.System, "You are a helpful assistant."),
+                new(Role.User, new List<Content>
                 {
                     "What's in this image?",
                     new ImageUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg", ImageDetail.Low)
@@ -462,8 +366,8 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
-                new Message(Role.System, "You are a helpful assistant."),
-                new Message(Role.User, new List<Content>
+                new(Role.System, "You are a helpful assistant."),
+                new(Role.User, new List<Content>
                 {
                     "What's in this image?",
                     new ImageUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg", ImageDetail.Low)
@@ -490,8 +394,8 @@ namespace OpenAI.Tests
             var image = AssetDatabase.LoadAssetAtPath<Texture2D>(imageAssetPath);
             var messages = new List<Message>
             {
-                new Message(Role.System, "You are a helpful assistant."),
-                new Message(Role.User, new List<Content>
+                new(Role.System, "You are a helpful assistant."),
+                new(Role.User, new List<Content>
                 {
                     "What's in this image?",
                     image
@@ -511,10 +415,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
-                new Message(Role.System, "You are a helpful assistant."),
-                new Message(Role.User, "Who won the world series in 2020?"),
-                new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
-                new Message(Role.User, "Where was it played?"),
+                new(Role.System, "You are a helpful assistant."),
+                new(Role.User, "Who won the world series in 2020?"),
+                new(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
+                new(Role.User, "Where was it played?"),
             };
             var chatRequest = new ChatRequest(messages, topLogProbs: 1);
             var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
@@ -536,10 +440,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
-                new Message(Role.System, "You are a helpful assistant."),
-                new Message(Role.User, "Who won the world series in 2020?"),
-                new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
-                new Message(Role.User, "Where was it played?"),
+                new(Role.System, "You are a helpful assistant."),
+                new(Role.User, "Who won the world series in 2020?"),
+                new(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
+                new(Role.User, "Where was it played?"),
             };
             var chatRequest = new ChatRequest(messages, topLogProbs: 1);
             var cumulativeDelta = string.Empty;

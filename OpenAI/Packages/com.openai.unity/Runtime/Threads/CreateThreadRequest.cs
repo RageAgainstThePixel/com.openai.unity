@@ -47,6 +47,6 @@ namespace OpenAI.Threads
         public IReadOnlyDictionary<string, string> Metadata { get; }
 
         [Preserve]
-        public static implicit operator CreateThreadRequest(string message) => new CreateThreadRequest(new[] { new Message(message) });
+        public static implicit operator CreateThreadRequest(string message) => new(new[] { new Message(message) });
     }
 }
