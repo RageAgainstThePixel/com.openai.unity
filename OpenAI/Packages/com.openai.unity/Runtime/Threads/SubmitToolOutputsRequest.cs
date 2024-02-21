@@ -41,5 +41,8 @@ namespace OpenAI.Threads
 
         [Preserve]
         public static implicit operator SubmitToolOutputsRequest(ToolOutput[] toolOutputs) => new(toolOutputs);
+
+        [Preserve]
+        public static implicit operator SubmitToolOutputsRequest(List<ToolOutput> toolOutputs) => new(toolOutputs);
     }
 }
