@@ -15,7 +15,7 @@ namespace OpenAI.Tests
         public async Task Test_01_UploadFile()
         {
             Assert.IsNotNull(OpenAIClient.FilesEndpoint);
-            var testData = new Conversation(new List<Message> { new Message(Role.Assistant, "I'm a learning language model") });
+            var testData = new Conversation(new List<Message> { new(Role.Assistant, "I'm a learning language model") });
             await File.WriteAllTextAsync("test.jsonl", testData);
             Assert.IsTrue(File.Exists("test.jsonl"));
             var result = await OpenAIClient.FilesEndpoint.UploadFileAsync("test.jsonl", "fine-tune");

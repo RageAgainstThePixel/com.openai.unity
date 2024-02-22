@@ -11,7 +11,7 @@ namespace OpenAI.Threads
     public sealed class Message
     {
         [Preserve]
-        public static implicit operator Message(string content) => new Message(content);
+        public static implicit operator Message(string content) => new(content);
 
         /// <summary>
         /// Constructor.

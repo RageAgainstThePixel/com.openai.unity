@@ -25,12 +25,13 @@ namespace OpenAI.Chat
             int? number = null,
             double? presencePenalty = null,
             ChatResponseFormat responseFormat = ChatResponseFormat.Text,
+            int? seed = null,
             string[] stops = null,
             double? temperature = null,
             double? topP = null,
             int? topLogProbs = null,
             string user = null)
-            : this(messages, model, frequencyPenalty, logitBias, maxTokens, number, presencePenalty, responseFormat, number, stops, temperature, topP, topLogProbs, user)
+            : this(messages, model, frequencyPenalty, logitBias, maxTokens, number, presencePenalty, responseFormat, seed, stops, temperature, topP, topLogProbs, user)
         {
             var tooList = tools?.ToList();
 
@@ -45,15 +46,8 @@ namespace OpenAI.Chat
                     if (!toolChoice.Equals("none") &&
                         !toolChoice.Equals("auto"))
                     {
-                        var tool = new JObject
-                        {
-                            ["type"] = "function",
-                            ["function"] = new JObject
-                            {
-                                ["name"] = toolChoice
-                            }
-                        };
-                        ToolChoice = tool;
+                        var tool = tooList.FirstOrDefault(t => t.Function.Name.Contains(toolChoice));
+                        ToolChoice = tool ?? throw new ArgumentException($"The specified tool choice '{toolChoice}' was not found in the list of tools");
                     }
                     else
                     {

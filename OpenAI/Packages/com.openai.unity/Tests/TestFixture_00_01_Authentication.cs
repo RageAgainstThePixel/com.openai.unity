@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace OpenAI.Tests
 {
-    internal class TestFixture_00_Authentication
+    internal class TestFixture_00_01_Authentication
     {
         [SetUp]
         public void Setup()
@@ -130,7 +130,8 @@ namespace OpenAI.Tests
             }
             catch (Exception e)
             {
-                Assert.IsTrue(false, $"Expected exception {nameof(InvalidCredentialException)} but got {e.GetType().Name}");
+                Assert.IsTrue(false,
+                    $"Expected exception {nameof(InvalidCredentialException)} but got {e.GetType().Name}");
             }
         }
 
@@ -172,7 +173,8 @@ namespace OpenAI.Tests
             }
             catch (Exception e)
             {
-                Assert.IsTrue(false, $"Expected exception {nameof(InvalidCredentialException)} but got {e.GetType().Name}");
+                Assert.IsTrue(false,
+                    $"Expected exception {nameof(InvalidCredentialException)} but got {e.GetType().Name}");
             }
         }
 
