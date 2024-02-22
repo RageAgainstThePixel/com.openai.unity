@@ -102,7 +102,7 @@ namespace OpenAI.FineTuning
         [JsonProperty("trained_tokens")]
         public int? TrainedTokens { get; private set; }
 
-        private List<EventResponse> events = new List<EventResponse>();
+        private List<EventResponse> events = new();
 
         [JsonIgnore]
         public IReadOnlyList<EventResponse> Events

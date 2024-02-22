@@ -124,7 +124,7 @@ namespace OpenAI.FineTuning
         }
 
         [SerializeField]
-        private List<Conversation> conversationTrainingData = new List<Conversation>();
+        private List<Conversation> conversationTrainingData = new();
 
         public List<Conversation> ConversationTrainingData
         {

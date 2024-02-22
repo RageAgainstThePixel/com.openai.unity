@@ -219,7 +219,7 @@ namespace OpenAI.Tests
                 new CreateAssistantRequest(
                     name: "Math Tutor",
                     instructions: "You are a personal math tutor. Answer questions briefly, in a sentence or less.",
-                    model: "gpt-4-1106-preview"));
+                    model: "gpt-4-turbo-preview"));
             Assert.NotNull(assistant);
             testAssistant = assistant;
             var thread = await OpenAIClient.ThreadsEndpoint.CreateThreadAsync();
@@ -347,29 +347,13 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_07_01_SubmitToolOutput()
         {
-            var function = new Function(
-                nameof(WeatherService.GetCurrentWeather),
-                "Get the current weather in a given location",
-                new JObject
-                {
-                    ["type"] = "object",
-                    ["properties"] = new JObject
-                    {
-                        ["location"] = new JObject
-                        {
-                            ["type"] = "string",
-                            ["description"] = "The city and state, e.g. San Francisco, CA"
-                        },
-                        ["unit"] = new JObject
-                        {
-                            ["type"] = "string",
-                            ["enum"] = new JArray { "celsius", "fahrenheit" }
-                        }
-                    },
-                    ["required"] = new JArray { "location", "unit" }
-                });
-            testAssistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(new CreateAssistantRequest(tools: new Tool[] { function }));
-            var run = await testAssistant.CreateThreadAndRunAsync("I'm in Kuala-Lumpur, please tell me what's the temperature in celsius now?");
+            var tools = new List<Tool>
+            {
+                Tool.GetOrCreateTool(typeof(WeatherService), nameof(WeatherService.GetCurrentWeatherAsync))
+            };
+            var assistantRequest = new CreateAssistantRequest(tools: tools, instructions: "You are a helpful weather assistant. Use the appropriate unit based on geographical location.");
+            testAssistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(assistantRequest);
+            var run = await testAssistant.CreateThreadAndRunAsync("I'm in Kuala-Lumpur, please tell me what's the temperature now?");
             testThread = await run.GetThreadAsync();
             // waiting while run is Queued and InProgress
             run = await run.WaitForStatusChangeAsync();
@@ -397,12 +381,11 @@ namespace OpenAI.Tests
             var toolCall = run.RequiredAction.SubmitToolOutputs.ToolCalls[0];
             Assert.AreEqual("function", toolCall.Type);
             Assert.IsNotNull(toolCall.FunctionCall);
-            Assert.AreEqual(nameof(WeatherService.GetCurrentWeather), toolCall.FunctionCall.Name);
+            Assert.IsTrue(toolCall.FunctionCall.Name.Contains(nameof(WeatherService.GetCurrentWeatherAsync)));
             Assert.IsNotNull(toolCall.FunctionCall.Arguments);
             Debug.Log($"tool call arguments: {toolCall.FunctionCall.Arguments}");
-            var functionArgs = JsonConvert.DeserializeObject<WeatherArgs>(toolCall.FunctionCall.Arguments);
-            var functionResult = WeatherService.GetCurrentWeather(functionArgs);
-            var toolOutput = new ToolOutput(toolCall.Id, functionResult);
+            var toolOutput = await testAssistant.GetToolOutputAsync(toolCall);
+            Debug.Log($"tool call output: {toolOutput.Output}");
             run = await run.SubmitToolOutputsAsync(toolOutput);
             // waiting while run in Queued and InProgress
             run = await run.WaitForStatusChangeAsync();
@@ -415,12 +398,12 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(runStep.Client);
                 var retrievedRunStep = await runStep.UpdateAsync();
                 Assert.IsNotNull(retrievedRunStep);
-                Console.WriteLine($"[{runStep.Id}] {runStep.Status} {runStep.CreatedAt} -> {(runStep.ExpiresAtUnixTimeSeconds.HasValue ? runStep.ExpiresAt : runStep.CompletedAt)}");
+                Debug.Log($"[{runStep.Id}] {runStep.Status} {runStep.CreatedAt} -> {(runStep.ExpiresAtUnixTimeSeconds.HasValue ? runStep.ExpiresAt : runStep.CompletedAt)}");
                 if (runStep.StepDetails.ToolCalls == null) { continue; }
 
                 foreach (var runStepToolCall in runStep.StepDetails.ToolCalls)
                 {
-                    Console.WriteLine($"[{runStep.Id}][{runStepToolCall.Type}][{runStepToolCall.Id}] {runStepToolCall.FunctionCall.Name}: {runStepToolCall.FunctionCall.Output}");
+                    Debug.Log($"[{runStep.Id}][{runStepToolCall.Type}][{runStepToolCall.Id}] {runStepToolCall.FunctionCall.Name}: {runStepToolCall.FunctionCall.Output}");
                 }
             }
 

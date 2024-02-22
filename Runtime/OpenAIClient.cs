@@ -110,7 +110,7 @@ namespace OpenAI
         /// <summary>
         /// The <see cref="JsonSerializationOptions"/> to use when making calls to the API.
         /// </summary>
-        internal static JsonSerializerSettings JsonSerializationOptions { get; } = new JsonSerializerSettings
+        internal static JsonSerializerSettings JsonSerializationOptions { get; } = new()
         {
             NullValueHandling = NullValueHandling.Ignore,
             DefaultValueHandling = DefaultValueHandling.Ignore,

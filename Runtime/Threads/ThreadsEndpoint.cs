@@ -225,7 +225,7 @@ namespace OpenAI.Threads
         {
             if (request == null || string.IsNullOrWhiteSpace(request.AssistantId))
             {
-                var assistant = await client.AssistantsEndpoint.CreateAssistantAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                var assistant = await client.AssistantsEndpoint.CreateAssistantAsync(cancellationToken: cancellationToken);
                 request = new CreateRunRequest(assistant, request);
             }
 
@@ -245,7 +245,7 @@ namespace OpenAI.Threads
         {
             if (request == null || string.IsNullOrWhiteSpace(request.AssistantId))
             {
-                var assistant = await client.AssistantsEndpoint.CreateAssistantAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                var assistant = await client.AssistantsEndpoint.CreateAssistantAsync(cancellationToken: cancellationToken);
                 request = new CreateThreadAndRunRequest(assistant, request);
             }
 
