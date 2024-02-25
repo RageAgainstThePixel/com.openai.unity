@@ -1,7 +1,5 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using OpenAI.Chat;
 using OpenAI.Models;
@@ -108,7 +106,7 @@ namespace OpenAI.Tests
 
             var messages = new List<Message>
             {
-                new(Role.System, "You are a helpful weather assistant."),
+                new(Role.System, "You are a helpful weather assistant.\n\r- Always prompt the user for their location."),
                 new(Role.User, "What's the weather like today?"),
             };
 
@@ -117,12 +115,13 @@ namespace OpenAI.Tests
                 Debug.Log($"{message.Role}: {message.Content}");
             }
 
-            var tools = Tool.GetAllAvailableTools(false);
+            var tools = Tool.GetAllAvailableTools(false, forceUpdate: true, clearCache: true);
             var chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "auto");
             var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             Assert.IsTrue(response.Choices.Count == 1);
+            Assert.IsTrue(response.FirstChoice.FinishReason == "stop");
             messages.Add(response.FirstChoice.Message);
 
             Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishReason}");
@@ -138,7 +137,7 @@ namespace OpenAI.Tests
             Assert.IsTrue(response.Choices.Count == 1);
             messages.Add(response.FirstChoice.Message);
 
-            if (!string.IsNullOrEmpty(response.ToString()))
+            if (response.FirstChoice.FinishReason == "stop")
             {
                 Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishReason}");
 
@@ -173,7 +172,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
-                new(Role.System, "You are a helpful weather assistant."),
+                new(Role.System, "You are a helpful weather assistant.\n\r- Always prompt the user for their location."),
                 new(Role.User, "What's the weather like today?"),
             };
 
@@ -256,11 +255,11 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
-                new(Role.System, "You are a helpful weather assistant. Use the appropriate unit based on geographical location."),
+                new(Role.System, "You are a helpful weather assistant.\n\r - Use the appropriate unit based on geographical location."),
                 new(Role.User, "What's the weather like today in Los Angeles, USA and Tokyo, Japan?"),
             };
 
-            var tools = Tool.GetAllAvailableTools(false);
+            var tools = Tool.GetAllAvailableTools(false, forceUpdate: true, clearCache: true);
             var chatRequest = new ChatRequest(messages, model: "gpt-4-turbo-preview", tools: tools, toolChoice: "auto");
             var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
@@ -269,6 +268,7 @@ namespace OpenAI.Tests
                 Assert.NotZero(partialResponse.Choices.Count);
             });
 
+            Assert.IsTrue(response.FirstChoice.FinishReason == "tool_calls");
             messages.Add(response.FirstChoice.Message);
 
             var toolCalls = response.FirstChoice.Message.ToolCalls;
@@ -303,12 +303,13 @@ namespace OpenAI.Tests
                 Debug.Log($"{message.Role}: {message.Content}");
             }
 
-            var tools = Tool.GetAllAvailableTools(false);
+            var tools = Tool.GetAllAvailableTools(false, forceUpdate: true, clearCache: true);
             var chatRequest = new ChatRequest(messages, tools: tools);
             var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             Assert.IsTrue(response.Choices.Count == 1);
+            Assert.IsTrue(response.FirstChoice.FinishReason == "stop");
             messages.Add(response.FirstChoice.Message);
 
             Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishReason}");

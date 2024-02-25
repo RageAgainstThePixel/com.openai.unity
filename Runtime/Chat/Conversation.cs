@@ -2,7 +2,9 @@
 
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Chat
@@ -15,21 +17,30 @@ namespace OpenAI.Chat
         [JsonConstructor]
         public Conversation([JsonProperty("messages")] List<Message> messages = null)
         {
-            this.messages = messages ?? new List<Message>();
+
+            this.messages = new ConcurrentQueue<Message>();
+
+            if (messages != null)
+            {
+                foreach (var message in messages)
+                {
+                    this.messages.Enqueue(message);
+                }
+            }
         }
 
-        private readonly List<Message> messages;
+        private readonly ConcurrentQueue<Message> messages;
 
         [Preserve]
         [JsonProperty("messages")]
-        public IReadOnlyList<Message> Messages => messages;
+        public IReadOnlyList<Message> Messages => messages.ToList();
 
         /// <summary>
         /// Appends <see cref="Message"/> to the end of <see cref="Messages"/>.
         /// </summary>
         /// <param name="message">The message to add to the <see cref="Conversation"/>.</param>
         [Preserve]
-        public void AppendMessage(Message message) => messages.Add(message);
+        public void AppendMessage(Message message) => messages.Enqueue(message);
 
         [Preserve]
         public override string ToString() => JsonConvert.SerializeObject(this, OpenAIClient.JsonSerializationOptions);
