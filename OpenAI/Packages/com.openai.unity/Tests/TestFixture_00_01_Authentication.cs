@@ -130,8 +130,7 @@ namespace OpenAI.Tests
             }
             catch (Exception e)
             {
-                Assert.IsTrue(false,
-                    $"Expected exception {nameof(InvalidCredentialException)} but got {e.GetType().Name}");
+                Assert.IsTrue(false, $"Expected exception {nameof(InvalidCredentialException)} but got {e.GetType().Name}");
             }
         }
 
@@ -173,8 +172,7 @@ namespace OpenAI.Tests
             }
             catch (Exception e)
             {
-                Assert.IsTrue(false,
-                    $"Expected exception {nameof(InvalidCredentialException)} but got {e.GetType().Name}");
+                Assert.IsTrue(false, $"Expected exception {nameof(InvalidCredentialException)} but got {e.GetType().Name}");
             }
         }
 
@@ -206,6 +204,8 @@ namespace OpenAI.Tests
                 File.Delete(OpenAIAuthentication.CONFIG_FILE);
             }
 
+            Assert.IsFalse(File.Exists(OpenAIAuthentication.CONFIG_FILE));
+            
             OpenAIAuthentication.Default = null;
             OpenAISettings.Default = null;
         }

@@ -121,7 +121,7 @@ namespace OpenAI.Assistants
         //    => await assistantFile.Client.FilesEndpoint.DownloadFileAsync(assistantFile.Id, directory, deleteCachedFile, cancellationToken);
 
         /// <summary>
-        /// Remove AssistantFile.
+        /// Remove the file from the assistant it is attached to.
         /// </summary>
         /// <remarks>
         /// Note that removing an AssistantFile does not delete the original File object,
@@ -135,7 +135,7 @@ namespace OpenAI.Assistants
             => await file.Client.AssistantsEndpoint.RemoveFileAsync(file.AssistantId, file.Id, cancellationToken);
 
         /// <summary>
-        /// Remove AssistantFile.
+        /// Remove the file from the assistant it is attached to.
         /// </summary>
         /// <remarks>
         /// Note that removing an AssistantFile does not delete the original File object,

@@ -21,7 +21,7 @@ namespace OpenAI.Embeddings
         /// Each input must not exceed 8192 tokens in length.
         /// </param>
         /// <param name="model">
-        /// The <see cref="Models.Model"/> to use.
+        /// ID of the model to use.<br/>
         /// Defaults to: <see cref="Model.Embedding_Ada_002"/>
         /// </param>
         /// <param name="user">

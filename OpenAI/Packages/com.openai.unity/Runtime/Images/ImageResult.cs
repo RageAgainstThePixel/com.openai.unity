@@ -23,7 +23,7 @@ namespace OpenAI.Images
 
         [Preserve]
         [JsonProperty("url")]
-        public string Url { get; }
+        public string Url { get; private set; }
 
         [Preserve]
         [JsonProperty("b64_json")]
@@ -45,7 +45,7 @@ namespace OpenAI.Images
         public static implicit operator Texture2D(ImageResult imageResult) => imageResult.Texture;
 
         [Preserve]
-        public static implicit operator string(ImageResult imageResult) => imageResult.ToString();
+        public static implicit operator string(ImageResult result) => result?.ToString();
 
         [Preserve]
         public override string ToString()

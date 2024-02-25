@@ -30,12 +30,6 @@ namespace OpenAI.Chat
         public async Task<ChatResponse> GetCompletionAsync(ChatRequest chatRequest, CancellationToken cancellationToken = default)
         {
             var payload = JsonConvert.SerializeObject(chatRequest, OpenAIClient.JsonSerializationOptions);
-
-            if (EnableDebug)
-            {
-                Debug.Log(payload);
-            }
-
             var response = await Rest.PostAsync(GetUrl("/completions"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<ChatResponse>(client);

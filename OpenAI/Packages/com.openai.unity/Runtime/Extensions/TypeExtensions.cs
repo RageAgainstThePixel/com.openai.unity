@@ -99,9 +99,12 @@ namespace OpenAI.Extensions
                             requiredProperties.Add(propertyName);
                         }
 
+                        JToken defaultValue = null;
+
                         if (functionPropertyAttribute.DefaultValue != null)
                         {
-                            propertyInfo["default"] = JToken.FromObject(functionPropertyAttribute.DefaultValue, serializer);
+                            defaultValue = JToken.FromObject(functionPropertyAttribute.DefaultValue, serializer);
+                            propertyInfo["default"] = defaultValue;
                         }
 
                         if (functionPropertyAttribute.PossibleValues is { Length: > 0 })
@@ -110,17 +113,24 @@ namespace OpenAI.Extensions
 
                             foreach (var value in functionPropertyAttribute.PossibleValues)
                             {
-                                enums.Add(JToken.FromObject(value, serializer));
+                                var @enum = JToken.FromObject(value, serializer);
+
+                                if (defaultValue == null)
+                                {
+                                    enums.Add(@enum);
+                                }
+                                else
+                                {
+                                    if (@enum != defaultValue)
+                                    {
+                                        enums.Add(@enum);
+                                    }
+                                }
                             }
 
-                            if (functionPropertyAttribute.DefaultValue != null)
+                            if (defaultValue != null && !enums.Contains(defaultValue))
                             {
-                                var defaultValue = JToken.FromObject(functionPropertyAttribute.DefaultValue, serializer);
-
-                                if (!enums.Contains(defaultValue))
-                                {
-                                    enums.Add(JToken.FromObject(functionPropertyAttribute.DefaultValue, serializer));
-                                }
+                                enums.Add(defaultValue);
                             }
 
                             propertyInfo["enum"] = enums;

@@ -90,7 +90,7 @@ namespace OpenAI.Models
             {
                 if (e.Message.Contains("You have insufficient permissions for this operation. You need to be this role: Owner."))
                 {
-                    throw new UnauthorizedAccessException("You have insufficient permissions for this operation. You need to be this role: Owner.");
+                    throw new UnauthorizedAccessException($"You have insufficient permissions for this operation. You need to be this role: Owner.\n{e}");
                 }
 
                 throw;

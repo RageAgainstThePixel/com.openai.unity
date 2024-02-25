@@ -16,7 +16,7 @@ using Utilities.Async;
 namespace OpenAI
 {
     /// <summary>
-    /// <see href="https://platform.openai.com/docs/guides/gpt/function-calling"/>
+    /// <see href="https://platform.openai.com/docs/guides/function-calling"/>
     /// </summary>
     [Preserve]
     public sealed class Function
@@ -379,7 +379,9 @@ namespace OpenAI
                 throw new InvalidOperationException($"Failed to find a valid method for {Name}");
             }
 
-            var requestedArgs = JsonConvert.DeserializeObject<Dictionary<string, object>>(Arguments?.ToString() ?? string.Empty);
+            var requestedArgs = Arguments != null
+                ? JsonConvert.DeserializeObject<Dictionary<string, object>>(Arguments.ToString(), OpenAIClient.JsonSerializationOptions)
+                : new();
             var methodParams = function.MethodInfo.GetParameters();
             var invokeArgs = new object[methodParams.Length];
 
