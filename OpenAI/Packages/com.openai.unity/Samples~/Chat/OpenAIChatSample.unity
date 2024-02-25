@@ -2174,6 +2174,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a891710bf1466924297c3b3b6f1b6e51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  configuration: {fileID: 0}
   enableDebug: 1
   submitButton: {fileID: 1094024334}
   recordButton: {fileID: 1143678156}
@@ -2184,7 +2185,13 @@ MonoBehaviour:
   systemPrompt: 'You are a helpful assistant.
 
     - If an image is requested then
-    use "![Image](output.jpg)" to display it.'
+    use "![Image](output.jpg)" to display it.
+
+    - When performing function calls,
+    use the defaults unless explicitly told to use a specific value.
+
+    - Images
+    should always be generated in base64.'
 --- !u!82 &1711080862
 AudioSource:
   m_ObjectHideFlags: 0

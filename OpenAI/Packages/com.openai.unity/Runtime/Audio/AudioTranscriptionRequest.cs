@@ -105,7 +105,7 @@ namespace OpenAI.Audio
         /// The name of the audio file to transcribe.
         /// </param>
         /// <param name="model">
-        /// ID of the model to use.
+        /// ID of the model to use. Only whisper-1 is currently available.
         /// </param>
         /// <param name="prompt">
         /// Optional, An optional text to guide the model's style or continue a previous audio segment.<br/>
@@ -167,7 +167,7 @@ namespace OpenAI.Audio
         public string AudioName { get; }
 
         /// <summary>
-        /// ID of the model to use.
+        /// ID of the model to use. Only whisper-1 is currently available.
         /// </summary>
         public string Model { get; }
 

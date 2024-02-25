@@ -1,7 +1,5 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using OpenAI.Assistants;
 using OpenAI.Files;
@@ -16,7 +14,6 @@ using UnityEngine;
 
 namespace OpenAI.Tests
 {
-
     /// <summary>
     /// https://github.com/openai/openai-cookbook/blob/main/examples/Assistants_API_overview_python.ipynb
     /// </summary>
@@ -137,6 +134,7 @@ namespace OpenAI.Tests
         public async Task Test_04_03_ModifyMessage()
         {
             Assert.IsNotNull(testThread);
+            Assert.IsNotNull(testMessage);
             Assert.IsNotNull(OpenAIClient.ThreadsEndpoint);
             var metadata = new Dictionary<string, string>
             {

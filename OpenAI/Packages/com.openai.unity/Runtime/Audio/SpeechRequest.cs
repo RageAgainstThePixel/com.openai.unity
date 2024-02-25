@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using OpenAI.Models;
+using System;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Audio
@@ -20,31 +21,51 @@ namespace OpenAI.Audio
         [Preserve]
         public SpeechRequest(string input, Model model = null, SpeechVoice voice = SpeechVoice.Alloy, SpeechResponseFormat responseFormat = SpeechResponseFormat.MP3, float? speed = null)
         {
-            Input = input;
+            Input = !string.IsNullOrWhiteSpace(input) ? input : throw new ArgumentException("Input cannot be null or empty.", nameof(input));
             Model = string.IsNullOrWhiteSpace(model?.Id) ? Models.Model.TTS_1 : model;
             Voice = voice;
             ResponseFormat = responseFormat;
             Speed = speed;
         }
 
+        /// <summary>
+        /// One of the available TTS models. Defaults to tts-1.
+        /// </summary>
         [Preserve]
         [JsonProperty("model")]
+        [FunctionProperty("One of the available TTS models. Defaults to tts-1.", true, "tts-1", "tts-1-hd")]
         public string Model { get; }
 
+        /// <summary>
+        /// The text to generate audio for. The maximum length is 4096 characters.
+        /// </summary>
         [Preserve]
         [JsonProperty("input")]
+        [FunctionProperty("The text to generate audio for. The maximum length is 4096 characters.", true)]
         public string Input { get; }
 
+        /// <summary>
+        /// The voice to use when generating the audio.
+        /// </summary>
         [Preserve]
         [JsonProperty("voice", DefaultValueHandling = DefaultValueHandling.Include)]
+        [FunctionProperty("The voice to use when generating the audio.", true)]
         public SpeechVoice Voice { get; }
 
+        /// <summary>
+        /// The format to audio in. Supported formats are mp3, opus, aac, and flac.
+        /// </summary>
         [Preserve]
         [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Include)]
+        [FunctionProperty("The format to audio in. Supported formats are mp3, opus, aac, and flac.", false, SpeechResponseFormat.MP3)]
         public SpeechResponseFormat ResponseFormat { get; }
 
+        /// <summary>
+        /// The speed of the generated audio. Select a value from 0.25 to 4.0. 1.0 is the default.
+        /// </summary>
         [Preserve]
         [JsonProperty("speed")]
+        [FunctionProperty("The speed of the generated audio. Select a value from 0.25 to 4.0. 1.0 is the default.", false, 1.0f)]
         public float? Speed { get; }
     }
 }

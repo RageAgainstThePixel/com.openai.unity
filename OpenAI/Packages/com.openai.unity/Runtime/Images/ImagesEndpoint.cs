@@ -32,6 +32,7 @@ namespace OpenAI.Images
         /// <param name="request"><see cref="ImageGenerationRequest"/></param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
+        [Function("Creates an image given a prompt.")]
         public async Task<IReadOnlyList<ImageResult>> GenerateImageAsync(ImageGenerationRequest request, CancellationToken cancellationToken = default)
         {
             var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
@@ -45,6 +46,7 @@ namespace OpenAI.Images
         /// <param name="request"><see cref="ImageEditRequest"/></param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
+        [Function("Creates an edited or extended image given an original image and a prompt.")]
         public async Task<IReadOnlyList<ImageResult>> CreateImageEditAsync(ImageEditRequest request, CancellationToken cancellationToken = default)
         {
             var form = new WWWForm();
@@ -81,6 +83,7 @@ namespace OpenAI.Images
         /// <param name="request"><see cref="ImageVariationRequest"/></param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
+        [Function("Creates a variation of a given image.")]
         public async Task<IReadOnlyList<ImageResult>> CreateImageVariationAsync(ImageVariationRequest request, CancellationToken cancellationToken = default)
         {
             var form = new WWWForm();

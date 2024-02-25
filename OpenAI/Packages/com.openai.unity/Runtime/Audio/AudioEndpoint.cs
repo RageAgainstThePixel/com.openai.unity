@@ -46,6 +46,7 @@ namespace OpenAI.Audio
         /// <param name="request"><see cref="SpeechRequest"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="AudioClip"/> and the cached path.</returns>
+        [Function("Generates audio from the input text.")]
         public async Task<Tuple<string, AudioClip>> CreateSpeechAsync(SpeechRequest request, CancellationToken cancellationToken = default)
         {
             var audioFormat = request.ResponseFormat switch

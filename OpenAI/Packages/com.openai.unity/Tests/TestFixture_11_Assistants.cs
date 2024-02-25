@@ -95,6 +95,7 @@ namespace OpenAI.Tests
             Assert.IsTrue(File.Exists(testFilePath));
             var file = await testAssistant.UploadFileAsync(testFilePath);
             Assert.IsNotNull(file);
+            Debug.Log($"uploaded -> {file.Id}");
         }
 
         [Test]
