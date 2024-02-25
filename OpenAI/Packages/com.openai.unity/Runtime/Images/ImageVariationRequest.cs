@@ -39,7 +39,7 @@ namespace OpenAI.Images
             string user = null,
             ResponseFormat responseFormat = ResponseFormat.Url,
             Model model = null)
-            : this(File.OpenRead(imagePath), Path.GetFileName(imagePath), numberOfResults, size, user, responseFormat)
+            : this(File.OpenRead(imagePath), Path.GetFileName(imagePath), numberOfResults, size, user, responseFormat, model)
         {
         }
 
@@ -79,7 +79,8 @@ namespace OpenAI.Images
                 numberOfResults,
                 size,
                 user,
-                responseFormat)
+                responseFormat,
+                model)
         {
         }
 

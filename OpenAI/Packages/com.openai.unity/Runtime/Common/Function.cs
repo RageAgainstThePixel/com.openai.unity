@@ -2,7 +2,9 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OpenAI.Extensions;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
@@ -37,11 +39,8 @@ namespace OpenAI
         /// <param name="parameters">
         /// An optional JSON object describing the parameters of the function that the model can generate.
         /// </param>
-        /// <param name="arguments">
-        /// An optional JSON object describing the arguments to use when invoking the function.
-        /// </param>
         [Preserve]
-        public Function(string name, string description = null, JToken parameters = null, JToken arguments = null)
+        public Function(string name, string description = null, JToken parameters = null)
         {
             if (!System.Text.RegularExpressions.Regex.IsMatch(name, NameRegex))
             {
@@ -51,25 +50,94 @@ namespace OpenAI
             Name = name;
             Description = description;
             Parameters = parameters;
-            Arguments = arguments;
+            functionCache[Name] = this;
         }
+
+        /// <summary>
+        /// Creates a new function description to insert into a chat conversation.
+        /// </summary>
+        /// <param name="name">
+        /// Required. The name of the function to generate arguments for based on the context in a message.<br/>
+        /// May contain a-z, A-Z, 0-9, underscores and dashes, with a maximum length of 64 characters. Recommended to not begin with a number or a dash.
+        /// </param>
+        /// <param name="description">
+        /// An optional description of the function, used by the API to determine if it is useful to include in the response.
+        /// </param>
+        /// <param name="parameters">
+        /// An optional JSON describing the parameters of the function that the model can generate.
+        /// </param>
+        [Preserve]
+        public Function(string name, string description, string parameters)
+        {
+            if (!System.Text.RegularExpressions.Regex.IsMatch(name, NameRegex))
+            {
+                throw new ArgumentException($"The name of the function does not conform to naming standards: {NameRegex}");
+            }
+
+            Name = name;
+            Description = description;
+            Parameters = new JObject(parameters);
+            functionCache[Name] = this;
+        }
+
+        [Preserve]
+        internal Function(string name, string description, MethodInfo method, object instance = null)
+        {
+            if (!System.Text.RegularExpressions.Regex.IsMatch(name, NameRegex))
+            {
+                throw new ArgumentException($"The name of the function does not conform to naming standards: {NameRegex}");
+            }
+
+            Name = name;
+            Description = description;
+            MethodInfo = method;
+            Parameters = method.GenerateJsonSchema();
+            Instance = instance;
+            functionCache[Name] = this;
+        }
+
+        #region Func<,> Overloads
+
+        public static Function FromFunc<TResult>(string name, Func<TResult> function, string description = null)
+            => new(name, description, function.Method, function.Target);
+
+        public static Function FromFunc<T1, TResult>(string name, Func<T1, TResult> function, string description = null)
+            => new(name, description, function.Method, function.Target);
+
+        public static Function FromFunc<T1, T2, TResult>(string name, Func<T1, T2, TResult> function, string description = null)
+            => new(name, description, function.Method, function.Target);
+
+        public static Function FromFunc<T1, T2, T3, TResult>(string name, Func<T1, T2, T3, TResult> function, string description = null)
+        => new(name, description, function.Method, function.Target);
+
+        public static Function FromFunc<T1, T2, T3, T4, TResult>(string name, Func<T1, T2, T3, T4, TResult> function, string description = null)
+            => new(name, description, function.Method, function.Target);
+
+        public static Function FromFunc<T1, T2, T3, T4, T5, TResult>(string name, Func<T1, T2, T3, T4, T5, TResult> function, string description = null)
+            => new(name, description, function.Method, function.Target);
+
+        public static Function FromFunc<T1, T2, T3, T4, T5, T6, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, TResult> function, string description = null)
+            => new(name, description, function.Method, function.Target);
+
+        public static Function FromFunc<T1, T2, T3, T4, T5, T6, T7, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, TResult> function, string description = null)
+            => new(name, description, function.Method, function.Target);
+
+        public static Function FromFunc<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> function, string description = null)
+            => new(name, description, function.Method, function.Target);
+
+        public static Function FromFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> function, string description = null)
+            => new(name, description, function.Method, function.Target);
+
+        public static Function FromFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> function, string description = null)
+            => new(name, description, function.Method, function.Target);
+
+        public static Function FromFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> function, string description = null)
+            => new(name, description, function.Method, function.Target);
+
+        #endregion Func<,> Overloads
 
         [Preserve]
         internal Function(Function other) => CopyFrom(other);
-
-        [Preserve]
-        internal Function(string name, string description, JObject parameters, MethodInfo method)
-        {
-            if (!System.Text.RegularExpressions.Regex.IsMatch(name, NameRegex))
-            {
-                throw new ArgumentException($"The name of the function does not conform to naming standards: {NameRegex}");
-            }
-
-            Name = name;
-            Description = description;
-            Parameters = parameters;
-            functionCache[Name] = method;
-        }
 
         /// <summary>
         /// The name of the function to generate arguments for.<br/>
@@ -136,6 +204,20 @@ namespace OpenAI
             internal set => arguments = value;
         }
 
+        /// <summary>
+        /// The instance of the object to invoke the method on.
+        /// </summary>
+        [Preserve]
+        [JsonIgnore]
+        internal object Instance { get; }
+
+        /// <summary>
+        /// The method to invoke.
+        /// </summary>
+        [Preserve]
+        [JsonIgnore]
+        private MethodInfo MethodInfo { get; }
+
         [Preserve]
         internal void CopyFrom(Function other)
         {
@@ -162,60 +244,143 @@ namespace OpenAI
 
         #region Function Invoking Utilities
 
-        private static readonly Dictionary<string, MethodInfo> functionCache = new();
+        private static readonly ConcurrentDictionary<string, Function> functionCache = new();
 
+        /// <summary>
+        /// Invokes the function and returns the result as json.
+        /// </summary>
+        /// <returns>The result of the function as json.</returns>
         [Preserve]
         public string Invoke()
         {
-            var (method, invokeArgs) = ValidateFunctionArguments();
-            var result = method.Invoke(null, invokeArgs);
-            return result == null ? string.Empty : JsonConvert.SerializeObject(new { result });
+            try
+            {
+                var (function, invokeArgs) = ValidateFunctionArguments();
+
+                if (function.MethodInfo.ReturnType == typeof(void))
+                {
+                    function.MethodInfo.Invoke(function.Instance, invokeArgs);
+                    return "{\"result\": \"success\"}";
+                }
+
+                var result = Invoke<object>();
+                return JsonConvert.SerializeObject(new { result });
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return JsonConvert.SerializeObject(new { error = e.Message });
+            }
         }
 
+        /// <summary>
+        /// Invokes the function and returns the result.
+        /// </summary>
+        /// <typeparam name="T">The expected return type.</typeparam>
+        /// <returns>The result of the function.</returns>
+        [Preserve]
+        public T Invoke<T>()
+        {
+            try
+            {
+                var (function, invokeArgs) = ValidateFunctionArguments();
+                var result = function.MethodInfo.Invoke(function.Instance, invokeArgs);
+                return result == null ? default : (T)result;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Invokes the function and returns the result as json.
+        /// </summary>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns>The result of the function as json.</returns>
         [Preserve]
         public async Task<string> InvokeAsync(CancellationToken cancellationToken = default)
         {
             await Awaiters.UnityMainThread;
-            var (method, invokeArgs) = ValidateFunctionArguments(cancellationToken);
-            var task = (Task)method.Invoke(null, invokeArgs);
 
-            if (task is null)
+            try
             {
-                throw new InvalidOperationException($"The function {Name} did not return a Task.");
+                var (function, invokeArgs) = ValidateFunctionArguments(cancellationToken);
+
+                if (function.MethodInfo.ReturnType == typeof(Task))
+                {
+                    if (function.MethodInfo.Invoke(function.Instance, invokeArgs) is not Task task)
+                    {
+                        throw new InvalidOperationException($"The function {Name} did not return a valid Task.");
+                    }
+
+                    await task;
+                    return "{\"result\": \"success\"}";
+                }
+
+                var result = await InvokeAsync<object>(cancellationToken);
+                return JsonConvert.SerializeObject(new { result });
             }
-
-            await task;
-
-            if (method.ReturnType == typeof(Task))
+            catch (Exception e)
             {
-                return string.Empty;
+                Debug.LogException(e);
+                return JsonConvert.SerializeObject(new { error = e.Message });
             }
-
-            var result = method.ReturnType.GetProperty(nameof(Task<object>.Result))?.GetValue(task);
-            return result == null ? string.Empty : JsonConvert.SerializeObject(new { result });
         }
 
-        private (MethodInfo method, object[] invokeArgs) ValidateFunctionArguments(CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Invokes the function and returns the result.
+        /// </summary>
+        /// <typeparam name="T">Expected return type.</typeparam>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns>The result of the function.</returns>
+        [Preserve]
+        public async Task<T> InvokeAsync<T>(CancellationToken cancellationToken = default)
         {
-            if (Parameters != null && Arguments == null)
+            await Awaiters.UnityMainThread;
+
+            try
+            {
+                var (function, invokeArgs) = ValidateFunctionArguments(cancellationToken);
+
+                if (function.MethodInfo.Invoke(function.Instance, invokeArgs) is not Task task)
+                {
+                    throw new InvalidOperationException($"The function {Name} did not return a valid Task.");
+                }
+
+                await task;
+                // ReSharper disable once InconsistentNaming
+                const string Result = nameof(Result);
+                var resultProperty = task.GetType().GetProperty(Result);
+                return (T)resultProperty?.GetValue(task);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw;
+            }
+        }
+
+        private (Function function, object[] invokeArgs) ValidateFunctionArguments(CancellationToken cancellationToken = default)
+        {
+            if (Parameters is { HasValues: true } && Arguments == null)
             {
                 throw new ArgumentException($"Function {Name} has parameters but no arguments are set.");
             }
 
-            if (!functionCache.TryGetValue(Name, out var method))
+            if (!functionCache.TryGetValue(Name, out var function))
             {
-                if (!Name.Contains('_'))
-                {
-                    throw new InvalidOperationException($"Failed to lookup and invoke function \"{Name}\"");
-                }
-
-                var type = Type.GetType(Name[..Name.LastIndexOf('_')].Replace('_', '.')) ?? throw new InvalidOperationException($"Failed to find a valid type for {Name}");
-                method = type.GetMethod(Name[(Name.LastIndexOf('_') + 1)..].Replace('_', '.')) ?? throw new InvalidOperationException($"Failed to find a valid method for {Name}");
-                functionCache[Name] = method;
+                throw new InvalidOperationException($"Failed to find a valid function for {Name}");
             }
 
-            var requestedArgs = JsonConvert.DeserializeObject<Dictionary<string, object>>(Arguments.ToString());
-            var methodParams = method.GetParameters();
+            if (function.MethodInfo == null)
+            {
+                throw new InvalidOperationException($"Failed to find a valid method for {Name}");
+            }
+
+            var requestedArgs = JsonConvert.DeserializeObject<Dictionary<string, object>>(Arguments?.ToString() ?? string.Empty);
+            var methodParams = function.MethodInfo.GetParameters();
             var invokeArgs = new object[methodParams.Length];
 
             for (var i = 0; i < methodParams.Length; i++)
@@ -224,7 +389,7 @@ namespace OpenAI
 
                 if (parameter.Name == null)
                 {
-                    throw new InvalidOperationException($"Failed to find a valid parameter name for {method.DeclaringType}.{method.Name}()");
+                    throw new InvalidOperationException($"Failed to find a valid parameter name for {function.MethodInfo.DeclaringType}.{function.MethodInfo.Name}()");
                 }
 
                 if (requestedArgs.TryGetValue(parameter.Name, out var value))
@@ -236,6 +401,10 @@ namespace OpenAI
                     else if (value is string @enum && parameter.ParameterType.IsEnum)
                     {
                         invokeArgs[i] = Enum.Parse(parameter.ParameterType, @enum);
+                    }
+                    else if (value is JObject json)
+                    {
+                        invokeArgs[i] = json.ToObject(parameter.ParameterType);
                     }
                     else
                     {
@@ -252,7 +421,7 @@ namespace OpenAI
                 }
             }
 
-            return (method, invokeArgs);
+            return (function, invokeArgs);
         }
 
         #endregion Function Invoking Utilities

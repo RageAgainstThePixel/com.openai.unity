@@ -1,20 +1,17 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using OpenAI.Audio;
 using OpenAI.Chat;
 using OpenAI.Images;
 using OpenAI.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Utilities.Async;
 using Utilities.Audio;
 using Utilities.Encoding.Wav;
 using Utilities.Extensions;
@@ -50,52 +47,13 @@ namespace OpenAI.Samples.Chat
 
         [SerializeField]
         [TextArea(3, 10)]
-        private string systemPrompt = "You are a helpful assistant.\n- If an image is requested then use \"![Image](output.jpg)\" to display it.";
+        private string systemPrompt = "You are a helpful assistant.\n- If an image is requested then use \"![Image](output.jpg)\" to display it.\n- When performing function calls, use the defaults unless explicitly told to use a specific value.\n- Images should always be generated in base64.";
 
         private OpenAIClient openAI;
 
         private readonly Conversation conversation = new();
 
-        private CancellationTokenSource lifetimeCancellationTokenSource;
-
-        private readonly List<Tool> assistantTools = new()
-        {
-            new Function(
-                nameof(GenerateImageAsync),
-                "Generates an image based on the user's request.",
-                new JObject
-                {
-                    ["type"] = "object",
-                    ["properties"] = new JObject
-                    {
-                        ["prompt"] = new JObject
-                        {
-                            ["type"] = "string",
-                            ["description"] = "A text description of the desired image(s). The maximum length is 1000 characters for dall-e-2 and 4000 characters for dall-e-3."
-                        },
-                        ["model"] = new JObject
-                        {
-                            ["type"] = "string",
-                            ["description"] = "The model to use for image generation.",
-                            ["enum"] = new JArray { "dall-e-2", "dall-e-3" },
-                            ["default"] = "dall-e-2"
-                        },
-                        ["size"] = new JObject
-                        {
-                            ["type"] = "string",
-                            ["description"] = "The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024 for dall-e-2. Must be one of 1024x1024, 1792x1024, or 1024x1792 for dall-e-3 models.",
-                            ["enum"] = new JArray{ "256x256", "512x512", "1024x1024", "1792x1024", "1024x1792" },
-                            ["default"] = "512x512"
-                        },
-                        ["response_format"] = new JObject
-                        {
-                            ["type"] = "string",
-                            ["enum"] = new JArray { "b64_json" } // hard coded for webgl
-                        }
-                    },
-                    ["required"] = new JArray { "prompt", "model", "response_format" }
-                })
-        };
+        private readonly List<Tool> assistantTools = new();
 
         private void OnValidate()
         {
@@ -109,22 +67,15 @@ namespace OpenAI.Samples.Chat
         private void Awake()
         {
             OnValidate();
-            lifetimeCancellationTokenSource = new CancellationTokenSource();
             openAI = new OpenAIClient(configuration)
             {
                 EnableDebug = enableDebug
             };
+            assistantTools.Add(Tool.GetOrCreateTool(openAI.ImagesEndPoint, nameof(ImagesEndpoint.GenerateImageAsync)));
             conversation.AppendMessage(new Message(Role.System, systemPrompt));
             inputField.onSubmit.AddListener(SubmitChat);
             submitButton.onClick.AddListener(SubmitChat);
             recordButton.onClick.AddListener(ToggleRecording);
-        }
-
-        private void OnDestroy()
-        {
-            lifetimeCancellationTokenSource.Cancel();
-            lifetimeCancellationTokenSource.Dispose();
-            lifetimeCancellationTokenSource = null;
         }
 
         private void SubmitChat(string _) => SubmitChat();
@@ -148,19 +99,19 @@ namespace OpenAI.Samples.Chat
 
             try
             {
-                var request = new ChatRequest(conversation.Messages, tools: assistantTools, toolChoice: "auto");
+                var request = new ChatRequest(conversation.Messages, tools: assistantTools);
                 var response = await openAI.ChatEndpoint.StreamCompletionAsync(request, resultHandler: deltaResponse =>
                 {
                     if (deltaResponse?.FirstChoice?.Delta == null) { return; }
                     assistantMessageContent.text += deltaResponse.FirstChoice.Delta.ToString();
                     scrollView.verticalNormalizedPosition = 0f;
-                }, lifetimeCancellationTokenSource.Token);
+                }, destroyCancellationToken);
 
                 conversation.AppendMessage(response.FirstChoice.Message);
 
                 if (response.FirstChoice.FinishReason == "tool_calls")
                 {
-                    response = await ProcessToolCallAsync(response);
+                    response = await ProcessToolCallsAsync(response);
                     assistantMessageContent.text += response.ToString().Replace("![Image](output.jpg)", string.Empty);
                 }
 
@@ -180,7 +131,7 @@ namespace OpenAI.Samples.Chat
             }
             finally
             {
-                if (lifetimeCancellationTokenSource is { IsCancellationRequested: false })
+                if (destroyCancellationToken is { IsCancellationRequested: false })
                 {
                     inputField.interactable = true;
                     EventSystem.current.SetSelectedGameObject(inputField.gameObject);
@@ -190,45 +141,71 @@ namespace OpenAI.Samples.Chat
                 isChatPending = false;
             }
 
-            async Task<ChatResponse> ProcessToolCallAsync(ChatResponse response)
+            async Task<ChatResponse> ProcessToolCallsAsync(ChatResponse response)
             {
-                var toolCall = response.FirstChoice.Message.ToolCalls.FirstOrDefault();
+                var toolCalls = new List<Task>();
 
-                if (enableDebug)
+                foreach (var toolCall in response.FirstChoice.Message.ToolCalls)
                 {
-                    Debug.Log($"{response.FirstChoice.Message.Role}: {toolCall?.Function?.Name} | Finish Reason: {response.FirstChoice.FinishReason}");
-                    Debug.Log($"{toolCall?.Function?.Arguments}");
+                    if (enableDebug)
+                    {
+                        Debug.Log($"{response.FirstChoice.Message.Role}: {toolCall.Function.Name} | Finish Reason: {response.FirstChoice.FinishReason}");
+                        Debug.Log($"{toolCall.Function.Arguments}");
+                    }
+
+                    toolCalls.Add(ProcessToolCall());
+
+                    async Task ProcessToolCall()
+                    {
+                        await Awaiters.UnityMainThread;
+
+                        try
+                        {
+                            var imageResults = await toolCall.InvokeFunctionAsync<IReadOnlyList<ImageResult>>().ConfigureAwait(true);
+
+                            foreach (var imageResult in imageResults)
+                            {
+                                AddNewImageContent(imageResult);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogError(e);
+                            conversation.AppendMessage(new(toolCall, $"{{\"result\":\"{e.Message}\"}}"));
+                            return;
+                        }
+
+                        conversation.AppendMessage(new(toolCall, "{\"result\":\"completed\"}"));
+                    }
                 }
 
-                if (toolCall == null || toolCall.Function?.Name != nameof(GenerateImageAsync))
-                {
-                    throw new Exception($"Failed to find a valid tool call!\n{response}");
-                }
 
+                await Task.WhenAll(toolCalls).ConfigureAwait(true);
                 ChatResponse toolCallResponse;
 
                 try
                 {
-                    var imageGenerationRequest = JsonConvert.DeserializeObject<ImageGenerationRequest>(toolCall.Function.Arguments.ToString());
-                    var imageResult = await GenerateImageAsync(imageGenerationRequest);
-                    AddNewImageContent(imageResult);
-                    conversation.AppendMessage(new Message(toolCall, "{\"result\":\"completed\"}"));
-                    var toolCallRequest = new ChatRequest(conversation.Messages, tools: assistantTools, toolChoice: "auto");
+                    var toolCallRequest = new ChatRequest(conversation.Messages, tools: assistantTools);
                     toolCallResponse = await openAI.ChatEndpoint.GetCompletionAsync(toolCallRequest);
                     conversation.AppendMessage(toolCallResponse.FirstChoice.Message);
                 }
                 catch (RestException restEx)
                 {
                     Debug.LogError(restEx);
-                    conversation.AppendMessage(new Message(toolCall, restEx.Response.Body));
-                    var toolCallRequest = new ChatRequest(conversation.Messages, tools: assistantTools, toolChoice: "auto");
+
+                    foreach (var toolCall in response.FirstChoice.Message.ToolCalls)
+                    {
+                        conversation.AppendMessage(new Message(toolCall, restEx.Response.Body));
+                    }
+
+                    var toolCallRequest = new ChatRequest(conversation.Messages, tools: assistantTools);
                     toolCallResponse = await openAI.ChatEndpoint.GetCompletionAsync(toolCallRequest);
                     conversation.AppendMessage(toolCallResponse.FirstChoice.Message);
                 }
 
                 if (toolCallResponse.FirstChoice.FinishReason == "tool_calls")
                 {
-                    return await ProcessToolCallAsync(toolCallResponse);
+                    return await ProcessToolCallsAsync(toolCallResponse);
                 }
 
                 return toolCallResponse;
@@ -238,8 +215,9 @@ namespace OpenAI.Samples.Chat
         private async void GenerateSpeech(string text)
         {
             text = text.Replace("![Image](output.jpg)", string.Empty);
+            if (string.IsNullOrWhiteSpace(text)) { return; }
             var request = new SpeechRequest(text, Model.TTS_1);
-            var (clipPath, clip) = await openAI.AudioEndpoint.CreateSpeechAsync(request, lifetimeCancellationTokenSource.Token);
+            var (clipPath, clip) = await openAI.AudioEndpoint.CreateSpeechAsync(request, destroyCancellationToken);
             audioSource.PlayOneShot(clip);
 
             if (enableDebug)
@@ -276,12 +254,6 @@ namespace OpenAI.Samples.Chat
             aspectRatioFitter.aspectRatio = texture.width / (float)texture.height;
         }
 
-        private async Task<ImageResult> GenerateImageAsync(ImageGenerationRequest request)
-        {
-            var results = await openAI.ImagesEndPoint.GenerateImageAsync(request);
-            return results.FirstOrDefault();
-        }
-
         private void ToggleRecording()
         {
             RecordingManager.EnableDebug = enableDebug;
@@ -310,7 +282,7 @@ namespace OpenAI.Samples.Chat
             {
                 recordButton.interactable = false;
                 var request = new AudioTranscriptionRequest(clip, temperature: 0.1f, language: "en");
-                var userInput = await openAI.AudioEndpoint.CreateTranscriptionAsync(request, lifetimeCancellationTokenSource.Token);
+                var userInput = await openAI.AudioEndpoint.CreateTranscriptionAsync(request, destroyCancellationToken);
 
                 if (enableDebug)
                 {
