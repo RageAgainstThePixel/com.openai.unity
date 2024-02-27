@@ -51,11 +51,6 @@ namespace OpenAI.Chat
             {
                 try
                 {
-                    if (EnableDebug)
-                    {
-                        Debug.Log(eventData);
-                    }
-
                     var partialResponse = JsonConvert.DeserializeObject<ChatResponse>(eventData, OpenAIClient.JsonSerializationOptions);
 
                     if (chatResponse == null)
