@@ -377,14 +377,22 @@ namespace OpenAI.Tests
             }
 
             var toolCall = run.RequiredAction.SubmitToolOutputs.ToolCalls[0];
+            Assert.IsTrue(run.RequiredAction.SubmitToolOutputs.ToolCalls.Count == 1);
             Assert.AreEqual("function", toolCall.Type);
             Assert.IsNotNull(toolCall.FunctionCall);
             Assert.IsTrue(toolCall.FunctionCall.Name.Contains(nameof(WeatherService.GetCurrentWeatherAsync)));
             Assert.IsNotNull(toolCall.FunctionCall.Arguments);
-            Debug.Log($"tool call arguments: {toolCall.FunctionCall.Arguments}");
-            var toolOutput = await testAssistant.GetToolOutputAsync(toolCall);
-            Debug.Log($"tool call output: {toolOutput.Output}");
-            run = await run.SubmitToolOutputsAsync(toolOutput);
+            Console.WriteLine($"tool call arguments: {toolCall.FunctionCall.Arguments}");
+
+            // Invoke all the tool call functions and return the tool outputs.
+            var toolOutputs = await testAssistant.GetToolOutputsAsync(run.RequiredAction.SubmitToolOutputs.ToolCalls);
+
+            foreach (var toolOutput in toolOutputs)
+            {
+                Console.WriteLine($"tool output: {toolOutput}");
+            }
+
+            run = await run.SubmitToolOutputsAsync(toolOutputs);
             // waiting while run in Queued and InProgress
             run = await run.WaitForStatusChangeAsync();
             Assert.AreEqual(RunStatus.Completed, run.Status);
