@@ -196,7 +196,7 @@ namespace OpenAI
                 if (arguments == null &&
                     !string.IsNullOrWhiteSpace(argumentsString))
                 {
-                    arguments = JToken.FromObject(argumentsString);
+                    arguments = JToken.FromObject(argumentsString, JsonSerializer.Create(OpenAIClient.JsonSerializationOptions));
                 }
 
                 return arguments;
@@ -264,12 +264,12 @@ namespace OpenAI
                 }
 
                 var result = Invoke<object>();
-                return JsonConvert.SerializeObject(new { result });
+                return JsonConvert.SerializeObject(new { result }, OpenAIClient.JsonSerializationOptions);
             }
             catch (Exception e)
             {
                 Debug.LogException(e);
-                return JsonConvert.SerializeObject(new { error = e.Message });
+                return JsonConvert.SerializeObject(new { error = e.Message }, OpenAIClient.JsonSerializationOptions);
             }
         }
 
@@ -320,12 +320,12 @@ namespace OpenAI
                 }
 
                 var result = await InvokeAsync<object>(cancellationToken);
-                return JsonConvert.SerializeObject(new { result });
+                return JsonConvert.SerializeObject(new { result }, OpenAIClient.JsonSerializationOptions);
             }
             catch (Exception e)
             {
                 Debug.LogException(e);
-                return JsonConvert.SerializeObject(new { error = e.Message });
+                return JsonConvert.SerializeObject(new { error = e.Message }, OpenAIClient.JsonSerializationOptions);
             }
         }
 
@@ -402,11 +402,11 @@ namespace OpenAI
                     }
                     else if (value is string @enum && parameter.ParameterType.IsEnum)
                     {
-                        invokeArgs[i] = Enum.Parse(parameter.ParameterType, @enum);
+                        invokeArgs[i] = Enum.Parse(parameter.ParameterType, @enum, true);
                     }
                     else if (value is JObject json)
                     {
-                        invokeArgs[i] = json.ToObject(parameter.ParameterType);
+                        invokeArgs[i] = json.ToObject(parameter.ParameterType, JsonSerializer.Create(OpenAIClient.JsonSerializationOptions));
                     }
                     else
                     {
