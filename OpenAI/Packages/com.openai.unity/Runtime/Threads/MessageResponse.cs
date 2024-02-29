@@ -50,7 +50,7 @@ namespace OpenAI.Threads
         public string Id { get; }
 
         /// <summary>
-        /// The object type, which is always thread.
+        /// The object type, which is always message.
         /// </summary>
         [Preserve]
         [JsonProperty("object")]
