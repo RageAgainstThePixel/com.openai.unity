@@ -57,7 +57,7 @@ namespace OpenAI.Threads
         public string Object { get; }
 
         /// <summary>
-        /// The Unix timestamp (in seconds) for when the thread was created.
+        /// The Unix timestamp (in seconds) for when the message was created.
         /// </summary>
         [Preserve]
         [JsonProperty("created_at")]
