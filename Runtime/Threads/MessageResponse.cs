@@ -50,14 +50,14 @@ namespace OpenAI.Threads
         public string Id { get; }
 
         /// <summary>
-        /// The object type, which is always thread.
+        /// The object type, which is always message.
         /// </summary>
         [Preserve]
         [JsonProperty("object")]
         public string Object { get; }
 
         /// <summary>
-        /// The Unix timestamp (in seconds) for when the thread was created.
+        /// The Unix timestamp (in seconds) for when the message was created.
         /// </summary>
         [Preserve]
         [JsonProperty("created_at")]
