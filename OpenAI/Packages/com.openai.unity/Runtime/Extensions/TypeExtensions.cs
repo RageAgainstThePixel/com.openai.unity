@@ -44,7 +44,7 @@ namespace OpenAI.Extensions
                     requiredParameters.Add(parameter.Name);
                 }
 
-                schema["properties"]![parameter.Name] = GenerateJsonSchema(parameter.ParameterType);
+                schema["properties"]![parameter.Name] = GenerateJsonSchema(parameter.ParameterType, schema);
 
                 var functionParameterAttribute = parameter.GetCustomAttribute<FunctionParameterAttribute>();
 
@@ -62,12 +62,58 @@ namespace OpenAI.Extensions
             return schema;
         }
 
-        public static JObject GenerateJsonSchema(this Type type)
+        public static JObject GenerateJsonSchema(this Type type, JObject rootSchema = null)
         {
             var schema = new JObject();
+            rootSchema ??= schema;
             var serializer = JsonSerializer.Create(OpenAIClient.JsonSerializationOptions);
 
-            if (type.IsEnum)
+            if (!type.IsPrimitive &&
+                type != typeof(Guid) &&
+                type != typeof(DateTime) &&
+                type != typeof(DateTimeOffset) &&
+                rootSchema["definitions"] != null &&
+                ((JObject)rootSchema["definitions"]).ContainsKey(type.FullName))
+            {
+                return new JObject { ["$ref"] = $"#/definitions/{type.FullName}" };
+            }
+
+            if (type == typeof(string))
+            {
+                schema["type"] = "string";
+            }
+            else if (type == typeof(int) ||
+                     type == typeof(long) ||
+                     type == typeof(uint) ||
+                     type == typeof(byte) ||
+                     type == typeof(sbyte) ||
+                     type == typeof(ulong) ||
+                     type == typeof(short) ||
+                     type == typeof(ushort))
+            {
+                schema["type"] = "integer";
+            }
+            else if (type == typeof(float) ||
+                     type == typeof(double) ||
+                     type == typeof(decimal))
+            {
+                schema["type"] = "number";
+            }
+            else if (type == typeof(bool))
+            {
+                schema["type"] = "boolean";
+            }
+            else if (type == typeof(DateTime) || type == typeof(DateTimeOffset))
+            {
+                schema["type"] = "string";
+                schema["format"] = "date-time";
+            }
+            else if (type == typeof(Guid))
+            {
+                schema["type"] = "string";
+                schema["format"] = "uuid";
+            }
+            else if (type.IsEnum)
             {
                 schema["type"] = "string";
                 schema["enum"] = new JArray();
@@ -80,21 +126,54 @@ namespace OpenAI.Extensions
             else if (type.IsArray || (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>)))
             {
                 schema["type"] = "array";
-                schema["items"] = GenerateJsonSchema(type.GetElementType() ?? type.GetGenericArguments()[0]);
+                var elementType = type.GetElementType() ?? type.GetGenericArguments()[0];
+
+                if (rootSchema["definitions"] != null &&
+                         ((JObject)rootSchema["definitions"]).ContainsKey(elementType.FullName))
+                {
+                    schema["items"] = new JObject { ["$ref"] = $"#/definitions/{elementType.FullName}" };
+                }
+                else
+                {
+                    schema["items"] = GenerateJsonSchema(elementType, rootSchema);
+                }
             }
-            else if (type.IsClass && type != typeof(string))
+            else
             {
                 schema["type"] = "object";
-                var properties = type.GetProperties();
-                var propertiesInfo = new JObject();
-                var requiredProperties = new JArray();
+                rootSchema["definitions"] ??= new JObject();
+                rootSchema["definitions"][type.FullName] = new JObject();
 
-                foreach (var property in properties)
+                var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                var members = new List<MemberInfo>(properties.Length + fields.Length);
+                members.AddRange(properties);
+                members.AddRange(fields);
+
+                var memberInfo = new JObject();
+                var requiredMembers = new JArray();
+
+                foreach (var member in members)
                 {
-                    var propertyInfo = GenerateJsonSchema(property.PropertyType);
-                    var functionPropertyAttribute = property.GetCustomAttribute<FunctionPropertyAttribute>();
-                    var jsonPropertyAttribute = property.GetCustomAttribute<JsonPropertyAttribute>();
-                    var propertyName = jsonPropertyAttribute?.PropertyName ?? property.Name;
+                    var memberType = GetMemberType(member);
+                    var functionPropertyAttribute = member.GetCustomAttribute<FunctionPropertyAttribute>();
+                    var jsonPropertyAttribute = member.GetCustomAttribute<JsonPropertyAttribute>();
+                    var propertyName = jsonPropertyAttribute?.PropertyName ?? member.Name;
+
+                    // skip unity engine property for Items
+                    if (memberType == typeof(float) && propertyName.Equals("Item")) { continue; }
+
+                    JObject propertyInfo;
+
+                    if (rootSchema["definitions"] != null &&
+                            ((JObject)rootSchema["definitions"]).ContainsKey(memberType.FullName))
+                    {
+                        propertyInfo = new JObject { ["$ref"] = $"#/definitions/{memberType.FullName}" };
+                    }
+                    else
+                    {
+                        propertyInfo = GenerateJsonSchema(memberType, rootSchema);
+                    }
 
                     // override properties with values from function property attribute
                     if (functionPropertyAttribute != null)
@@ -103,7 +182,7 @@ namespace OpenAI.Extensions
 
                         if (functionPropertyAttribute.Required)
                         {
-                            requiredProperties.Add(propertyName);
+                            requiredMembers.Add(propertyName);
                         }
 
                         JToken defaultValue = null;
@@ -143,52 +222,53 @@ namespace OpenAI.Extensions
                             propertyInfo["enum"] = enums;
                         }
                     }
-                    else if (Nullable.GetUnderlyingType(property.PropertyType) == null)
+                    else if (jsonPropertyAttribute != null)
                     {
-                        requiredProperties.Add(propertyName);
+                        switch (jsonPropertyAttribute.Required)
+                        {
+                            case Required.Always:
+                                requiredMembers.Add(propertyName);
+                                break;
+                            case Required.Default:
+                            case Required.AllowNull:
+                            case Required.DisallowNull:
+                            default:
+                                requiredMembers.Remove(propertyName);
+                                break;
+                        }
+                    }
+                    else if (Nullable.GetUnderlyingType(memberType) == null)
+                    {
+                        if (member is FieldInfo)
+                        {
+                            requiredMembers.Add(propertyName);
+                        }
                     }
 
-                    propertiesInfo[propertyName] = propertyInfo;
+                    memberInfo[propertyName] = propertyInfo;
                 }
 
-                schema["properties"] = propertiesInfo;
+                schema["properties"] = memberInfo;
 
-                if (requiredProperties.Count > 0)
+                if (requiredMembers.Count > 0)
                 {
-                    schema["required"] = requiredProperties;
+                    schema["required"] = requiredMembers;
                 }
-            }
-            else
-            {
-                if (type == typeof(int) || type == typeof(long) || type == typeof(short) || type == typeof(byte))
-                {
-                    schema["type"] = "integer";
-                }
-                else if (type == typeof(float) || type == typeof(double) || type == typeof(decimal))
-                {
-                    schema["type"] = "number";
-                }
-                else if (type == typeof(bool))
-                {
-                    schema["type"] = "boolean";
-                }
-                else if (type == typeof(DateTime) || type == typeof(DateTimeOffset))
-                {
-                    schema["type"] = "string";
-                    schema["format"] = "date-time";
-                }
-                else if (type == typeof(Guid))
-                {
-                    schema["type"] = "string";
-                    schema["format"] = "uuid";
-                }
-                else
-                {
-                    schema["type"] = type.Name.ToLower();
-                }
+
+                rootSchema["definitions"] ??= new JObject();
+                rootSchema["definitions"][type.FullName] = schema;
+                return new JObject { ["$ref"] = $"#/definitions/{type.FullName}" };
             }
 
             return schema;
         }
+
+        private static Type GetMemberType(MemberInfo member)
+            => member switch
+            {
+                FieldInfo fieldInfo => fieldInfo.FieldType,
+                PropertyInfo propertyInfo => propertyInfo.PropertyType,
+                _ => throw new ArgumentException($"{nameof(MemberInfo)} must be of type {nameof(FieldInfo)}, {nameof(PropertyInfo)}", nameof(member))
+            };
     }
 }
