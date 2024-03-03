@@ -227,10 +227,10 @@ namespace OpenAI.Extensions
                         switch (jsonPropertyAttribute.Required)
                         {
                             case Required.Always:
+                            case Required.AllowNull:
                                 requiredMembers.Add(propertyName);
                                 break;
                             case Required.Default:
-                            case Required.AllowNull:
                             case Required.DisallowNull:
                             default:
                                 requiredMembers.Remove(propertyName);
