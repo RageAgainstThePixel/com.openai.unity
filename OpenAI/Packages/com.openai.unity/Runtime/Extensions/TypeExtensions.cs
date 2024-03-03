@@ -62,10 +62,9 @@ namespace OpenAI.Extensions
             return schema;
         }
 
-        public static JObject GenerateJsonSchema(this Type type, JObject rootSchema = null)
+        public static JObject GenerateJsonSchema(this Type type, JObject rootSchema)
         {
             var schema = new JObject();
-            rootSchema ??= schema;
             var serializer = JsonSerializer.Create(OpenAIClient.JsonSerializationOptions);
 
             if (!type.IsPrimitive &&
