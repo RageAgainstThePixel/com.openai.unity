@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using OpenAI.Images;
 using OpenAI.Tests.Weather;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,6 +22,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(tools);
             Assert.IsNotEmpty(tools);
             tools.Add(Tool.GetOrCreateTool(OpenAIClient.ImagesEndPoint, nameof(ImagesEndpoint.GenerateImageAsync)));
+            tools.Add(Tool.FromFunc<GameObject, Vector2, Vector3, Quaternion, string>("complex_objects", (gameObject, vector2, vector3, quaternion) => "success"));
             var json = JsonConvert.SerializeObject(tools, Formatting.Indented, OpenAIClient.JsonSerializationOptions);
             Debug.Log(json);
         }
@@ -31,7 +33,7 @@ namespace OpenAI.Tests
             var tools = new List<Tool>
             {
                 Tool.FromFunc("test_func", Function),
-                Tool.FromFunc<string, string, string>("test_func_with_args", FunctionWithArgs),
+                Tool.FromFunc<DateTime, Vector3, string>("test_func_with_args", FunctionWithArgs),
                 Tool.FromFunc("test_func_weather", () => WeatherService.GetCurrentWeatherAsync("my location", WeatherService.WeatherUnit.Celsius))
             };
 
@@ -44,13 +46,12 @@ namespace OpenAI.Tests
             Assert.AreEqual("success", result);
             var toolWithArgs = tools[1];
             Assert.IsNotNull(toolWithArgs);
-            toolWithArgs.Function.Arguments = new JObject
-            {
-                ["arg1"] = "arg1",
-                ["arg2"] = "arg2"
-            };
+            var testValue = new { arg1 = DateTime.UtcNow, arg2 = Vector3.one };
+            toolWithArgs.Function.Arguments = JToken.FromObject(testValue, JsonSerializer.Create(OpenAIClient.JsonSerializationOptions));
             var resultWithArgs = toolWithArgs.InvokeFunction<string>();
-            Assert.AreEqual("arg1 arg2", resultWithArgs);
+            Debug.Log(resultWithArgs);
+            var testResult = JsonConvert.DeserializeObject(resultWithArgs, testValue.GetType(), OpenAIClient.JsonSerializationOptions);
+            Assert.AreEqual(testResult, testValue);
 
             var toolWeather = tools[2];
             Assert.IsNotNull(toolWeather);
@@ -64,9 +65,9 @@ namespace OpenAI.Tests
             return "success";
         }
 
-        private string FunctionWithArgs(string arg1, string arg2)
+        private string FunctionWithArgs(DateTime arg1, Vector3 arg2)
         {
-            return $"{arg1} {arg2}";
+            return JsonConvert.SerializeObject(new { arg1, arg2 }, OpenAIClient.JsonSerializationOptions);
         }
     }
 }

@@ -114,6 +114,7 @@ namespace OpenAI
         {
             NullValueHandling = NullValueHandling.Ignore,
             DefaultValueHandling = DefaultValueHandling.Ignore,
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             Converters = new List<JsonConverter>
             {
                 new StringEnumConverter(new SnakeCaseNamingStrategy())
