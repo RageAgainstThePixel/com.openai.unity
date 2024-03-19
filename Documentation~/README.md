@@ -103,6 +103,7 @@ The recommended installation method is though the unity package manager and [Ope
   - [Json Mode](#chat-json-mode)
 - [Audio](#audio)
   - [Create Speech](#create-speech)
+    - [Stream Speech](#stream-speech) :new:
   - [Create Transcription](#create-transcription)
   - [Create Translation](#create-translation)
 - [Images](#images)
@@ -1047,6 +1048,18 @@ var api = new OpenAIClient();
 var request = new SpeechRequest("Hello world!");
 var (path, clip) = await api.AudioEndpoint.CreateSpeechAsync(request);
 audioSource.PlayOneShot(clip);
+Debug.Log(path);
+```
+
+##### [Stream Speech]
+
+Generate streamed audio from the input text.
+
+```csharp
+var api = new OpenAIClient();
+var request = new SpeechRequest("Hello world!");
+var (path, clip) = await OpenAIClient.AudioEndpoint.CreateSpeechStreamAsync(request, partialClip => audioSource.PlayOneShot(partialClip));
+Debug.Log(path);
 ```
 
 #### [Create Transcription](https://platform.openai.com/docs/api-reference/audio/createTranscription)
@@ -1058,6 +1071,19 @@ var api = new OpenAIClient();
 var request = new AudioTranscriptionRequest(audioClip, language: "en");
 var result = await api.AudioEndpoint.CreateTranscriptionAsync(request);
 Debug.Log(result);
+```
+
+You can also get detailed information using `verbose_json` to get timestamp granularities:
+
+```csharp
+var api = new OpenAIClient();
+using var request = new AudioTranscriptionRequest(transcriptionAudio, responseFormat: AudioResponseFormat.Verbose_Json, timestampGranularity: TimestampGranularity.Word, temperature: 0.1f, language: "en");
+var response = await api.AudioEndpoint.CreateTranscriptionTextAsync(request);
+
+foreach (var word in response.Words)
+{
+    Debug.Log($"[{word.Start}-{word.End}] \"{word.Word}\"");
+}
 ```
 
 #### [Create Translation](https://platform.openai.com/docs/api-reference/audio/createTranslation)
@@ -1187,7 +1213,7 @@ Returns information about a specific file.
 
 ```csharp
 var api = new OpenAIClient();
-var file = await GetFileInfoAsync(fileId);
+var file = await  api.FilesEndpoint.GetFileInfoAsync(fileId);
 Debug.Log($"{file.Id} -> {file.Object}: {file.FileName} | {file.Size} bytes");
 ```
 
