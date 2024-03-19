@@ -35,7 +35,7 @@ namespace OpenAI.Audio
         public AudioTranslationRequest(
             string audioPath,
             string model = null,
-            string prompt = null,
+            string prompt = "response should be in english.",
             AudioResponseFormat responseFormat = AudioResponseFormat.Json,
             float? temperature = null)
             : this(File.OpenRead(audioPath), Path.GetFileName(audioPath), model, prompt, responseFormat, temperature)

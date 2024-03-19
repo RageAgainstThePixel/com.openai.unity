@@ -53,12 +53,12 @@ namespace OpenAI.Audio
         public SpeechVoice Voice { get; }
 
         /// <summary>
-        /// The format to audio in. Supported formats are mp3, opus, aac, and flac.
+        /// The format to audio in. Supported formats are mp3, opus, aac, flac, wav and pcm.
         /// </summary>
         [Preserve]
         [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Include)]
-        [FunctionProperty("The format to audio in. Supported formats are mp3, opus, aac, and flac.", false, SpeechResponseFormat.MP3)]
-        public SpeechResponseFormat ResponseFormat { get; }
+        [FunctionProperty("The format to audio in. Supported formats are mp3, opus, aac, flac, wav and pcm.", false, SpeechResponseFormat.MP3)]
+        public SpeechResponseFormat ResponseFormat { get; internal set; }
 
         /// <summary>
         /// The speed of the generated audio. Select a value from 0.25 to 4.0. 1.0 is the default.
