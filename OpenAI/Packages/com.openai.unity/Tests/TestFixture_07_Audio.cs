@@ -3,6 +3,7 @@
 using NUnit.Framework;
 using OpenAI.Audio;
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEditor;
@@ -17,10 +18,10 @@ namespace OpenAI.Tests
         {
             Assert.IsNotNull(OpenAIClient.AudioEndpoint);
             var audioPath = AssetDatabase.GUIDToAssetPath("259eaa73cab84284eac307d3134c3ade");
-            using var request = new AudioTranscriptionRequest(Path.GetFullPath(audioPath), temperature: 0.1f, language: "en");
-            var result = await OpenAIClient.AudioEndpoint.CreateTranscriptionAsync(request);
-            Assert.IsNotNull(result);
-            Debug.Log(result);
+            using var request = new AudioTranscriptionRequest(Path.GetFullPath(audioPath), responseFormat: AudioResponseFormat.Text, temperature: 0.1f, language: "en");
+            var response = await OpenAIClient.AudioEndpoint.CreateTranscriptionTextAsync(request);
+            Assert.IsNotNull(response);
+            Debug.Log(response);
         }
 
         [Test]
@@ -29,10 +30,40 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.AudioEndpoint);
             var audioPath = AssetDatabase.GUIDToAssetPath("259eaa73cab84284eac307d3134c3ade");
             var audioClip = AssetDatabase.LoadAssetAtPath<AudioClip>(audioPath);
-            using var request = new AudioTranscriptionRequest(audioClip, temperature: 0.1f, language: "en");
-            var result = await OpenAIClient.AudioEndpoint.CreateTranscriptionAsync(request);
-            Assert.IsNotNull(result);
-            Debug.Log(result);
+            using var request = new AudioTranscriptionRequest(audioClip, responseFormat: AudioResponseFormat.Json, temperature: 0.1f, language: "en");
+            var response = await OpenAIClient.AudioEndpoint.CreateTranscriptionTextAsync(request);
+            Assert.IsNotNull(response);
+            Debug.Log(response);
+        }
+
+        [Test]
+        public async Task Test_01_03_01_Transcription_VerboseJson()
+        {
+            Assert.IsNotNull(OpenAIClient.AudioEndpoint);
+            var audioPath = AssetDatabase.GUIDToAssetPath("259eaa73cab84284eac307d3134c3ade");
+            var audioClip = AssetDatabase.LoadAssetAtPath<AudioClip>(audioPath);
+            using var request = new AudioTranscriptionRequest(audioClip, responseFormat: AudioResponseFormat.Verbose_Json, temperature: 0.1f, language: "en");
+            var response = await OpenAIClient.AudioEndpoint.CreateTranscriptionJsonAsync(request);
+            Assert.IsNotNull(response);
+            Assert.IsNotNull(response.Duration);
+            Assert.IsTrue(response.Language == "english");
+            Assert.IsNotNull(response.Segments);
+            Assert.IsNotEmpty(response.Segments);
+        }
+
+        [Test]
+        public async Task Test_01_03_02_Transcription_VerboseJson_WordSimilarities()
+        {
+            Assert.IsNotNull(OpenAIClient.AudioEndpoint);
+            var audioPath = AssetDatabase.GUIDToAssetPath("259eaa73cab84284eac307d3134c3ade");
+            var audioClip = AssetDatabase.LoadAssetAtPath<AudioClip>(audioPath);
+            using var request = new AudioTranscriptionRequest(audioClip, responseFormat: AudioResponseFormat.Verbose_Json, timestampGranularity: TimestampGranularity.Word, temperature: 0.1f, language: "en");
+            var response = await OpenAIClient.AudioEndpoint.CreateTranscriptionJsonAsync(request);
+            Assert.IsNotNull(response);
+            Assert.IsNotNull(response.Duration);
+            Assert.IsTrue(response.Language == "english");
+            Assert.IsNotNull(response.Words);
+            Assert.IsNotEmpty(response.Words);
         }
 
         [Test]
@@ -41,7 +72,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.AudioEndpoint);
             var audioPath = AssetDatabase.GUIDToAssetPath("3ab176222366dc241894506c315c6fa4");
             using var request = new AudioTranslationRequest(Path.GetFullPath(audioPath));
-            var result = await OpenAIClient.AudioEndpoint.CreateTranslationAsync(request);
+            var result = await OpenAIClient.AudioEndpoint.CreateTranslationTextAsync(request);
             Assert.IsNotNull(result);
             Debug.Log(result);
         }
@@ -52,20 +83,32 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.AudioEndpoint);
             var audioPath = AssetDatabase.GUIDToAssetPath("3ab176222366dc241894506c315c6fa4");
             var audioClip = AssetDatabase.LoadAssetAtPath<AudioClip>(audioPath);
-            using var request = new AudioTranslationRequest(audioClip);
-            var result = await OpenAIClient.AudioEndpoint.CreateTranslationAsync(request);
-            Assert.IsNotNull(result);
-            Debug.Log(result);
+            using var request = new AudioTranslationRequest(audioClip, prompt: "responses should be in spanish.");
+            var response = await OpenAIClient.AudioEndpoint.CreateTranslationJsonAsync(request);
+            Assert.IsNotNull(response);
+            Debug.Log(response);
         }
 
         [Test]
-        public async Task Test_3_Speech()
+        public async Task Test_03_01_Speech()
         {
             Assert.IsNotNull(OpenAIClient.AudioEndpoint);
             var request = new SpeechRequest("Hello world!");
             var (path, clip) = await OpenAIClient.AudioEndpoint.CreateSpeechAsync(request);
             Debug.Log(path);
             Assert.IsNotNull(clip);
+        }
+
+        [Test]
+        public async Task Test_03_02_Speech_Streaming()
+        {
+            Assert.IsNotNull(OpenAIClient.AudioEndpoint);
+            var request = new SpeechRequest("Hello world!", responseFormat: SpeechResponseFormat.PCM);
+            var clipQueue = new ConcurrentQueue<AudioClip>();
+            var (path, clip) = await OpenAIClient.AudioEndpoint.CreateSpeechStreamAsync(request, partialClip => clipQueue.Enqueue(partialClip));
+            Debug.Log(path);
+            Assert.IsNotNull(clip);
+            Assert.IsTrue(clipQueue.Count > 0);
         }
     }
 }

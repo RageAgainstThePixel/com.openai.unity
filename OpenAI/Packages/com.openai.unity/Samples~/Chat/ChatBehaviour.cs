@@ -6,6 +6,7 @@ using OpenAI.Images;
 using OpenAI.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -44,6 +45,9 @@ namespace OpenAI.Samples.Chat
 
         [SerializeField]
         private AudioSource audioSource;
+
+        [SerializeField]
+        private SpeechVoice voice;
 
         [SerializeField]
         [TextArea(3, 10)]
@@ -115,7 +119,7 @@ namespace OpenAI.Samples.Chat
                     assistantMessageContent.text += response.ToString().Replace("![Image](output.jpg)", string.Empty);
                 }
 
-                GenerateSpeech(response);
+                await GenerateSpeechAsync(response, destroyCancellationToken);
             }
             catch (Exception e)
             {
@@ -212,17 +216,69 @@ namespace OpenAI.Samples.Chat
             }
         }
 
-        private async void GenerateSpeech(string text)
+        private async Task GenerateSpeechAsync(string text, CancellationToken cancellationToken)
         {
             text = text.Replace("![Image](output.jpg)", string.Empty);
             if (string.IsNullOrWhiteSpace(text)) { return; }
-            var request = new SpeechRequest(text, Model.TTS_1);
-            var (clipPath, clip) = await openAI.AudioEndpoint.CreateSpeechAsync(request, destroyCancellationToken);
-            audioSource.PlayOneShot(clip);
+            var request = new SpeechRequest(text, Model.TTS_1, voice, SpeechResponseFormat.PCM);
+            var streamClipQueue = new Queue<AudioClip>();
+            var streamTcs = new TaskCompletionSource<bool>();
+            var audioPlaybackTask = PlayStreamQueueAsync(streamTcs.Task);
+            var (clipPath, fullClip) = await openAI.AudioEndpoint.CreateSpeechStreamAsync(request, clip => streamClipQueue.Enqueue(clip), destroyCancellationToken);
+            streamTcs.SetResult(true);
 
             if (enableDebug)
             {
                 Debug.Log(clipPath);
+            }
+
+            await audioPlaybackTask;
+            audioSource.clip = fullClip;
+
+            async Task PlayStreamQueueAsync(Task streamTask)
+            {
+                try
+                {
+                    await new WaitUntil(() => streamClipQueue.Count > 0);
+                    var endOfFrame = new WaitForEndOfFrame();
+
+                    do
+                    {
+                        if (!audioSource.isPlaying &&
+                            streamClipQueue.TryDequeue(out var clip))
+                        {
+                            if (enableDebug)
+                            {
+                                Debug.Log($"playing partial clip: {clip.name} | ({streamClipQueue.Count} remaining)");
+                            }
+
+                            audioSource.PlayOneShot(clip);
+                            // ReSharper disable once MethodSupportsCancellation
+                            await Task.Delay(TimeSpan.FromSeconds(clip.length)).ConfigureAwait(true);
+                        }
+                        else
+                        {
+                            await endOfFrame;
+                        }
+
+                        if (streamTask.IsCompleted && !audioSource.isPlaying && streamClipQueue.Count == 0)
+                        {
+                            return;
+                        }
+                    } while (!cancellationToken.IsCancellationRequested);
+                }
+                catch (Exception e)
+                {
+                    switch (e)
+                    {
+                        case TaskCanceledException:
+                        case OperationCanceledException:
+                            break;
+                        default:
+                            Debug.LogError(e);
+                            break;
+                    }
+                }
             }
         }
 
@@ -282,7 +338,7 @@ namespace OpenAI.Samples.Chat
             {
                 recordButton.interactable = false;
                 var request = new AudioTranscriptionRequest(clip, temperature: 0.1f, language: "en");
-                var userInput = await openAI.AudioEndpoint.CreateTranscriptionAsync(request, destroyCancellationToken);
+                var userInput = await openAI.AudioEndpoint.CreateTranscriptionTextAsync(request, destroyCancellationToken);
 
                 if (enableDebug)
                 {
