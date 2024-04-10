@@ -11,7 +11,7 @@ namespace OpenAI
     [Serializable]
     public sealed class OpenAIAuthInfo : IAuthInfo
     {
-        internal const string SecretKeyPrefix = "sk-";
+        internal const string SecretKeyPrefix = "";
         internal const string SessionKeyPrefix = "sess-";
         internal const string OrganizationPrefix = "org-";
 
