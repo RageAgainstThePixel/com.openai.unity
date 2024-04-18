@@ -9,6 +9,7 @@ namespace OpenAI
         System = 1,
         Assistant,
         User,
+        Memory,
         [Obsolete("Use Tool")]
         Function,
         Tool
