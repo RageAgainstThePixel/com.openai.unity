@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -169,7 +170,7 @@ namespace OpenAI.Audio
 
             if (request.Temperature.HasValue)
             {
-                form.AddField("temperature", request.Temperature.ToString());
+                form.AddField("temperature", request.Temperature.Value.ToString(CultureInfo.InvariantCulture));
             }
 
             if (!string.IsNullOrWhiteSpace(request.Language))
@@ -246,7 +247,7 @@ namespace OpenAI.Audio
 
             if (request.Temperature.HasValue)
             {
-                form.AddField("temperature", request.Temperature.ToString());
+                form.AddField("temperature", request.Temperature.Value.ToString(CultureInfo.InvariantCulture));
             }
 
             request.Dispose();

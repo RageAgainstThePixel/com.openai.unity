@@ -47,6 +47,11 @@ namespace OpenAI
                 throw new ArgumentException($"The name of the function does not conform to naming standards: {NameRegex}");
             }
 
+            if (functionCache.ContainsKey(name))
+            {
+                throw new ArgumentException($"The function \"{name}\" is already registered.");
+            }
+
             Name = name;
             Description = description;
             Parameters = parameters;
@@ -74,6 +79,11 @@ namespace OpenAI
                 throw new ArgumentException($"The name of the function does not conform to naming standards: {NameRegex}");
             }
 
+            if (functionCache.ContainsKey(name))
+            {
+                throw new ArgumentException($"The function \"{name}\" is already registered.");
+            }
+
             Name = name;
             Description = description;
             Parameters = new JObject(parameters);
@@ -88,6 +98,11 @@ namespace OpenAI
                 throw new ArgumentException($"The name of the function does not conform to naming standards: {NameRegex}");
             }
 
+            if (functionCache.ContainsKey(name))
+            {
+                throw new ArgumentException($"The function \"{name}\" is already registered.");
+            }
+
             Name = name;
             Description = description;
             MethodInfo = method;
@@ -95,6 +110,11 @@ namespace OpenAI
             Instance = instance;
             functionCache[Name] = this;
         }
+
+        internal static Function GetOrCreateFunction(string name, string description, MethodInfo method, object instance = null)
+            => functionCache.TryGetValue(name, out var function)
+                ? function
+                : new Function(name, description, method, instance);
 
         #region Func<,> Overloads
 
@@ -245,6 +265,8 @@ namespace OpenAI
         #region Function Invoking Utilities
 
         private static readonly ConcurrentDictionary<string, Function> functionCache = new();
+
+        internal static void ClearFunctionCache() => functionCache.Clear();
 
         /// <summary>
         /// Invokes the function and returns the result as json.
