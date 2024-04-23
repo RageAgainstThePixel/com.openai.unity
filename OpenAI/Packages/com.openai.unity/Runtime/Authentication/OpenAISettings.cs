@@ -29,19 +29,22 @@ namespace OpenAI
                 configuration = Resources.LoadAll<OpenAIConfiguration>(string.Empty).FirstOrDefault(asset => asset != null);
             }
 
-            if (configuration == null)
+            if (configuration != null)
             {
-                throw new MissingReferenceException($"Failed to find a valid {nameof(OpenAIConfiguration)}!");
-            }
-
-            if (configuration.UseAzureOpenAI)
-            {
-                Info = new OpenAISettingsInfo(configuration.ResourceName, configuration.DeploymentId, configuration.ApiVersion, configuration.UseAzureActiveDirectory);
-                cachedDefault = this;
+                if (configuration.UseAzureOpenAI)
+                {
+                    Info = new OpenAISettingsInfo(configuration.ResourceName, configuration.DeploymentId, configuration.ApiVersion, configuration.UseAzureActiveDirectory);
+                    cachedDefault = this;
+                }
+                else
+                {
+                    Info = new OpenAISettingsInfo(domain: configuration.ProxyDomain, apiVersion: configuration.ApiVersion);
+                    cachedDefault = this;
+                }
             }
             else
             {
-                Info = new OpenAISettingsInfo(domain: configuration.ProxyDomain, apiVersion: configuration.ApiVersion);
+                Info = new OpenAISettingsInfo();
                 cachedDefault = this;
             }
         }

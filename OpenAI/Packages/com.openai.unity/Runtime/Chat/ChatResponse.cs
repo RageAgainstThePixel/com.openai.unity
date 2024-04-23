@@ -35,6 +35,9 @@ namespace OpenAI.Chat
             this.choices = choices.ToList();
         }
 
+        /// <summary>
+        /// A unique identifier for the chat completion.
+        /// </summary>
         [Preserve]
         [JsonProperty("id")]
         public string Id { get; private set; }
@@ -77,6 +80,9 @@ namespace OpenAI.Chat
         [JsonIgnore]
         private List<Choice> choices;
 
+        /// <summary>
+        /// A list of chat completion choices. Can be more than one if n is greater than 1.
+        /// </summary>
         [Preserve]
         [JsonProperty("choices")]
         public IReadOnlyList<Choice> Choices

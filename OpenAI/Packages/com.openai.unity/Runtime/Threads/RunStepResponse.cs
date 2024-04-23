@@ -1,8 +1,8 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Threads
@@ -31,7 +31,8 @@ namespace OpenAI.Threads
             [JsonProperty("expires_at")] int? expiresAtUnixTimeSeconds,
             [JsonProperty("cancelled_at")] int? cancelledAtUnixTimeSeconds,
             [JsonProperty("failed_at")] int? failedAtUnixTimeSeconds,
-            [JsonProperty("metadata")] IReadOnlyDictionary<string, string> metadata)
+            [JsonProperty("metadata")] Dictionary<string, string> metadata,
+            [JsonProperty("usage")] Usage usage)
         {
             Id = id;
             Object = @object;
@@ -47,6 +48,7 @@ namespace OpenAI.Threads
             CancelledAtUnixTimeSeconds = cancelledAtUnixTimeSeconds;
             FailedAtUnixTimeSeconds = failedAtUnixTimeSeconds;
             Metadata = metadata;
+            Usage = usage;
         }
 
         /// <summary>
@@ -185,6 +187,10 @@ namespace OpenAI.Threads
         [Preserve]
         [JsonProperty("metadata")]
         public IReadOnlyDictionary<string, string> Metadata { get; }
+
+        [Preserve]
+        [JsonProperty("usage")]
+        public Usage Usage { get; }
 
         [Preserve]
         public static implicit operator string(RunStepResponse runStep) => runStep?.ToString();

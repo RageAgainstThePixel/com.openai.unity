@@ -12,10 +12,12 @@ namespace OpenAI.Threads
         [JsonConstructor]
         public FunctionCall(
             [JsonProperty("name")] string name,
-            [JsonProperty("arguments")] string arguments)
+            [JsonProperty("arguments")] string arguments,
+            [JsonProperty("output")] string output)
         {
             Name = name;
             Arguments = arguments;
+            Output = output;
         }
 
         /// <summary>
@@ -31,5 +33,12 @@ namespace OpenAI.Threads
         [Preserve]
         [JsonProperty("arguments")]
         public string Arguments { get; }
+
+        /// <summary>
+        /// The output of the function. This will be null if the outputs have not been submitted yet.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("output")]
+        public string Output { get; }
     }
 }

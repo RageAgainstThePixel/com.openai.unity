@@ -3,7 +3,7 @@
 using System;
 using System.IO;
 using UnityEngine;
-using Utilities.Encoding.OggVorbis;
+using Utilities.Encoding.Wav;
 
 namespace OpenAI.Audio
 {
@@ -16,7 +16,7 @@ namespace OpenAI.Audio
         /// The audio file to translate, in one of these formats: flac, mp3, mp4, mpeg, mpga, m4a, ogg, wav, or webm.
         /// </param>
         /// <param name="model">
-        /// ID of the model to use.
+        /// ID of the model to use. Only whisper-1 is currently available.
         /// </param>
         /// <param name="prompt">
         /// Optional, An optional text to guide the model's style or continue a previous audio segment.<br/>
@@ -35,9 +35,9 @@ namespace OpenAI.Audio
         public AudioTranslationRequest(
             string audioPath,
             string model = null,
-            string prompt = null,
+            string prompt = "response should be in english.",
             AudioResponseFormat responseFormat = AudioResponseFormat.Json,
-            int? temperature = null)
+            float? temperature = null)
             : this(File.OpenRead(audioPath), Path.GetFileName(audioPath), model, prompt, responseFormat, temperature)
         {
         }
@@ -71,7 +71,7 @@ namespace OpenAI.Audio
             string prompt = null,
             AudioResponseFormat responseFormat = AudioResponseFormat.Json,
             float? temperature = null)
-            : this(new MemoryStream(audio.EncodeToOggVorbis()), $"{audio.name}.ogg", model, prompt, responseFormat, temperature)
+            : this(new MemoryStream(audio.EncodeToWav()), $"{audio.name}.wav", model, prompt, responseFormat, temperature)
         {
         }
 
@@ -136,7 +136,7 @@ namespace OpenAI.Audio
         public string AudioName { get; }
 
         /// <summary>
-        /// ID of the model to use.
+        /// ID of the model to use. Only whisper-1 is currently available.
         /// </summary>
         public string Model { get; }
 

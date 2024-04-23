@@ -10,7 +10,7 @@ using Utilities.WebRequestRest;
 
 namespace OpenAI.Assistants
 {
-    public class AssistantsEndpoint : OpenAIBaseEndpoint
+    public sealed class AssistantsEndpoint : OpenAIBaseEndpoint
     {
         internal AssistantsEndpoint(OpenAIClient client) : base(client) { }
 

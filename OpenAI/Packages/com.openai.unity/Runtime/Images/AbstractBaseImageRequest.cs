@@ -1,8 +1,8 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using System;
 using OpenAI.Models;
+using System;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Images
@@ -23,7 +23,7 @@ namespace OpenAI.Images
         /// The number of images to generate. Must be between 1 and 10.
         /// </param>
         /// <param name="size">
-        /// The size of the generated images.
+        /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
         /// </param>
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
@@ -55,6 +55,7 @@ namespace OpenAI.Images
         /// </summary>
         [Preserve]
         [JsonProperty("model")]
+        [FunctionProperty("The model to use for image generation.", true, "dall-e-2")]
         public string Model { get; }
 
         /// <summary>
@@ -62,6 +63,7 @@ namespace OpenAI.Images
         /// </summary>
         [Preserve]
         [JsonProperty("n")]
+        [FunctionProperty("The number of images to generate. Must be between 1 and 10.", false, 1)]
         public int Number { get; }
 
         /// <summary>
@@ -71,6 +73,7 @@ namespace OpenAI.Images
         /// </summary>
         [Preserve]
         [JsonProperty("response_format")]
+        [FunctionProperty("The format in which the generated images are returned. Must be one of url or b64_json.")]
         public ResponseFormat ResponseFormat { get; }
 
         /// <summary>
@@ -78,6 +81,7 @@ namespace OpenAI.Images
         /// </summary>
         [Preserve]
         [JsonProperty("size")]
+        [FunctionProperty("The size of the generated images.", false, "256x256", "512x512", "1024x1024")]
         public string Size { get; }
 
         /// <summary>
@@ -85,6 +89,7 @@ namespace OpenAI.Images
         /// </summary>
         [Preserve]
         [JsonProperty("user")]
+        [FunctionProperty("A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.")]
         public string User { get; }
     }
 }

@@ -16,6 +16,7 @@ namespace OpenAI.Threads
     [Preserve]
     public sealed class MessageResponse : BaseResponse
     {
+        [Preserve]
         [JsonConstructor]
         public MessageResponse(
             [JsonProperty("id")] string id,
@@ -27,7 +28,7 @@ namespace OpenAI.Threads
             [JsonProperty("assistant_id")] string assistantId,
             [JsonProperty("run_id")] string runId,
             [JsonProperty("file_ids")] IReadOnlyList<string> fileIds,
-            [JsonProperty("metadata")] IReadOnlyDictionary<string, string> metadata)
+            [JsonProperty("metadata")] Dictionary<string, string> metadata)
         {
             Id = id;
             Object = @object;
@@ -49,14 +50,14 @@ namespace OpenAI.Threads
         public string Id { get; }
 
         /// <summary>
-        /// The object type, which is always thread.
+        /// The object type, which is always message.
         /// </summary>
         [Preserve]
         [JsonProperty("object")]
         public string Object { get; }
 
         /// <summary>
-        /// The Unix timestamp (in seconds) for when the thread was created.
+        /// The Unix timestamp (in seconds) for when the message was created.
         /// </summary>
         [Preserve]
         [JsonProperty("created_at")]

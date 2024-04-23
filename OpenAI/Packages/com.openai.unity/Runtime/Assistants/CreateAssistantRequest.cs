@@ -1,8 +1,8 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Assistants
@@ -48,7 +48,14 @@ namespace OpenAI.Assistants
         /// </param>
         [Preserve]
         public CreateAssistantRequest(AssistantResponse assistant, string model = null, string name = null, string description = null, string instructions = null, IEnumerable<Tool> tools = null, IEnumerable<string> files = null, IReadOnlyDictionary<string, string> metadata = null)
-            : this(string.IsNullOrWhiteSpace(model) ? assistant.Model : model, string.IsNullOrWhiteSpace(name) ? assistant.Name : name, string.IsNullOrWhiteSpace(description) ? assistant.Description : description, string.IsNullOrWhiteSpace(instructions) ? assistant.Instructions : instructions, tools ?? assistant.Tools, files ?? assistant.FileIds, metadata ?? assistant.Metadata)
+            : this(
+                string.IsNullOrWhiteSpace(model) ? assistant.Model : model,
+                string.IsNullOrWhiteSpace(name) ? assistant.Name : name,
+                string.IsNullOrWhiteSpace(description) ? assistant.Description : description,
+                string.IsNullOrWhiteSpace(instructions) ? assistant.Instructions : instructions,
+                tools ?? assistant.Tools,
+                files ?? assistant.FileIds,
+                metadata ?? assistant.Metadata)
         {
         }
 

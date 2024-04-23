@@ -11,7 +11,7 @@ namespace OpenAI.Threads
     public sealed class Message
     {
         [Preserve]
-        public static implicit operator Message(string content) => new Message(content);
+        public static implicit operator Message(string content) => new(content);
 
         /// <summary>
         /// Constructor.
@@ -29,7 +29,7 @@ namespace OpenAI.Threads
         /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
         /// </param>
         [Preserve]
-        public Message(string content, IEnumerable<string> fileIds = null, IReadOnlyDictionary<string, string> metadata = null)
+        public Message(string content, IEnumerable<string> fileIds = null, Dictionary<string, string> metadata = null)
         {
             Role = Role.User;
             Content = content;
@@ -49,7 +49,7 @@ namespace OpenAI.Threads
         /// The content of the message.
         /// </summary>
         [Preserve]
-        [JsonProperty("content")]
+        [JsonProperty("content", DefaultValueHandling = DefaultValueHandling.Populate, NullValueHandling = NullValueHandling.Include)]
         public string Content { get; }
 
         /// <summary>

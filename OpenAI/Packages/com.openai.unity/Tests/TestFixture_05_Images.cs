@@ -22,10 +22,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(imageResults);
             Assert.NotZero(imageResults.Count);
 
-            foreach (var (path, texture) in imageResults)
+            foreach (var result in imageResults)
             {
-                Debug.Log(path);
-                Assert.IsNotNull(texture);
+                Debug.Log(result.ToString());
+                Assert.IsNotNull(result.Texture);
             }
         }
 
@@ -59,10 +59,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(imageResults);
             Assert.NotZero(imageResults.Count);
 
-            foreach (var (path, texture) in imageResults)
+            foreach (var result in imageResults)
             {
-                Debug.Log(path);
-                Assert.IsNotNull(texture);
+                Debug.Log(result.ToString());
+                Assert.IsNotNull(result.Texture);
             }
         }
 
@@ -75,15 +75,15 @@ namespace OpenAI.Tests
             var maskAssetPath = AssetDatabase.GUIDToAssetPath("0be6be2fad590cc47930495d2ca37dd6");
             var mask = AssetDatabase.LoadAssetAtPath<Texture2D>(maskAssetPath);
             var request = new ImageEditRequest(image, mask, "A sunlit indoor lounge area with a pool containing a flamingo", size: ImageSize.Small);
-            var results = await OpenAIClient.ImagesEndPoint.CreateImageEditAsync(request);
+            var imageResults = await OpenAIClient.ImagesEndPoint.CreateImageEditAsync(request);
 
-            Assert.IsNotNull(results);
-            Assert.NotZero(results.Count);
+            Assert.IsNotNull(imageResults);
+            Assert.NotZero(imageResults.Count);
 
-            foreach (var (path, texture) in results)
+            foreach (var result in imageResults)
             {
-                Debug.Log(path);
-                Assert.IsNotNull(texture);
+                Debug.Log(result.ToString());
+                Assert.IsNotNull(result.Texture);
             }
         }
 
@@ -101,10 +101,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(imageResults);
             Assert.NotZero(imageResults.Count);
 
-            foreach (var (path, texture) in imageResults)
+            foreach (var result in imageResults)
             {
-                Debug.Log(path);
-                Assert.IsNotNull(texture);
+                Debug.Log(result.ToString());
+                Assert.IsNotNull(result.Texture);
             }
         }
 
@@ -120,10 +120,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(imageResults);
             Assert.NotZero(imageResults.Count);
 
-            foreach (var (path, texture) in imageResults)
+            foreach (var result in imageResults)
             {
-                Debug.Log(path);
-                Assert.IsNotNull(texture);
+                Debug.Log(result.ToString());
+                Assert.IsNotNull(result.Texture);
             }
         }
 
@@ -138,10 +138,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(imageResults);
             Assert.NotZero(imageResults.Count);
 
-            foreach (var (path, texture) in imageResults)
+            foreach (var result in imageResults)
             {
-                Debug.Log(path);
-                Assert.IsNotNull(texture);
+                Debug.Log(result.ToString());
+                Assert.IsNotNull(result.Texture);
             }
         }
 
@@ -157,10 +157,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(imageResults);
             Assert.NotZero(imageResults.Count);
 
-            foreach (var (path, texture) in imageResults)
+            foreach (var result in imageResults)
             {
-                Debug.Log(path);
-                Assert.IsNotNull(texture);
+                Debug.Log(result.ToString());
+                Assert.IsNotNull(result.Texture);
             }
         }
 
@@ -176,10 +176,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(imageResults);
             Assert.NotZero(imageResults.Count);
 
-            foreach (var (path, texture) in imageResults)
+            foreach (var result in imageResults)
             {
-                Debug.Log(path);
-                Assert.IsNotNull(texture);
+                Debug.Log(result.ToString());
+                Assert.IsNotNull(result.Texture);
             }
         }
     }

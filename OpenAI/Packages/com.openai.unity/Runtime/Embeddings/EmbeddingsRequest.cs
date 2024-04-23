@@ -21,16 +21,20 @@ namespace OpenAI.Embeddings
         /// Each input must not exceed 8192 tokens in length.
         /// </param>
         /// <param name="model">
-        /// The <see cref="Models.Model"/> to use.
+        /// ID of the model to use.<br/>
         /// Defaults to: <see cref="Model.Embedding_Ada_002"/>
         /// </param>
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
+        /// <param name="dimensions">
+        /// The number of dimensions the resulting output embeddings should have.
+        /// Only supported in text-embedding-3 and later models
+        /// </param>
         /// <exception cref="ArgumentNullException">A valid <see cref="input"/> string is a Required parameter.</exception>
         [Preserve]
-        public EmbeddingsRequest(string input, string model = null, string user = null)
-            : this(new List<string> { input }, model, user)
+        public EmbeddingsRequest(string input, string model = null, string user = null, int? dimensions = null)
+            : this(new List<string> { input }, model, user, dimensions)
         {
             if (string.IsNullOrWhiteSpace(input))
             {
@@ -53,9 +57,13 @@ namespace OpenAI.Embeddings
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
+        /// <param name="dimensions">
+        /// The number of dimensions the resulting output embeddings should have.
+        /// Only supported in text-embedding-3 and later models
+        /// </param>
         /// <exception cref="ArgumentNullException">A valid <see cref="input"/> string is a Required parameter.</exception>
         [Preserve]
-        public EmbeddingsRequest(IEnumerable<string> input, string model = null, string user = null)
+        public EmbeddingsRequest(IEnumerable<string> input, string model = null, string user = null, int? dimensions = null)
         {
             Input = input?.ToList();
 
@@ -66,6 +74,7 @@ namespace OpenAI.Embeddings
 
             Model = string.IsNullOrWhiteSpace(model) ? Models.Model.Embedding_Ada_002 : model;
             User = user;
+            Dimensions = dimensions;
         }
 
         [Preserve]
@@ -79,5 +88,9 @@ namespace OpenAI.Embeddings
         [Preserve]
         [JsonProperty("user")]
         public string User { get; }
+
+        [Preserve]
+        [JsonProperty("dimensions")]
+        public int? Dimensions { get; }
     }
 }

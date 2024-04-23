@@ -11,20 +11,20 @@ namespace OpenAI.Threads
     public sealed class CreateMessageRequest
     {
         [Preserve]
-        public static implicit operator CreateMessageRequest(string content) => new CreateMessageRequest(content);
+        public static implicit operator CreateMessageRequest(string content) => new(content);
 
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="content"></param>
-        /// <param name="fieldIds"></param>
+        /// <param name="fileIds"></param>
         /// <param name="metadata"></param>
         [Preserve]
-        public CreateMessageRequest(string content, IEnumerable<string> fieldIds = null, IReadOnlyDictionary<string, string> metadata = null)
+        public CreateMessageRequest(string content, IEnumerable<string> fileIds = null, IReadOnlyDictionary<string, string> metadata = null)
         {
             Role = Role.User;
             Content = content;
-            FileIds = fieldIds?.ToList();
+            FileIds = fileIds?.ToList();
             Metadata = metadata;
         }
 
@@ -42,7 +42,7 @@ namespace OpenAI.Threads
         /// The content of the message.
         /// </summary>
         [Preserve]
-        [JsonProperty("content")]
+        [JsonProperty("content", DefaultValueHandling = DefaultValueHandling.Populate, NullValueHandling = NullValueHandling.Include)]
         public string Content { get; }
 
         /// <summary>

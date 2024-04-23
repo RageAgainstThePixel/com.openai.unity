@@ -35,7 +35,8 @@ namespace OpenAI.Threads
             [JsonProperty("instructions")] string instructions,
             [JsonProperty("tools")] IReadOnlyList<Tool> tools,
             [JsonProperty("file_ids")] IReadOnlyList<string> fileIds,
-            [JsonProperty("metadata")] IReadOnlyDictionary<string, string> metadata)
+            [JsonProperty("metadata")] Dictionary<string, string> metadata,
+            [JsonProperty("usage")] Usage usage)
         {
             Id = id;
             Object = @object;
@@ -55,6 +56,7 @@ namespace OpenAI.Threads
             Tools = tools;
             FileIds = fileIds;
             Metadata = metadata;
+            Usage = usage;
         }
 
         /// <summary>
@@ -225,6 +227,10 @@ namespace OpenAI.Threads
         [Preserve]
         [JsonProperty("metadata")]
         public IReadOnlyDictionary<string, string> Metadata { get; }
+
+        [Preserve]
+        [JsonProperty("usage")]
+        public Usage Usage { get; }
 
         [Preserve]
         public static implicit operator string(RunResponse run) => run?.ToString();

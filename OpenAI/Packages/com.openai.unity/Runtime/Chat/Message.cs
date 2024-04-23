@@ -42,7 +42,7 @@ namespace OpenAI.Chat
         public Message(Role role, IEnumerable<Content> content, string name = null)
         {
             Role = role;
-            Content = content.ToList();
+            Content = content?.ToList();
             Name = name;
         }
 
@@ -181,9 +181,9 @@ namespace OpenAI.Chat
                 Role = other.Role;
             }
 
-            if (!string.IsNullOrEmpty(other?.Content))
+            if (other?.Content != null)
             {
-                Content += other.Content;
+                content += other.Content;
             }
 
             if (!string.IsNullOrWhiteSpace(other?.Name))

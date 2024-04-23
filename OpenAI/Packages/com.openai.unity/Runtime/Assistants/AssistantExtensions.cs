@@ -2,8 +2,12 @@
 
 using OpenAI.Files;
 using OpenAI.Threads;
-using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace OpenAI.Assistants
 {
@@ -80,6 +84,21 @@ namespace OpenAI.Assistants
         }
 
         /// <summary>
+        /// Uploads a new file at the specified path and attaches it to the assistant.
+        /// </summary>
+        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
+        /// <param name="stream">The file contents to upload.</param>
+        /// <param name="fileName">The name of the file.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="AssistantFileResponse"/>.</returns>
+
+        public static async Task<AssistantFileResponse> UploadFileAsync(this AssistantResponse assistant, Stream stream, string fileName, CancellationToken cancellationToken = default)
+        {
+            var file = await assistant.Client.FilesEndpoint.UploadFileAsync(new FileUploadRequest(stream, fileName, "assistants"), uploadProgress: null, cancellationToken);
+            return await assistant.AttachFileAsync(file, cancellationToken);
+        }
+
+        /// <summary>
         /// Retrieves the <see cref="AssistantFileResponse"/>.
         /// </summary>
         /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
@@ -102,7 +121,7 @@ namespace OpenAI.Assistants
         //    => await assistantFile.Client.FilesEndpoint.DownloadFileAsync(assistantFile.Id, directory, deleteCachedFile, cancellationToken);
 
         /// <summary>
-        /// Remove AssistantFile.
+        /// Remove the file from the assistant it is attached to.
         /// </summary>
         /// <remarks>
         /// Note that removing an AssistantFile does not delete the original File object,
@@ -116,7 +135,7 @@ namespace OpenAI.Assistants
             => await file.Client.AssistantsEndpoint.RemoveFileAsync(file.AssistantId, file.Id, cancellationToken);
 
         /// <summary>
-        /// Remove AssistantFile.
+        /// Remove the file from the assistant it is attached to.
         /// </summary>
         /// <remarks>
         /// Note that removing an AssistantFile does not delete the original File object,
@@ -152,9 +171,94 @@ namespace OpenAI.Assistants
         public static async Task<bool> DeleteFileAsync(this AssistantResponse assistant, string fileId, CancellationToken cancellationToken = default)
         {
             var isRemoved = await assistant.Client.AssistantsEndpoint.RemoveFileAsync(assistant.Id, fileId, cancellationToken);
-            return isRemoved && await assistant.Client.FilesEndpoint.DeleteFileAsync(fileId, cancellationToken);
+            if (!isRemoved) { return false; }
+            return await assistant.Client.FilesEndpoint.DeleteFileAsync(fileId, cancellationToken);
         }
 
         #endregion Files
+
+        #region Tools
+
+        /// <summary>
+        /// Invoke the assistant's tool function using the <see cref="ToolCall"/>.
+        /// </summary>
+        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
+        /// <param name="toolCall"><see cref="ToolCall"/>.</param>
+        /// <returns>Tool output result as <see cref="string"/></returns>
+        public static string InvokeToolCall(this AssistantResponse assistant, ToolCall toolCall)
+        {
+            if (toolCall.Type != "function")
+            {
+                throw new InvalidOperationException($"Cannot invoke built in tool {toolCall.Type}");
+            }
+
+            var tool = assistant.Tools.FirstOrDefault(tool => tool.Type == "function" && tool.Function.Name == toolCall.FunctionCall.Name) ??
+                       throw new InvalidOperationException($"Failed to find a valid tool for [{toolCall.Id}] {toolCall.Type}");
+            tool.Function.Arguments = toolCall.FunctionCall.Arguments;
+            return tool.InvokeFunction();
+        }
+
+        /// <summary>
+        /// Invoke the assistant's tool function using the <see cref="ToolCall"/>.
+        /// </summary>
+        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
+        /// <param name="toolCall"><see cref="ToolCall"/>.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns>Tool output result as <see cref="string"/></returns>
+        public static async Task<string> InvokeToolCallAsync(this AssistantResponse assistant, ToolCall toolCall, CancellationToken cancellationToken = default)
+        {
+            if (toolCall.Type != "function")
+            {
+                throw new InvalidOperationException($"Cannot invoke built in tool {toolCall.Type}");
+            }
+
+            var tool = assistant.Tools.FirstOrDefault(tool => tool.Type == "function" && tool.Function.Name == toolCall.FunctionCall.Name) ??
+                       throw new InvalidOperationException($"Failed to find a valid tool for [{toolCall.Id}] {toolCall.Type}");
+            tool.Function.Arguments = toolCall.FunctionCall.Arguments;
+            return await tool.InvokeFunctionAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Calls the tool's function, with the provided arguments from the toolCall and returns the output.
+        /// </summary>
+        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
+        /// <param name="toolCall"><see cref="ToolCall"/>.</param>
+        /// <returns><see cref="ToolOutput"/>.</returns>
+        public static ToolOutput GetToolOutput(this AssistantResponse assistant, ToolCall toolCall)
+            => new(toolCall.Id, assistant.InvokeToolCall(toolCall));
+
+        /// <summary>
+        /// Calls each tool's function, with the provided arguments from the toolCalls and returns the outputs.
+        /// </summary>
+        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
+        /// <param name="toolCalls">A collection of <see cref="ToolCall"/>s.</param>
+        /// <returns>A collection of <see cref="ToolOutput"/>s.</returns>
+        public static IReadOnlyList<ToolOutput> GetToolOutputs(this AssistantResponse assistant, IEnumerable<ToolCall> toolCalls)
+            => toolCalls.Select(assistant.GetToolOutput).ToList();
+
+        /// <summary>
+        /// Calls the tool's function, with the provided arguments from the toolCall and returns the output.
+        /// </summary>
+        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
+        /// <param name="toolCall"><see cref="ToolCall"/>.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="ToolOutput"/>.</returns>
+        public static async Task<ToolOutput> GetToolOutputAsync(this AssistantResponse assistant, ToolCall toolCall, CancellationToken cancellationToken = default)
+        {
+            var output = await assistant.InvokeToolCallAsync(toolCall, cancellationToken);
+            return new ToolOutput(toolCall.Id, output);
+        }
+
+        /// <summary>
+        /// Calls each tool's function, with the provided arguments from the toolCalls and returns the outputs.
+        /// </summary>
+        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
+        /// <param name="toolCalls">A collection of <see cref="ToolCall"/>s.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns>A collection of <see cref="ToolOutput"/>s.</returns>
+        public static async Task<IReadOnlyList<ToolOutput>> GetToolOutputsAsync(this AssistantResponse assistant, IEnumerable<ToolCall> toolCalls, CancellationToken cancellationToken = default)
+            => await Task.WhenAll(toolCalls.Select(async toolCall => await assistant.GetToolOutputAsync(toolCall, cancellationToken))).ConfigureAwait(true);
+
+        #endregion Tools
     }
 }

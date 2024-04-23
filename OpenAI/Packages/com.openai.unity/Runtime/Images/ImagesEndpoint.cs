@@ -3,7 +3,6 @@
 using Newtonsoft.Json;
 using OpenAI.Extensions;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,43 +29,11 @@ namespace OpenAI.Images
         /// <summary>
         /// Creates an image given a prompt.
         /// </summary>
-        /// <param name="prompt">
-        /// A text description of the desired image(s). The maximum length is 1000 characters.
-        /// </param>
-        /// <param name="numberOfResults">
-        /// The number of images to generate. Must be between 1 and 10.
-        /// </param>
-        /// <param name="size">
-        /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
-        /// </param>
-        /// <param name="user">
-        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
-        /// </param>
-        /// <param name="responseFormat">
-        /// The format in which the generated images are returned. Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
-        /// </param>
-        /// <param name="cancellationToken">
-        /// Optional, <see cref="CancellationToken"/>.
-        /// </param>
-        /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
-        [Obsolete]
-        public async Task<IReadOnlyDictionary<string, Texture2D>> GenerateImageAsync(
-            string prompt,
-            int numberOfResults = 1,
-            ImageSize size = ImageSize.Large,
-            string user = null,
-            ResponseFormat responseFormat = ResponseFormat.Url,
-            CancellationToken cancellationToken = default)
-            => await GenerateImageAsync(new ImageGenerationRequest(prompt, numberOfResults, size, user, responseFormat), cancellationToken);
-
-        /// <summary>
-        /// Creates an image given a prompt.
-        /// </summary>
         /// <param name="request"><see cref="ImageGenerationRequest"/></param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
-        public async Task<IReadOnlyDictionary<string, Texture2D>> GenerateImageAsync(ImageGenerationRequest request, CancellationToken cancellationToken = default)
+        [Function("Creates an image given a prompt.")]
+        public async Task<IReadOnlyList<ImageResult>> GenerateImageAsync(ImageGenerationRequest request, CancellationToken cancellationToken = default)
         {
             var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl("/generations"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
@@ -76,100 +43,11 @@ namespace OpenAI.Images
         /// <summary>
         /// Creates an edited or extended image given an original image and a prompt.
         /// </summary>
-        /// <param name="image">
-        /// The image to edit. Must be a valid PNG file, less than 4MB, and square.
-        /// If mask is not provided, image must have transparency, which will be used as the mask.
-        /// </param>
-        /// <param name="mask">
-        /// An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where image should be edited.
-        /// Must be a valid PNG file, less than 4MB, and have the same dimensions as image.
-        /// </param>
-        /// <param name="prompt">
-        /// A text description of the desired image(s). The maximum length is 1000 characters.
-        /// </param>
-        /// <param name="numberOfResults">
-        /// The number of images to generate. Must be between 1 and 10.
-        /// </param>
-        /// <param name="size">
-        /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
-        /// </param>
-        /// <param name="user">
-        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
-        /// </param>
-        /// <param name="responseFormat">
-        /// The format in which the generated images are returned. Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
-        /// </param>
-        /// <param name="cancellationToken">
-        /// Optional, <see cref="CancellationToken"/>.
-        /// </param>
-        /// <returns>
-        /// A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.
-        /// </returns>
-        [Obsolete]
-        public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageEditAsync(
-            string image,
-            string mask,
-            string prompt,
-            int numberOfResults = 1,
-            ImageSize size = ImageSize.Large,
-            string user = null,
-            ResponseFormat responseFormat = ResponseFormat.Url,
-            CancellationToken cancellationToken = default)
-            => await CreateImageEditAsync(new ImageEditRequest(image, mask, prompt, numberOfResults, size, user, responseFormat), cancellationToken);
-
-        /// <summary>
-        /// Creates an edited or extended image given an original image and a prompt.
-        /// </summary>
-        /// <param name="image">
-        /// The image to edit. Must be a valid PNG file, less than 4MB, and square.
-        /// If mask is not provided, image must have transparency, which will be used as the mask.
-        /// </param>
-        /// <param name="mask">
-        /// An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where image should be edited.
-        /// Must be a valid PNG file, less than 4MB, and have the same dimensions as image.
-        /// </param>
-        /// <param name="prompt">
-        /// A text description of the desired image(s). The maximum length is 1000 characters.
-        /// </param>
-        /// <param name="numberOfResults">
-        /// The number of images to generate. Must be between 1 and 10.
-        /// </param>
-        /// <param name="size">
-        /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
-        /// </param>
-        /// <param name="user">
-        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
-        /// </param>
-        /// <param name="responseFormat">
-        /// The format in which the generated images are returned. Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
-        /// </param>
-        /// <param name="cancellationToken">
-        /// Optional, <see cref="CancellationToken"/>.
-        /// </param>
-        /// <returns>
-        /// A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.
-        /// </returns>
-        [Obsolete]
-        public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageEditAsync(
-            Texture2D image,
-            Texture2D mask,
-            string prompt,
-            int numberOfResults = 1,
-            ImageSize size = ImageSize.Large,
-            string user = null,
-            ResponseFormat responseFormat = ResponseFormat.Url,
-            CancellationToken cancellationToken = default)
-            => await CreateImageEditAsync(new ImageEditRequest(image, mask, prompt, numberOfResults, size, user, responseFormat), cancellationToken);
-
-        /// <summary>
-        /// Creates an edited or extended image given an original image and a prompt.
-        /// </summary>
         /// <param name="request"><see cref="ImageEditRequest"/></param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
-        public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageEditAsync(ImageEditRequest request, CancellationToken cancellationToken = default)
+        [Function("Creates an edited or extended image given an original image and a prompt.")]
+        public async Task<IReadOnlyList<ImageResult>> CreateImageEditAsync(ImageEditRequest request, CancellationToken cancellationToken = default)
         {
             var form = new WWWForm();
             using var imageData = new MemoryStream();
@@ -202,72 +80,11 @@ namespace OpenAI.Images
         /// <summary>
         /// Creates a variation of a given image.
         /// </summary>
-        /// <param name="imagePath">
-        /// The image to edit. Must be a valid PNG file, less than 4MB, and square.
-        /// </param>
-        /// <param name="numberOfResults">
-        /// The number of images to generate. Must be between 1 and 10.
-        /// </param>
-        /// <param name="size">
-        /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
-        /// </param>
-        /// <param name="user">
-        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
-        /// </param>
-        /// <param name="responseFormat">
-        /// The format in which the generated images are returned. Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
-        /// </param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
-        [Obsolete]
-        public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageVariationAsync(
-            string imagePath,
-            int numberOfResults = 1,
-            ImageSize size = ImageSize.Large,
-            string user = null,
-            ResponseFormat responseFormat = ResponseFormat.Url,
-            CancellationToken cancellationToken = default)
-            => await CreateImageVariationAsync(new ImageVariationRequest(imagePath, numberOfResults, size, user, responseFormat), cancellationToken);
-
-        /// <summary>
-        /// Creates a variation of a given image.
-        /// </summary>
-        /// <param name="texture">
-        /// The texture to edit. Must be a valid PNG file, less than 4MB, and square. Read/Write should be enabled and Compression set to None.
-        /// </param>
-        /// <param name="numberOfResults">
-        /// The number of images to generate. Must be between 1 and 10.
-        /// </param>
-        /// <param name="size">
-        /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
-        /// </param>
-        /// <param name="user">
-        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
-        /// </param>
-        /// <param name="responseFormat">
-        /// The format in which the generated images are returned. Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
-        /// </param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
-        [Obsolete]
-        public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageVariationAsync(
-            Texture2D texture,
-            int numberOfResults = 1,
-            ImageSize size = ImageSize.Large,
-            string user = null,
-            ResponseFormat responseFormat = ResponseFormat.Url,
-            CancellationToken cancellationToken = default)
-            => await CreateImageVariationAsync(new ImageVariationRequest(texture, numberOfResults, size, user, responseFormat), cancellationToken);
-
-        /// <summary>
-        /// Creates a variation of a given image.
-        /// </summary>
         /// <param name="request"><see cref="ImageVariationRequest"/></param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A dictionary of file urls and the preloaded <see cref="Texture2D"/> that were downloaded.</returns>
-        public async Task<IReadOnlyDictionary<string, Texture2D>> CreateImageVariationAsync(ImageVariationRequest request, CancellationToken cancellationToken = default)
+        [Function("Creates a variation of a given image.")]
+        public async Task<IReadOnlyList<ImageResult>> CreateImageVariationAsync(ImageVariationRequest request, CancellationToken cancellationToken = default)
         {
             var form = new WWWForm();
             using var imageData = new MemoryStream();
@@ -288,10 +105,7 @@ namespace OpenAI.Images
             return await DeserializeResponseAsync(response, cancellationToken);
         }
 
-        private const string LocalFilePrefix = "file://";
-        private readonly char[] localFilePrefixCharArray = LocalFilePrefix.ToCharArray();
-
-        private async Task<IReadOnlyDictionary<string, Texture2D>> DeserializeResponseAsync(Response response, CancellationToken cancellationToken = default)
+        private async Task<IReadOnlyList<ImageResult>> DeserializeResponseAsync(Response response, CancellationToken cancellationToken = default)
         {
             response.Validate(EnableDebug);
 
@@ -302,47 +116,46 @@ namespace OpenAI.Images
                 throw new Exception($"No image content returned!\n{response.Body}");
             }
 
-            var images = new ConcurrentDictionary<string, Texture2D>();
             await Rest.ValidateCacheDirectoryAsync();
             var downloads = imagesResponse.Results.Select(DownloadAsync).ToList();
 
             async Task DownloadAsync(ImageResult result)
             {
-                string resultImagePath;
-                string localFilePath;
+                await Awaiters.UnityMainThread;
 
                 if (string.IsNullOrWhiteSpace(result.Url))
                 {
-                    resultImagePath = result.B64_Json;
-                    var imageData = Convert.FromBase64String(resultImagePath);
-
-                    if (!Rest.TryGetDownloadCacheItem(resultImagePath, out localFilePath))
+                    var imageData = Convert.FromBase64String(result.B64_Json);
+#if PLATFORM_WEBGL
+                    result.Texture = new Texture2D(2, 2);
+                    result.Texture.LoadImage(imageData);
+#else
+                    if (!Rest.TryGetDownloadCacheItem(result.B64_Json, out var localFilePath))
                     {
-                        await File.WriteAllBytesAsync(localFilePath, imageData, cancellationToken);
+                        await File.WriteAllBytesAsync(localFilePath, imageData, cancellationToken).ConfigureAwait(true);
                     }
 
-                    resultImagePath = $"{LocalFilePrefix}{localFilePath}";
+                    result.Texture = await Rest.DownloadTextureAsync(localFilePath, parameters: new RestParameters(debug: EnableDebug), cancellationToken: cancellationToken);
+
+                    if (Rest.TryGetDownloadCacheItem(result.B64_Json, out var cachedPath))
+                    {
+                        result.CachedPath = cachedPath;
+                    }
+#endif
                 }
                 else
                 {
-                    resultImagePath = result.Url;
-                }
+                    result.Texture = await Rest.DownloadTextureAsync(result.Url, parameters: new RestParameters(debug: EnableDebug), cancellationToken: cancellationToken);
 
-                await Awaiters.UnityMainThread;
-                var texture = await Rest.DownloadTextureAsync(resultImagePath, cancellationToken: cancellationToken);
-
-                if (Rest.TryGetDownloadCacheItem(resultImagePath, out localFilePath))
-                {
-                    images.TryAdd(localFilePath.TrimStart(localFilePrefixCharArray), texture);
-                }
-                else
-                {
-                    Debug.LogError($"Failed to find cached item for {resultImagePath}");
+                    if (Rest.TryGetDownloadCacheItem(result.Url, out var cachedPath))
+                    {
+                        result.CachedPath = cachedPath;
+                    }
                 }
             }
 
             await Task.WhenAll(downloads).ConfigureAwait(true);
-            return images;
+            return imagesResponse.Results;
         }
     }
 }

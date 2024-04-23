@@ -1,7 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,50 +11,6 @@ namespace OpenAI.Chat
     [Preserve]
     public sealed class ChatRequest
     {
-        /// <inheritdoc />
-        [Preserve]
-        [Obsolete("Use new constructor arguments")]
-        public ChatRequest(
-            IEnumerable<Message> messages,
-            IEnumerable<Function> functions,
-            string functionCall = null,
-            string model = null,
-            double? temperature = null,
-            double? topP = null,
-            int? number = null,
-            string[] stops = null,
-            int? maxTokens = null,
-            double? presencePenalty = null,
-            double? frequencyPenalty = null,
-            IReadOnlyDictionary<string, double> logitBias = null,
-            string user = null)
-            : this(messages, model, frequencyPenalty, logitBias, maxTokens, number, presencePenalty, ChatResponseFormat.Text, maxTokens, stops, temperature, topP, user)
-        {
-            var functionList = functions?.ToList();
-
-            if (functionList != null && functionList.Any())
-            {
-                if (string.IsNullOrWhiteSpace(functionCall))
-                {
-                    FunctionCall = "auto";
-                }
-                else
-                {
-                    if (!functionCall.Equals("none") &&
-                        !functionCall.Equals("auto"))
-                    {
-                        FunctionCall = new JObject { ["name"] = functionCall };
-                    }
-                    else
-                    {
-                        FunctionCall = functionCall;
-                    }
-                }
-            }
-
-            Functions = functionList?.ToList();
-        }
-
         /// <inheritdoc />
         [Preserve]
         public ChatRequest(
@@ -69,15 +24,17 @@ namespace OpenAI.Chat
             int? number = null,
             double? presencePenalty = null,
             ChatResponseFormat responseFormat = ChatResponseFormat.Text,
+            int? seed = null,
             string[] stops = null,
             double? temperature = null,
             double? topP = null,
+            int? topLogProbs = null,
             string user = null)
-            : this(messages, model, frequencyPenalty, logitBias, maxTokens, number, presencePenalty, responseFormat, number, stops, temperature, topP, user)
+            : this(messages, model, frequencyPenalty, logitBias, maxTokens, number, presencePenalty, responseFormat, seed, stops, temperature, topP, topLogProbs, user)
         {
-            var tooList = tools?.ToList();
+            var toolList = tools?.ToList();
 
-            if (tooList != null && tooList.Any())
+            if (toolList != null && toolList.Any())
             {
                 if (string.IsNullOrWhiteSpace(toolChoice))
                 {
@@ -88,15 +45,9 @@ namespace OpenAI.Chat
                     if (!toolChoice.Equals("none") &&
                         !toolChoice.Equals("auto"))
                     {
-                        var tool = new JObject
-                        {
-                            ["type"] = "function",
-                            ["function"] = new JObject
-                            {
-                                ["name"] = toolChoice
-                            }
-                        };
-                        ToolChoice = tool;
+                        var tool = toolList.FirstOrDefault(t => t.Function.Name.Contains(toolChoice)) ??
+                            throw new ArgumentException($"The specified tool choice '{toolChoice}' was not found in the list of tools");
+                        ToolChoice = new { type = "function", function = new { name = tool.Function.Name } };
                     }
                     else
                     {
@@ -105,7 +56,7 @@ namespace OpenAI.Chat
                 }
             }
 
-            Tools = tooList?.ToList();
+            Tools = toolList?.ToList();
         }
 
         /// <summary>
@@ -169,6 +120,10 @@ namespace OpenAI.Chat
         /// in a ban or exclusive selection of the relevant token.<br/>
         /// Defaults to null
         /// </param>
+        /// <param name="topLogProbs">
+        /// An integer between 0 and 5 specifying the number of most likely tokens to return at each token position,
+        /// each with an associated log probability.
+        /// </param>
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
@@ -186,6 +141,7 @@ namespace OpenAI.Chat
             string[] stops = null,
             double? temperature = null,
             double? topP = null,
+            int? topLogProbs = null,
             string user = null)
         {
             Messages = messages?.ToList();
@@ -206,6 +162,8 @@ namespace OpenAI.Chat
             Stops = stops;
             Temperature = temperature;
             TopP = topP;
+            LogProbs = topLogProbs.HasValue ? topLogProbs.Value > 0 : null;
+            TopLogProbs = topLogProbs;
             User = user;
         }
 
@@ -245,6 +203,28 @@ namespace OpenAI.Chat
         [Preserve]
         [JsonProperty("logit_bias")]
         public IReadOnlyDictionary<string, double> LogitBias { get; }
+
+        /// <summary>
+        /// Whether to return log probabilities of the output tokens or not.
+        /// If true, returns the log probabilities of each output token returned in the content of message.
+        /// </summary>
+        /// <remarks>
+        /// This option is currently not available on the gpt-4-vision-preview model.
+        /// </remarks>
+        [Preserve]
+        [JsonProperty("logprobs", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool? LogProbs { get; }
+
+        /// <summary>
+        /// An integer between 0 and 5 specifying the number of most likely tokens to return at each token position,
+        /// each with an associated log probability.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="LogProbs"/> must be set to true if this parameter is used.
+        /// </remarks>
+        [Preserve]
+        [JsonProperty("top_logprobs", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? TopLogProbs { get; }
 
         /// <summary>
         /// The maximum number of tokens allowed for the generated answer.

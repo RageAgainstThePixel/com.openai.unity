@@ -20,7 +20,7 @@ namespace OpenAI.Threads
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
             [JsonProperty("created_at")] int createdAtUnitTimeSeconds,
-            [JsonProperty("metadata")] IReadOnlyDictionary<string, string> metadata)
+            [JsonProperty("metadata")] Dictionary<string, string> metadata)
         {
             Id = id;
             Object = @object;
