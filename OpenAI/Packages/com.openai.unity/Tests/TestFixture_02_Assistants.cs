@@ -6,11 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using OpenAI.Models;
 using UnityEngine;
 
 namespace OpenAI.Tests
 {
-    internal class TestFixture_11_Assistants : AbstractTestFixture
+    internal class TestFixture_02_Assistants : AbstractTestFixture
     {
         private AssistantResponse testAssistant;
 
@@ -24,7 +25,7 @@ namespace OpenAI.Tests
             var file = await OpenAIClient.FilesEndpoint.UploadFileAsync(testFilePath, "assistants");
             File.Delete(testFilePath);
             Assert.IsFalse(File.Exists(testFilePath));
-            var request = new CreateAssistantRequest("gpt-3.5-turbo",
+            var request = new CreateAssistantRequest(Model.GPT3_5_Turbo,
                 name: "test-assistant",
                 description: "Used for unit testing.",
                 instructions: "You are test assistant",
@@ -43,7 +44,7 @@ namespace OpenAI.Tests
             Assert.AreEqual("test-assistant", assistant.Name);
             Assert.AreEqual("Used for unit testing.", assistant.Description);
             Assert.AreEqual("You are test assistant", assistant.Instructions);
-            Assert.AreEqual("gpt-3.5-turbo", assistant.Model);
+            Assert.AreEqual(Model.GPT3_5_Turbo.ToString(), assistant.Model);
             Assert.IsNotEmpty(assistant.Metadata);
             testAssistant = assistant;
             Debug.Log($"{assistant} -> {assistant.Metadata["test"]}");
@@ -71,7 +72,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(testAssistant);
             Assert.IsNotNull(OpenAIClient.AssistantsEndpoint);
             var request = new CreateAssistantRequest(
-                model: "gpt-4-turbo-preview",
+                model: Model.GPT4_Turbo,
                 name: "Test modified",
                 description: "Modified description",
                 instructions: "You are modified test assistant");
@@ -80,7 +81,7 @@ namespace OpenAI.Tests
             Assert.AreEqual("Test modified", assistant.Name);
             Assert.AreEqual("Modified description", assistant.Description);
             Assert.AreEqual("You are modified test assistant", assistant.Instructions);
-            Assert.AreEqual("gpt-4-turbo-preview", assistant.Model);
+            Assert.AreEqual(Model.GPT4_Turbo.ToString(), assistant.Model);
             Assert.IsTrue(assistant.Metadata.ContainsKey("test"));
             Debug.Log($"{assistant.Id} -> modified");
         }
