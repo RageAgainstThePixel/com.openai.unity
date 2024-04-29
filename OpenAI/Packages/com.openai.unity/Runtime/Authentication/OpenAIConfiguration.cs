@@ -39,6 +39,15 @@ namespace OpenAI
         }
 
         [SerializeField]
+        internal string projectId;
+
+        public string ProjectId
+        {
+            get => projectId;
+            internal set => projectId = value;
+        }
+
+        [SerializeField]
         [Tooltip("Check this box if you're using OpenAI on Azure.")]
         private bool useAzureOpenAI;
 

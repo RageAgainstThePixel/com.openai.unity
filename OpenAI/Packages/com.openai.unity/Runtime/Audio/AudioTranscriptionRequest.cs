@@ -109,6 +109,31 @@ namespace OpenAI.Audio
         {
         }
 
+        public AudioTranscriptionRequest(
+            Stream audioStream,
+            string model = null,
+            string prompt = null,
+            AudioResponseFormat responseFormat = AudioResponseFormat.Json,
+            float? temperature = null,
+            string language = null,
+            TimestampGranularity timestampGranularity = TimestampGranularity.None)
+            : this(audioStream, $"UserSpeech.wav", model, prompt, responseFormat, temperature, language, timestampGranularity)
+        {
+        }
+
+        public AudioTranscriptionRequest(
+            byte[] encodedAudio,
+            string audioName,
+            string model = null,
+            string prompt = null,
+            AudioResponseFormat responseFormat = AudioResponseFormat.Json,
+            float? temperature = null,
+            string language = null,
+            TimestampGranularity timestampGranularity = TimestampGranularity.None)
+            : this(new MemoryStream(encodedAudio), audioName, model, prompt, responseFormat, temperature, language, timestampGranularity)
+        {
+        }
+
         /// <summary>
         /// Constructor.
         /// </summary>

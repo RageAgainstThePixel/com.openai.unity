@@ -15,7 +15,7 @@ namespace OpenAI
         internal const string SessionKeyPrefix = "sess-";
         internal const string OrganizationPrefix = "org-";
 
-        public OpenAIAuthInfo(string apiKey, string organizationId = null)
+        public OpenAIAuthInfo(string apiKey, string organizationId = null, string project = null)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
             {
@@ -32,6 +32,11 @@ namespace OpenAI
                 }
 
                 this.organizationId = organizationId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(project))
+            {
+                this.projectId = project;
             }
         }
 
@@ -52,5 +57,9 @@ namespace OpenAI
         /// Usage from these API requests will count against the specified organization's subscription quota.
         /// </summary>
         public string OrganizationId => organizationId;
+
+        [SerializeField]
+        private string projectId;
+        public string ProjectId => projectId;
     }
 }

@@ -17,12 +17,13 @@ namespace OpenAI.Threads
         /// Constructor.
         /// </summary>
         /// <param name="content"></param>
+        /// <param name="role"></param>
         /// <param name="fileIds"></param>
         /// <param name="metadata"></param>
         [Preserve]
-        public CreateMessageRequest(string content, IEnumerable<string> fileIds = null, IReadOnlyDictionary<string, string> metadata = null)
+        public CreateMessageRequest(string content, Role role = Role.User, IEnumerable<string> fileIds = null, IReadOnlyDictionary<string, string> metadata = null)
         {
-            Role = Role.User;
+            Role = role;
             Content = content;
             FileIds = fileIds?.ToList();
             Metadata = metadata;

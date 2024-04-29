@@ -2,7 +2,9 @@
 
 using Newtonsoft.Json;
 using OpenAI.Extensions;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Utilities.WebRequestRest;
@@ -233,6 +235,112 @@ namespace OpenAI.Threads
             var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<RunResponse>(client);
+        }
+        private RunResponse streamingRunResponse;
+        public async Task<RunResponse> CreateStreamingRunAsync(string threadId, CreateRunRequest request, Action<string> resultHandler, CancellationToken cancellationToken = default)
+        {
+            streamingRunResponse = null;
+            request.Stream = true;
+            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            Action<string> serverSentEventCallback = async eventData =>
+            {
+                try
+                {
+                    using (var stringReader = new StringReader(eventData))
+                    {
+
+                        string line;
+                        while ((line = await stringReader.ReadLineAsync()) != null)
+                        {
+                            if (string.IsNullOrWhiteSpace(line))
+                            {
+                                continue;
+                            }
+
+                            if (line.StartsWith("event"))
+                            {
+                                if (line == "event: done")
+                                {
+                                    UnityEngine.Debug.Log($"Done event detected!");
+                                }
+                                else if (line.EndsWith("failed"))
+                                {
+                                    UnityEngine.Debug.LogError($"Run thread failed! \n{eventData}");
+                                }
+                                continue;
+                            }
+                            else
+                            {
+                                var abstractMessage = JsonConvert.DeserializeObject<MessageAbstract>(line, OpenAIClient.JsonSerializationOptions);
+                                if (abstractMessage != null)
+                                {
+                                    //UnityEngine.Debug.Log($"{abstractMessage.Object}:\n{line}");
+                                    if (abstractMessage.Object == "thread.message.delta")
+                                    {
+                                        var partialResponse = JsonConvert.DeserializeObject<MessageDelta>(line, OpenAIClient.JsonSerializationOptions);
+                                        if (partialResponse != null)
+                                        {
+                                            resultHandler?.Invoke(partialResponse.Delta.PrintContent());
+                                        }
+                                    }
+                                    else if (abstractMessage.Object == "thread.message")
+                                    {
+                                        // var messageResponse = JsonConvert.DeserializeObject<MessageResponse>(line, OpenAIClient.JsonSerializationOptions);
+                                        // if (messageResponse != null)
+                                        // {
+                                        //     resultHandler?.Invoke(messageResponse.PrintContent());
+                                        // }
+                                    }
+                                    else if (abstractMessage.Object == "thread.run.step")
+                                    {
+                                        // var stepResponse = JsonConvert.DeserializeObject<RunStepResponse>(line, OpenAIClient.JsonSerializationOptions);
+                                        // UnityEngine.Debug.Log($"stepResponse.Status: {stepResponse.Status}");
+                                    }
+                                    else if (abstractMessage.Object == "thread.run")
+                                    {
+                                        var run = JsonConvert.DeserializeObject<RunResponse>(line, OpenAIClient.JsonSerializationOptions);
+                                        if (run.Status == RunStatus.Completed)
+                                        {
+                                            streamingRunResponse = run;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    UnityEngine.Debug.LogError($"Could Parse\n{line}");
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    UnityEngine.Debug.LogError($"{eventData}\n{e}");
+                }
+            };
+            Response response = await Rest.PostAsync(GetUrl($"/{threadId}/runs"), payload, serverSentEventCallback, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response?.Validate(EnableDebug);
+
+            var responseReceived = Task.Run(() =>
+            {
+                while (streamingRunResponse == null)
+                {
+                    Task.Delay(100).Wait(); // Check every 100ms.
+                }
+            });
+
+            if (await Task.WhenAny(responseReceived, Task.Delay(30000)) == responseReceived)
+            {
+                // task completed within timeout
+                UnityEngine.Debug.Log($"runResponse: {streamingRunResponse.Status}");
+                return streamingRunResponse;
+            }
+            else
+            {
+                // timeout logic
+                UnityEngine.Debug.LogError($"runResponse timeout");
+                return null;
+            }
         }
 
         /// <summary>

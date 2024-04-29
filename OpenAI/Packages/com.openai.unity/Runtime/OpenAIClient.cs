@@ -64,7 +64,7 @@ namespace OpenAI
 #if !UNITY_WEBGL
                 { "User-Agent", "com.openai.unity" },
 #endif
-                { "OpenAI-Beta", "assistants=v1"}
+                { "OpenAI-Beta", "assistants=v2"}
             };
 
             if (Settings.Info.BaseRequestUrlFormat.Contains(OpenAISettingsInfo.OpenAIDomain) &&
@@ -110,7 +110,7 @@ namespace OpenAI
         /// <summary>
         /// The <see cref="JsonSerializationOptions"/> to use when making calls to the API.
         /// </summary>
-        internal static JsonSerializerSettings JsonSerializationOptions { get; } = new()
+        public static JsonSerializerSettings JsonSerializationOptions { get; } = new()
         {
             NullValueHandling = NullValueHandling.Ignore,
             DefaultValueHandling = DefaultValueHandling.Ignore,

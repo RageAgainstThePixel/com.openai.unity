@@ -85,7 +85,7 @@ namespace OpenAI.Tests
             File.Delete(testFilePath);
             Assert.IsFalse(File.Exists(testFilePath));
             await testThread.CreateMessageAsync("hello world!");
-            var request = new CreateMessageRequest("Test create message",
+            var request = new CreateMessageRequest("Test create message", Role.User,
                 new[] { file.Id },
                 new Dictionary<string, string>
                 {
@@ -161,7 +161,7 @@ namespace OpenAI.Tests
             var file2 = await CreateTestFileAsync("test_2.txt");
             try
             {
-                var createRequest = new CreateMessageRequest("Test content with files", new[] { file1.Id, file2.Id });
+                var createRequest = new CreateMessageRequest("Test content with files", Role.User, new[] { file1.Id, file2.Id });
                 var message = await testThread.CreateMessageAsync(createRequest);
                 var fileList = await message.ListFilesAsync();
                 Assert.IsNotNull(fileList);

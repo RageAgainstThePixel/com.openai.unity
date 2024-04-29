@@ -57,6 +57,12 @@ namespace OpenAI
             cachedDefault = this;
         }
 
+        public OpenAIAuthentication(string apiKey, string organization, string project)
+        {
+            Info = new OpenAIAuthInfo(apiKey, organization, project);
+            cachedDefault = this;
+        }
+
         /// <summary>
         /// Instantiates a new Authentication object with the given <paramref name="authInfo"/>, which may be <see langword="null"/>.
         /// </summary>
@@ -71,7 +77,7 @@ namespace OpenAI
         /// Instantiates a new Authentication object with the given <see cref="configuration"/>.
         /// </summary>
         /// <param name="configuration"><see cref="OpenAIConfiguration"/>.</param>
-        public OpenAIAuthentication(OpenAIConfiguration configuration) : this(configuration.ApiKey, configuration.organizationId) { }
+        public OpenAIAuthentication(OpenAIConfiguration configuration) : this(configuration.ApiKey, configuration.organizationId, configuration.projectId) { }
 
         /// <inheritdoc />
         public override OpenAIAuthInfo Info { get; }
