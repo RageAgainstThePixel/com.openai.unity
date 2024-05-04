@@ -7,6 +7,7 @@ namespace OpenAI
 {
     public sealed class OpenAISettingsInfo : ISettingsInfo
     {
+        internal const string Https = "https://";
         internal const string OpenAIDomain = "api.openai.com";
         internal const string DefaultOpenAIApiVersion = "v1";
         internal const string AzureOpenAIDomain = "openai.azure.com";
@@ -21,7 +22,7 @@ namespace OpenAI
             ApiVersion = DefaultOpenAIApiVersion;
             DeploymentId = string.Empty;
             BaseRequest = $"/{ApiVersion}/";
-            BaseRequestUrlFormat = $"https://{ResourceName}{BaseRequest}{{0}}";
+            BaseRequestUrlFormat = $"{Https}{ResourceName}{BaseRequest}{{0}}";
             UseOAuthAuthentication = true;
         }
 
@@ -48,11 +49,11 @@ namespace OpenAI
                 apiVersion = DefaultOpenAIApiVersion;
             }
 
-            ResourceName = domain;
+            ResourceName = domain.Contains("http") ? domain : $"{Https}{domain}";
             ApiVersion = apiVersion;
             DeploymentId = string.Empty;
             BaseRequest = $"/{ApiVersion}/";
-            BaseRequestUrlFormat = $"https://{ResourceName}{BaseRequest}{{0}}";
+            BaseRequestUrlFormat = $"{ResourceName}{BaseRequest}{{0}}";
             UseOAuthAuthentication = true;
         }
 
@@ -94,7 +95,7 @@ namespace OpenAI
             DeploymentId = deploymentId;
             ApiVersion = apiVersion;
             BaseRequest = $"/openai/deployments/{DeploymentId}/";
-            BaseRequestUrlFormat = $"https://{ResourceName}.{AzureOpenAIDomain}{BaseRequest}{{0}}?api-version={ApiVersion}";
+            BaseRequestUrlFormat = $"{Https}{ResourceName}.{AzureOpenAIDomain}{BaseRequest}{{0}}?api-version={ApiVersion}";
             UseOAuthAuthentication = useActiveDirectoryAuthentication;
         }
 
@@ -106,10 +107,10 @@ namespace OpenAI
 
         public string BaseRequest { get; }
 
-        public string BaseRequestUrlFormat { get; }
+        internal string BaseRequestUrlFormat { get; }
 
-        public bool UseOAuthAuthentication { get; }
+        internal bool UseOAuthAuthentication { get; }
 
-        internal bool IsAzureDeployment => BaseRequestUrlFormat.Contains(AzureOpenAIDomain);
+        public bool IsAzureDeployment => BaseRequestUrlFormat.Contains(AzureOpenAIDomain);
     }
 }
