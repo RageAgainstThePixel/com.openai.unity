@@ -59,6 +59,11 @@ namespace OpenAI.Samples.Chat
 
         private readonly List<Tool> assistantTools = new();
 
+#if !UNITY_2022_3_OR_NEWER
+        private readonly CancellationTokenSource lifetimeCts = new();
+        private CancellationToken destroyCancellationToken => lifetimeCts.Token;
+#endif
+
         private void OnValidate()
         {
             inputField.Validate();
@@ -81,6 +86,15 @@ namespace OpenAI.Samples.Chat
             submitButton.onClick.AddListener(SubmitChat);
             recordButton.onClick.AddListener(ToggleRecording);
         }
+
+
+#if !UNITY_2022_3_OR_NEWER
+        private void OnDestroy()
+        {
+            lifetimeCts.Cancel();
+            lifetimeCts.Dispose();
+        }
+#endif
 
         private void SubmitChat(string _) => SubmitChat();
 
