@@ -72,7 +72,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(testAssistant);
             Assert.IsNotNull(OpenAIClient.AssistantsEndpoint);
             var request = new CreateAssistantRequest(
-                model: Model.GPT4_Turbo,
+                model: Model.GPT4o,
                 name: "Test modified",
                 description: "Modified description",
                 instructions: "You are modified test assistant");
@@ -81,7 +81,7 @@ namespace OpenAI.Tests
             Assert.AreEqual("Test modified", assistant.Name);
             Assert.AreEqual("Modified description", assistant.Description);
             Assert.AreEqual("You are modified test assistant", assistant.Instructions);
-            Assert.AreEqual(Model.GPT4_Turbo.ToString(), assistant.Model);
+            Assert.AreEqual(Model.GPT4o.ToString(), assistant.Model);
             Assert.IsTrue(assistant.Metadata.ContainsKey("test"));
             Debug.Log($"{assistant.Id} -> modified");
         }

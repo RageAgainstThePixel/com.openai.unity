@@ -218,7 +218,7 @@ namespace OpenAI.Tests
                 new CreateAssistantRequest(
                     name: "Math Tutor",
                     instructions: "You are a personal math tutor. Answer questions briefly, in a sentence or less.",
-                    model: Model.GPT4_Turbo));
+                    model: Model.GPT4o));
             Assert.NotNull(assistant);
             testAssistant = assistant;
             var thread = await OpenAIClient.ThreadsEndpoint.CreateThreadAsync();

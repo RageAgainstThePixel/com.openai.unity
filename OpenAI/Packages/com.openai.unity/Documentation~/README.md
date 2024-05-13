@@ -398,7 +398,7 @@ Create an assistant with a model and instructions.
 
 ```csharp
 var api = new OpenAIClient();
-var request = new CreateAssistantRequest(Model.GPT4_Turbo);
+var request = new CreateAssistantRequest(Model.GPT4o);
 var assistant = await api.AssistantsEndpoint.CreateAssistantAsync(request);
 ```
 
@@ -420,7 +420,7 @@ Modifies an assistant.
 var api = new OpenAIClient();
 var createRequest = new CreateAssistantRequest(Model.GPT3_5_Turbo);
 var assistant = await api.AssistantsEndpoint.CreateAssistantAsync(createRequest);
-var modifyRequest = new CreateAssistantRequest(Model.GPT4_Turbo);
+var modifyRequest = new CreateAssistantRequest(Model.GPT4o);
 var modifiedAssistant = await api.AssistantsEndpoint.ModifyAssistantAsync(assistant.Id, modifyRequest);
 // OR AssistantExtension for easier use!
 var modifiedAssistantEx = await assistant.ModifyAsync(modifyRequest);
@@ -550,7 +550,7 @@ var assistant = await api.AssistantsEndpoint.CreateAssistantAsync(
     new CreateAssistantRequest(
         name: "Math Tutor",
         instructions: "You are a personal math tutor. Answer questions briefly, in a sentence or less.",
-        model: Model.GPT4_Turbo));
+        model: Model.GPT4o));
 var messages = new List<Message> { "I need to solve the equation `3x + 11 = 14`. Can you help me?" };
 var threadRequest = new CreateThreadRequest(messages);
 var run = await assistant.CreateThreadAndRunAsync(threadRequest);
@@ -726,7 +726,7 @@ var assistant = await api.AssistantsEndpoint.CreateAssistantAsync(
     new CreateAssistantRequest(
         name: "Math Tutor",
         instructions: "You are a personal math tutor. Answer questions briefly, in a sentence or less.",
-        model: Model.GPT4_Turbo));
+        model: Model.GPT4o));
 var thread = await api.ThreadsEndpoint.CreateThreadAsync();
 var message = await thread.CreateMessageAsync("I need to solve the equation `3x + 11 = 14`. Can you help me?");
 var run = await thread.CreateRunAsync(assistant);
@@ -868,7 +868,7 @@ var messages = new List<Message>
     new Message(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
     new Message(Role.User, "Where was it played?"),
 };
-var chatRequest = new ChatRequest(messages, Model.GPT4_Turbo);
+var chatRequest = new ChatRequest(messages, Model.GPT4o);
 var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
 var choice = response.FirstChoice;
 Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice.Message} | Finish Reason: {choice.FinishReason}");
@@ -982,7 +982,7 @@ var messages = new List<Message>
         new ImageUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Gfp-wisconsin-madison-the-nature-boardwalk.jpg/2560px-Gfp-wisconsin-madison-the-nature-boardwalk.jpg", ImageDetail.Low)
     })
 };
-var chatRequest = new ChatRequest(messages, model: Model.GPT4_Turbo);
+var chatRequest = new ChatRequest(messages, model: Model.GPT4o);
 var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
 Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice.Message.Content} | Finish Reason: {response.FirstChoice.FinishDetails}");
 ```
@@ -1000,7 +1000,7 @@ var messages = new List<Message>
         texture
     })
 };
-var chatRequest = new ChatRequest(messages, model: Model.GPT4_Turbo);
+var chatRequest = new ChatRequest(messages, model: Model.GPT4o);
 var result = await apiChatEndpoint.GetCompletionAsync(chatRequest);
 Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice} | Finish Reason: {result.FirstChoice.FinishDetails}");
 ```
@@ -1021,7 +1021,7 @@ var messages = new List<Message>
     new Message(Role.System, "You are a helpful assistant designed to output JSON."),
     new Message(Role.User, "Who won the world series in 2020?"),
 };
-var chatRequest = new ChatRequest(messages, Model.GPT4_Turbo, responseFormat: ChatResponseFormat.Json);
+var chatRequest = new ChatRequest(messages, Model.GPT4o, responseFormat: ChatResponseFormat.Json);
 var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
 
 foreach (var choice in response.Choices)

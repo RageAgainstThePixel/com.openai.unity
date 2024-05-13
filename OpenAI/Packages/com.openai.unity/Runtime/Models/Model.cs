@@ -115,6 +115,14 @@ namespace OpenAI.Models
         public static Model GPT4_Turbo { get; } = new("gpt-4-turbo", "openai");
 
         /// <summary>
+        /// The most advanced, multimodal flagship model that’s cheaper and faster than GPT-4 Turbo.
+        /// </summary>
+        /// <remarks>
+        /// Context Window: 128,000 tokens
+        /// </remarks>
+        public static Model GPT4o { get;} = new Model("gpt-4o", "openai");
+
+        /// <summary>
         /// Same capabilities as the base gpt-4 mode but with 4x the context length.
         /// Will be updated with our latest model iteration.  Tokens are 2x the price of gpt-4.
         /// </summary>
