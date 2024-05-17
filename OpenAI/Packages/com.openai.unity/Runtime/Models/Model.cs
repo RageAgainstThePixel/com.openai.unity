@@ -98,6 +98,17 @@ namespace OpenAI.Models
         public string Parent { get; }
 
         /// <summary>
+        /// PT-4o (“o” for “omni”) is our most advanced model.
+        /// It is multimodal (accepting text or image inputs and outputting text),
+        /// and it has the same high intelligence as GPT-4 Turbo but is much more efficient—it generates text 2x faster and is 50% cheaper.
+        /// Additionally, GPT-4o has the best vision and performance across non-English languages of any of our models.
+        /// </summary>
+        /// <remarks>
+        /// Content Window: 128,000 tokens
+        /// </remarks>
+        public static Model GPT4_o { get; } = new("gpt-4o", "openai");
+
+        /// <summary>
         /// More capable than any GPT-3.5 model, able to do more complex tasks, and optimized for chat.
         /// Will be updated with our latest model iteration.
         /// </summary>
