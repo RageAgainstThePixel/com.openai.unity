@@ -3,7 +3,6 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Threads
@@ -67,32 +66,5 @@ namespace OpenAI.Threads
 
         [Preserve]
         public static implicit operator CreateThreadRequest(string message) => new(new[] { new Message(message) });
-    }
-
-    [Preserve]
-    public sealed class IncompleteDetails
-    {
-        [Preserve]
-        [JsonProperty("reason")]
-        public IncompleteMessageReason Reason { get; private set; }
-    }
-
-    public enum IncompleteMessageReason
-    {
-        None = 0,
-        [EnumMember(Value = "content_filter")]
-        ContentFilter,
-        [EnumMember(Value = "max_tokens")]
-        MaxTokens,
-        [EnumMember(Value = "max_completion_tokens")]
-        MaxCompletionTokens,
-        [EnumMember(Value = "max_prompt_tokens")]
-        MaxPromptTokens,
-        [EnumMember(Value = "run_cancelled")]
-        RunCancelled,
-        [EnumMember(Value = "run_expired")]
-        RunExpired,
-        [EnumMember(Value = "run_failed")]
-        RunFailed
     }
 }
