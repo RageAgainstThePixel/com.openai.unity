@@ -37,26 +37,6 @@ namespace OpenAI.FineTuning
             return response.Deserialize<FineTuneJobResponse>(client);
         }
 
-        [Obsolete("Use new overload")]
-        public async Task<FineTuneJobList> ListJobsAsync(int? limit, string after, CancellationToken cancellationToken = default)
-        {
-            var parameters = new Dictionary<string, string>();
-
-            if (limit.HasValue)
-            {
-                parameters.Add(nameof(limit), limit.ToString());
-            }
-
-            if (!string.IsNullOrWhiteSpace(after))
-            {
-                parameters.Add(nameof(after), after);
-            }
-
-            var response = await Rest.GetAsync(GetUrl("/jobs", parameters), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(EnableDebug);
-            return JsonConvert.DeserializeObject<FineTuneJobList>(response.Body, OpenAIClient.JsonSerializationOptions);
-        }
-
         /// <summary>
         /// List your organization's fine-tuning jobs.
         /// </summary>
@@ -73,7 +53,7 @@ namespace OpenAI.FineTuning
         /// <summary>
         /// Gets info about the fine-tune job.
         /// </summary>
-        /// <param name="jobId"><see cref="FineTuneJob.Id"/>.</param>
+        /// <param name="jobId"><see cref="FineTuneJobResponse.Id"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="FineTuneJobResponse"/>.</returns>
         public async Task<FineTuneJobResponse> GetJobInfoAsync(string jobId, CancellationToken cancellationToken = default)
@@ -88,41 +68,21 @@ namespace OpenAI.FineTuning
         /// <summary>
         /// Immediately cancel a fine-tune job.
         /// </summary>
-        /// <param name="jobId"><see cref="FineTuneJob.Id"/> to cancel.</param>
+        /// <param name="jobId"><see cref="FineTuneJobResponse.Id"/> to cancel.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="FineTuneJobResponse"/>.</returns>
         public async Task<bool> CancelJobAsync(string jobId, CancellationToken cancellationToken = default)
         {
             var response = await Rest.PostAsync(GetUrl($"/jobs/{jobId}/cancel"), jsonData: string.Empty, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            var result = JsonConvert.DeserializeObject<FineTuneJobResponse>(response.Body, OpenAIClient.JsonSerializationOptions);
+            var result = response.Deserialize<FineTuneJobResponse>(client);
             return result.Status == JobStatus.Cancelled;
-        }
-
-        [Obsolete("use new overload")]
-        public async Task<EventList> ListJobEventsAsync(string jobId, int? limit, string after, CancellationToken cancellationToken = default)
-        {
-            var parameters = new Dictionary<string, string>();
-
-            if (limit.HasValue)
-            {
-                parameters.Add(nameof(limit), limit.ToString());
-            }
-
-            if (!string.IsNullOrWhiteSpace(after))
-            {
-                parameters.Add(nameof(after), after);
-            }
-
-            var response = await Rest.GetAsync(GetUrl($"/jobs/{jobId}/events", parameters), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(EnableDebug);
-            return JsonConvert.DeserializeObject<EventList>(response.Body, OpenAIClient.JsonSerializationOptions);
         }
 
         /// <summary>
         /// Get fine-grained status updates for a fine-tune job.
         /// </summary>
-        /// <param name="jobId"><see cref="FineTuneJob.Id"/>.</param>
+        /// <param name="jobId"><see cref="FineTuneJobResponse.Id"/>.</param>
         /// <param name="query"><see cref="ListQuery"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>List of events for <see cref="FineTuneJobResponse"/>.</returns>

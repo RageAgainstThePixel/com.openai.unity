@@ -10,6 +10,9 @@ namespace OpenAI.Threads
     public sealed class TextContent
     {
         [Preserve]
+        public TextContent(string value) => Value = value;
+
+        [Preserve]
         [JsonConstructor]
         public TextContent(
             [JsonProperty("value")] string value,
@@ -32,5 +35,13 @@ namespace OpenAI.Threads
         [Preserve]
         [JsonProperty("annotations")]
         public IReadOnlyList<Annotation> Annotations { get; }
+
+        [Preserve]
+        public static implicit operator TextContent(string value) => new(value);
+
+        [Preserve]
+        public static implicit operator string(TextContent text) => text?.ToString();
+
+        public override string ToString() => Value;
     }
 }

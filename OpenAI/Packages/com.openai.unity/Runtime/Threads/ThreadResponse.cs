@@ -20,11 +20,13 @@ namespace OpenAI.Threads
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
             [JsonProperty("created_at")] int createdAtUnitTimeSeconds,
+            [JsonProperty("tool_resources")] ToolResources toolResources,
             [JsonProperty("metadata")] Dictionary<string, string> metadata)
         {
             Id = id;
             Object = @object;
             CreatedAtUnixTimeSeconds = createdAtUnitTimeSeconds;
+            ToolResources = toolResources;
             Metadata = metadata;
         }
 
@@ -52,6 +54,16 @@ namespace OpenAI.Threads
         [Preserve]
         [JsonIgnore]
         public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTimeSeconds).DateTime;
+
+        /// <summary>
+        /// A set of resources that are made available to the assistant's tools in this thread.
+        /// The resources are specific to the type of tool.
+        /// For example, the code_interpreter tool requires a list of file IDs,
+        /// while the file_search tool requires a list of vector store IDs.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("tool_resources")]
+        public ToolResources ToolResources { get; private set; }
 
         /// <summary>
         /// Set of 16 key-value pairs that can be attached to an object.

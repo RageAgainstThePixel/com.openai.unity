@@ -1,7 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
 using Newtonsoft.Json;
+using System;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Assistants
@@ -10,6 +10,7 @@ namespace OpenAI.Assistants
     /// File attached to an assistant.
     /// </summary>
     [Preserve]
+    [Obsolete("Removed. Use Assistant.ToolResources instead.")]
     public sealed class AssistantFileResponse : BaseResponse
     {
         [Preserve]

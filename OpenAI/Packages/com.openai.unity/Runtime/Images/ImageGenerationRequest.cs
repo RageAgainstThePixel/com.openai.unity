@@ -34,7 +34,7 @@ namespace OpenAI.Images
         /// <param name="responseFormat">
         /// The format in which the generated images are returned.
         /// Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
+        /// <para/> Defaults to <see cref="ImageResponseFormat.Url"/>
         /// </param>
         /// <param name="size">
         /// The size of the generated images.
@@ -57,7 +57,7 @@ namespace OpenAI.Images
             [JsonProperty("model")] Model model = null,
             [JsonProperty("n")] int numberOfResults = 1,
             [JsonProperty("quality")] string quality = null,
-            [JsonProperty("response_format")] ResponseFormat responseFormat = ResponseFormat.Url,
+            [JsonProperty("response_format")] ImageResponseFormat responseFormat = ImageResponseFormat.Url,
             [JsonProperty("size")] string size = null,
             [JsonProperty("style")] string style = null,
             [JsonProperty("user")] string user = null)
@@ -110,12 +110,12 @@ namespace OpenAI.Images
         /// <summary>
         /// The format in which the generated images are returned.
         /// Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
+        /// <para/> Defaults to <see cref="ImageResponseFormat.Url"/>
         /// </summary>
         [Preserve]
         [JsonProperty("response_format")]
         [FunctionProperty("The format in which the generated images are returned. Must be one of url or b64_json.", true)]
-        public ResponseFormat ResponseFormat { get; }
+        public ImageResponseFormat ResponseFormat { get; }
 
         /// <summary>
         /// The size of the generated images.
@@ -126,7 +126,7 @@ namespace OpenAI.Images
         [JsonProperty("size")]
         [FunctionProperty("The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024 for dall-e-2. Must be one of 1024x1024, 1792x1024, or 1024x1792 for dall-e-3 models.", true,
             defaultValue: "1024x1024",
-            possibleValues: new object[] { "256x256", "512x512", "1024x1024", "1792x1024", "1024x1792"})]
+            possibleValues: new object[] { "256x256", "512x512", "1024x1024", "1792x1024", "1024x1792" })]
         public string Size { get; }
 
         /// <summary>

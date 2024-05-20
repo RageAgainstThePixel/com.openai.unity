@@ -5,6 +5,7 @@ using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using OpenAI.Assistants;
 using OpenAI.Audio;
+using OpenAI.Batch;
 using OpenAI.Chat;
 using OpenAI.Embeddings;
 using OpenAI.Files;
@@ -13,6 +14,7 @@ using OpenAI.Images;
 using OpenAI.Models;
 using OpenAI.Moderations;
 using OpenAI.Threads;
+using OpenAI.VectorStores;
 using System.Collections.Generic;
 using System.Security.Authentication;
 using Utilities.WebRequestRest;
@@ -55,6 +57,8 @@ namespace OpenAI
             ModerationsEndpoint = new ModerationsEndpoint(this);
             ThreadsEndpoint = new ThreadsEndpoint(this);
             AssistantsEndpoint = new AssistantsEndpoint(this);
+            BatchEndpoint = new BatchEndpoint(this);
+            VectorStoresEndpoint = new VectorStoresEndpoint(this);
         }
 
         protected override void SetupDefaultRequestHeaders()
@@ -64,7 +68,7 @@ namespace OpenAI
 #if !UNITY_WEBGL
                 { "User-Agent", "com.openai.unity" },
 #endif
-                { "OpenAI-Beta", "assistants=v1"}
+                { "OpenAI-Beta", "assistants=v2"}
             };
 
             if (Settings.Info.BaseRequestUrlFormat.Contains(OpenAISettingsInfo.OpenAIDomain) &&
@@ -153,7 +157,7 @@ namespace OpenAI
         public AudioEndpoint AudioEndpoint { get; set; }
 
         /// <summary>
-        /// Files are used to upload documents that can be used with features like Fine-tuning.<br/>
+        /// Files are used to upload documents that can be used with features like Assistants, Fine-tuning, and Batch API.<br/>
         /// <see href="https://platform.openai.com/docs/api-reference/files"/>
         /// </summary>
         public FilesEndpoint FilesEndpoint { get; }
@@ -182,5 +186,18 @@ namespace OpenAI
         /// <see href="https://platform.openai.com/docs/api-reference/assistants"/>
         /// </summary>
         public AssistantsEndpoint AssistantsEndpoint { get; }
+
+        /// <summary>
+        /// Create large batches of API requests for asynchronous processing.
+        /// The Batch API returns completions within 24 hours for a 50% discount.
+        /// <see href="https://platform.openai.com/docs/api-reference/batch"/>
+        /// </summary>
+        public BatchEndpoint BatchEndpoint { get; }
+
+        /// <summary>
+        /// Vector stores are used to store files for use by the file_search tool.
+        /// <see href="https://platform.openai.com/docs/api-reference/vector-stores"/>
+        /// </summary>
+        public VectorStoresEndpoint VectorStoresEndpoint { get; }
     }
 }

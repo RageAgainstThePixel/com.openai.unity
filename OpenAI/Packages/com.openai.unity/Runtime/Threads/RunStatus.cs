@@ -22,6 +22,8 @@ namespace OpenAI.Threads
         Failed,
         [EnumMember(Value = "completed")]
         Completed,
+        [EnumMember(Value = "incomplete")]
+        Incomplete,
         [EnumMember(Value = "expired")]
         Expired
     }

@@ -1,6 +1,8 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Threads
@@ -13,11 +15,15 @@ namespace OpenAI.Threads
         public ToolCall(
             [JsonProperty("id")] string id,
             [JsonProperty("type")] string type,
-            [JsonProperty("function")] FunctionCall functionCall)
+            [JsonProperty("function")] FunctionCall functionCall,
+            [JsonProperty("code_interpreter")] CodeInterpreter codeInterpreter,
+            [JsonProperty("file_search")] IReadOnlyDictionary<string, object> fileSearch)
         {
             Id = id;
             Type = type;
             FunctionCall = functionCall;
+            CodeInterpreter = codeInterpreter;
+            FileSearch = fileSearch;
         }
 
         /// <summary>
@@ -50,10 +56,17 @@ namespace OpenAI.Threads
         public CodeInterpreter CodeInterpreter { get; private set; }
 
         /// <summary>
-        /// For now, this is always going to be an empty object.
+        /// The File Search tool call definition.
         /// </summary>
+        /// <remarks>
+        /// For now, this is always going to be an empty object.
+        /// </remarks>
         [Preserve]
-        [JsonProperty("retrieval")]
+        [JsonProperty("file_search")]
+        public IReadOnlyDictionary<string, object> FileSearch { get; private set; }
+
+        [JsonIgnore]
+        [Obsolete("Removed")]
         public object Retrieval { get; private set; }
     }
 }

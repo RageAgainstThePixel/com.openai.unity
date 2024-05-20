@@ -34,7 +34,7 @@ namespace OpenAI.Tests
         {
             Assert.IsNotNull(OpenAIClient.ImagesEndPoint);
 
-            var request = new ImageGenerationRequest("A house riding a velociraptor", Model.DallE_2, responseFormat: ResponseFormat.B64_Json);
+            var request = new ImageGenerationRequest("A house riding a velociraptor", Model.DallE_2, responseFormat: ImageResponseFormat.B64_Json);
             var imageResults = await OpenAIClient.ImagesEndPoint.GenerateImageAsync(request);
 
             Assert.IsNotNull(imageResults);
@@ -95,7 +95,7 @@ namespace OpenAI.Tests
             var image = AssetDatabase.LoadAssetAtPath<Texture2D>(imageAssetPath);
             var maskAssetPath = AssetDatabase.GUIDToAssetPath("0be6be2fad590cc47930495d2ca37dd6");
             var mask = AssetDatabase.LoadAssetAtPath<Texture2D>(maskAssetPath);
-            var request = new ImageEditRequest(image, mask, "A sunlit indoor lounge area with a pool containing a flamingo", size: ImageSize.Small, responseFormat: ResponseFormat.B64_Json);
+            var request = new ImageEditRequest(image, mask, "A sunlit indoor lounge area with a pool containing a flamingo", size: ImageSize.Small, responseFormat: ImageResponseFormat.B64_Json);
             var imageResults = await OpenAIClient.ImagesEndPoint.CreateImageEditAsync(request);
 
             Assert.IsNotNull(imageResults);
@@ -170,7 +170,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ImagesEndPoint);
             var imageAssetPath = AssetDatabase.GUIDToAssetPath("230fd778637d3d84d81355c8c13b1999");
             var image = AssetDatabase.LoadAssetAtPath<Texture2D>(imageAssetPath);
-            var request = new ImageVariationRequest(image, size: ImageSize.Small, responseFormat: ResponseFormat.B64_Json);
+            var request = new ImageVariationRequest(image, size: ImageSize.Small, responseFormat: ImageResponseFormat.B64_Json);
             var imageResults = await OpenAIClient.ImagesEndPoint.CreateImageVariationAsync(request);
 
             Assert.IsNotNull(imageResults);

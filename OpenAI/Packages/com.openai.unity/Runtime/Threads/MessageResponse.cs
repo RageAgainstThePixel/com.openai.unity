@@ -23,22 +23,30 @@ namespace OpenAI.Threads
             [JsonProperty("object")] string @object,
             [JsonProperty("created_at")] int createdAtUnixTimeSeconds,
             [JsonProperty("thread_id")] string threadId,
+            [JsonProperty("status")] MessageStatus status,
+            [JsonProperty("incomplete_details")] IncompleteDetails incompleteDetails,
+            [JsonProperty("completed_at")] int? completedAtUnixTimeSeconds,
+            [JsonProperty("incomplete_at")] int? incompleteAtUnixTimeSeconds,
             [JsonProperty("role")] Role role,
-            [JsonProperty("content")] IReadOnlyList<Content> content,
+            [JsonProperty("content")] object content,
             [JsonProperty("assistant_id")] string assistantId,
             [JsonProperty("run_id")] string runId,
-            [JsonProperty("file_ids")] IReadOnlyList<string> fileIds,
+            [JsonProperty("Attachments")] IReadOnlyList<Attachment> attachments,
             [JsonProperty("metadata")] Dictionary<string, string> metadata)
         {
             Id = id;
             Object = @object;
             CreatedAtUnixTimeSeconds = createdAtUnixTimeSeconds;
             ThreadId = threadId;
+            Status = status;
+            IncompleteDetails = incompleteDetails;
+            CompletedAtUnixTimeSeconds = completedAtUnixTimeSeconds;
+            IncompleteAtUnixTimeSeconds = incompleteAtUnixTimeSeconds;
             Role = role;
             Content = content;
             AssistantId = assistantId;
             RunId = runId;
-            FileIds = fileIds;
+            Attachments = attachments;
             Metadata = metadata;
         }
 
@@ -75,6 +83,46 @@ namespace OpenAI.Threads
         public string ThreadId { get; }
 
         /// <summary>
+        /// The status of the message, which can be either 'in_progress', 'incomplete', or 'completed'.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("status")]
+        public MessageStatus Status { get; private set; }
+
+        /// <summary>
+        /// On an incomplete message, details about why the message is incomplete.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("incomplete_details")]
+        public IncompleteDetails IncompleteDetails { get; private set; }
+
+        /// <summary>
+        /// The Unix timestamp (in seconds) for when the message was completed.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("completed_at")]
+        public int? CompletedAtUnixTimeSeconds { get; private set; }
+
+        [JsonIgnore]
+        public DateTime? CompletedAt
+            => CompletedAtUnixTimeSeconds.HasValue
+                ? DateTimeOffset.FromUnixTimeSeconds(CompletedAtUnixTimeSeconds.Value).DateTime
+                : null;
+
+        /// <summary>
+        /// The Unix timestamp (in seconds) for when the message was marked as incomplete.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("incomplete_at")]
+        public int? IncompleteAtUnixTimeSeconds { get; private set; }
+
+        [JsonIgnore]
+        public DateTime? IncompleteAt
+            => IncompleteAtUnixTimeSeconds.HasValue
+                ? DateTimeOffset.FromUnixTimeSeconds(IncompleteAtUnixTimeSeconds.Value).DateTime
+                : null;
+
+        /// <summary>
         /// The entity that produced the message. One of user or assistant.
         /// </summary>
         [Preserve]
@@ -86,7 +134,7 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("content")]
-        public IReadOnlyList<Content> Content { get; }
+        public object Content { get; }
 
         /// <summary>
         /// If applicable, the ID of the assistant that authored this message.
@@ -107,9 +155,16 @@ namespace OpenAI.Threads
         /// Useful for tools like 'retrieval' and 'code_interpreter' that can access files.
         /// A maximum of 10 files can be attached to a message.
         /// </summary>
-        [Preserve]
-        [JsonProperty("file_ids")]
+        [JsonIgnore]
+        [Obsolete("Removed")]
         public IReadOnlyList<string> FileIds { get; }
+
+        /// <summary>
+        /// A list of files attached to the message, and the tools they were added to.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("Attachments")]
+        public IReadOnlyList<Attachment> Attachments { get; private set; }
 
         /// <summary>
         /// Set of 16 key-value pairs that can be attached to an object.
@@ -124,6 +179,15 @@ namespace OpenAI.Threads
         public static implicit operator string(MessageResponse message) => message?.ToString();
 
         [Preserve]
+        public static implicit operator Message(MessageResponse response)
+            => response?.Content switch
+            {
+                string content => new(content, response.Role, response.Attachments, response.Metadata),
+                IReadOnlyList<Content> contents => new(contents, response.Role, response.Attachments, response.Metadata),
+                _ => null
+            };
+
+        [Preserve]
         public override string ToString() => Id;
 
         /// <summary>
@@ -132,6 +196,12 @@ namespace OpenAI.Threads
         /// </summary>
         /// <returns><see cref="string"/> of all <see cref="Content"/>.</returns>
         [Preserve]
-        public string PrintContent() => string.Join("\n", Content.Select(content => content?.ToString()));
+        public string PrintContent()
+            => Content switch
+            {
+                string content => content,
+                IReadOnlyList<Content> contents => string.Join("\n", contents.Select(content => content?.ToString())),
+                _ => string.Empty
+            };
     }
 }

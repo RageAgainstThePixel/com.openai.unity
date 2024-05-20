@@ -2,13 +2,13 @@
 
 using System.Runtime.Serialization;
 
-namespace OpenAI.Images
+namespace OpenAI
 {
     public enum ResponseFormat
     {
-        [EnumMember(Value = "url")]
-        Url,
-        [EnumMember(Value = "b64_json")]
-        B64_Json
+        [EnumMember(Value = "text")]
+        Text,
+        [EnumMember(Value = "json_object")]
+        Json
     }
 }

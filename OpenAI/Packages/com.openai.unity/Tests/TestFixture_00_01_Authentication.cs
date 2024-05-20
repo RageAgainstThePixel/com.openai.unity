@@ -205,7 +205,7 @@ namespace OpenAI.Tests
             }
 
             Assert.IsFalse(File.Exists(OpenAIAuthentication.CONFIG_FILE));
-            
+
             OpenAIAuthentication.Default = null;
             OpenAISettings.Default = null;
         }

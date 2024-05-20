@@ -3,6 +3,7 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Threads
@@ -16,6 +17,12 @@ namespace OpenAI.Threads
         /// <param name="messages">
         /// A list of messages to start the thread with.
         /// </param>
+        /// <param name="toolResources">
+        /// A set of resources that are made available to the assistant's tools in this thread.
+        /// The resources are specific to the type of tool.
+        /// For example, the code_interpreter tool requires a list of file IDs,
+        /// while the file_search tool requires a list of vector store IDs.
+        /// </param>
         /// <param name="metadata">
         /// Set of 16 key-value pairs that can be attached to an object.
         /// This can be useful for storing additional information about the object in a structured format.
@@ -24,9 +31,11 @@ namespace OpenAI.Threads
         [Preserve]
         public CreateThreadRequest(
             [JsonProperty("messages")] IEnumerable<Message> messages = null,
+            [JsonProperty("tool_resources")] ToolResources toolResources = null,
             [JsonProperty("metadata")] Dictionary<string, string> metadata = null)
         {
             Messages = messages?.ToList();
+            ToolResources = toolResources;
             Metadata = metadata;
         }
 
@@ -36,6 +45,16 @@ namespace OpenAI.Threads
         [Preserve]
         [JsonProperty("messages")]
         public IReadOnlyList<Message> Messages { get; }
+
+        /// <summary>
+        /// A set of resources that are made available to the assistant's tools in this thread.
+        /// The resources are specific to the type of tool.
+        /// For example, the code_interpreter tool requires a list of file IDs,
+        /// while the file_search tool requires a list of vector store IDs.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("tool_resources")]
+        public ToolResources ToolResources { get; }
 
         /// <summary>
         /// Set of 16 key-value pairs that can be attached to an object.
@@ -48,5 +67,32 @@ namespace OpenAI.Threads
 
         [Preserve]
         public static implicit operator CreateThreadRequest(string message) => new(new[] { new Message(message) });
+    }
+
+    [Preserve]
+    public sealed class IncompleteDetails
+    {
+        [Preserve]
+        [JsonProperty("reason")]
+        public IncompleteMessageReason Reason { get; private set; }
+    }
+
+    public enum IncompleteMessageReason
+    {
+        None = 0,
+        [EnumMember(Value = "content_filter")]
+        ContentFilter,
+        [EnumMember(Value = "max_tokens")]
+        MaxTokens,
+        [EnumMember(Value = "max_completion_tokens")]
+        MaxCompletionTokens,
+        [EnumMember(Value = "max_prompt_tokens")]
+        MaxPromptTokens,
+        [EnumMember(Value = "run_cancelled")]
+        RunCancelled,
+        [EnumMember(Value = "run_expired")]
+        RunExpired,
+        [EnumMember(Value = "run_failed")]
+        RunFailed
     }
 }
