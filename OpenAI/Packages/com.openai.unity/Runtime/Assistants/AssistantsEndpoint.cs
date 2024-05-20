@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using OpenAI.Extensions;
 using OpenAI.Files;
 using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Utilities.WebRequestRest;

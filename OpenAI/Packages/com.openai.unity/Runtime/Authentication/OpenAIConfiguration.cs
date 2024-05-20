@@ -7,7 +7,7 @@ using Utilities.WebRequestRest.Interfaces;
 namespace OpenAI
 {
     [CreateAssetMenu(fileName = nameof(OpenAIConfiguration), menuName = "OpenAI/" + nameof(OpenAIConfiguration), order = 0)]
-    public class OpenAIConfiguration : ScriptableObject, IConfiguration
+    public sealed class OpenAIConfiguration : ScriptableObject, IConfiguration
     {
         [SerializeField]
         [Tooltip("The OpenAI or Azure api key.")]
