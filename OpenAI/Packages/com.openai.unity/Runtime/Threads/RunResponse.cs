@@ -9,7 +9,7 @@ namespace OpenAI.Threads
 {
     /// <summary>
     /// An invocation of an Assistant on a Thread.
-    /// The Assistant uses it’s configuration and the Thread’s Messages to perform tasks by calling models and tools.
+    /// The Assistant uses itâ€™s configuration and the Threadâ€™s Messages to perform tasks by calling models and tools.
     /// As part of a Run, the Assistant appends Messages to the Thread.
     /// </summary>
     [Preserve]
@@ -42,7 +42,7 @@ namespace OpenAI.Threads
             [JsonProperty("max_prompt_tokens")] int? maxPromptTokens,
             [JsonProperty("max_completion_tokens")] int? maxCompletionTokens,
             [JsonProperty("truncation_strategy")] TruncationStrategy truncationStrategy,
-            [JsonProperty("tool_choice")] dynamic toolChoice,
+            [JsonProperty("tool_choice")] object toolChoice,
             [JsonProperty("response_format")] ResponseFormatObject responseFormat)
         {
             Id = id;
@@ -294,7 +294,7 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("tool_choice")]
-        public dynamic ToolChoice { get; private set; }
+        public object ToolChoice { get; private set; }
 
         /// <summary>
         /// Specifies the format that the model must output.

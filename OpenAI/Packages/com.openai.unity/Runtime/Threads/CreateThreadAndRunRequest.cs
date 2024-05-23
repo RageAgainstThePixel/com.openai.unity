@@ -293,7 +293,7 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("tool_choice")]
-        public dynamic ToolChoice { get; }
+        public object ToolChoice { get; }
 
         /// <summary>
         /// An object specifying the format that the model must output.
