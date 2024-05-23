@@ -20,6 +20,7 @@ namespace OpenAI.Threads
         public RunStepResponse(
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
+            [JsonProperty("created_at")] int? createdAtUnixTimeSeconds,
             [JsonProperty("assistant_id")] string assistantId,
             [JsonProperty("thread_id")] string threadId,
             [JsonProperty("run_id")] string runId,
@@ -27,8 +28,7 @@ namespace OpenAI.Threads
             [JsonProperty("status")] RunStatus runStatus,
             [JsonProperty("step_details")] StepDetails stepDetails,
             [JsonProperty("last_error")] Error lastRunError,
-            [JsonProperty("created_at")] int? createdAtUnixTimeSeconds,
-            [JsonProperty("expires_at")] int? expiresAtUnixTimeSeconds,
+            [JsonProperty("expired_at")] int? expiredAtUnixTimeSeconds,
             [JsonProperty("cancelled_at")] int? cancelledAtUnixTimeSeconds,
             [JsonProperty("failed_at")] int? failedAtUnixTimeSeconds,
             [JsonProperty("metadata")] Dictionary<string, string> metadata,
@@ -36,6 +36,7 @@ namespace OpenAI.Threads
         {
             Id = id;
             Object = @object;
+            CreatedAtUnixTimeSeconds = createdAtUnixTimeSeconds;
             AssistantId = assistantId;
             ThreadId = threadId;
             RunId = runId;
@@ -43,8 +44,7 @@ namespace OpenAI.Threads
             Status = runStatus;
             StepDetails = stepDetails;
             LastError = lastRunError;
-            CreatedAtUnixTimeSeconds = createdAtUnixTimeSeconds;
-            ExpiresAtUnixTimeSeconds = expiresAtUnixTimeSeconds;
+            ExpiredAtUnixTimeSeconds = expiredAtUnixTimeSeconds;
             CancelledAtUnixTimeSeconds = cancelledAtUnixTimeSeconds;
             FailedAtUnixTimeSeconds = failedAtUnixTimeSeconds;
             Metadata = metadata;
@@ -128,13 +128,13 @@ namespace OpenAI.Threads
         /// The Unix timestamp (in seconds) for when the run step expired. A step is considered expired if the parent run is expired.
         /// </summary>
         [Preserve]
-        [JsonProperty("expires_at")]
-        public int? ExpiresAtUnixTimeSeconds { get; }
+        [JsonProperty("expired_at")]
+        public int? ExpiredAtUnixTimeSeconds { get; }
 
         [JsonIgnore]
-        public DateTime? ExpiresAt
-            => ExpiresAtUnixTimeSeconds.HasValue
-                ? DateTimeOffset.FromUnixTimeSeconds(ExpiresAtUnixTimeSeconds.Value).DateTime
+        public DateTime? ExpiredAt
+            => ExpiredAtUnixTimeSeconds.HasValue
+                ? DateTimeOffset.FromUnixTimeSeconds(ExpiredAtUnixTimeSeconds.Value).DateTime
                 : null;
 
         /// <summary>

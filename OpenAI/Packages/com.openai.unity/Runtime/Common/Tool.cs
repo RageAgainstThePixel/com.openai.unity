@@ -1,7 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +32,12 @@ namespace OpenAI
 
         [Preserve]
         [JsonIgnore]
-        public static Tool Retrieval { get; } = new() { Type = "retrieval" };
+        [Obsolete("Use FileSearch")]
+        public static Tool Retrieval { get; } = new() { Type = "file_search" };
+
+        [Preserve]
+        [JsonIgnore]
+        public static Tool FileSearch { get; } = new() { Type = "file_search" };
 
         [Preserve]
         [JsonIgnore]
@@ -122,7 +126,7 @@ namespace OpenAI
 
         private static readonly List<Tool> toolCache = new()
         {
-            Retrieval,
+            FileSearch,
             CodeInterpreter
         };
 
@@ -134,7 +138,7 @@ namespace OpenAI
             toolCache.Clear();
             Function.ClearFunctionCache();
             toolCache.Add(CodeInterpreter);
-            toolCache.Add(Retrieval);
+            toolCache.Add(FileSearch);
         }
 
         /// <summary>
@@ -322,8 +326,7 @@ namespace OpenAI
             return tool;
         }
 
-        public static Tool FromFunc<T1, T2, TResult>(string name, Func<T1, T2, TResult> function,
-            string description = null)
+        public static Tool FromFunc<T1, T2, TResult>(string name, Func<T1, T2, TResult> function, string description = null)
         {
             if (TryGetTool(name, function, out var tool))
             {
@@ -335,8 +338,7 @@ namespace OpenAI
             return tool;
         }
 
-        public static Tool FromFunc<T1, T2, T3, TResult>(string name, Func<T1, T2, T3, TResult> function,
-            string description = null)
+        public static Tool FromFunc<T1, T2, T3, TResult>(string name, Func<T1, T2, T3, TResult> function, string description = null)
         {
             if (TryGetTool(name, function, out var tool))
             {

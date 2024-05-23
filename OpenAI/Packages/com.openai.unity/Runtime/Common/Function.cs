@@ -7,6 +7,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -42,7 +43,7 @@ namespace OpenAI
         [Preserve]
         public Function(string name, string description = null, JToken parameters = null)
         {
-            if (!System.Text.RegularExpressions.Regex.IsMatch(name, NameRegex))
+            if (!Regex.IsMatch(name, NameRegex))
             {
                 throw new ArgumentException($"The name of the function does not conform to naming standards: {NameRegex}");
             }
@@ -74,7 +75,7 @@ namespace OpenAI
         [Preserve]
         public Function(string name, string description, string parameters)
         {
-            if (!System.Text.RegularExpressions.Regex.IsMatch(name, NameRegex))
+            if (!Regex.IsMatch(name, NameRegex))
             {
                 throw new ArgumentException($"The name of the function does not conform to naming standards: {NameRegex}");
             }
@@ -93,7 +94,7 @@ namespace OpenAI
         [Preserve]
         internal Function(string name, string description, MethodInfo method, object instance = null)
         {
-            if (!System.Text.RegularExpressions.Regex.IsMatch(name, NameRegex))
+            if (!Regex.IsMatch(name, NameRegex))
             {
                 throw new ArgumentException($"The name of the function does not conform to naming standards: {NameRegex}");
             }

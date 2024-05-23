@@ -3,6 +3,7 @@
 using NUnit.Framework;
 using OpenAI.Assistants;
 using OpenAI.Files;
+using OpenAI.Models;
 using OpenAI.Tests.Weather;
 using OpenAI.Threads;
 using System;
@@ -10,7 +11,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using OpenAI.Models;
 using UnityEngine;
 
 namespace OpenAI.Tests
@@ -29,12 +29,12 @@ namespace OpenAI.Tests
         public async Task Test_01_CreateThread()
         {
             Assert.IsNotNull(OpenAIClient.ThreadsEndpoint);
-            var thread = await OpenAIClient.ThreadsEndpoint.CreateThreadAsync(new CreateThreadRequest(
-                new List<Message>
+            var thread = await OpenAIClient.ThreadsEndpoint.CreateThreadAsync(new(
+                messages: new List<Message>
                 {
                    "Test message"
                 },
-                new Dictionary<string, string>
+                metadata: new Dictionary<string, string>
                 {
                     ["test"] = nameof(Test_01_CreateThread)
                 }));
@@ -81,21 +81,35 @@ namespace OpenAI.Tests
             const string testFilePath = "assistant_test_1.txt";
             await File.WriteAllTextAsync(testFilePath, "Knowledge is power!");
             Assert.IsTrue(File.Exists(testFilePath));
-            var file = await OpenAIClient.FilesEndpoint.UploadFileAsync(testFilePath, "assistants");
-            Assert.NotNull(file);
-            File.Delete(testFilePath);
-            Assert.IsFalse(File.Exists(testFilePath));
-            await testThread.CreateMessageAsync("hello world!");
-            var request = new CreateMessageRequest("Test create message",
-                new[] { file.Id },
-                new Dictionary<string, string>
-                {
-                    ["test"] = nameof(Test_04_01_CreateMessage)
-                });
+            FileResponse file = null;
             MessageResponse message;
+
             try
             {
-                message = await testThread.CreateMessageAsync(request);
+                try
+                {
+                    file = await OpenAIClient.FilesEndpoint.UploadFileAsync(testFilePath, "assistants");
+                    Assert.NotNull(file);
+                }
+                finally
+                {
+                    if (File.Exists(testFilePath))
+                    {
+                        File.Delete(testFilePath);
+                    }
+
+                    Assert.IsFalse(File.Exists(testFilePath));
+                }
+
+                message = await testThread.CreateMessageAsync("hello world!");
+                Assert.IsNotNull(message);
+                message = await testThread.CreateMessageAsync(new(
+                    content: "Test create message",
+                    attachments: new[] { new Attachment(file.Id, Tool.FileSearch) },
+                    metadata: new Dictionary<string, string>
+                    {
+                        ["test"] = nameof(Test_04_01_CreateMessage)
+                    }));
             }
             finally
             {
@@ -154,60 +168,13 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_04_04_UploadAndDownloadMessageFiles()
-        {
-            Assert.IsNotNull(testThread);
-            Assert.IsNotNull(OpenAIClient.ThreadsEndpoint);
-            var file1 = await CreateTestFileAsync("test_1.txt");
-            var file2 = await CreateTestFileAsync("test_2.txt");
-            try
-            {
-                var createRequest = new CreateMessageRequest("Test content with files", new[] { file1.Id, file2.Id });
-                var message = await testThread.CreateMessageAsync(createRequest);
-                var fileList = await message.ListFilesAsync();
-                Assert.IsNotNull(fileList);
-                Assert.AreEqual(2, fileList.Items.Count);
-
-                foreach (var file in fileList.Items)
-                {
-                    var retrieved = await message.RetrieveFileAsync(file);
-                    Assert.IsNotNull(retrieved);
-                    Debug.Log(file.Id);
-                    // TODO 400 bad request errors. Likely OpenAI bug downloading message file content.
-                    //var filePath = await message.DownloadFileContentAsync(file, Directory.GetCurrentDirectory(), true);
-                    //Assert.IsFalse(string.IsNullOrWhiteSpace(filePath));
-                    //Assert.IsTrue(File.Exists(filePath));
-                    //File.Delete(filePath);
-                }
-
-                var threadList = await testThread.ListFilesAsync(message);
-                Assert.IsNotNull(threadList);
-                Assert.IsNotEmpty(threadList.Items);
-
-                //foreach (var file in threadList.Items)
-                //{
-                //    // TODO 400 bad request errors. Likely OpenAI bug downloading message file content.
-                //    var filePath = await file.DownloadContentAsync(Directory.GetCurrentDirectory(), true);
-                //    Assert.IsFalse(string.IsNullOrWhiteSpace(filePath));
-                //    Assert.IsTrue(File.Exists(filePath));
-                //    File.Delete(filePath);
-                //}
-            }
-            finally
-            {
-                await CleanupFileAsync(file1);
-                await CleanupFileAsync(file2);
-            }
-        }
-
-        [Test]
         public async Task Test_05_DeleteThread()
         {
             Assert.IsNotNull(testThread);
             Assert.IsNotNull(OpenAIClient.ThreadsEndpoint);
-            var isDeleted = await testThread.DeleteAsync();
+            var isDeleted = await testThread.DeleteAsync(deleteToolResources: true);
             Assert.IsTrue(isDeleted);
-            Debug.Log($"Deleted thread {testThread.Id}");
+            Debug.Log($"Deleted thread -> {testThread.Id}");
         }
 
         [Test]
@@ -218,7 +185,7 @@ namespace OpenAI.Tests
                 new CreateAssistantRequest(
                     name: "Math Tutor",
                     instructions: "You are a personal math tutor. Answer questions briefly, in a sentence or less.",
-                    model: Model.GPT4_Turbo));
+                    model: Model.GPT4o));
             Assert.NotNull(assistant);
             testAssistant = assistant;
             var thread = await OpenAIClient.ThreadsEndpoint.CreateThreadAsync();
@@ -236,7 +203,7 @@ namespace OpenAI.Tests
             }
             finally
             {
-                await thread.DeleteAsync();
+                await thread.DeleteAsync(deleteToolResources: true);
             }
         }
 
@@ -283,7 +250,7 @@ namespace OpenAI.Tests
         {
             Assert.NotNull(testRun);
             Assert.NotNull(OpenAIClient.ThreadsEndpoint);
-            // run in Queued and InProgress can't be modified
+            // a run that is Queued or InProgress can't be modified
             var run = await testRun.WaitForStatusChangeAsync();
             Assert.IsNotNull(run);
             Assert.IsTrue(run.Status == RunStatus.Completed);
@@ -308,6 +275,7 @@ namespace OpenAI.Tests
             var run = await testThread.CreateRunAsync(testAssistant);
             Assert.IsNotNull(run);
             Assert.IsTrue(run.Status == RunStatus.Queued);
+            await Task.Delay(10);
             run = await run.CancelAsync();
             Assert.IsNotNull(run);
             Assert.IsTrue(run.Status == RunStatus.Cancelling);
@@ -338,7 +306,7 @@ namespace OpenAI.Tests
 
             if (testThread != null)
             {
-                var isDeleted = await testThread.DeleteAsync();
+                var isDeleted = await testThread.DeleteAsync(deleteToolResources: true);
                 Assert.IsTrue(isDeleted);
             }
         }
@@ -373,7 +341,7 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(runStep.Client);
                 var retrievedRunStep = await runStep.UpdateAsync();
                 Assert.IsNotNull(retrievedRunStep);
-                Debug.Log($"[{runStep.Id}] {runStep.Status} {runStep.CreatedAt} -> {runStep.ExpiresAt}");
+                Debug.Log($"[{runStep.Id}] {runStep.Status} {runStep.CreatedAt} -> {runStep.ExpiredAt}");
                 var retrieveStepRunStep = await run.RetrieveRunStepAsync(runStep.Id);
                 Assert.IsNotNull(retrieveStepRunStep);
             }
@@ -384,14 +352,14 @@ namespace OpenAI.Tests
             Assert.IsNotNull(toolCall.FunctionCall);
             Assert.IsTrue(toolCall.FunctionCall.Name.Contains(nameof(WeatherService.GetCurrentWeatherAsync)));
             Assert.IsNotNull(toolCall.FunctionCall.Arguments);
-            Console.WriteLine($"tool call arguments: {toolCall.FunctionCall.Arguments}");
+            Debug.Log($"tool call arguments: {toolCall.FunctionCall.Arguments}");
 
             // Invoke all the tool call functions and return the tool outputs.
             var toolOutputs = await testAssistant.GetToolOutputsAsync(run.RequiredAction.SubmitToolOutputs.ToolCalls);
 
             foreach (var toolOutput in toolOutputs)
             {
-                Console.WriteLine($"tool output: {toolOutput}");
+                Debug.Log($"tool output: {toolOutput}");
             }
 
             run = await run.SubmitToolOutputsAsync(toolOutputs);
@@ -406,7 +374,7 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(runStep.Client);
                 var retrievedRunStep = await runStep.UpdateAsync();
                 Assert.IsNotNull(retrievedRunStep);
-                Debug.Log($"[{runStep.Id}] {runStep.Status} {runStep.CreatedAt} -> {(runStep.ExpiresAtUnixTimeSeconds.HasValue ? runStep.ExpiresAt : runStep.CompletedAt)}");
+                Debug.Log($"[{runStep.Id}] {runStep.Status} {runStep.CreatedAt} -> {(runStep.ExpiredAtUnixTimeSeconds.HasValue ? runStep.ExpiredAt : runStep.CompletedAt)}");
                 if (runStep.StepDetails.ToolCalls == null) { continue; }
 
                 foreach (var runStepToolCall in runStep.StepDetails.ToolCalls)
@@ -422,7 +390,6 @@ namespace OpenAI.Tests
             foreach (var message in messages.Items.OrderBy(response => response.CreatedAt))
             {
                 Assert.IsNotNull(message);
-                Assert.IsNotEmpty(message.Content);
                 Debug.Log($"{message.Role}: {message.PrintContent()}");
             }
         }
@@ -438,7 +405,7 @@ namespace OpenAI.Tests
 
             if (testThread != null)
             {
-                var isDeleted = await testThread.DeleteAsync();
+                var isDeleted = await testThread.DeleteAsync(deleteToolResources: true);
                 Assert.IsTrue(isDeleted);
             }
         }
@@ -455,6 +422,7 @@ namespace OpenAI.Tests
 
         private async Task CleanupFileAsync(FileResponse file)
         {
+            if (file == null) { return; }
             var isDeleted = await OpenAIClient.FilesEndpoint.DeleteFileAsync(file);
             Assert.IsTrue(isDeleted);
         }

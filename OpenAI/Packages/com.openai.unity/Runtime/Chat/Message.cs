@@ -19,15 +19,6 @@ namespace OpenAI.Chat
         [Preserve]
         internal Message(Delta other) => CopyFrom(other);
 
-        [Preserve]
-        [Obsolete("Use new constructor args")]
-        public Message(Role role, string content, string name, Function function)
-            : this(role, content, name)
-        {
-            Name = name;
-            Function = function;
-        }
-
         /// <summary>
         /// Creates a new message to insert into a chat conversation.
         /// </summary>

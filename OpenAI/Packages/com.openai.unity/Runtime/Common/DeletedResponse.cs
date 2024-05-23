@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI
 {
     [Preserve]
-    public sealed class DeletedResponse
+    public sealed class DeletedResponse : BaseResponse
     {
         [Preserve]
         [JsonConstructor]

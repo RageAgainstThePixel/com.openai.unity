@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Audio
 {
     [Preserve]
-    public class AudioResponse
+    public sealed class AudioResponse
     {
         [Preserve]
         [JsonConstructor]

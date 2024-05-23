@@ -5,7 +5,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Scripting;
 
-namespace OpenAI.Chat
+namespace OpenAI
 {
     [Preserve]
     public sealed class Content
@@ -30,6 +30,13 @@ namespace OpenAI.Chat
         }
 
         [Preserve]
+        public Content(ImageFile imageFile)
+        {
+            Type = ContentType.ImageFile;
+            ImageFile = imageFile;
+        }
+
+        [Preserve]
         public Content(ContentType type, string input)
         {
             Type = type;
@@ -42,6 +49,10 @@ namespace OpenAI.Chat
                 case ContentType.ImageUrl:
                     ImageUrl = new ImageUrl(input);
                     break;
+                case ContentType.ImageFile:
+                    throw new ArgumentException("Use the ImageFile constructor for ImageFile content.");
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type));
             }
         }
 
@@ -58,6 +69,10 @@ namespace OpenAI.Chat
         public ImageUrl ImageUrl { get; private set; }
 
         [Preserve]
+        [JsonProperty("image_file")]
+        public ImageFile ImageFile { get; private set; }
+
+        [Preserve]
         public static implicit operator Content(string input) => new(ContentType.Text, input);
 
         [Preserve]
@@ -65,5 +80,8 @@ namespace OpenAI.Chat
 
         [Preserve]
         public static implicit operator Content(Texture2D texture) => new(texture);
+
+        [Preserve]
+        public static implicit operator Content(ImageFile imageFile) => new(imageFile);
     }
 }
