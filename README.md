@@ -1001,7 +1001,7 @@ var messages = new List<Message>
     })
 };
 var chatRequest = new ChatRequest(messages, model: Model.GPT4_Turbo);
-var result = await apiChatEndpoint.GetCompletionAsync(chatRequest);
+var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
 Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice} | Finish Reason: {result.FirstChoice.FinishDetails}");
 ```
 
