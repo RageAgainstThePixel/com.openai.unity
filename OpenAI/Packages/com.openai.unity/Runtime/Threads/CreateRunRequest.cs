@@ -37,7 +37,7 @@ namespace OpenAI.Threads
                 request?.MaxPromptTokens,
                 request?.MaxCompletionTokens,
                 request?.TruncationStrategy,
-                request?.ToolChoice as string ?? (string)request?.ToolChoice?.funcion?.name,
+                request?.ToolChoice,
                 request?.ResponseFormat ?? OpenAI.ResponseFormat.Text)
         {
         }
@@ -133,7 +133,7 @@ namespace OpenAI.Threads
             int? maxPromptTokens = null,
             int? maxCompletionTokens = null,
             TruncationStrategy truncationStrategy = null,
-            string toolChoice = null,
+            object toolChoice = null,
             ResponseFormat responseFormat = OpenAI.ResponseFormat.Text)
         {
             AssistantId = assistantId;
@@ -146,24 +146,31 @@ namespace OpenAI.Threads
 
             if (toolList != null && toolList.Any())
             {
-                if (string.IsNullOrWhiteSpace(toolChoice))
+                if (toolChoice is string toolChoiceString)
                 {
-                    ToolChoice = "auto";
-                }
-                else
-                {
-                    if (!toolChoice.Equals("none") &&
-                        !toolChoice.Equals("required") &&
-                        !toolChoice.Equals("auto"))
+                    if (string.IsNullOrWhiteSpace(toolChoiceString))
                     {
-                        var tool = toolList.FirstOrDefault(t => t.Function.Name.Contains(toolChoice)) ??
-                                   throw new ArgumentException($"The specified tool choice '{toolChoice}' was not found in the list of tools");
-                        ToolChoice = new { type = "function", function = new { name = tool.Function.Name } };
+                        ToolChoice = "auto";
                     }
                     else
                     {
-                        ToolChoice = toolChoice;
+                        if (!toolChoiceString.Equals("none") &&
+                            !toolChoiceString.Equals("required") &&
+                            !toolChoiceString.Equals("auto"))
+                        {
+                            var tool = toolList.FirstOrDefault(t => t.Function.Name.Contains(toolChoiceString)) ??
+                                       throw new ArgumentException($"The specified tool choice '{toolChoiceString}' was not found in the list of tools");
+                            ToolChoice = new { type = "function", function = new { name = tool.Function.Name } };
+                        }
+                        else
+                        {
+                            ToolChoice = toolChoiceString;
+                        }
                     }
+                }
+                else
+                {
+                    ToolChoice = toolChoice;
                 }
             }
 
