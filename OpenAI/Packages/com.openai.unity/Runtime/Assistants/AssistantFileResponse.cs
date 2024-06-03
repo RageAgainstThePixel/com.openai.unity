@@ -15,7 +15,7 @@ namespace OpenAI.Assistants
     {
         [Preserve]
         [JsonConstructor]
-        public AssistantFileResponse(
+        internal AssistantFileResponse(
             string id,
             string @object,
             int createdAtUnixTimeSeconds,

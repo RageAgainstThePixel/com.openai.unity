@@ -1,3 +1,5 @@
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
 using Newtonsoft.Json;
 using OpenAI.Extensions;
 using System;
@@ -208,13 +210,13 @@ namespace OpenAI.VectorStores
         /// A list of File IDs that the vector store should use. Useful for tools like file_search that can access files.
         /// </param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="VectorStoreFileBatch"/>.</returns>
-        public async Task<VectorStoreFileBatch> CreateVectorStoreFileBatch(string vectorStoreId, IReadOnlyList<string> fileIds, CancellationToken cancellationToken = default)
+        /// <returns><see cref="VectorStoreFileBatchResponse"/>.</returns>
+        public async Task<VectorStoreFileBatchResponse> CreateVectorStoreFileBatch(string vectorStoreId, IReadOnlyList<string> fileIds, CancellationToken cancellationToken = default)
         {
             if (fileIds is not { Count: not 0 }) { throw new ArgumentNullException(nameof(fileIds)); }
             var jsonContent = JsonConvert.SerializeObject(new { file_ids = fileIds }, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl($"/{vectorStoreId}/file_batches"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            return response.Deserialize<VectorStoreFileBatch>(client);
+            return response.Deserialize<VectorStoreFileBatchResponse>(client);
         }
 
         /// <summary>
@@ -225,7 +227,7 @@ namespace OpenAI.VectorStores
         /// <param name="filter">Optional, filter by file status.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="ListResponse{VectorStoreFileBatch}"/>.</returns>
-        public async Task<ListResponse<VectorStoreFileBatch>> ListVectorStoreFileBatchesAsync(string vectorStoreId, ListQuery query = null, VectorStoreFileStatus? filter = null, CancellationToken cancellationToken = default)
+        public async Task<ListResponse<VectorStoreFileBatchResponse>> ListVectorStoreFileBatchesAsync(string vectorStoreId, ListQuery query = null, VectorStoreFileStatus? filter = null, CancellationToken cancellationToken = default)
         {
             Dictionary<string, string> queryParams = query;
 
@@ -237,7 +239,7 @@ namespace OpenAI.VectorStores
 
             var response = await Rest.GetAsync(GetUrl($"/{vectorStoreId}/file_batches", queryParams), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<ListResponse<VectorStoreFileBatch>>(client);
+            return response.Deserialize<ListResponse<VectorStoreFileBatchResponse>>(client);
         }
 
         /// <summary>
@@ -246,12 +248,12 @@ namespace OpenAI.VectorStores
         /// <param name="vectorStoreId">The ID of the vector store that the files belong to.</param>
         /// <param name="fileBatchId">The ID of the file batch being retrieved.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="VectorStoreFileBatch"/>.</returns>
-        public async Task<VectorStoreFileBatch> GetVectorStoreFileBatchAsync(string vectorStoreId, string fileBatchId, CancellationToken cancellationToken = default)
+        /// <returns><see cref="VectorStoreFileBatchResponse"/>.</returns>
+        public async Task<VectorStoreFileBatchResponse> GetVectorStoreFileBatchAsync(string vectorStoreId, string fileBatchId, CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl($"/{vectorStoreId}/file_batches/{fileBatchId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<VectorStoreFileBatch>(client);
+            return response.Deserialize<VectorStoreFileBatchResponse>(client);
         }
 
         /// <summary>
@@ -266,7 +268,7 @@ namespace OpenAI.VectorStores
         {
             var response = await Rest.PostAsync(GetUrl($"/{vectorStoreId}/file_batches/{fileBatchId}/cancel"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            var result = response.Deserialize<VectorStoreFileBatch>(client);
+            var result = response.Deserialize<VectorStoreFileBatchResponse>(client);
             return result.Status == VectorStoreFileStatus.Cancelled;
         }
 

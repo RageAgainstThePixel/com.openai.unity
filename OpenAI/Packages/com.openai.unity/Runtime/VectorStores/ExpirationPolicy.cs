@@ -12,14 +12,13 @@ namespace OpenAI.VectorStores
     public sealed class ExpirationPolicy
     {
         [Preserve]
-        public static implicit operator ExpirationPolicy(int days) => new(days);
-
-        [Preserve]
         [JsonConstructor]
-        public ExpirationPolicy(
+        internal ExpirationPolicy(
             [JsonProperty("anchor")] string anchor,
             [JsonProperty("days")] int days)
         {
+            Anchor = anchor;
+            Days = days;
         }
 
         /// <summary>
@@ -47,5 +46,8 @@ namespace OpenAI.VectorStores
         [Preserve]
         [JsonProperty("days")]
         public int Days { get; }
+
+        [Preserve]
+        public static implicit operator ExpirationPolicy(int days) => new(days);
     }
 }

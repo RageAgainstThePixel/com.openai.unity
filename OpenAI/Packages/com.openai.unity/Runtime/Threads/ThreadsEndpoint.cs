@@ -365,6 +365,5 @@ namespace OpenAI.Threads
         }
 
         #endregion Files (Obsolete)
-
     }
 }

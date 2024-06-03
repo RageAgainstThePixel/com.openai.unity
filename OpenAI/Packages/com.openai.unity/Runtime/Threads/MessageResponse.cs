@@ -18,7 +18,7 @@ namespace OpenAI.Threads
     {
         [Preserve]
         [JsonConstructor]
-        public MessageResponse(
+        internal MessageResponse(
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
             [JsonProperty("created_at")] int createdAtUnixTimeSeconds,
@@ -28,7 +28,7 @@ namespace OpenAI.Threads
             [JsonProperty("completed_at")] int? completedAtUnixTimeSeconds,
             [JsonProperty("incomplete_at")] int? incompleteAtUnixTimeSeconds,
             [JsonProperty("role")] Role role,
-            [JsonProperty("content")] object content,
+            [JsonProperty("content")] IReadOnlyList<Content> content,
             [JsonProperty("assistant_id")] string assistantId,
             [JsonProperty("run_id")] string runId,
             [JsonProperty("Attachments")] IReadOnlyList<Attachment> attachments,
@@ -134,7 +134,7 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("content")]
-        public object Content { get; }
+        public IReadOnlyList<Content> Content { get; }
 
         /// <summary>
         /// If applicable, the ID of the assistant that authored this message.
@@ -156,8 +156,8 @@ namespace OpenAI.Threads
         /// A maximum of 10 files can be attached to a message.
         /// </summary>
         [JsonIgnore]
-        [Obsolete("Removed")]
-        public IReadOnlyList<string> FileIds { get; }
+        [Obsolete("Use Attachments instead.")]
+        public IReadOnlyList<string> FileIds => Attachments?.Select(attachment => attachment.FileId).ToList();
 
         /// <summary>
         /// A list of files attached to the message, and the tools they were added to.
@@ -180,12 +180,7 @@ namespace OpenAI.Threads
 
         [Preserve]
         public static implicit operator Message(MessageResponse response)
-            => response?.Content switch
-            {
-                string content => new(content, response.Role, response.Attachments, response.Metadata),
-                IReadOnlyList<Content> contents => new(contents, response.Role, response.Attachments, response.Metadata),
-                _ => null
-            };
+            => new(response.Content, response.Role, response.Attachments, response.Metadata);
 
         [Preserve]
         public override string ToString() => Id;
@@ -197,11 +192,6 @@ namespace OpenAI.Threads
         /// <returns><see cref="string"/> of all <see cref="Content"/>.</returns>
         [Preserve]
         public string PrintContent()
-            => Content switch
-            {
-                string content => content,
-                IReadOnlyList<Content> contents => string.Join("\n", contents.Select(content => content?.ToString())),
-                _ => string.Empty
-            };
+            => string.Join("\n", Content.Select(content => content?.ToString()));
     }
 }

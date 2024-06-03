@@ -65,6 +65,9 @@ namespace OpenAI.Threads
         [JsonProperty("file_search")]
         public IReadOnlyDictionary<string, object> FileSearch { get; private set; }
 
+        /// <summary>
+        /// For now, this is always going to be an empty object.
+        /// </summary>
         [JsonIgnore]
         [Obsolete("Removed")]
         public object Retrieval { get; private set; }

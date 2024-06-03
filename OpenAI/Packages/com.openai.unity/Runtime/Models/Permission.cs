@@ -11,7 +11,7 @@ namespace OpenAI.Models
     {
         [Preserve]
         [JsonConstructor]
-        public Permission(
+        internal Permission(
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
             [JsonProperty("created")] int createdAtUnixTime,

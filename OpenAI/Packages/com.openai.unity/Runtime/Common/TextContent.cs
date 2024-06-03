@@ -2,9 +2,10 @@
 
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 
-namespace OpenAI.Threads
+namespace OpenAI
 {
     [Preserve]
     public sealed class TextContent
@@ -16,10 +17,10 @@ namespace OpenAI.Threads
         [JsonConstructor]
         public TextContent(
             [JsonProperty("value")] string value,
-            [JsonProperty("annotations")] IReadOnlyList<Annotation> annotations)
+            [JsonProperty("annotations")] IEnumerable<Annotation> annotations)
         {
             Value = value;
-            Annotations = annotations;
+            Annotations = annotations?.ToList();
         }
 
         /// <summary>
@@ -40,8 +41,9 @@ namespace OpenAI.Threads
         public static implicit operator TextContent(string value) => new(value);
 
         [Preserve]
-        public static implicit operator string(TextContent text) => text?.ToString();
+        public static implicit operator string(TextContent content) => content.Value;
 
+        [Preserve]
         public override string ToString() => Value;
     }
 }

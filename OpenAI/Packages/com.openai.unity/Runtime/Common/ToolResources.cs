@@ -11,15 +11,15 @@ namespace OpenAI
     /// For example, the <see cref="Tool.CodeInterpreter"/> requres a list of file ids,
     /// While the <see cref="Tool.FileSearch"/> requires a list vector store ids.
     /// </summary>
+    [Preserve]
     public sealed class ToolResources
     {
-        public ToolResources() { }
-
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="fileSearch"><see cref="FileSearchResources"/>.</param>
         /// <param name="codeInterpreter"><see cref="CodeInterpreterResources"/>.</param>
+        [Preserve]
         public ToolResources(FileSearchResources fileSearch = null, CodeInterpreterResources codeInterpreter = null)
             : this(codeInterpreter, fileSearch)
         {
@@ -30,7 +30,11 @@ namespace OpenAI
         /// </summary>
         /// <param name="codeInterpreter"><see cref="CodeInterpreterResources"/>.</param>
         /// <param name="fileSearch"><see cref="FileSearchResources"/>.</param>
-        public ToolResources(CodeInterpreterResources codeInterpreter = null, FileSearchResources fileSearch = null)
+        [Preserve]
+        [JsonConstructor]
+        public ToolResources(
+            [JsonProperty("code_interpreter")] CodeInterpreterResources codeInterpreter = null,
+            [JsonProperty("file_search")] FileSearchResources fileSearch = null)
         {
             CodeInterpreter = codeInterpreter;
             FileSearch = fileSearch;
@@ -44,8 +48,10 @@ namespace OpenAI
         [JsonProperty("file_search")]
         public FileSearchResources FileSearch { get; private set; }
 
+        [Preserve]
         public static implicit operator ToolResources(FileSearchResources fileSearch) => new(fileSearch);
 
+        [Preserve]
         public static implicit operator ToolResources(CodeInterpreterResources codeInterpreter) => new(codeInterpreter);
     }
 }

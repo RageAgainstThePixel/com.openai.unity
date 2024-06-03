@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Scripting;
@@ -8,25 +9,27 @@ using UnityEngine.Scripting;
 namespace OpenAI.Assistants
 {
     /// <summary>
-    /// Purpose-built AI that uses OpenAI’s models and calls tools.
+    /// Purpose-built AI that uses OpenAI's models and calls tools.
     /// </summary>
     [Preserve]
     public sealed class AssistantResponse : BaseResponse
     {
         [Preserve]
         [JsonConstructor]
-        public AssistantResponse(
-            string id,
-            string @object,
-            int createdAtUnixTimeSeconds,
-            string name,
-            string description,
-            string model,
-            string instructions,
-            IReadOnlyList<Tool> tools,
-            ToolResources toolResources,
-            IReadOnlyList<string> fileIds,
-            Dictionary<string, string> metadata)
+        internal AssistantResponse(
+            [JsonProperty("id")] string id,
+            [JsonProperty("object")] string @object,
+            [JsonProperty("created_at")] int createdAtUnixTimeSeconds,
+            [JsonProperty("name")] string name,
+            [JsonProperty("description")] string description,
+            [JsonProperty("model")] string model,
+            [JsonProperty("instructions")] string instructions,
+            [JsonProperty("tools")] IReadOnlyList<Tool> tools,
+            [JsonProperty("tool_resources")] ToolResources toolResources,
+            [JsonProperty("metadata")] Dictionary<string, string> metadata,
+            [JsonProperty("temperature")] double temperature,
+            [JsonProperty("top_p")] double topP,
+            [JsonProperty("response_format")][JsonConverter(typeof(ResponseFormatConverter))] ChatResponseFormat responseFormat)
         {
             Id = id;
             Object = @object;
@@ -38,6 +41,9 @@ namespace OpenAI.Assistants
             Tools = tools;
             ToolResources = toolResources;
             Metadata = metadata;
+            Temperature = temperature;
+            TopP = topP;
+            ResponseFormat = responseFormat;
         }
 
         /// <summary>
@@ -115,7 +121,7 @@ namespace OpenAI.Assistants
         /// </summary>
         [Preserve]
         [JsonProperty("tool_resources")]
-        public ToolResources ToolResources { get; private set; }
+        public ToolResources ToolResources { get; }
 
         /// <summary>
         /// A list of file IDs attached to this assistant.
@@ -123,6 +129,7 @@ namespace OpenAI.Assistants
         /// Files are ordered by their creation date in ascending order.
         /// </summary>
         [JsonIgnore]
+        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
         public IReadOnlyList<string> FileIds => null;
 
         /// <summary>
@@ -141,7 +148,7 @@ namespace OpenAI.Assistants
         /// </summary>
         [Preserve]
         [JsonProperty("temperature")]
-        public double Temperature { get; private set; }
+        public double Temperature { get; }
 
         /// <summary>
         /// An alternative to sampling with temperature, called nucleus sampling,
@@ -150,11 +157,11 @@ namespace OpenAI.Assistants
         /// </summary>
         [Preserve]
         [JsonProperty("top_p")]
-        public double TopP { get; private set; }
+        public double TopP { get; }
 
         /// <summary>
         /// Specifies the format that the model must output.
-        /// Setting to <see cref="ResponseFormat.Json"/> enables JSON mode,
+        /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.
         /// </summary>
         /// <remarks>
@@ -165,8 +172,9 @@ namespace OpenAI.Assistants
         /// which indicates the generation exceeded max_tokens or the conversation exceeded the max context length.
         /// </remarks>
         [Preserve]
-        [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public ResponseFormatObject ResponseFormat { get; private set; }
+        [JsonProperty("response_format")]
+        [JsonConverter(typeof(ResponseFormatConverter))]
+        public ChatResponseFormat ResponseFormat { get; }
 
         [Preserve]
         public static implicit operator string(AssistantResponse assistant) => assistant?.Id;

@@ -10,7 +10,7 @@ namespace OpenAI.Audio
     {
         [Preserve]
         [JsonConstructor]
-        public AudioResponse(
+        internal AudioResponse(
             [JsonProperty("language")] string language,
             [JsonProperty("duration")] double? duration,
             [JsonProperty("text")] string text,

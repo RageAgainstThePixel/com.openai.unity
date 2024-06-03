@@ -10,6 +10,7 @@ namespace OpenAI
     /// A helper to create a vector store with file_ids and attach it to an assistant/thread.
     /// There can be a maximum of 1 vector store attached to the assistant/thread.
     /// </summary>
+    [Preserve]
     public sealed class VectorStoreRequest
     {
         /// <summary>
@@ -24,6 +25,7 @@ namespace OpenAI
         /// This can be useful for storing additional information about the vector store in a structured format.
         /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
         /// </param>
+        [Preserve]
         public VectorStoreRequest(IReadOnlyList<string> fileIds, IReadOnlyDictionary<string, string> metadata = null)
         {
             FileIds = fileIds;

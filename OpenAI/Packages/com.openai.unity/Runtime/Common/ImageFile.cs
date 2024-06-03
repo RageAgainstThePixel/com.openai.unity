@@ -47,5 +47,7 @@ namespace OpenAI
         [Preserve]
         [JsonProperty("detail")]
         public ImageDetail Detail { get; private set; }
+
+        public override string ToString() => FileId;
     }
 }

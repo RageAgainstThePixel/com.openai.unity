@@ -8,6 +8,9 @@ using UnityEngine.Scripting;
 
 namespace OpenAI.Threads
 {
+    /// <summary>
+    /// Create a message on a thread.
+    /// </summary>
     [Obsolete("use Thread.Message instead.")]
     public sealed class CreateMessageRequest
     {
@@ -18,22 +21,50 @@ namespace OpenAI.Threads
 
         public static implicit operator Message(CreateMessageRequest request) => new(request.Content, request.Role, request.Attachments, request.Metadata);
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="content"></param>
-        /// <param name="fileIds"></param>
-        /// <param name="metadata"></param>
         [Obsolete("Removed")]
         public CreateMessageRequest(string content, IEnumerable<string> fileIds, IReadOnlyDictionary<string, string> metadata = null)
         {
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="content">
+        /// The contents of the message.
+        /// </param>
+        /// <param name="role">
+        /// The role of the entity that is creating the message.
+        /// </param>
+        /// <param name="attachments">
+        /// A list of files attached to the message, and the tools they were added to.
+        /// </param>
+        /// <param name="metadata">
+        /// Set of 16 key-value pairs that can be attached to an object.
+        /// This can be useful for storing additional information about the object in a structured format.
+        /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
+        /// </param>
         public CreateMessageRequest(string content, Role role = Role.User, IEnumerable<Attachment> attachments = null, IReadOnlyDictionary<string, string> metadata = null)
             : this(new List<Content> { new(content) }, role, attachments, metadata)
         {
         }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="content">
+        /// The contents of the message.
+        /// </param>
+        /// <param name="role">
+        /// The role of the entity that is creating the message.
+        /// </param>
+        /// <param name="attachments">
+        /// A list of files attached to the message, and the tools they were added to.
+        /// </param>
+        /// <param name="metadata">
+        /// Set of 16 key-value pairs that can be attached to an object.
+        /// This can be useful for storing additional information about the object in a structured format.
+        /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
+        /// </param>
         public CreateMessageRequest(IEnumerable<Content> content, Role role = Role.User, IEnumerable<Attachment> attachments = null, IReadOnlyDictionary<string, string> metadata = null)
         {
             Content = content?.ToList();

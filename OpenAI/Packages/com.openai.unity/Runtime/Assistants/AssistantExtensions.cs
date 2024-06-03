@@ -77,7 +77,7 @@ namespace OpenAI.Assistants
         /// </summary>
         /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
         /// <param name="toolCall"><see cref="ToolCall"/>.</param>
-        /// <returns>Tool output result as <see cref="string"/></returns>
+        /// <returns>Tool output result as <see cref="string"/>.</returns>
         public static string InvokeToolCall(this AssistantResponse assistant, ToolCall toolCall)
         {
             if (toolCall.Type != "function")
@@ -86,7 +86,7 @@ namespace OpenAI.Assistants
             }
 
             var tool = assistant.Tools.FirstOrDefault(tool => tool.Type == "function" && tool.Function.Name == toolCall.FunctionCall.Name) ??
-                       throw new InvalidOperationException($"Failed to find a valid tool for [{toolCall.Id}] {toolCall.Type}");
+                throw new InvalidOperationException($"Failed to find a valid tool for [{toolCall.Id}] {toolCall.Type}");
             tool.Function.Arguments = toolCall.FunctionCall.Arguments;
             return tool.InvokeFunction();
         }
@@ -97,7 +97,7 @@ namespace OpenAI.Assistants
         /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
         /// <param name="toolCall"><see cref="ToolCall"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns>Tool output result as <see cref="string"/></returns>
+        /// <returns>Tool output result as <see cref="string"/>.</returns>
         public static async Task<string> InvokeToolCallAsync(this AssistantResponse assistant, ToolCall toolCall, CancellationToken cancellationToken = default)
         {
             if (toolCall.Type != "function")
@@ -106,7 +106,7 @@ namespace OpenAI.Assistants
             }
 
             var tool = assistant.Tools.FirstOrDefault(tool => tool.Type == "function" && tool.Function.Name == toolCall.FunctionCall.Name) ??
-                       throw new InvalidOperationException($"Failed to find a valid tool for [{toolCall.Id}] {toolCall.Type}");
+                throw new InvalidOperationException($"Failed to find a valid tool for [{toolCall.Id}] {toolCall.Type}");
             tool.Function.Arguments = toolCall.FunctionCall.Arguments;
             return await tool.InvokeFunctionAsync(cancellationToken);
         }

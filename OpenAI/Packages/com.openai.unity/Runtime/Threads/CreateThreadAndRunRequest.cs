@@ -1,4 +1,7 @@
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,8 +34,8 @@ namespace OpenAI.Threads
                 request?.MaxPromptTokens,
                 request?.MaxCompletionTokens,
                 request?.TruncationStrategy,
-                request?.ToolChoice,
-                request?.ResponseFormat ?? OpenAI.ResponseFormat.Text)
+                request?.ToolChoice as string ?? ((Tool)request?.ToolChoice)?.Function?.Name,
+                request?.ResponseFormat ?? ChatResponseFormat.Auto)
         {
         }
 
@@ -107,7 +110,7 @@ namespace OpenAI.Threads
         /// </param>
         /// <param name="responseFormat">
         /// An object specifying the format that the model must output.
-        /// Setting to <see cref="ResponseFormat.Json"/> enables JSON mode,
+        /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.<br/>
         /// Important: When using JSON mode you must still instruct the model to produce JSON yourself via some conversation message,
         /// for example via your system message. If you don't do this, the model may generate an unending stream of
@@ -132,8 +135,8 @@ namespace OpenAI.Threads
             int? maxPromptTokens = null,
             int? maxCompletionTokens = null,
             TruncationStrategy truncationStrategy = null,
-            object toolChoice = null,
-            ResponseFormat responseFormat = OpenAI.ResponseFormat.Text,
+            string toolChoice = null,
+            ChatResponseFormat responseFormat = ChatResponseFormat.Auto,
             CreateThreadRequest createThreadRequest = null)
         {
             AssistantId = assistantId;
@@ -144,33 +147,24 @@ namespace OpenAI.Threads
 
             if (toolList != null && toolList.Any())
             {
-                if (toolChoice is string toolChoiceString)
+                if (string.IsNullOrWhiteSpace(toolChoice))
                 {
-                    if (string.IsNullOrWhiteSpace(toolChoiceString))
-                    {
-                        ToolChoice = "auto";
-                    }
-                    else
-                    {
-                        if (!toolChoiceString.Equals("none") &&
-                            !toolChoiceString.Equals("required") &&
-                            !toolChoiceString.Equals("auto"))
-                        {
-                            var tool = toolList.FirstOrDefault(t => t.Function.Name.Contains(toolChoiceString)) ??
-                                       throw new ArgumentException(
-                                           $"The specified tool choice '{toolChoiceString}' was not found in the list of tools");
-
-                            ToolChoice = new { type = "function", function = new { name = tool.Function.Name } };
-                        }
-                        else
-                        {
-                            ToolChoice = toolChoiceString;
-                        }
-                    }
+                    ToolChoice = "auto";
                 }
                 else
                 {
-                    ToolChoice = toolChoice;
+                    if (!toolChoice.Equals("none") &&
+                        !toolChoice.Equals("required") &&
+                        !toolChoice.Equals("auto"))
+                    {
+                        var tool = toolList.FirstOrDefault(t => t.Function.Name.Contains(toolChoice)) ??
+                                   throw new ArgumentException($"The specified tool choice '{toolChoice}' was not found in the list of tools");
+                        ToolChoice = new { type = "function", function = new { name = tool.Function.Name } };
+                    }
+                    else
+                    {
+                        ToolChoice = toolChoice;
+                    }
                 }
             }
 
@@ -306,7 +300,7 @@ namespace OpenAI.Threads
 
         /// <summary>
         /// An object specifying the format that the model must output.
-        /// Setting to <see cref="ResponseFormat.Json"/> enables JSON mode,
+        /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.
         /// </summary>
         /// <remarks>
@@ -318,7 +312,8 @@ namespace OpenAI.Threads
         /// </remarks>
         [Preserve]
         [JsonProperty("response_format")]
-        public ResponseFormatObject ResponseFormat { get; private set; }
+        [JsonConverter(typeof(ResponseFormatConverter))]
+        public ChatResponseFormat ResponseFormat { get; }
 
         /// <summary>
         /// The optional <see cref="CreateThreadRequest"/> options to use.

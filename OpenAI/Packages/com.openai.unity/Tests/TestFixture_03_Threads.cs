@@ -184,8 +184,9 @@ namespace OpenAI.Tests
             var assistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(
                 new CreateAssistantRequest(
                     name: "Math Tutor",
-                    instructions: "You are a personal math tutor. Answer questions briefly, in a sentence or less.",
-                    model: Model.GPT4o));
+                    instructions: "You are a personal math tutor. Answer questions briefly, in a sentence or less. Your responses should be formatted in JSON.",
+                    model: Model.GPT4o,
+                    responseFormat: ChatResponseFormat.Json));
             Assert.NotNull(assistant);
             testAssistant = assistant;
             var thread = await OpenAIClient.ThreadsEndpoint.CreateThreadAsync();
@@ -200,6 +201,12 @@ namespace OpenAI.Tests
                 run = await run.WaitForStatusChangeAsync();
                 Assert.IsNotNull(run);
                 Assert.IsTrue(run.Status == RunStatus.Completed);
+                var messages = await thread.ListMessagesAsync();
+
+                foreach (var response in messages.Items)
+                {
+                    Console.WriteLine($"{response.Role}: {response.PrintContent()}");
+                }
             }
             finally
             {
@@ -272,16 +279,15 @@ namespace OpenAI.Tests
             Assert.IsNotNull(testThread);
             Assert.IsNotNull(testAssistant);
             Assert.NotNull(OpenAIClient.ThreadsEndpoint);
-            var run = await testThread.CreateRunAsync(testAssistant);
+            var run = await testThread.CreateRunAsync(new CreateRunRequest(testAssistant));
             Assert.IsNotNull(run);
             Assert.IsTrue(run.Status == RunStatus.Queued);
-            await Task.Delay(10);
-            run = await run.CancelAsync();
-            Assert.IsNotNull(run);
-            Assert.IsTrue(run.Status == RunStatus.Cancelling);
 
             try
             {
+                run = await run.CancelAsync();
+                Assert.IsNotNull(run);
+                Assert.IsTrue(run.Status == RunStatus.Cancelling);
                 // waiting while run is cancelling
                 run = await run.WaitForStatusChangeAsync();
             }
@@ -390,6 +396,7 @@ namespace OpenAI.Tests
             foreach (var message in messages.Items.OrderBy(response => response.CreatedAt))
             {
                 Assert.IsNotNull(message);
+                Assert.IsNotEmpty(message.Content);
                 Debug.Log($"{message.Role}: {message.PrintContent()}");
             }
         }

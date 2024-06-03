@@ -6,10 +6,18 @@ using UnityEngine.Scripting;
 
 namespace OpenAI.Batch
 {
+    [Preserve]
     public sealed class BatchErrors
     {
         [Preserve]
+        [JsonConstructor]
+        internal BatchErrors([JsonProperty("data")] IReadOnlyList<Error> errors)
+        {
+            Errors = errors;
+        }
+
+        [Preserve]
         [JsonProperty("data")]
-        public IReadOnlyList<Error> Errors { get; private set; }
+        public IReadOnlyList<Error> Errors { get; }
     }
 }

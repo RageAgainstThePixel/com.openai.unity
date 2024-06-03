@@ -41,10 +41,19 @@ namespace OpenAI.Files
         /// <summary>
         /// Returns a list of files that belong to the user's organization.
         /// </summary>
+        /// <param name="purpose">List files with a specific purpose.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>List of <see cref="FileResponse"/>.</returns>
-        public async Task<IReadOnlyList<FileResponse>> ListFilesAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<FileResponse>> ListFilesAsync(string purpose = null, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.GetAsync(GetUrl(), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            Dictionary<string, string> query = null;
+
+            if (!string.IsNullOrWhiteSpace(purpose))
+            {
+                query = new Dictionary<string, string> { { nameof(purpose), purpose } };
+            }
+
+            var response = await Rest.GetAsync(GetUrl(queryParameters: query), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<FilesList>(client)?.Files;
         }
@@ -117,8 +126,8 @@ namespace OpenAI.Files
                 {
                     const string fileProcessing = "File is still processing. Check back later.";
 
-                    if (response.Code == 409 ||
-                        response.Body != null &&
+                    if (response.Code == 409 /* HttpStatusCode.Conflict */ ||
+                        !string.IsNullOrWhiteSpace(response.Body) &&
                         response.Body.Contains(fileProcessing))
                     {
                         // back off requests on each attempt

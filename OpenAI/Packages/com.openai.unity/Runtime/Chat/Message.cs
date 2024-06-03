@@ -75,6 +75,19 @@ namespace OpenAI.Chat
             ToolCallId = tool.Id;
         }
 
+        /// <summary>
+        /// Creates a new message to insert into a chat conversation.
+        /// </summary>
+        /// <param name="toolCallId">The tool_call_id to use for the message.</param>
+        /// <param name="toolFunctionName">Name of the function call.</param>
+        /// <param name="content">Tool function response.</param>
+        [Preserve]
+        public Message(string toolCallId, string toolFunctionName, IEnumerable<Content> content)
+            : this(Role.Tool, content, toolFunctionName)
+        {
+            ToolCallId = toolCallId;
+        }
+
         [SerializeField]
         private string name;
 
@@ -205,20 +218,6 @@ namespace OpenAI.Chat
                     }
                 }
             }
-
-#pragma warning disable CS0618 // Type or member is obsolete
-            if (other?.Function != null)
-            {
-                if (Function == null)
-                {
-                    Function = new Function(other.Function);
-                }
-                else
-                {
-                    Function.CopyFrom(other.Function);
-                }
-            }
-#pragma warning restore CS0618 // Type or member is obsolete
         }
     }
 }

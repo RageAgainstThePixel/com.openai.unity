@@ -26,9 +26,7 @@ namespace OpenAI.Threads
         /// <param name="toolOutputs">Collection of tools for which the outputs are being submitted.</param>
         [Preserve]
         public SubmitToolOutputsRequest(IEnumerable<ToolOutput> toolOutputs)
-        {
-            ToolOutputs = toolOutputs?.ToList();
-        }
+            => ToolOutputs = toolOutputs?.ToList();
 
         /// <summary>
         /// A list of tools for which the outputs are being submitted.

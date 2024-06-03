@@ -79,7 +79,7 @@ namespace OpenAI.Threads
         public Role Role { get; }
 
         /// <summary>
-        /// The content of the message.
+        /// The contents of the message.
         /// </summary>
         [Preserve]
         [JsonProperty("content", DefaultValueHandling = DefaultValueHandling.Populate, NullValueHandling = NullValueHandling.Include)]

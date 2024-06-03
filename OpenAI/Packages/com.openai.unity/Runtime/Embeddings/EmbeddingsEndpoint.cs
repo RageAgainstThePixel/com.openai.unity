@@ -40,7 +40,7 @@ namespace OpenAI.Embeddings
         /// Only supported in text-embedding-3 and later models
         /// </param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="EmbeddingsResponse"/></returns>
+        /// <returns><see cref="EmbeddingsResponse"/>.</returns>
         public async Task<EmbeddingsResponse> CreateEmbeddingAsync(string input, string model = null, string user = null, int? dimensions = null, CancellationToken cancellationToken = default)
             => await CreateEmbeddingAsync(new EmbeddingsRequest(input, model, user, dimensions), cancellationToken);
 
@@ -64,7 +64,7 @@ namespace OpenAI.Embeddings
         /// Only supported in text-embedding-3 and later models
         /// </param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="EmbeddingsResponse"/></returns>
+        /// <returns><see cref="EmbeddingsResponse"/>.</returns>
         public async Task<EmbeddingsResponse> CreateEmbeddingAsync(IEnumerable<string> input, string model = null, string user = null, int? dimensions = null, CancellationToken cancellationToken = default)
             => await CreateEmbeddingAsync(new EmbeddingsRequest(input, model, user, dimensions), cancellationToken);
 

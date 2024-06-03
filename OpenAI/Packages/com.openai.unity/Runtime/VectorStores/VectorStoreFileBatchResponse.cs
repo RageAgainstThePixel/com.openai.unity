@@ -1,3 +1,5 @@
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
 using Newtonsoft.Json;
 using System;
 using UnityEngine.Scripting;
@@ -8,28 +10,46 @@ namespace OpenAI.VectorStores
     /// A batch of files attached to a vector store.
     /// </summary>
     [Preserve]
-    public sealed class VectorStoreFileBatch : BaseResponse
+    public sealed class VectorStoreFileBatchResponse : BaseResponse
     {
+        [Preserve]
+        [JsonConstructor]
+        internal VectorStoreFileBatchResponse(
+            [JsonProperty("id")] string id,
+            [JsonProperty("object")] string object_,
+            [JsonProperty("created_at")] int createdAtUnixTimeSeconds,
+            [JsonProperty("vector_store_id")] string vectorStoreId,
+            [JsonProperty("status")] VectorStoreFileStatus status,
+            [JsonProperty("file_counts")] FileCounts fileCounts)
+        {
+            Id = id;
+            Object = object_;
+            CreatedAtUnixTimeSeconds = createdAtUnixTimeSeconds;
+            VectorStoreId = vectorStoreId;
+            Status = status;
+            FileCounts = fileCounts;
+        }
+
         /// <summary>
         /// The identifier, which can be referenced in API endpoints.
         /// </summary>
         [Preserve]
         [JsonProperty("id")]
-        public string Id { get; private set; }
+        public string Id { get; }
 
         /// <summary>
         /// The object type, which is always `vector_store.file_batch`.
         /// </summary>
         [Preserve]
         [JsonProperty("object")]
-        public string Object { get; private set; }
+        public string Object { get; }
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the vector store files batch was created.
         /// </summary>
         [Preserve]
         [JsonProperty("created_at")]
-        public int CreatedAtUnixTimeSeconds { get; private set; }
+        public int CreatedAtUnixTimeSeconds { get; }
 
         [JsonIgnore]
         public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTimeSeconds).DateTime;
@@ -39,17 +59,17 @@ namespace OpenAI.VectorStores
         /// </summary>
         [Preserve]
         [JsonProperty("vector_store_id")]
-        public string VectorStoreId { get; private set; }
+        public string VectorStoreId { get; }
 
         /// <summary>
         /// The status of the vector store files batch, which can be either `in_progress`, `completed`, `cancelled` or `failed`.
         /// </summary>
         [Preserve]
         [JsonProperty("status")]
-        public VectorStoreFileStatus Status { get; private set; }
+        public VectorStoreFileStatus Status { get; }
 
         [Preserve]
         [JsonProperty("file_counts")]
-        public FileCounts FileCounts { get; private set; }
+        public FileCounts FileCounts { get; }
     }
 }

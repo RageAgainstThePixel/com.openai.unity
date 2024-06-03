@@ -1,3 +1,5 @@
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
 using Newtonsoft.Json;
 using System;
 using UnityEngine.Scripting;
@@ -7,35 +9,56 @@ namespace OpenAI.VectorStores
     /// <summary>
     /// A list of files attached to a vector store.
     /// </summary>
+    [Preserve]
     public sealed class VectorStoreFileResponse : BaseResponse
     {
+        [Preserve]
+        [JsonConstructor]
+        internal VectorStoreFileResponse(
+            [JsonProperty("id")] string id,
+            [JsonProperty("object")] string objectValue,
+            [JsonProperty("usage_bytes")] long usageBytes,
+            [JsonProperty("created_at")] int createdAtUnixTimeSeconds,
+            [JsonProperty("vector_store_id")] string vectorStoreId,
+            [JsonProperty("status")] VectorStoreFileStatus status,
+            [JsonProperty("last_error")] Error lastError)
+        {
+            Id = id;
+            Object = objectValue;
+            UsageBytes = usageBytes;
+            CreatedAtUnixTimeSeconds = createdAtUnixTimeSeconds;
+            VectorStoreId = vectorStoreId;
+            Status = status;
+            LastError = lastError;
+        }
+
         /// <summary>
         /// The identifier, which can be referenced in API endpoints.
         /// </summary>
         [Preserve]
         [JsonProperty("id")]
-        public string Id { get; private set; }
+        public string Id { get; }
 
         /// <summary>
         /// The object type, which is always 'vector_store.file'.
         /// </summary>
         [Preserve]
         [JsonProperty("object")]
-        public string Object { get; private set; }
+        public string Object { get; }
 
         /// <summary>
         /// The total vector store usage in bytes. Note that this may be different from the original file size.
         /// </summary>
         [Preserve]
         [JsonProperty("usage_bytes")]
-        public long UsageBytes { get; private set; }
+        public long UsageBytes { get; }
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the vector store file was created.
         /// </summary>
         [Preserve]
         [JsonProperty("created_at")]
-        public int CreatedAtUnixTimeSeconds { get; private set; }
+        public int CreatedAtUnixTimeSeconds { get; }
 
         [JsonIgnore]
         public DateTimeOffset CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTimeSeconds);
@@ -45,7 +68,7 @@ namespace OpenAI.VectorStores
         /// </summary>
         [Preserve]
         [JsonProperty("vector_store_id")]
-        public string VectorStoreId { get; private set; }
+        public string VectorStoreId { get; }
 
         /// <summary>
         /// The status of the vector store file, which can be either 'in_progress', 'completed', 'cancelled', or 'failed'.
@@ -53,13 +76,13 @@ namespace OpenAI.VectorStores
         /// </summary>
         [Preserve]
         [JsonProperty("status")]
-        public VectorStoreFileStatus Status { get; private set; }
+        public VectorStoreFileStatus Status { get; }
 
         /// <summary>
         /// The last error associated with this vector store file. Will be 'null' if there are no errors.
         /// </summary>
         [Preserve]
         [JsonProperty("last_error")]
-        public Error LastError { get; private set; }
+        public Error LastError { get; }
     }
 }

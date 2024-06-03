@@ -10,7 +10,7 @@ namespace OpenAI
     {
         [Preserve]
         [JsonConstructor]
-        public Usage(
+        internal Usage(
             [JsonProperty("prompt_tokens")] int? promptTokens,
             [JsonProperty("completion_tokens")] int? completionTokens,
             [JsonProperty("total_tokens")] int? totalTokens)
@@ -22,15 +22,15 @@ namespace OpenAI
 
         [Preserve]
         [JsonProperty("prompt_tokens")]
-        public int? PromptTokens { get; internal set; }
+        public int? PromptTokens { get; private set; }
 
         [Preserve]
         [JsonProperty("completion_tokens")]
-        public int? CompletionTokens { get; internal set; }
+        public int? CompletionTokens { get; private set; }
 
         [Preserve]
         [JsonProperty("total_tokens")]
-        public int? TotalTokens { get; internal set; }
+        public int? TotalTokens { get; private set; }
 
         [Preserve]
         internal void CopyFrom(Usage other)
@@ -51,8 +51,10 @@ namespace OpenAI
             }
         }
 
+        [Preserve]
         public override string ToString() => JsonConvert.SerializeObject(this, OpenAIClient.JsonSerializationOptions);
 
+        [Preserve]
         public static Usage operator +(Usage a, Usage b)
             => new(
                 (a.PromptTokens ?? 0) + (b.PromptTokens ?? 0),

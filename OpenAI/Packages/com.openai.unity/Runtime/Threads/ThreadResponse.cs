@@ -16,7 +16,7 @@ namespace OpenAI.Threads
     {
         [Preserve]
         [JsonConstructor]
-        public ThreadResponse(
+        internal ThreadResponse(
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
             [JsonProperty("created_at")] int createdAtUnitTimeSeconds,
@@ -63,7 +63,7 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("tool_resources")]
-        public ToolResources ToolResources { get; private set; }
+        public ToolResources ToolResources { get; }
 
         /// <summary>
         /// Set of 16 key-value pairs that can be attached to an object.

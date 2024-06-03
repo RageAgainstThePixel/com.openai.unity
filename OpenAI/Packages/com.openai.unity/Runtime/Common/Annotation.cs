@@ -3,14 +3,14 @@
 using Newtonsoft.Json;
 using UnityEngine.Scripting;
 
-namespace OpenAI.Threads
+namespace OpenAI
 {
     [Preserve]
     public sealed class Annotation
     {
         [Preserve]
         [JsonConstructor]
-        public Annotation(
+        internal Annotation(
             [JsonProperty("type")] AnnotationType annotationType,
             [JsonProperty("text")] string text,
             [JsonProperty("file_citation")] FileCitation fileCitation,

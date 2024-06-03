@@ -38,8 +38,7 @@ namespace OpenAI.Batch
         /// </param>
         /// <param name="cancellationToken">Optional <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="BatchResponse"/>.</returns>
-        public async Task<BatchResponse> CreateBatchAsync(string inputFileId, string endpoint,
-            IReadOnlyDictionary<string, object> metadata = null, CancellationToken cancellationToken = default)
+        public async Task<BatchResponse> CreateBatchAsync(string inputFileId, string endpoint, IReadOnlyDictionary<string, object> metadata = null, CancellationToken cancellationToken = default)
         {
             // ReSharper disable once InconsistentNaming
             const string completion_window = "24h";
@@ -56,8 +55,7 @@ namespace OpenAI.Batch
         /// <param name="query"><see cref="ListQuery"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="ListResponse{BatchResponse}"/>.</returns>
-        public async Task<ListResponse<BatchResponse>> ListBatchesAsync(ListQuery query = null,
-            CancellationToken cancellationToken = default)
+        public async Task<ListResponse<BatchResponse>> ListBatchesAsync(ListQuery query = null, CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl(queryParameters: query), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);

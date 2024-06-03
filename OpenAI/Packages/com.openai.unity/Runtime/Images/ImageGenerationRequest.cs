@@ -51,6 +51,7 @@ namespace OpenAI.Images
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
+        [Preserve]
         [JsonConstructor]
         public ImageGenerationRequest(
             [JsonProperty("prompt")] string prompt,

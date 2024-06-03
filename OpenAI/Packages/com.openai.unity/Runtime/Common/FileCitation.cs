@@ -3,7 +3,7 @@
 using Newtonsoft.Json;
 using UnityEngine.Scripting;
 
-namespace OpenAI.Threads
+namespace OpenAI
 {
     [Preserve]
     public sealed class FileCitation

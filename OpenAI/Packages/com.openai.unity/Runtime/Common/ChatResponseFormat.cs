@@ -4,8 +4,9 @@ using System.Runtime.Serialization;
 
 namespace OpenAI
 {
-    public enum ResponseFormat
+    public enum ChatResponseFormat
     {
+        Auto = 0,
         [EnumMember(Value = "text")]
         Text,
         [EnumMember(Value = "json_object")]

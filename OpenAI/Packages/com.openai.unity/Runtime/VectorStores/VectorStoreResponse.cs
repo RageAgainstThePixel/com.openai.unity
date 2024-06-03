@@ -1,3 +1,5 @@
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -8,28 +10,57 @@ namespace OpenAI.VectorStores
     /// <summary>
     ///  A vector store is a collection of processed files can be used by the 'file_search' tool.
     /// </summary>
+    [Preserve]
     public sealed class VectorStoreResponse : BaseResponse
     {
+        [Preserve]
+        [JsonConstructor]
+        internal VectorStoreResponse(
+            [JsonProperty("id")] string id,
+            [JsonProperty("object")] string object_,
+            [JsonProperty("created_at")] int createdAtUnixTimeSeconds,
+            [JsonProperty("name")] string name,
+            [JsonProperty("usage_bytes")] long usageBytes,
+            [JsonProperty("file_counts")] FileCounts fileCounts,
+            [JsonProperty("status")] VectorStoreStatus status,
+            [JsonProperty("expires_after")] ExpirationPolicy expirationPolicy,
+            [JsonProperty("expires_at")] int? expiresAtUnixTimeSeconds,
+            [JsonProperty("last_active_at")] int? lastActiveAtUnixTimeSeconds,
+            [JsonProperty("metadata")] Dictionary<string, object> metadata)
+        {
+            Id = id;
+            Object = object_;
+            CreatedAtUnixTimeSeconds = createdAtUnixTimeSeconds;
+            Name = name;
+            UsageBytes = usageBytes;
+            FileCounts = fileCounts;
+            Status = status;
+            ExpirationPolicy = expirationPolicy;
+            ExpiresAtUnixTimeSeconds = expiresAtUnixTimeSeconds;
+            LastActiveAtUnixTimeSeconds = lastActiveAtUnixTimeSeconds;
+            Metadata = metadata;
+        }
+
         /// <summary>
         /// The identifier, which can be referenced in API endpoints.
         /// </summary>
         [Preserve]
         [JsonProperty("id")]
-        public string Id { get; private set; }
+        public string Id { get; }
 
         /// <summary>
         /// The object type, which is always 'vector_store'.
         /// </summary>
         [Preserve]
         [JsonProperty("object")]
-        public string Object { get; private set; }
+        public string Object { get; }
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the vector store was created.
         /// </summary>
         [Preserve]
         [JsonProperty("created_at")]
-        public int CreatedAtUnixTimeSeconds { get; private set; }
+        public int CreatedAtUnixTimeSeconds { get; }
 
         [JsonIgnore]
         public DateTimeOffset CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTimeSeconds);
@@ -39,18 +70,18 @@ namespace OpenAI.VectorStores
         /// </summary>
         [Preserve]
         [JsonProperty("name")]
-        public string Name { get; private set; }
+        public string Name { get; }
 
         /// <summary>
         /// The total number of bytes used by the files in the vector store.
         /// </summary>
         [Preserve]
         [JsonProperty("usage_bytes")]
-        public long UsageBytes { get; private set; }
+        public long UsageBytes { get; }
 
         [Preserve]
         [JsonProperty("file_counts")]
-        public FileCounts FileCounts { get; private set; }
+        public FileCounts FileCounts { get; }
 
         /// <summary>
         /// The status of the vector store, which can be either 'expired', 'in_progress', or 'completed'.
@@ -58,21 +89,21 @@ namespace OpenAI.VectorStores
         /// </summary>
         [Preserve]
         [JsonProperty("status")]
-        public VectorStoreStatus Status { get; private set; }
+        public VectorStoreStatus Status { get; }
 
         /// <summary>
         /// The expiration policy for a vector store.
         /// </summary>
         [Preserve]
         [JsonProperty("expires_after")]
-        public ExpirationPolicy ExpirationPolicy { get; private set; }
+        public ExpirationPolicy ExpirationPolicy { get; }
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the vector store will expire.
         /// </summary>
         [Preserve]
         [JsonProperty("expires_at")]
-        public int? ExpiresAtUnixTimeSeconds { get; private set; }
+        public int? ExpiresAtUnixTimeSeconds { get; }
 
         [JsonIgnore]
         public DateTimeOffset? ExpiresAt
@@ -85,7 +116,7 @@ namespace OpenAI.VectorStores
         /// </summary>
         [Preserve]
         [JsonProperty("last_active_at")]
-        public int? LastActiveAtUnixTimeSeconds { get; private set; }
+        public int? LastActiveAtUnixTimeSeconds { get; }
 
         [JsonIgnore]
         public DateTimeOffset? LastActiveAt
@@ -100,6 +131,6 @@ namespace OpenAI.VectorStores
         /// </summary>
         [Preserve]
         [JsonProperty("metadata")]
-        public Dictionary<string, object> Metadata { get; private set; }
+        public Dictionary<string, object> Metadata { get; }
     }
 }

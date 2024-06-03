@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,7 +47,8 @@ namespace OpenAI.Assistants
         /// Set of 16 key-value pairs that can be attached to an object.
         /// This can be useful for storing additional information about the object in a structured format.
         /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
-        /// </param>        /// <param name="temperature">
+        /// </param>
+        /// <param name="temperature">
         /// What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random,
         /// while lower values like 0.2 will make it more focused and deterministic.
         /// </param>
@@ -58,7 +60,7 @@ namespace OpenAI.Assistants
         /// </param>
         /// <param name="responseFormat">
         /// Specifies the format that the model must output.
-        /// Setting to <see cref="ResponseFormat.Json"/> enables JSON mode,
+        /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.<br/>
         /// Important: When using JSON mode you must still instruct the model to produce JSON yourself via some conversation message,
         /// for example via your system message. If you don't do this, the model may generate an unending stream of
@@ -78,7 +80,7 @@ namespace OpenAI.Assistants
             IReadOnlyDictionary<string, string> metadata = null,
             double? temperature = null,
             double? topP = null,
-            ResponseFormat responseFormat = OpenAI.ResponseFormat.Text)
+            ChatResponseFormat responseFormat = ChatResponseFormat.Auto)
         : this(
             string.IsNullOrWhiteSpace(model) ? assistant.Model : model,
             string.IsNullOrWhiteSpace(name) ? assistant.Name : name,
@@ -124,7 +126,7 @@ namespace OpenAI.Assistants
         /// </param>
         /// <param name="instructions">
         /// The system instructions that the assistant uses.
-        /// The maximum length is 32768 characters.
+        /// The maximum length is 256,000 characters.
         /// </param>
         /// <param name="tools">
         /// A list of tool enabled on the assistant.
@@ -153,7 +155,7 @@ namespace OpenAI.Assistants
         /// </param>
         /// <param name="responseFormat">
         /// Specifies the format that the model must output.
-        /// Setting to <see cref="ResponseFormat.Json"/> enables JSON mode,
+        /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.<br/>
         /// Important: When using JSON mode you must still instruct the model to produce JSON yourself via some conversation message,
         /// for example via your system message. If you don't do this, the model may generate an unending stream of
@@ -172,7 +174,7 @@ namespace OpenAI.Assistants
             IReadOnlyDictionary<string, string> metadata = null,
             double? temperature = null,
             double? topP = null,
-            ResponseFormat responseFormat = OpenAI.ResponseFormat.Text)
+            ChatResponseFormat responseFormat = ChatResponseFormat.Auto)
         {
             Model = string.IsNullOrWhiteSpace(model) ? Models.Model.GPT4o : model;
             Name = name;
@@ -256,17 +258,8 @@ namespace OpenAI.Assistants
         public double? TopP { get; }
 
         /// <summary>
-        /// Set of 16 key-value pairs that can be attached to an object.
-        /// This can be useful for storing additional information about the object in a structured format.
-        /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
-        /// </summary>
-        [Preserve]
-        [JsonProperty("metadata")]
-        public IReadOnlyDictionary<string, string> Metadata { get; }
-
-        /// <summary>
         /// Specifies the format that the model must output.
-        /// Setting to <see cref="ResponseFormat.Json"/> enables JSON mode,
+        /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.
         /// </summary>
         /// <remarks>
@@ -278,6 +271,15 @@ namespace OpenAI.Assistants
         /// </remarks>
         [Preserve]
         [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public ResponseFormatObject ResponseFormat { get; }
+        [JsonConverter(typeof(ResponseFormatConverter))]
+        public ChatResponseFormat ResponseFormat { get; }
+
+        /// <summary>
+        /// Set of 16 key-value pairs that can be attached to an object.
+        /// This can be useful for storing additional information about the object in a structured format.
+        /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
+        /// </summary>
+        [JsonProperty("metadata")]
+        public IReadOnlyDictionary<string, string> Metadata { get; }
     }
 }

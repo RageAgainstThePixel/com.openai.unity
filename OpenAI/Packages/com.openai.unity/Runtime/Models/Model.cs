@@ -33,7 +33,7 @@ namespace OpenAI.Models
 
         [Preserve]
         [JsonConstructor]
-        public Model(
+        internal Model(
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
             [JsonProperty("created")] int createdAtUnixTimeSeconds,
@@ -107,7 +107,7 @@ namespace OpenAI.Models
         /// <remarks>
         /// Context Window: 128,000 tokens
         /// </remarks>
-        public static Model GPT4o { get; } = new Model("gpt-4o", "openai");
+        public static Model GPT4o { get; } = new("gpt-4o", "openai");
 
         /// <summary>
         /// More capable than any GPT-3.5 model, able to do more complex tasks, and optimized for chat.

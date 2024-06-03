@@ -38,11 +38,7 @@ namespace OpenAI.Assistants
         public async Task<AssistantResponse> CreateAssistantAsync(CreateAssistantRequest request = null, CancellationToken cancellationToken = default)
         {
             request ??= new CreateAssistantRequest();
-            ResponseFormatObject responseFormatObject = new ResponseFormatObject(ResponseFormat.Json);
-            var json = JsonConvert.SerializeObject(responseFormatObject, OpenAIClient.JsonSerializationOptions);
-            UnityEngine.Debug.Log(json);
             var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            UnityEngine.Debug.Log(jsonContent);
             var response = await Rest.PostAsync(GetUrl(), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<AssistantResponse>(client);

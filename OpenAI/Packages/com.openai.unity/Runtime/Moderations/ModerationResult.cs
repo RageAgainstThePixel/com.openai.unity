@@ -10,7 +10,7 @@ namespace OpenAI.Moderations
     {
         [Preserve]
         [JsonConstructor]
-        public ModerationResult(
+        internal ModerationResult(
             [JsonProperty("categories")] Categories categories,
             [JsonProperty("category_scores")] Scores scores,
             [JsonProperty("flagged")] bool flagged)

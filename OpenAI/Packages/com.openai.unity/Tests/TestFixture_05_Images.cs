@@ -22,10 +22,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(imageResults);
             Assert.NotZero(imageResults.Count);
 
-            foreach (var result in imageResults)
+            foreach (var image in imageResults)
             {
-                Debug.Log(result.ToString());
-                Assert.IsNotNull(result.Texture);
+                Assert.IsNotNull(image.Texture);
+                Debug.Log(image.ToString());
             }
         }
 
@@ -59,10 +59,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(imageResults);
             Assert.NotZero(imageResults.Count);
 
-            foreach (var result in imageResults)
+            foreach (var image in imageResults)
             {
-                Debug.Log(result.ToString());
-                Assert.IsNotNull(result.Texture);
+                Assert.IsNotNull(image.Texture);
+                Debug.Log(image.ToString());
             }
         }
 
@@ -82,8 +82,8 @@ namespace OpenAI.Tests
 
             foreach (var result in imageResults)
             {
-                Debug.Log(result.ToString());
                 Assert.IsNotNull(result.Texture);
+                Debug.Log(result.ToString());
             }
         }
 
@@ -103,8 +103,8 @@ namespace OpenAI.Tests
 
             foreach (var result in imageResults)
             {
-                Debug.Log(result.ToString());
                 Assert.IsNotNull(result.Texture);
+                Debug.Log(result.ToString());
             }
         }
 
@@ -120,10 +120,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(imageResults);
             Assert.NotZero(imageResults.Count);
 
-            foreach (var result in imageResults)
+            foreach (var image in imageResults)
             {
-                Debug.Log(result.ToString());
-                Assert.IsNotNull(result.Texture);
+                Assert.IsNotNull(image.Texture);
+                Debug.Log(image.ToString());
             }
         }
 
@@ -138,10 +138,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(imageResults);
             Assert.NotZero(imageResults.Count);
 
-            foreach (var result in imageResults)
+            foreach (var image in imageResults)
             {
-                Debug.Log(result.ToString());
-                Assert.IsNotNull(result.Texture);
+                Assert.IsNotNull(image.Texture);
+                Debug.Log(image.ToString());
             }
         }
 
@@ -178,8 +178,8 @@ namespace OpenAI.Tests
 
             foreach (var result in imageResults)
             {
-                Debug.Log(result.ToString());
                 Assert.IsNotNull(result.Texture);
+                Debug.Log(result.ToString());
             }
         }
     }

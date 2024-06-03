@@ -9,15 +9,15 @@ namespace OpenAI.Threads
 {
     /// <summary>
     /// A detailed list of steps the Assistant took as part of a Run.
-    /// An Assistant can call tools or create Messages during it’s run.
-    /// Examining Run Steps allows you to introspect how the Assistant is getting to it’s final results.
+    /// An Assistant can call tools or create Messages during it's run.
+    /// Examining Run Steps allows you to introspect how the Assistant is getting to it's final results.
     /// </summary>
     [Preserve]
     public sealed class RunStepResponse : BaseResponse
     {
         [Preserve]
         [JsonConstructor]
-        public RunStepResponse(
+        internal RunStepResponse(
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
             [JsonProperty("created_at")] int? createdAtUnixTimeSeconds,
@@ -31,6 +31,7 @@ namespace OpenAI.Threads
             [JsonProperty("expired_at")] int? expiredAtUnixTimeSeconds,
             [JsonProperty("cancelled_at")] int? cancelledAtUnixTimeSeconds,
             [JsonProperty("failed_at")] int? failedAtUnixTimeSeconds,
+            [JsonProperty("completed_at")] int? completedAtUnixTimeSeconds,
             [JsonProperty("metadata")] Dictionary<string, string> metadata,
             [JsonProperty("usage")] Usage usage)
         {
@@ -47,6 +48,7 @@ namespace OpenAI.Threads
             ExpiredAtUnixTimeSeconds = expiredAtUnixTimeSeconds;
             CancelledAtUnixTimeSeconds = cancelledAtUnixTimeSeconds;
             FailedAtUnixTimeSeconds = failedAtUnixTimeSeconds;
+            CompletedAtUnixTimeSeconds = completedAtUnixTimeSeconds;
             Metadata = metadata;
             Usage = usage;
         }
@@ -61,6 +63,19 @@ namespace OpenAI.Threads
         [Preserve]
         [JsonProperty("object")]
         public string Object { get; }
+
+        /// <summary>
+        /// The Unix timestamp (in seconds) for when the run step was created.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("created_at")]
+        public int? CreatedAtUnixTimeSeconds { get; }
+
+        [JsonIgnore]
+        public DateTime? CreatedAt
+            => CreatedAtUnixTimeSeconds.HasValue
+                ? DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTimeSeconds.Value).DateTime
+                : null;
 
         /// <summary>
         /// The ID of the assistant associated with the run step.
@@ -112,19 +127,6 @@ namespace OpenAI.Threads
         public Error LastError { get; }
 
         /// <summary>
-        /// The Unix timestamp (in seconds) for when the run step was created.
-        /// </summary>
-        [Preserve]
-        [JsonProperty("created_at")]
-        public int? CreatedAtUnixTimeSeconds { get; }
-
-        [JsonIgnore]
-        public DateTime? CreatedAt
-            => CreatedAtUnixTimeSeconds.HasValue
-                ? DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTimeSeconds.Value).DateTime
-                : null;
-
-        /// <summary>
         /// The Unix timestamp (in seconds) for when the run step expired. A step is considered expired if the parent run is expired.
         /// </summary>
         [Preserve]
@@ -132,10 +134,18 @@ namespace OpenAI.Threads
         public int? ExpiredAtUnixTimeSeconds { get; }
 
         [JsonIgnore]
+        [Obsolete("use ExpiredAtUnixTimeSeconds")]
+        public int? ExpiresAtUnitTimeSeconds => ExpiredAtUnixTimeSeconds;
+
+        [JsonIgnore]
         public DateTime? ExpiredAt
             => ExpiredAtUnixTimeSeconds.HasValue
                 ? DateTimeOffset.FromUnixTimeSeconds(ExpiredAtUnixTimeSeconds.Value).DateTime
                 : null;
+
+        [JsonIgnore]
+        [Obsolete("Use ExpiredAt")]
+        public DateTime? ExpiresAt => ExpiredAt;
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the run step was cancelled.

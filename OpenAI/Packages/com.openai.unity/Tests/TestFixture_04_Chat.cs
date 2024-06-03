@@ -85,7 +85,7 @@ namespace OpenAI.Tests
                 new(Role.System, "You are a helpful assistant designed to output JSON."),
                 new(Role.User, "Who won the world series in 2020?"),
             };
-            var chatRequest = new ChatRequest(messages, Model.GPT4o, responseFormat: ResponseFormat.Json);
+            var chatRequest = new ChatRequest(messages, Model.GPT4o, responseFormat: ChatResponseFormat.Json);
             var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
@@ -173,7 +173,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
             {
-                new(Role.System, "You are a helpful weather assistant. Always ask the user for their location."),
+                new(Role.System, "You are a helpful weather assistant. Always prompt the user for their location."),
                 new(Role.User, "What's the weather like today?"),
             };
 
@@ -331,6 +331,7 @@ namespace OpenAI.Tests
             messages.Add(response.FirstChoice.Message);
 
             Assert.IsTrue(response.FirstChoice.FinishReason == "stop");
+            Assert.IsTrue(response.FirstChoice.Message.ToolCalls.Count == 1);
             var usedTool = response.FirstChoice.Message.ToolCalls[0];
             Assert.IsNotNull(usedTool);
             Assert.IsTrue(usedTool.Function.Name.Contains(nameof(WeatherService.GetCurrentWeatherAsync)));

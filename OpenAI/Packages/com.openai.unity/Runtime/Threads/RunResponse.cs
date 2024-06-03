@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Scripting;
@@ -9,7 +10,7 @@ namespace OpenAI.Threads
 {
     /// <summary>
     /// An invocation of an Assistant on a Thread.
-    /// The Assistant uses it’s configuration and the Thread’s Messages to perform tasks by calling models and tools.
+    /// The Assistant uses it's configuration and the Thread's Messages to perform tasks by calling models and tools.
     /// As part of a Run, the Assistant appends Messages to the Thread.
     /// </summary>
     [Preserve]
@@ -17,7 +18,7 @@ namespace OpenAI.Threads
     {
         [Preserve]
         [JsonConstructor]
-        public RunResponse(
+        internal RunResponse(
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
             [JsonProperty("created_at")] int createdAtUnixTimeSeconds,
@@ -43,7 +44,7 @@ namespace OpenAI.Threads
             [JsonProperty("max_completion_tokens")] int? maxCompletionTokens,
             [JsonProperty("truncation_strategy")] TruncationStrategy truncationStrategy,
             [JsonProperty("tool_choice")] object toolChoice,
-            [JsonProperty("response_format")] ResponseFormatObject responseFormat)
+            [JsonProperty("response_format")][JsonConverter(typeof(ResponseFormatConverter))] ChatResponseFormat responseFormat)
         {
             Id = id;
             Object = @object;
@@ -246,6 +247,9 @@ namespace OpenAI.Threads
         [JsonProperty("metadata")]
         public IReadOnlyDictionary<string, string> Metadata { get; }
 
+        /// <summary>
+        /// Usage statistics related to the run. This value will be `null` if the run is not in a terminal state (i.e. `in_progress`, `queued`, etc.).
+        /// </summary>
         [Preserve]
         [JsonProperty("usage")]
         public Usage Usage { get; }
@@ -254,35 +258,35 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("temperature")]
-        public double? Temperature { get; private set; }
+        public double? Temperature { get; }
 
         /// <summary>
         /// The nucleus sampling value used for this run. If not set, defaults to 1.
         /// </summary>
         [Preserve]
         [JsonProperty("top_p")]
-        public double? TopP { get; private set; }
+        public double? TopP { get; }
 
         /// <summary>
         /// The maximum number of prompt tokens specified to have been used over the course of the run.
         /// </summary>
         [Preserve]
         [JsonProperty("max_prompt_tokens")]
-        public int? MaxPromptTokens { get; private set; }
+        public int? MaxPromptTokens { get; }
 
         /// <summary>
         /// The maximum number of completion tokens specified to have been used over the course of the run.
         /// </summary>
         [Preserve]
         [JsonProperty("max_completion_tokens")]
-        public int? MaxCompletionTokens { get; private set; }
+        public int? MaxCompletionTokens { get; }
 
         /// <summary>
-        /// Controls for how a thread will be truncated prior to the run. Use this to control the intial context window of the run.
+        /// Controls for how a thread will be truncated prior to the run. Use this to control the initial context window of the run.
         /// </summary>
         [Preserve]
         [JsonProperty("truncation_strategy")]
-        public TruncationStrategy TruncationStrategy { get; private set; }
+        public TruncationStrategy TruncationStrategy { get; }
 
         /// <summary>
         /// Controls which (if any) tool is called by the model.
@@ -294,11 +298,11 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("tool_choice")]
-        public object ToolChoice { get; private set; }
+        public object ToolChoice { get; }
 
         /// <summary>
         /// Specifies the format that the model must output.
-        /// Setting to <see cref="ResponseFormat.Json"/> enables JSON mode,
+        /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.
         /// </summary>
         /// <remarks>
@@ -310,7 +314,8 @@ namespace OpenAI.Threads
         /// </remarks>
         [Preserve]
         [JsonProperty("response_format")]
-        public ResponseFormatObject ResponseFormat { get; private set; }
+        [JsonConverter(typeof(ResponseFormatConverter))]
+        public ChatResponseFormat ResponseFormat { get; }
 
         [Preserve]
         public static implicit operator string(RunResponse run) => run?.ToString();

@@ -15,7 +15,7 @@ namespace OpenAI
     public sealed class Tool
     {
         [Preserve]
-        public Tool() { }
+        private Tool() { }
 
         [Preserve]
         public Tool(Tool other) => CopyFrom(other);
@@ -26,6 +26,21 @@ namespace OpenAI
             Function = function;
             Type = nameof(function);
         }
+
+        [Preserve]
+        [JsonConstructor]
+        internal Tool(
+            [JsonProperty("id")] string id,
+            [JsonProperty("index")] int? index,
+            [JsonProperty("type")] string type,
+            [JsonProperty("function")] Function function)
+        {
+            Id = id;
+            Index = index;
+            Type = type;
+            Function = function;
+        }
+
 
         [Preserve]
         public static implicit operator Tool(Function function) => new(function);
@@ -133,6 +148,7 @@ namespace OpenAI
         /// <summary>
         /// Clears the tool cache of all previously registered tools.
         /// </summary>
+        [Preserve]
         public static void ClearRegisteredTools()
         {
             toolCache.Clear();
@@ -146,6 +162,7 @@ namespace OpenAI
         /// </summary>
         /// <param name="tool">The tool to check.</param>
         /// <returns>True, if the tool is already registered in the tool cache.</returns>
+        [Preserve]
         public static bool IsToolRegistered(Tool tool)
             => toolCache.Any(knownTool =>
                 knownTool.Type == "function" &&
@@ -157,6 +174,7 @@ namespace OpenAI
         /// </summary>
         /// <param name="tool">The tool to register.</param>
         /// <returns>True, if the tool was added to the cache.</returns>
+        [Preserve]
         public static bool TryRegisterTool(Tool tool)
         {
             if (IsToolRegistered(tool))

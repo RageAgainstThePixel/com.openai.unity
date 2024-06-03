@@ -11,7 +11,7 @@ namespace OpenAI.Images
     {
         [Preserve]
         [JsonConstructor]
-        public ImageResult(
+        internal ImageResult(
             [JsonProperty("url")] string url,
             [JsonProperty("b64_json")] string b64_json,
             [JsonProperty("revised_prompt")] string revisedPrompt)

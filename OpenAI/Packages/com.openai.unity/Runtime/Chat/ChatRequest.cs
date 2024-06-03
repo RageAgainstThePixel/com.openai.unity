@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace OpenAI.Chat
             int? maxTokens = null,
             int? number = null,
             double? presencePenalty = null,
-            ResponseFormat responseFormat = OpenAI.ResponseFormat.Text,
+            ChatResponseFormat responseFormat = ChatResponseFormat.Auto,
             int? seed = null,
             string[] stops = null,
             double? temperature = null,
@@ -42,17 +43,17 @@ namespace OpenAI.Chat
                 }
                 else
                 {
-                    if (toolChoice.Equals("none") ||
-                        toolChoice.Equals("required") ||
-                        toolChoice.Equals("auto"))
+                    if (!toolChoice.Equals("none") &&
+                        !toolChoice.Equals("required") &&
+                        !toolChoice.Equals("auto"))
                     {
-                        ToolChoice = toolChoice;
+                        var tool = toolList.FirstOrDefault(t => t.Function.Name.Contains(toolChoice)) ??
+                            throw new ArgumentException($"The specified tool choice '{toolChoice}' was not found in the list of tools");
+                        ToolChoice = new { type = "function", function = new { name = tool.Function.Name } };
                     }
                     else
                     {
-                        var tool = toolList.FirstOrDefault(t => t.Function.Name.Contains(toolChoice)) ??
-                                   throw new ArgumentException($"The specified tool choice '{toolChoice}' was not found in the list of tools");
-                        ToolChoice = new { type = "function", function = new { name = tool.Function.Name } };
+                        ToolChoice = toolChoice;
                     }
                 }
             }
@@ -103,7 +104,7 @@ namespace OpenAI.Chat
         /// </param>
         /// <param name="responseFormat">
         /// An object specifying the format that the model must output.
-        /// Setting to <see cref="ResponseFormat.Json"/> enables JSON mode,
+        /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.
         /// </param>
         /// <param name="frequencyPenalty">
@@ -137,7 +138,7 @@ namespace OpenAI.Chat
             int? maxTokens = null,
             int? number = null,
             double? presencePenalty = null,
-            ResponseFormat responseFormat = OpenAI.ResponseFormat.Text,
+            ChatResponseFormat responseFormat = ChatResponseFormat.Auto,
             int? seed = null,
             string[] stops = null,
             double? temperature = null,
@@ -255,7 +256,7 @@ namespace OpenAI.Chat
 
         /// <summary>
         /// An object specifying the format that the model must output.
-        /// Setting to <see cref="ResponseFormat.Json"/> enables JSON mode,
+        /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.
         /// </summary>
         /// <remarks>
@@ -267,7 +268,8 @@ namespace OpenAI.Chat
         /// </remarks>
         [Preserve]
         [JsonProperty("response_format")]
-        public ResponseFormatObject ResponseFormat { get; }
+        [JsonConverter(typeof(ResponseFormatConverter))]
+        public ChatResponseFormat ResponseFormat { get; }
 
         /// <summary>
         /// This feature is in Beta. If specified, our system will make a best effort to sample deterministically,
