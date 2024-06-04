@@ -66,6 +66,7 @@ namespace OpenAI.Tests
                 var instance = ScriptableObject.CreateInstance<OpenAIConfiguration>();
                 instance.ApiKey = "sk-test12";
                 instance.OrganizationId = "org-testOrg";
+                instance.ProjectId = "proj_testProject";
                 AssetDatabase.CreateAsset(instance, configPath);
                 cleanup = true;
             }
@@ -78,6 +79,7 @@ namespace OpenAI.Tests
             Assert.IsNotEmpty(auth.Info.ApiKey);
             Assert.AreEqual(auth.Info.ApiKey, configuration.ApiKey);
             Assert.AreEqual(auth.Info.OrganizationId, configuration.OrganizationId);
+            Assert.AreEqual(auth.Info.ProjectId, configuration.ProjectId);
 
             if (cleanup)
             {
