@@ -12,10 +12,11 @@ namespace OpenAI
     public sealed class OpenAIAuthInfo : IAuthInfo
     {
         internal const string SecretKeyPrefix = "sk-";
+        internal const string ProjectPrefix = "proj_";
         internal const string SessionKeyPrefix = "sess-";
         internal const string OrganizationPrefix = "org-";
 
-        public OpenAIAuthInfo(string apiKey, string organizationId = null)
+        public OpenAIAuthInfo(string apiKey, string organizationId = null, string projectId = null)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
             {
@@ -32,6 +33,16 @@ namespace OpenAI
                 }
 
                 this.organizationId = organizationId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(projectId))
+            {
+                if (!projectId.Contains(ProjectPrefix))
+                {
+                    throw new InvalidCredentialException($"{nameof(projectId)} must start with '{ProjectPrefix}'");
+                }
+
+                this.projectId = projectId;
             }
         }
 
@@ -52,5 +63,13 @@ namespace OpenAI
         /// Usage from these API requests will count against the specified organization's subscription quota.
         /// </summary>
         public string OrganizationId => organizationId;
+
+        [SerializeField]
+        private string projectId;
+
+        /// <summary>
+        /// For users that specify specific projects.
+        /// </summary>
+        public string ProjectId => projectId;
     }
 }

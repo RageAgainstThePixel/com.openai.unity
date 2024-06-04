@@ -93,6 +93,11 @@ namespace OpenAI
                 headers.Add("OpenAI-Organization", Authentication.Info.OrganizationId);
             }
 
+            if (!string.IsNullOrWhiteSpace(Authentication?.Info?.ProjectId))
+            {
+                headers.Add("OpenAI-Project", Authentication.Info.ProjectId);
+            }
+
             DefaultRequestHeaders = headers;
         }
 
