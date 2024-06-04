@@ -173,7 +173,7 @@ Attempts to load api keys from a configuration file, by default `.openai` in the
 
 To create a configuration file, create a new text file named `.openai` and containing the line:
 
-> Organization and project id entries is optional.
+> Organization and project id entries are optional.
 
 ##### Json format
 
