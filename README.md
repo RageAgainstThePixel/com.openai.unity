@@ -52,7 +52,7 @@ The recommended installation method is though the unity package manager and [Ope
 
 ### Table of Contents
 
-- [Authentication](#authentication)
+- [Authentication](#authentication) :new: :warning: :construction:
 - [Azure OpenAI](#azure-openai)
   - [Azure Active Directory Authentication](#azure-active-directory-authentication)
 - [OpenAI API Proxy](#openai-api-proxy)
@@ -60,7 +60,7 @@ The recommended installation method is though the unity package manager and [Ope
   - [List Models](#list-models)
   - [Retrieve Models](#retrieve-model)
   - [Delete Fine Tuned Model](#delete-fine-tuned-model)
-- [Assistants](#assistants)
+- [Assistants](#assistants) :new: :warning: :construction:
   - [List Assistants](#list-assistants)
   - [Create Assistant](#create-assistant)
   - [Retrieve Assistant](#retrieve-assistant)
@@ -72,7 +72,7 @@ The recommended installation method is though the unity package manager and [Ope
   - [Retrieve File from Assistant](#retrieve-file-from-assistant)
   - [Remove File from Assistant](#remove-file-from-assistant)
   - [Delete File from Assistant](#delete-file-from-assistant)
-- [Threads](#threads)
+- [Threads](#threads) :new: :warning: :construction:
   - [Create Thread](#create-thread)
   - [Create Thread and Run](#create-thread-and-run)
   - [Retrieve Thread](#retrieve-thread)
@@ -106,7 +106,7 @@ The recommended installation method is though the unity package manager and [Ope
     - [Stream Speech](#stream-speech) :new:
   - [Create Transcription](#create-transcription)
   - [Create Translation](#create-translation)
-- [Images](#images)
+- [Images](#images) :warning: :construction:
   - [Create Image](#create-image)
   - [Edit Image](#edit-image)
   - [Create Image Variation](#create-image-variation)
@@ -131,7 +131,8 @@ The recommended installation method is though the unity package manager and [Ope
 
 There are 4 ways to provide your API keys, in order of precedence:
 
-:warning: We recommended using the environment variables to load the API key instead of having it hard coded in your source. It is not recommended use this method in production, but only for accepting user credentials, local testing and quick start scenarios.
+> [!WARNING]
+> We recommended using the environment variables to load the API key instead of having it hard coded in your source. It is not recommended use this method in production, but only for accepting user credentials, local testing and quick start scenarios.
 
 1. [Pass keys directly with constructor](#pass-keys-directly-with-constructor) :warning:
 2. [Unity Scriptable Object](#unity-scriptable-object) :warning:
@@ -142,7 +143,8 @@ You use the `OpenAIAuthentication` when you initialize the API as shown:
 
 #### Pass keys directly with constructor
 
-:warning: We recommended using the environment variables to load the API key instead of having it hard coded in your source. It is not recommended use this method in production, but only for accepting user credentials, local testing and quick start scenarios.
+> [!WARNING]
+> We recommended using the environment variables to load the API key instead of having it hard coded in your source. It is not recommended use this method in production, but only for accepting user credentials, local testing and quick start scenarios.
 
 ```csharp
 var api = new OpenAIClient("sk-apiKey");
@@ -151,7 +153,7 @@ var api = new OpenAIClient("sk-apiKey");
 Or create a `OpenAIAuthentication` object manually
 
 ```csharp
-var api = new OpenAIClient(new OpenAIAuthentication("sk-apiKey", "org-yourOrganizationId"));
+var api = new OpenAIClient(new OpenAIAuthentication("sk-apiKey", "org-yourOrganizationId", "proj_yourProjectId"));
 ```
 
 #### Unity Scriptable Object
@@ -160,7 +162,8 @@ You can save the key directly into a scriptable object that is located in the `A
 
 You can create a new one by using the context menu of the project pane and creating a new `OpenAIConfiguration` scriptable object.
 
-:warning: Beware checking this file into source control, as other people will be able to see your API key. It is recommended to use the [OpenAI-DotNet-Proxy](#openai-api-proxy) and authenticate users with your preferred OAuth provider.
+> [!WARNING]
+> Beware checking this file into source control, as other people will be able to see your API key. It is recommended to use the [OpenAI-DotNet-Proxy](#openai-api-proxy) and authenticate users with your preferred OAuth provider.
 
 ![Create new OpenAIConfiguration](OpenAI/Packages/com.openai.unity/Documentation~/images/create-scriptable-object.png)
 
@@ -170,22 +173,24 @@ Attempts to load api keys from a configuration file, by default `.openai` in the
 
 To create a configuration file, create a new text file named `.openai` and containing the line:
 
-> Organization entry is optional.
+> Organization and project id entries is optional.
 
 ##### Json format
 
 ```json
 {
   "apiKey": "sk-aaaabbbbbccccddddd",
-  "organization": "org-yourOrganizationId"
+  "organizationId": "org-yourOrganizationId",
+  "projectId": "proj_yourProjectId"
 }
 ```
 
 ##### Deprecated format
 
 ```shell
-OPENAI_KEY=sk-aaaabbbbbccccddddd
-ORGANIZATION=org-yourOrganizationId
+OPENAI_API_KEY=sk-aaaabbbbbccccddddd
+OPENAI_ORGANIZATION_ID=org-yourOrganizationId
+OPENAI_PROJECT_ID=proj_yourProjectId
 ```
 
 You can also load the configuration file directly with known path by calling static methods in `OpenAIAuthentication`:
@@ -208,6 +213,7 @@ Use your system's environment variables specify an api key and organization to u
 
 - Use `OPENAI_API_KEY` for your api key.
 - Use `OPENAI_ORGANIZATION_ID` to specify an organization.
+- Use `OPENAI_PROJECT_ID` to specify a project.
 
 ```csharp
 var api = new OpenAIClient(new OpenAIAuthentication().LoadFromEnvironment());
@@ -369,7 +375,8 @@ Assert.IsTrue(isDeleted);
 
 ### [Assistants](https://platform.openai.com/docs/api-reference/assistants)
 
-> :warning: Beta Feature
+> [!WARNING]
+> Beta Feature. API subject to breaking changes.
 
 Build assistants that can call models and use tools to perform tasks.
 
@@ -522,7 +529,8 @@ Assert.IsTrue(isDeleted);
 
 ### [Threads](https://platform.openai.com/docs/api-reference/threads)
 
-> :warning: Beta Feature
+> [!WARNING]
+> Beta Feature. API subject to breaking changes.
 
 Create Threads that [Assistants](#assistants) can interact with.
 
@@ -969,7 +977,8 @@ foreach (var toolCall in response.FirstChoice.Message.ToolCalls)
 
 #### [Chat Vision](https://platform.openai.com/docs/guides/vision)
 
-> :warning: Beta Feature
+> [!WARNING]
+> Beta Feature. API subject to breaking changes.
 
 ```csharp
 var api = new OpenAIClient();
@@ -1007,13 +1016,14 @@ Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice} | Finish Rea
 
 #### [Chat Json Mode](https://platform.openai.com/docs/guides/text-generation/json-mode)
 
-> :warning: Beta Feature
+> [!WARNING]
+> Beta Feature. API subject to breaking changes.
 
-Important notes:
-
-- When using JSON mode, always instruct the model to produce JSON via some message in the conversation, for example via your system message. If you don't include an explicit instruction to generate JSON, the model may generate an unending stream of whitespace and the request may run continually until it reaches the token limit. To help ensure you don't forget, the API will throw an error if the string "JSON" does not appear somewhere in the context.
-- The JSON in the message the model returns may be partial (i.e. cut off) if `finish_reason` is length, which indicates the generation exceeded max_tokens or the conversation exceeded the token limit. To guard against this, check `finish_reason` before parsing the response.
-- JSON mode will not guarantee the output matches any specific schema, only that it is valid and parses without errors.
+> [!IMPORTANT]
+>
+> - When using JSON mode, always instruct the model to produce JSON via some message in the conversation, for example via your system message. If you don't include an explicit instruction to generate JSON, the model may generate an unending stream of whitespace and the request may run continually until it reaches the token limit. To help ensure you don't forget, the API will throw an error if the string "JSON" does not appear somewhere in the context.
+> - The JSON in the message the model returns may be partial (i.e. cut off) if `finish_reason` is length, which indicates the generation exceeded max_tokens or the conversation exceeded the token limit. To guard against this, check `finish_reason` before parsing the response.
+> - JSON mode will not guarantee the output matches any specific schema, only that it is valid and parses without errors.
 
 ```csharp
 var messages = new List<Message>
