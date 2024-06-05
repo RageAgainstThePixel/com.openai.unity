@@ -68,7 +68,7 @@ namespace OpenAI
 #if !UNITY_WEBGL
                 { "User-Agent", "com.openai.unity" },
 #endif
-                { "OpenAI-Beta", "assistants=v2"}
+                { "OpenAI-Beta", "assistants=v2" }
             };
 
             if (Settings.Info.BaseRequestUrlFormat.Contains(OpenAISettingsInfo.OpenAIDomain) &&
