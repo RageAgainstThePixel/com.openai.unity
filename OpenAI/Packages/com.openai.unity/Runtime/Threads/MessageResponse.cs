@@ -14,7 +14,7 @@ namespace OpenAI.Threads
     /// Messages stored as a list on the Thread.
     /// </summary>
     [Preserve]
-    public sealed class MessageResponse : BaseResponse
+    public sealed class MessageResponse : BaseResponse, IStreamEvent
     {
         [Preserve]
         [JsonConstructor]

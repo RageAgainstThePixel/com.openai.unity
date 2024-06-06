@@ -1,11 +1,13 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 using Utilities.WebRequestRest;
 
 namespace OpenAI.Threads
@@ -194,7 +196,7 @@ namespace OpenAI.Threads
         /// Create a run.
         /// </summary>
         /// <param name="threadId">The id of the thread to run.</param>
-        /// <param name="request"></param>
+        /// <param name="request"><see cref="CreateRunRequest"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="RunResponse"/>.</returns>
         public async Task<RunResponse> CreateRunAsync(string threadId, CreateRunRequest request = null, CancellationToken cancellationToken = default)
@@ -209,6 +211,68 @@ namespace OpenAI.Threads
             var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<RunResponse>(client);
+        }
+
+        /// <summary>
+        /// Create a run and stream the events.
+        /// </summary>
+        /// <param name="threadId">The id of the thread to run.</param>
+        /// <param name="eventHandler">The event handler to handle streamed run events.</param>
+        /// <param name="request"><see cref="CreateRunRequest"/>.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="RunResponse"/>.</returns>
+        public async Task<RunResponse> CreateStreamingRunAsync(string threadId, Action<IStreamEvent> eventHandler, CreateRunRequest request = null, CancellationToken cancellationToken = default)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.AssistantId))
+            {
+                var assistant = await client.AssistantsEndpoint.CreateAssistantAsync(cancellationToken: cancellationToken);
+                request = new CreateRunRequest(assistant, request);
+            }
+
+            request.Stream = true;
+            RunResponse run = null;
+            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs"), payload, eventData =>
+            {
+                try
+                {
+                    var eventPayload = JObject.Parse(eventData);
+                    var @event = eventPayload["event"]!.Value<string>();
+                    var data = eventPayload["data"]!;
+
+                    if (@event.Equals("thread.created"))
+                    {
+                        eventHandler?.Invoke(data.ToObject<ThreadResponse>(OpenAIClient.JsonSerializer));
+                        return;
+                    }
+
+                    if (@event.StartsWith("thread.run.step"))
+                    {
+                        eventHandler?.Invoke(data.ToObject<RunStepResponse>(OpenAIClient.JsonSerializer));
+                        return;
+                    }
+
+                    if (@event.StartsWith("thread.run"))
+                    {
+                        run = data.ToObject<RunResponse>(OpenAIClient.JsonSerializer);
+                        eventHandler?.Invoke(run);
+                        return;
+                    }
+
+                    if (@event.StartsWith("thread.message"))
+                    {
+                        eventHandler?.Invoke(data.ToObject<MessageResponse>(OpenAIClient.JsonSerializer));
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"{eventData}\n{e}");
+                }
+            }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            if (run == null) { return null; }
+            run.SetResponseData(response, client);
+            return run;
         }
 
         /// <summary>

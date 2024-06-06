@@ -130,6 +130,8 @@ namespace OpenAI
             }
         };
 
+        internal static JsonSerializer JsonSerializer { get; } = JsonSerializer.Create(JsonSerializationOptions);
+
         /// <summary>
         /// List and describe the various models available in the API.
         /// You can refer to the Models documentation to understand which models are available for certain endpoints: <see href="https://platform.openai.com/docs/models/model-endpoint-compatibility"/>.<br/>

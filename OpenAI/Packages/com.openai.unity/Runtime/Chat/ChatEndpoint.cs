@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OpenAI.Extensions;
 using System;
 using System.Threading;
@@ -51,7 +52,8 @@ namespace OpenAI.Chat
             {
                 try
                 {
-                    var partialResponse = JsonConvert.DeserializeObject<ChatResponse>(eventData, OpenAIClient.JsonSerializationOptions);
+                    var eventPayload = JObject.Parse(eventData);
+                    var partialResponse = eventPayload["data"]!.ToObject<ChatResponse>(OpenAIClient.JsonSerializer);
 
                     if (chatResponse == null)
                     {
@@ -69,7 +71,7 @@ namespace OpenAI.Chat
                     Debug.LogError($"{eventData}\n{e}");
                 }
             }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response?.Validate(EnableDebug);
+            response.Validate(EnableDebug);
             if (chatResponse == null) { return null; }
             chatResponse.SetResponseData(response, client);
             resultHandler?.Invoke(chatResponse);

@@ -7,7 +7,7 @@ using UnityEngine.Scripting;
 namespace OpenAI
 {
     [Preserve]
-    public sealed class Error
+    public sealed class Error : IStreamEvent
     {
         [Preserve]
         [JsonConstructor]
@@ -87,5 +87,9 @@ namespace OpenAI
 
             return builder.ToString();
         }
+
+        [Preserve]
+        [JsonIgnore]
+        public string Object => "error";
     }
 }

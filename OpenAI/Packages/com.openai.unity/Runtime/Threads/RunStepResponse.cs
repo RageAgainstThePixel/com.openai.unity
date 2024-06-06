@@ -13,7 +13,7 @@ namespace OpenAI.Threads
     /// Examining Run Steps allows you to introspect how the Assistant is getting to it's final results.
     /// </summary>
     [Preserve]
-    public sealed class RunStepResponse : BaseResponse
+    public sealed class RunStepResponse : BaseResponse, IStreamEvent
     {
         [Preserve]
         [JsonConstructor]

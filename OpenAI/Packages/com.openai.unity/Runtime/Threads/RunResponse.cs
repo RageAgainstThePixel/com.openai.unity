@@ -14,7 +14,7 @@ namespace OpenAI.Threads
     /// As part of a Run, the Assistant appends Messages to the Thread.
     /// </summary>
     [Preserve]
-    public sealed class RunResponse : BaseResponse
+    public sealed class RunResponse : BaseResponse, IStreamEvent
     {
         [Preserve]
         [JsonConstructor]

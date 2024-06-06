@@ -217,7 +217,7 @@ namespace OpenAI
                 if (arguments == null &&
                     !string.IsNullOrWhiteSpace(argumentsString))
                 {
-                    arguments = JToken.FromObject(argumentsString, JsonSerializer.Create(OpenAIClient.JsonSerializationOptions));
+                    arguments = JToken.FromObject(argumentsString, OpenAIClient.JsonSerializer);
                 }
 
                 return arguments;
@@ -429,7 +429,7 @@ namespace OpenAI
                     }
                     else if (value is JObject json)
                     {
-                        invokeArgs[i] = json.ToObject(parameter.ParameterType, JsonSerializer.Create(OpenAIClient.JsonSerializationOptions));
+                        invokeArgs[i] = json.ToObject(parameter.ParameterType, OpenAIClient.JsonSerializer);
                     }
                     else
                     {
