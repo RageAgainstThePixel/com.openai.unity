@@ -17,6 +17,9 @@ namespace OpenAI.Threads
     public sealed class MessageResponse : BaseResponse, IStreamEvent
     {
         [Preserve]
+        internal MessageResponse(MessageResponse other) => CopyFrom(other);
+
+        [Preserve]
         [JsonConstructor]
         internal MessageResponse(
             [JsonProperty("id")] string id,
@@ -43,7 +46,7 @@ namespace OpenAI.Threads
             CompletedAtUnixTimeSeconds = completedAtUnixTimeSeconds;
             IncompleteAtUnixTimeSeconds = incompleteAtUnixTimeSeconds;
             Role = role;
-            Content = content;
+            Content = content ?? new List<Content>();
             AssistantId = assistantId;
             RunId = runId;
             Attachments = attachments;
@@ -193,5 +196,10 @@ namespace OpenAI.Threads
         [Preserve]
         public string PrintContent()
             => string.Join("\n", Content.Select(content => content?.ToString()));
+
+        internal void CopyFrom(MessageResponse other)
+        {
+            // TODO Implement
+        }
     }
 }

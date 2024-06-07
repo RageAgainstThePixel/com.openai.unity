@@ -16,6 +16,9 @@ namespace OpenAI.Threads
     public sealed class RunStepResponse : BaseResponse, IStreamEvent
     {
         [Preserve]
+        internal RunStepResponse(RunStepResponse other) => CopyFrom(other);
+
+        [Preserve]
         [JsonConstructor]
         internal RunStepResponse(
             [JsonProperty("id")] string id,
@@ -58,18 +61,18 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("id")]
-        public string Id { get; }
+        public string Id { get; private set; }
 
         [Preserve]
         [JsonProperty("object")]
-        public string Object { get; }
+        public string Object { get; private set; }
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the run step was created.
         /// </summary>
         [Preserve]
         [JsonProperty("created_at")]
-        public int? CreatedAtUnixTimeSeconds { get; }
+        public int? CreatedAtUnixTimeSeconds { get; private set; }
 
         [JsonIgnore]
         public DateTime? CreatedAt
@@ -82,56 +85,56 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("assistant_id")]
-        public string AssistantId { get; }
+        public string AssistantId { get; private set; }
 
         /// <summary>
         /// The ID of the thread that was run.
         /// </summary>
         [Preserve]
         [JsonProperty("thread_id")]
-        public string ThreadId { get; }
+        public string ThreadId { get; private set; }
 
         /// <summary>
         /// The ID of the run that this run step is a part of.
         /// </summary>
         [Preserve]
         [JsonProperty("run_id")]
-        public string RunId { get; }
+        public string RunId { get; private set; }
 
         /// <summary>
         /// The type of run step.
         /// </summary>
         [Preserve]
         [JsonProperty("type")]
-        public RunStepType Type { get; }
+        public RunStepType Type { get; private set; }
 
         /// <summary>
         /// The status of the run step.
         /// </summary>
         [Preserve]
         [JsonProperty("status")]
-        public RunStatus Status { get; }
+        public RunStatus Status { get; private set; }
 
         /// <summary>
         /// The details of the run step.
         /// </summary>
         [Preserve]
         [JsonProperty("step_details")]
-        public StepDetails StepDetails { get; }
+        public StepDetails StepDetails { get; private set; }
 
         /// <summary>
         /// The last error associated with this run step. Will be null if there are no errors.
         /// </summary>
         [Preserve]
         [JsonProperty("last_error")]
-        public Error LastError { get; }
+        public Error LastError { get; private set; }
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the run step expired. A step is considered expired if the parent run is expired.
         /// </summary>
         [Preserve]
         [JsonProperty("expired_at")]
-        public int? ExpiredAtUnixTimeSeconds { get; }
+        public int? ExpiredAtUnixTimeSeconds { get; private set; }
 
         [JsonIgnore]
         [Obsolete("use ExpiredAtUnixTimeSeconds")]
@@ -152,7 +155,7 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("cancelled_at")]
-        public int? CancelledAtUnixTimeSeconds { get; }
+        public int? CancelledAtUnixTimeSeconds { get; private set; }
 
         [Preserve]
         [JsonIgnore]
@@ -166,7 +169,7 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("failed_at")]
-        public int? FailedAtUnixTimeSeconds { get; }
+        public int? FailedAtUnixTimeSeconds { get; private set; }
 
         [Preserve]
         [JsonIgnore]
@@ -180,7 +183,7 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("completed_at")]
-        public int? CompletedAtUnixTimeSeconds { get; }
+        public int? CompletedAtUnixTimeSeconds { get; private set; }
 
         [Preserve]
         [JsonIgnore]
@@ -196,16 +199,94 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("metadata")]
-        public IReadOnlyDictionary<string, string> Metadata { get; }
+        public IReadOnlyDictionary<string, string> Metadata { get; private set; }
 
         [Preserve]
         [JsonProperty("usage")]
-        public Usage Usage { get; }
+        public Usage Usage { get; private set; }
 
         [Preserve]
         public static implicit operator string(RunStepResponse runStep) => runStep?.ToString();
 
         [Preserve]
         public override string ToString() => Id;
+
+        internal void CopyFrom(RunStepResponse other)
+        {
+            if (other == null) { return; }
+
+            if (!string.IsNullOrWhiteSpace(other.Id))
+            {
+                Id = other.Id;
+            }
+
+            if (!string.IsNullOrWhiteSpace(other.Object))
+            {
+                Object = other.Object;
+            }
+
+            if (other.CreatedAtUnixTimeSeconds.HasValue)
+            {
+                CreatedAtUnixTimeSeconds = other.CreatedAtUnixTimeSeconds;
+            }
+
+            if (!string.IsNullOrWhiteSpace(other.AssistantId))
+            {
+                AssistantId = other.AssistantId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(other.ThreadId))
+            {
+                ThreadId = other.ThreadId;
+            }
+
+            if (!string.IsNullOrWhiteSpace(other.RunId))
+            {
+                RunId = other.RunId;
+            }
+
+            Type = other.Type;
+            Status = other.Status;
+
+            if (other.StepDetails != null)
+            {
+                StepDetails = other.StepDetails;
+            }
+
+            if (other.LastError != null)
+            {
+                LastError = other.LastError;
+            }
+
+            if (other.ExpiredAtUnixTimeSeconds.HasValue)
+            {
+                ExpiredAtUnixTimeSeconds = other.ExpiredAtUnixTimeSeconds;
+            }
+
+            if (other.CancelledAtUnixTimeSeconds.HasValue)
+            {
+                CancelledAtUnixTimeSeconds = other.CancelledAtUnixTimeSeconds;
+            }
+
+            if (other.FailedAtUnixTimeSeconds.HasValue)
+            {
+                FailedAtUnixTimeSeconds = other.FailedAtUnixTimeSeconds;
+            }
+
+            if (other.CompletedAtUnixTimeSeconds.HasValue)
+            {
+                CompletedAtUnixTimeSeconds = other.CompletedAtUnixTimeSeconds;
+            }
+
+            if (other.Metadata is { Count: > 0 })
+            {
+                Metadata = new Dictionary<string, string>(other.Metadata);
+            }
+
+            if (other.Usage != null)
+            {
+                Usage = other.Usage;
+            }
+        }
     }
 }

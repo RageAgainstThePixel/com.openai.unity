@@ -231,42 +231,83 @@ namespace OpenAI.Threads
 
             request.Stream = true;
             RunResponse run = null;
+            RunStepResponse runStep = null;
+            MessageResponse message = null;
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs"), payload, eventData =>
+            var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs"), payload, (sseResponse, ssEvent) =>
             {
                 try
                 {
-                    var eventPayload = JObject.Parse(eventData);
-                    var @event = eventPayload["event"]!.Value<string>();
-                    var data = eventPayload["data"]!;
+                    var @event = ssEvent.Value.Value<string>();
 
                     if (@event.Equals("thread.created"))
                     {
-                        eventHandler?.Invoke(data.ToObject<ThreadResponse>(OpenAIClient.JsonSerializer));
+                        eventHandler?.Invoke(sseResponse.Deserialize<ThreadResponse>(client));
                         return;
                     }
 
                     if (@event.StartsWith("thread.run.step"))
                     {
-                        eventHandler?.Invoke(data.ToObject<RunStepResponse>(OpenAIClient.JsonSerializer));
+                        var partialRunStep = sseResponse.Deserialize<RunStepResponse>(client);
+
+                        if (runStep == null)
+                        {
+                            runStep = new RunStepResponse(partialRunStep);
+                        }
+                        else
+                        {
+                            runStep.CopyFrom(partialRunStep);
+                        }
+
+                        eventHandler?.Invoke(partialRunStep);
                         return;
                     }
 
                     if (@event.StartsWith("thread.run"))
                     {
-                        run = data.ToObject<RunResponse>(OpenAIClient.JsonSerializer);
-                        eventHandler?.Invoke(run);
+                        var partialRun = sseResponse.Deserialize<RunResponse>(client);
+
+                        if (run == null)
+                        {
+                            run = new RunResponse(partialRun);
+                        }
+                        else
+                        {
+                            run.CopyFrom(partialRun);
+                        }
+
+                        eventHandler?.Invoke(partialRun);
                         return;
                     }
 
                     if (@event.StartsWith("thread.message"))
                     {
-                        eventHandler?.Invoke(data.ToObject<MessageResponse>(OpenAIClient.JsonSerializer));
+                        var partialMessage = sseResponse.Deserialize<MessageResponse>(client);
+
+                        if (message == null)
+                        {
+                            message = new MessageResponse(partialMessage);
+                        }
+                        else
+                        {
+                            message.CopyFrom(partialMessage);
+                        }
+
+                        eventHandler?.Invoke(partialMessage);
+                        return;
                     }
+
+                    if (@event.Equals("error"))
+                    {
+                        eventHandler?.Invoke(sseResponse.Deserialize<Error>(client));
+                        return;
+                    }
+
+                    Debug.LogWarning($"Unhandled event: {ssEvent}");
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"{eventData}\n{e}");
+                    Debug.LogError($"{ssEvent}\n{e}");
                 }
             }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);

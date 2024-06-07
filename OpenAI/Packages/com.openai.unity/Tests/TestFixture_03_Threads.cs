@@ -1,5 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using Newtonsoft.Json;
 using NUnit.Framework;
 using OpenAI.Assistants;
 using OpenAI.Files;
@@ -188,12 +189,11 @@ namespace OpenAI.Tests
                     model: Model.GPT4o,
                     responseFormat: ChatResponseFormat.Json));
             Assert.NotNull(assistant);
-            testAssistant = assistant;
             var thread = await OpenAIClient.ThreadsEndpoint.CreateThreadAsync();
-            Assert.NotNull(thread);
 
             try
             {
+                Assert.NotNull(thread);
                 var message = await thread.CreateMessageAsync("I need to solve the equation `3x + 11 = 14`. Can you help me?");
                 Assert.NotNull(message);
                 var run = await thread.CreateRunAsync(assistant);
@@ -205,11 +205,12 @@ namespace OpenAI.Tests
 
                 foreach (var response in messages.Items)
                 {
-                    Console.WriteLine($"{response.Role}: {response.PrintContent()}");
+                    Debug.Log($"{response.Role}: {response.PrintContent()}");
                 }
             }
             finally
             {
+                await assistant.DeleteAsync();
                 await thread.DeleteAsync(deleteToolResources: true);
             }
         }
@@ -225,19 +226,29 @@ namespace OpenAI.Tests
                     model: Model.GPT4o,
                     responseFormat: ChatResponseFormat.Json));
             Assert.NotNull(assistant);
-            testAssistant = assistant;
             var thread = await OpenAIClient.ThreadsEndpoint.CreateThreadAsync();
-            Assert.NotNull(thread);
 
             try
             {
+                Assert.NotNull(thread);
                 var message = await thread.CreateMessageAsync("I need to solve the equation `3x + 11 = 14`. Can you help me?");
 
                 Assert.NotNull(message);
 
                 var run = await thread.CreateStreamingRunAsync(streamEvent =>
                     {
-                        Debug.Log(streamEvent);
+                        switch (streamEvent)
+                        {
+                            case MessageResponse messageEvent:
+                                Debug.Log($"{messageEvent.Role}: {messageEvent.PrintContent()}");
+                                break;
+                            case Error error:
+                                Debug.LogError(error.ToString());
+                                break;
+                            default:
+                                Debug.Log(JsonConvert.SerializeObject(streamEvent));
+                                break;
+                        }
                     }, new CreateRunRequest(assistant));
 
                 Assert.IsNotNull(run);
@@ -246,9 +257,9 @@ namespace OpenAI.Tests
                 Assert.IsTrue(run.Status == RunStatus.Completed);
                 var messages = await thread.ListMessagesAsync();
 
-                foreach (var response in messages.Items)
+                foreach (var response in messages.Items.Reverse())
                 {
-                    Console.WriteLine($"{response.Role}: {response.PrintContent()}");
+                    Debug.Log($"{response.Role}: {response.PrintContent()}");
                 }
             }
             catch (Exception e)
@@ -257,6 +268,7 @@ namespace OpenAI.Tests
             }
             finally
             {
+                await assistant.DeleteAsync();
                 await thread.DeleteAsync(deleteToolResources: true);
             }
         }
@@ -264,8 +276,14 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_06_02_CreateThreadAndRun()
         {
-            Assert.NotNull(testAssistant);
             Assert.NotNull(OpenAIClient.ThreadsEndpoint);
+            testAssistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(
+                new CreateAssistantRequest(
+                    name: "Math Tutor",
+                    instructions: "You are a personal math tutor. Answer questions briefly, in a sentence or less. Your responses should be formatted in JSON.",
+                    model: Model.GPT4o,
+                    responseFormat: ChatResponseFormat.Json));
+            Assert.NotNull(testAssistant);
             var messages = new List<Message> { "I need to solve the equation `3x + 11 = 14`. Can you help me?" };
             var threadRequest = new CreateThreadRequest(messages);
             var run = await testAssistant.CreateThreadAndRunAsync(threadRequest);

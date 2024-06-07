@@ -1,7 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using OpenAI.Extensions;
 using System;
 using System.Threading;
@@ -48,12 +47,13 @@ namespace OpenAI.Chat
             chatRequest.Stream = true;
             ChatResponse chatResponse = null;
             var payload = JsonConvert.SerializeObject(chatRequest, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl("/completions"), payload, eventData =>
+            var response = await Rest.PostAsync(GetUrl("/completions"), payload, (sseResponse, ssEvent) =>
             {
                 try
                 {
-                    var eventPayload = JObject.Parse(eventData);
-                    var partialResponse = eventPayload["data"]!.ToObject<ChatResponse>(OpenAIClient.JsonSerializer);
+                    if (ssEvent.Event != ServerSentEventKind.Data) { return; }
+
+                    var partialResponse = sseResponse.Deserialize<ChatResponse>(client);
 
                     if (chatResponse == null)
                     {
@@ -68,7 +68,7 @@ namespace OpenAI.Chat
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"{eventData}\n{e}");
+                    Debug.LogError($"{ssEvent}\n{e}");
                 }
             }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
