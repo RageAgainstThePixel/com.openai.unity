@@ -63,7 +63,7 @@ namespace OpenAI
         public override string ToString() => Value;
 
         [Preserve]
-        public void Append(TextContent other)
+        public void AppendFrom(TextContent other)
         {
             if (other == null) { return; }
 
@@ -75,7 +75,7 @@ namespace OpenAI
             if (other is { Annotations: not null })
             {
                 annotations ??= new List<Annotation>();
-                annotations.Append(other.Annotations);
+                annotations.AppendFrom(other.Annotations);
             }
         }
     }

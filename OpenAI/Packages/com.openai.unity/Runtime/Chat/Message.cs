@@ -18,7 +18,7 @@ namespace OpenAI.Chat
         public Message() { }
 
         [Preserve]
-        internal Message(Delta other) => Append(other);
+        internal Message(Delta other) => AppendFrom(other);
 
         /// <summary>
         /// Creates a new message to insert into a chat conversation.
@@ -178,7 +178,7 @@ namespace OpenAI.Chat
         public static implicit operator string(Message message) => message?.ToString();
 
         [Preserve]
-        internal void Append(Delta other)
+        internal void AppendFrom(Delta other)
         {
             if (Role == 0 &&
                 other?.Role > 0)
@@ -199,7 +199,7 @@ namespace OpenAI.Chat
             if (other is { ToolCalls: not null })
             {
                 toolCalls ??= new List<Tool>();
-                toolCalls.Append(other.ToolCalls);
+                toolCalls.AppendFrom(other.ToolCalls);
             }
         }
     }

@@ -41,7 +41,7 @@ namespace OpenAI.Threads
         [JsonProperty("output")]
         public string Output { get; private set; }
 
-        internal void Append(FunctionCall other)
+        internal void AppendFrom(FunctionCall other)
         {
             if (other == null) { return; }
 

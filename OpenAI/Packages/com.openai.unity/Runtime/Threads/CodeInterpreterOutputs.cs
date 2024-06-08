@@ -48,7 +48,7 @@ namespace OpenAI.Threads
         [JsonProperty("image")]
         public ImageFile Image { get; private set; }
 
-        public void Append(CodeInterpreterOutputs other)
+        public void AppendFrom(CodeInterpreterOutputs other)
         {
             if (other == null) { return; }
 
@@ -70,7 +70,7 @@ namespace OpenAI.Threads
                 }
                 else
                 {
-                    Image.Append(other.Image);
+                    Image.AppendFrom(other.Image);
                 }
             }
         }

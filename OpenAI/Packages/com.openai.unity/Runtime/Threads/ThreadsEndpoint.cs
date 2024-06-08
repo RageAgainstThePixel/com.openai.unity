@@ -427,7 +427,7 @@ namespace OpenAI.Threads
                             }
                             else
                             {
-                                run.Append(partialRun);
+                                run.AppendFrom(partialRun);
                             }
 
                             streamEventHandler?.Invoke(run);
@@ -447,7 +447,7 @@ namespace OpenAI.Threads
                             }
                             else
                             {
-                                runStep.Append(partialRunStep);
+                                runStep.AppendFrom(partialRunStep);
                             }
 
                             streamEventHandler?.Invoke(runStep);
@@ -465,7 +465,7 @@ namespace OpenAI.Threads
                             }
                             else
                             {
-                                message.Append(partialMessage);
+                                message.AppendFrom(partialMessage);
                             }
 
                             streamEventHandler?.Invoke(message);

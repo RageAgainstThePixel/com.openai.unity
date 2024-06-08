@@ -60,7 +60,7 @@ namespace OpenAI
         [JsonProperty("detail")]
         public ImageDetail Detail { get; private set; }
 
-        public void Append(ImageUrl other)
+        public void AppendFrom(ImageUrl other)
         {
             if (other == null) { return; }
 

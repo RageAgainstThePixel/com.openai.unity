@@ -82,7 +82,7 @@ namespace OpenAI.Threads
         [Obsolete("Removed")]
         public object Retrieval { get; private set; }
 
-        public void Append(ToolCall other)
+        public void AppendFrom(ToolCall other)
         {
             if (other == null)
             {
@@ -102,7 +102,7 @@ namespace OpenAI.Threads
                 }
                 else
                 {
-                    FunctionCall.Append(other.FunctionCall);
+                    FunctionCall.AppendFrom(other.FunctionCall);
                 }
             }
 
@@ -114,7 +114,7 @@ namespace OpenAI.Threads
                 }
                 else
                 {
-                    CodeInterpreter.Append(other.CodeInterpreter);
+                    CodeInterpreter.AppendFrom(other.CodeInterpreter);
                 }
             }
 

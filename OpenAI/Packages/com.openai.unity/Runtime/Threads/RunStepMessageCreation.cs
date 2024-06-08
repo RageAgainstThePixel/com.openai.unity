@@ -22,7 +22,7 @@ namespace OpenAI.Threads
         [JsonProperty("message_id")]
         public string MessageId { get; private set; }
 
-        internal void Append(RunStepMessageCreation other)
+        internal void AppendFrom(RunStepMessageCreation other)
         {
             if (!string.IsNullOrWhiteSpace(other.MessageId))
             {

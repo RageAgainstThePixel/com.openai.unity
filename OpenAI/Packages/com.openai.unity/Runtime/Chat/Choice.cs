@@ -1,12 +1,13 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Chat
 {
     [Preserve]
-    public sealed class Choice
+    public sealed class Choice : IAppendable<Choice>
     {
         [Preserve]
         public Choice() { }
@@ -45,7 +46,7 @@ namespace OpenAI.Chat
         /// </summary>
         [Preserve]
         [JsonProperty("index")]
-        public int Index { get; private set; }
+        public int? Index { get; private set; }
 
         /// <summary>
         /// Log probability information for the choice.
@@ -61,7 +62,7 @@ namespace OpenAI.Chat
         public static implicit operator string(Choice choice) => choice?.ToString();
 
         [Preserve]
-        internal void Append(Choice other)
+        public void AppendFrom(Choice other)
         {
             Index = other?.Index ?? 0;
 
@@ -78,7 +79,7 @@ namespace OpenAI.Chat
                 }
                 else
                 {
-                    Message.Append(other.Delta);
+                    Message.AppendFrom(other.Delta);
                 }
             }
 

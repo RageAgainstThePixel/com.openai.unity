@@ -37,7 +37,7 @@ namespace OpenAI.Threads
         [JsonProperty("outputs")]
         public IReadOnlyList<CodeInterpreterOutputs> Outputs => outputs;
 
-        internal void Append(CodeInterpreter other)
+        internal void AppendFrom(CodeInterpreter other)
         {
             if (other == null) { return; }
 

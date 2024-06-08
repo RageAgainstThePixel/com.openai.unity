@@ -63,7 +63,7 @@ namespace OpenAI
 
         public override string ToString() => FileId;
 
-        public void Append(ImageFile other)
+        public void AppendFrom(ImageFile other)
         {
             if (other == null) { return; }
 

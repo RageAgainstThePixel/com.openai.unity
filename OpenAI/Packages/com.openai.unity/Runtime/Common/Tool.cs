@@ -19,7 +19,7 @@ namespace OpenAI
         public Tool() { }
 
         [Preserve]
-        public Tool(Tool other) => Append(other);
+        public Tool(Tool other) => AppendFrom(other);
 
         [Preserve]
         public Tool(Function function)
@@ -76,7 +76,7 @@ namespace OpenAI
         public Function Function { get; private set; }
 
         [Preserve]
-        public void Append(Tool other)
+        public void AppendFrom(Tool other)
         {
             if (other == null) { return; }
 
@@ -103,7 +103,7 @@ namespace OpenAI
                 }
                 else
                 {
-                    Function.Append(other.Function);
+                    Function.AppendFrom(other.Function);
                 }
             }
         }

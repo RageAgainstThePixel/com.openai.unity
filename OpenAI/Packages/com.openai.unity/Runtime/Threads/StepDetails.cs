@@ -14,7 +14,7 @@ namespace OpenAI.Threads
     public sealed class StepDetails
     {
         [Preserve]
-        internal StepDetails(StepDetails other) => Append(other);
+        internal StepDetails(StepDetails other) => AppendFrom(other);
 
         [Preserve]
         [JsonConstructor]
@@ -43,7 +43,7 @@ namespace OpenAI.Threads
         [JsonProperty("tool_calls", ReferenceLoopHandling = ReferenceLoopHandling.Ignore)]
         public IReadOnlyList<ToolCall> ToolCalls => toolCalls;
 
-        internal void Append(StepDetails other)
+        internal void AppendFrom(StepDetails other)
         {
             if (other.MessageCreation != null)
             {
@@ -53,14 +53,14 @@ namespace OpenAI.Threads
                 }
                 else
                 {
-                    MessageCreation.Append(other.MessageCreation);
+                    MessageCreation.AppendFrom(other.MessageCreation);
                 }
             }
 
             if (other.ToolCalls != null)
             {
                 toolCalls ??= new List<ToolCall>();
-                toolCalls.Append(other.ToolCalls);
+                toolCalls.AppendFrom(other.ToolCalls);
             }
         }
     }

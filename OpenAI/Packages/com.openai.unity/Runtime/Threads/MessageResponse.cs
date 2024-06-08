@@ -18,7 +18,7 @@ namespace OpenAI.Threads
     public sealed class MessageResponse : BaseResponse, IStreamEvent
     {
         [Preserve]
-        internal MessageResponse(MessageResponse other) => Append(other);
+        internal MessageResponse(MessageResponse other) => AppendFrom(other);
 
         [Preserve]
         [JsonConstructor]
@@ -208,7 +208,7 @@ namespace OpenAI.Threads
                 ? string.Empty
                 : string.Join("\n", content.Select(c => c?.ToString()));
 
-        internal void Append(MessageResponse other)
+        internal void AppendFrom(MessageResponse other)
         {
             if (other == null) { return; }
 
@@ -223,7 +223,7 @@ namespace OpenAI.Threads
                 if (other.Delta.Content != null)
                 {
                     content ??= new List<Content>();
-                    content.Append(other.Delta.Content);
+                    content.AppendFrom(other.Delta.Content);
                 }
 
                 // bail early since we only care about the delta content

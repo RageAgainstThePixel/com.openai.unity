@@ -4,6 +4,6 @@ namespace OpenAI.Extensions
 {
     internal interface IAppendable<in T> : IIndexable
     {
-        void Append(T other);
+        void AppendFrom(T other);
     }
 }

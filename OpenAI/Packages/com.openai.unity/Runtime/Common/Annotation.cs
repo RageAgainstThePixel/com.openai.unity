@@ -71,7 +71,7 @@ namespace OpenAI
         [JsonProperty("end_index")]
         public int EndIndex { get; private set; }
 
-        public void Append(Annotation other)
+        public void AppendFrom(Annotation other)
         {
             if (other == null) { return; }
 

@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace OpenAI.Chat
     public sealed class ChatResponse : BaseResponse
     {
         [Preserve]
-        internal ChatResponse(ChatResponse other) => Append(other);
+        internal ChatResponse(ChatResponse other) => AppendFrom(other);
 
         [Preserve]
         [JsonConstructor]
@@ -102,7 +103,7 @@ namespace OpenAI.Chat
         public static implicit operator string(ChatResponse response) => response.ToString();
 
         [Preserve]
-        internal void Append(ChatResponse other)
+        internal void AppendFrom(ChatResponse other)
         {
             if (other is null) { return; }
 
@@ -129,23 +130,14 @@ namespace OpenAI.Chat
                 }
                 else
                 {
-                    Usage.Append(other.Usage);
+                    Usage.AppendFrom(other.Usage);
                 }
             }
 
             if (other.Choices is { Count: > 0 })
             {
                 choices ??= new List<Choice>();
-
-                foreach (var otherChoice in other.Choices)
-                {
-                    if (otherChoice.Index + 1 > choices.Count)
-                    {
-                        choices.Insert(otherChoice.Index, otherChoice);
-                    }
-
-                    choices[otherChoice.Index].Append(otherChoice);
-                }
+                choices.AppendFrom(other.Choices);
             }
         }
 

@@ -17,7 +17,7 @@ namespace OpenAI.Threads
     public sealed class RunResponse : BaseResponse, IStreamEvent
     {
         [Preserve]
-        internal RunResponse(RunResponse other) => Append(other);
+        internal RunResponse(RunResponse other) => AppendFrom(other);
 
         [Preserve]
         [JsonConstructor]
@@ -328,7 +328,7 @@ namespace OpenAI.Threads
         [Preserve]
         public override string ToString() => Id;
 
-        internal void Append(RunResponse other)
+        internal void AppendFrom(RunResponse other)
         {
             if (other is null) { return; }
 
@@ -380,7 +380,7 @@ namespace OpenAI.Threads
             if (other is { Tools: not null })
             {
                 tools ??= new List<Tool>();
-                tools.Append(other.Tools);
+                tools.AppendFrom(other.Tools);
             }
 
             if (other.Metadata is { Count: > 0 })

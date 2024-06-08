@@ -61,7 +61,7 @@ namespace OpenAI.Chat
                     }
                     else
                     {
-                        chatResponse.Append(partialResponse);
+                        chatResponse.AppendFrom(partialResponse);
                     }
 
                     resultHandler?.Invoke(partialResponse);

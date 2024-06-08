@@ -16,7 +16,7 @@ namespace OpenAI.Threads
     public sealed class RunStepResponse : BaseResponse, IStreamEvent
     {
         [Preserve]
-        internal RunStepResponse(RunStepResponse other) => Append(other);
+        internal RunStepResponse(RunStepResponse other) => AppendFrom(other);
 
         [Preserve]
         [JsonConstructor]
@@ -217,7 +217,7 @@ namespace OpenAI.Threads
         [Preserve]
         public override string ToString() => Id;
 
-        internal void Append(RunStepResponse other)
+        internal void AppendFrom(RunStepResponse other)
         {
             if (other == null) { return; }
 
@@ -231,7 +231,7 @@ namespace OpenAI.Threads
                     }
                     else
                     {
-                        StepDetails.Append(other.Delta.StepDetails);
+                        StepDetails.AppendFrom(other.Delta.StepDetails);
                     }
                 }
 

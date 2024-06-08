@@ -125,7 +125,7 @@ namespace OpenAI
                 _ => throw new ArgumentOutOfRangeException(nameof(Type))
             } ?? string.Empty;
 
-        public void Append(Content other)
+        public void AppendFrom(Content other)
         {
             if (other == null) { return; }
 
@@ -138,7 +138,7 @@ namespace OpenAI
             {
                 if (Text is TextContent textContent)
                 {
-                    textContent.Append(otherTextContent);
+                    textContent.AppendFrom(otherTextContent);
                 }
                 else
                 {
@@ -161,7 +161,7 @@ namespace OpenAI
                 }
                 else
                 {
-                    ImageUrl.Append(other.ImageUrl);
+                    ImageUrl.AppendFrom(other.ImageUrl);
                 }
             }
 
@@ -173,7 +173,7 @@ namespace OpenAI
                 }
                 else
                 {
-                    ImageFile.Append(other.ImageFile);
+                    ImageFile.AppendFrom(other.ImageFile);
                 }
             }
         }

@@ -6,7 +6,7 @@ namespace OpenAI.Extensions
 {
     internal static class CollectionExtensions
     {
-        public static void Append<T>(this List<T> self, IReadOnlyList<T> other)
+        public static void AppendFrom<T>(this List<T> self, IReadOnlyList<T> other)
             where T : IAppendable<T>, new()
         {
             if (other == null)
@@ -23,18 +23,18 @@ namespace OpenAI.Extensions
                     if (otherItem.Index + 1 > self.Count)
                     {
                         var newItem = new T();
-                        newItem.Append(otherItem);
+                        newItem.AppendFrom(otherItem);
                         self.Insert(otherItem.Index.Value, newItem);
                     }
                     else
                     {
-                        self[otherItem.Index.Value].Append(otherItem);
+                        self[otherItem.Index.Value].AppendFrom(otherItem);
                     }
                 }
                 else
                 {
                     var newItem = new T();
-                    newItem.Append(otherItem);
+                    newItem.AppendFrom(otherItem);
                     self.Add(newItem);
                 }
             }
