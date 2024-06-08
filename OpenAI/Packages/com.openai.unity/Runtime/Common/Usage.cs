@@ -33,7 +33,7 @@ namespace OpenAI
         public int? TotalTokens { get; private set; }
 
         [Preserve]
-        internal void CopyFrom(Usage other)
+        internal void Append(Usage other)
         {
             if (other?.PromptTokens != null)
             {

@@ -13,7 +13,7 @@ namespace OpenAI.Chat
     public sealed class ChatResponse : BaseResponse
     {
         [Preserve]
-        internal ChatResponse(ChatResponse other) => CopyFrom(other);
+        internal ChatResponse(ChatResponse other) => Append(other);
 
         [Preserve]
         [JsonConstructor]
@@ -102,7 +102,7 @@ namespace OpenAI.Chat
         public static implicit operator string(ChatResponse response) => response.ToString();
 
         [Preserve]
-        internal void CopyFrom(ChatResponse other)
+        internal void Append(ChatResponse other)
         {
             if (other is null) { return; }
 
@@ -129,7 +129,7 @@ namespace OpenAI.Chat
                 }
                 else
                 {
-                    Usage.CopyFrom(other.Usage);
+                    Usage.Append(other.Usage);
                 }
             }
 
