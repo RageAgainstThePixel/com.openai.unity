@@ -61,7 +61,7 @@ namespace OpenAI.Chat
         public static implicit operator string(Choice choice) => choice?.ToString();
 
         [Preserve]
-        internal void CopyFrom(Choice other)
+        internal void Append(Choice other)
         {
             Index = other?.Index ?? 0;
 
@@ -78,7 +78,7 @@ namespace OpenAI.Chat
                 }
                 else
                 {
-                    Message.CopyFrom(other.Delta);
+                    Message.Append(other.Delta);
                 }
             }
 

@@ -17,7 +17,7 @@ namespace OpenAI.Threads
     public sealed class RunResponse : BaseResponse, IStreamEvent
     {
         [Preserve]
-        internal RunResponse(RunResponse other) => CopyFrom(other);
+        internal RunResponse(RunResponse other) => Append(other);
 
         [Preserve]
         [JsonConstructor]
@@ -328,7 +328,7 @@ namespace OpenAI.Threads
         [Preserve]
         public override string ToString() => Id;
 
-        internal void CopyFrom(RunResponse other)
+        internal void Append(RunResponse other)
         {
             if (other is null) { return; }
 
@@ -354,7 +354,10 @@ namespace OpenAI.Threads
                 AssistantId = other.AssistantId;
             }
 
-            Status = other.Status;
+            if (other.Status > 0)
+            {
+                Status = other.Status;
+            }
 
             if (other.RequiredAction != null)
             {
@@ -409,25 +412,7 @@ namespace OpenAI.Threads
             if (other is { Tools: not null })
             {
                 tools ??= new List<Tool>();
-
-                foreach (var otherTool in other.Tools)
-                {
-                    if (otherTool == null) { continue; }
-
-                    if (otherTool.Index.HasValue)
-                    {
-                        if (otherTool.Index + 1 > Tools.Count)
-                        {
-                            tools.Insert(otherTool.Index.Value, new Tool(otherTool));
-                        }
-
-                        tools[otherTool.Index.Value].CopyFrom(otherTool);
-                    }
-                    else
-                    {
-                        tools.Add(new Tool(otherTool));
-                    }
-                }
+                tools.Append(other.Tools);
             }
 
             if (other.Metadata is { Count: > 0 })

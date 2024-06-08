@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +13,13 @@ using UnityEngine.Scripting;
 namespace OpenAI
 {
     [Preserve]
-    public sealed class Tool
+    public sealed class Tool : IAppendable<Tool>
     {
         [Preserve]
-        private Tool() { }
+        public Tool() { }
 
         [Preserve]
-        public Tool(Tool other) => CopyFrom(other);
+        public Tool(Tool other) => Append(other);
 
         [Preserve]
         public Tool(Function function)
@@ -75,7 +76,7 @@ namespace OpenAI
         public Function Function { get; private set; }
 
         [Preserve]
-        internal void CopyFrom(Tool other)
+        public void Append(Tool other)
         {
             if (!string.IsNullOrWhiteSpace(other?.Id))
             {
@@ -100,7 +101,7 @@ namespace OpenAI
                 }
                 else
                 {
-                    Function.CopyFrom(other.Function);
+                    Function.Append(other.Function);
                 }
             }
         }
@@ -192,6 +193,7 @@ namespace OpenAI
 
         }
 
+        [Preserve]
         private static bool TryGetTool(string name, object instance, out Tool tool)
         {
             foreach (var knownTool in toolCache.Where(knownTool =>

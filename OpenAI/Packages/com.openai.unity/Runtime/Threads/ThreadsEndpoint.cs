@@ -238,72 +238,79 @@ namespace OpenAI.Threads
             {
                 try
                 {
-                    var @event = ssEvent.Value.Value<string>();
-
-                    if (@event.Equals("thread.created"))
+                    switch (ssEvent.Value.Value<string>())
                     {
-                        eventHandler?.Invoke(sseResponse.Deserialize<ThreadResponse>(client));
-                        return;
+                        case "thread.created":
+                            eventHandler?.Invoke(sseResponse.Deserialize<ThreadResponse>(client));
+                            return;
+                        case "thread.run.created":
+                        case "thread.run.queued":
+                        case "thread.run.in_progress":
+                        case "thread.run.requires_action":
+                        case "thread.run.completed":
+                        case "thread.run.incomplete":
+                        case "thread.run.failed":
+                        case "thread.run.cancelling":
+                        case "thread.run.cancelled":
+                        case "thread.run.expired":
+                            var partialRun = sseResponse.Deserialize<RunResponse>(client);
+
+                            if (run == null)
+                            {
+                                run = new RunResponse(partialRun);
+                            }
+                            else
+                            {
+                                run.Append(partialRun);
+                            }
+
+                            eventHandler?.Invoke(partialRun);
+                            return;
+                        case "thread.run.step.created":
+                        case "thread.run.step.in_progress":
+                        case "thread.run.step.delta":
+                        case "thread.run.step.completed":
+                        case "thread.run.step.failed":
+                        case "thread.run.step.cancelled":
+                        case "thread.run.step.expired":
+                            var partialRunStep = sseResponse.Deserialize<RunStepResponse>(client);
+
+                            if (runStep == null)
+                            {
+                                runStep = new RunStepResponse(partialRunStep);
+                            }
+                            else
+                            {
+                                runStep.Append(partialRunStep);
+                            }
+
+                            eventHandler?.Invoke(partialRunStep);
+                            return;
+                        case "thread.message.created":
+                        case "thread.message.in_progress":
+                        case "thread.message.delta":
+                        case "thread.message.completed":
+                        case "thread.message.incomplete":
+                            var partialMessage = sseResponse.Deserialize<MessageResponse>(client);
+
+                            if (message == null)
+                            {
+                                message = new MessageResponse(partialMessage);
+                            }
+                            else
+                            {
+                                message.Append(partialMessage);
+                            }
+
+                            eventHandler?.Invoke(message);
+                            return;
+                        case "error":
+                            eventHandler?.Invoke(sseResponse.Deserialize<Error>(client));
+                            return;
+                        default:
+                            Debug.LogWarning($"Unhandled event: {ssEvent}");
+                            return;
                     }
-
-                    if (@event.StartsWith("thread.run.step"))
-                    {
-                        var partialRunStep = sseResponse.Deserialize<RunStepResponse>(client);
-
-                        if (runStep == null)
-                        {
-                            runStep = new RunStepResponse(partialRunStep);
-                        }
-                        else
-                        {
-                            runStep.CopyFrom(partialRunStep);
-                        }
-
-                        eventHandler?.Invoke(partialRunStep);
-                        return;
-                    }
-
-                    if (@event.StartsWith("thread.run"))
-                    {
-                        var partialRun = sseResponse.Deserialize<RunResponse>(client);
-
-                        if (run == null)
-                        {
-                            run = new RunResponse(partialRun);
-                        }
-                        else
-                        {
-                            run.CopyFrom(partialRun);
-                        }
-
-                        eventHandler?.Invoke(partialRun);
-                        return;
-                    }
-
-                    if (@event.StartsWith("thread.message"))
-                    {
-                        var partialMessage = sseResponse.Deserialize<MessageResponse>(client);
-
-                        if (message == null)
-                        {
-                            message = new MessageResponse(partialMessage);
-                        }
-                        else
-                        {
-                            message.CopyFrom(partialMessage);
-                        }
-
-                        eventHandler?.Invoke(partialMessage);
-                        return;
-                    }
-
-                    if (@event.Equals("error"))
-                    {
-                        eventHandler?.Invoke(sseResponse.Deserialize<Error>(client));
-                        return;
-                    }
-
-                    Debug.LogWarning($"Unhandled event: {ssEvent}");
                 }
                 catch (Exception e)
                 {

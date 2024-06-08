@@ -16,7 +16,7 @@ namespace OpenAI.Threads
     public sealed class RunStepResponse : BaseResponse, IStreamEvent
     {
         [Preserve]
-        internal RunStepResponse(RunStepResponse other) => CopyFrom(other);
+        internal RunStepResponse(RunStepResponse other) => Append(other);
 
         [Preserve]
         [JsonConstructor]
@@ -211,7 +211,7 @@ namespace OpenAI.Threads
         [Preserve]
         public override string ToString() => Id;
 
-        internal void CopyFrom(RunStepResponse other)
+        internal void Append(RunStepResponse other)
         {
             if (other == null) { return; }
 
@@ -245,8 +245,15 @@ namespace OpenAI.Threads
                 RunId = other.RunId;
             }
 
-            Type = other.Type;
-            Status = other.Status;
+            if (other.Type > 0)
+            {
+                Type = other.Type;
+            }
+
+            if (other.Status > 0)
+            {
+                Status = other.Status;
+            }
 
             if (other.StepDetails != null)
             {

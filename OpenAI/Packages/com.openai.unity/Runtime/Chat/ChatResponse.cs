@@ -144,7 +144,7 @@ namespace OpenAI.Chat
                         choices.Insert(otherChoice.Index, otherChoice);
                     }
 
-                    choices[otherChoice.Index].CopyFrom(otherChoice);
+                    choices[otherChoice.Index].Append(otherChoice);
                 }
             }
         }

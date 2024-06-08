@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,13 +18,14 @@ namespace OpenAI.Threads
     public sealed class MessageResponse : BaseResponse, IStreamEvent
     {
         [Preserve]
-        internal MessageResponse(MessageResponse other) => CopyFrom(other);
+        internal MessageResponse(MessageResponse other) => Append(other);
 
         [Preserve]
         [JsonConstructor]
         internal MessageResponse(
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
+            [JsonProperty("delta")] MessageDelta delta,
             [JsonProperty("created_at")] int createdAtUnixTimeSeconds,
             [JsonProperty("thread_id")] string threadId,
             [JsonProperty("status")] MessageStatus status,
@@ -31,7 +33,7 @@ namespace OpenAI.Threads
             [JsonProperty("completed_at")] int? completedAtUnixTimeSeconds,
             [JsonProperty("incomplete_at")] int? incompleteAtUnixTimeSeconds,
             [JsonProperty("role")] Role role,
-            [JsonProperty("content")] IReadOnlyList<Content> content,
+            [JsonProperty("content")] List<Content> content,
             [JsonProperty("assistant_id")] string assistantId,
             [JsonProperty("run_id")] string runId,
             [JsonProperty("Attachments")] IReadOnlyList<Attachment> attachments,
@@ -39,6 +41,7 @@ namespace OpenAI.Threads
         {
             Id = id;
             Object = @object;
+            Delta = delta;
             CreatedAtUnixTimeSeconds = createdAtUnixTimeSeconds;
             ThreadId = threadId;
             Status = status;
@@ -46,7 +49,7 @@ namespace OpenAI.Threads
             CompletedAtUnixTimeSeconds = completedAtUnixTimeSeconds;
             IncompleteAtUnixTimeSeconds = incompleteAtUnixTimeSeconds;
             Role = role;
-            Content = content ?? new List<Content>();
+            this.content = content ?? new List<Content>();
             AssistantId = assistantId;
             RunId = runId;
             Attachments = attachments;
@@ -58,21 +61,25 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("id")]
-        public string Id { get; }
+        public string Id { get; private set; }
 
         /// <summary>
         /// The object type, which is always message.
         /// </summary>
         [Preserve]
         [JsonProperty("object")]
-        public string Object { get; }
+        public string Object { get; private set; }
+
+        [Preserve]
+        [JsonProperty("delta")]
+        public MessageDelta Delta { get; private set; }
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the message was created.
         /// </summary>
         [Preserve]
         [JsonProperty("created_at")]
-        public int CreatedAtUnixTimeSeconds { get; }
+        public int CreatedAtUnixTimeSeconds { get; private set; }
 
         [Preserve]
         [JsonIgnore]
@@ -83,7 +90,7 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("thread_id")]
-        public string ThreadId { get; }
+        public string ThreadId { get; private set; }
 
         /// <summary>
         /// The status of the message, which can be either 'in_progress', 'incomplete', or 'completed'.
@@ -130,28 +137,30 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("role")]
-        public Role Role { get; }
+        public Role Role { get; private set; }
+
+        private List<Content> content;
 
         /// <summary>
         /// The content of the message in array of text and/or images.
         /// </summary>
         [Preserve]
         [JsonProperty("content")]
-        public IReadOnlyList<Content> Content { get; }
+        public IReadOnlyList<Content> Content => content;
 
         /// <summary>
         /// If applicable, the ID of the assistant that authored this message.
         /// </summary>
         [Preserve]
         [JsonProperty("assistant_id")]
-        public string AssistantId { get; }
+        public string AssistantId { get; private set; }
 
         /// <summary>
         /// If applicable, the ID of the run associated with the authoring of this message.
         /// </summary>
         [Preserve]
         [JsonProperty("run_id")]
-        public string RunId { get; }
+        public string RunId { get; private set; }
 
         /// <summary>
         /// A list of file IDs that the assistant should use.
@@ -176,7 +185,7 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("metadata")]
-        public IReadOnlyDictionary<string, string> Metadata { get; }
+        public IReadOnlyDictionary<string, string> Metadata { get; private set; }
 
         [Preserve]
         public static implicit operator string(MessageResponse message) => message?.ToString();
@@ -195,11 +204,78 @@ namespace OpenAI.Threads
         /// <returns><see cref="string"/> of all <see cref="Content"/>.</returns>
         [Preserve]
         public string PrintContent()
-            => string.Join("\n", Content.Select(content => content?.ToString()));
+            => content == null
+                ? string.Empty
+                : string.Join("\n", content.Select(c => c?.ToString()));
 
-        internal void CopyFrom(MessageResponse other)
+        internal void Append(MessageResponse other)
         {
-            // TODO Implement
+            if (other == null) { return; }
+
+            if (other.Delta != null)
+            {
+                if (Role == 0 &&
+                    other.Delta.Role > 0)
+                {
+                    Role = other.Delta.Role;
+                }
+
+                if (other.Delta.Content != null)
+                {
+                    content ??= new List<Content>();
+                    content.Append(other.Delta.Content);
+                }
+
+                // bail early since we only care about the delta content
+                return;
+            }
+
+            if (Role == 0 &&
+                other.Role > 0)
+            {
+                Role = other.Role;
+            }
+
+            if (other.content != null)
+            {
+                content = other.content;
+            }
+
+            if (CreatedAtUnixTimeSeconds == 0 &&
+                other.CreatedAtUnixTimeSeconds > 0)
+            {
+                CreatedAtUnixTimeSeconds = other.CreatedAtUnixTimeSeconds;
+            }
+
+            if (other.CompletedAtUnixTimeSeconds.HasValue)
+            {
+                CompletedAtUnixTimeSeconds = other.CompletedAtUnixTimeSeconds;
+            }
+
+            if (other.IncompleteAtUnixTimeSeconds.HasValue)
+            {
+                IncompleteAtUnixTimeSeconds = other.IncompleteAtUnixTimeSeconds;
+            }
+
+            if (other.Status > 0)
+            {
+                Status = other.Status;
+            }
+
+            if (other.IncompleteDetails != null)
+            {
+                IncompleteDetails = other.IncompleteDetails;
+            }
+
+            if (other.Attachments != null)
+            {
+                Attachments = other.Attachments;
+            }
+
+            if (other.Metadata != null)
+            {
+                Metadata = other.Metadata;
+            }
         }
     }
 }
