@@ -26,7 +26,7 @@ namespace OpenAI.Threads
         {
             if (!string.IsNullOrWhiteSpace(other.MessageId))
             {
-                MessageId += other.MessageId;
+                MessageId = other.MessageId;
             }
         }
     }
