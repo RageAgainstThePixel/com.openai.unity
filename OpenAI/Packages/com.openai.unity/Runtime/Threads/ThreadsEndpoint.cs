@@ -93,8 +93,8 @@ namespace OpenAI.Threads
         /// <returns><see cref="MessageResponse"/>.</returns>
         public async Task<MessageResponse> CreateMessageAsync(string threadId, Message message, CancellationToken cancellationToken = default)
         {
-            var jsonContent = JsonConvert.SerializeObject(message, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl($"/{threadId}/messages"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var payload = JsonConvert.SerializeObject(message, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{threadId}/messages"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<MessageResponse>(client);
         }
@@ -168,8 +168,8 @@ namespace OpenAI.Threads
         /// <returns><see cref="MessageResponse"/>.</returns>
         public async Task<MessageResponse> ModifyMessageAsync(string threadId, string messageId, IReadOnlyDictionary<string, string> metadata, CancellationToken cancellationToken = default)
         {
-            var jsonContent = JsonConvert.SerializeObject(new { metadata }, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl($"/{threadId}/messages/{messageId}"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var payload = JsonConvert.SerializeObject(new { metadata }, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{threadId}/messages/{messageId}"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<MessageResponse>(client);
         }
@@ -197,9 +197,10 @@ namespace OpenAI.Threads
         /// </summary>
         /// <param name="threadId">The id of the thread to run.</param>
         /// <param name="request"><see cref="CreateRunRequest"/>.</param>
+        /// <param name="streamEventHandler">Optional, <see cref="Action{IStreamEvent}"/> stream callback handler.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="RunResponse"/>.</returns>
-        public async Task<RunResponse> CreateRunAsync(string threadId, CreateRunRequest request = null, CancellationToken cancellationToken = default)
+        public async Task<RunResponse> CreateRunAsync(string threadId, CreateRunRequest request = null, Action<IStreamEvent> streamEventHandler = null, CancellationToken cancellationToken = default)
         {
             if (request == null || string.IsNullOrWhiteSpace(request.AssistantId))
             {
@@ -207,49 +208,16 @@ namespace OpenAI.Threads
                 request = new CreateRunRequest(assistant, request);
             }
 
-            var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(EnableDebug);
-            return response.Deserialize<RunResponse>(client);
-        }
-
-        /// <summary>
-        /// Create a run and stream the events.
-        /// </summary>
-        /// <param name="threadId">The id of the thread to run.</param>
-        /// <param name="streamEventHandler">The event handler to handle streamed run events.</param>
-        /// <param name="request"><see cref="CreateRunRequest"/>.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="RunResponse"/>.</returns>
-        public async Task<RunResponse> CreateStreamingRunAsync(string threadId, Action<IStreamEvent> streamEventHandler, CreateRunRequest request = null, CancellationToken cancellationToken = default)
-        {
-            if (request == null || string.IsNullOrWhiteSpace(request.AssistantId))
-            {
-                var assistant = await client.AssistantsEndpoint.CreateAssistantAsync(cancellationToken: cancellationToken);
-                request = new CreateRunRequest(assistant, request);
-            }
-
-            request.Stream = true;
+            request.Stream = streamEventHandler != null;
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            return await StreamRunAsync($"/{threadId}/runs", payload, streamEventHandler, cancellationToken);
-        }
+            var endpoint = GetUrl($"/{threadId}/runs");
 
-        /// <summary>
-        /// Create a thread and run it in one request.
-        /// </summary>
-        /// <param name="request"><see cref="CreateThreadAndRunRequest"/>.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="RunResponse"/>.</returns>
-        public async Task<RunResponse> CreateThreadAndRunAsync(CreateThreadAndRunRequest request = null, CancellationToken cancellationToken = default)
-        {
-            if (request == null || string.IsNullOrWhiteSpace(request.AssistantId))
+            if (request.Stream)
             {
-                var assistant = await client.AssistantsEndpoint.CreateAssistantAsync(cancellationToken: cancellationToken);
-                request = new CreateThreadAndRunRequest(assistant, request);
+                return await StreamRunAsync(endpoint, payload, streamEventHandler, cancellationToken);
             }
 
-            var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl("/runs"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(endpoint, payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<RunResponse>(client);
         }
@@ -257,11 +225,11 @@ namespace OpenAI.Threads
         /// <summary>
         /// Create a thread and run it in one request.
         /// </summary>
-        /// <param name="streamEventHandler">The event handler to handle streamed run events.</param>
         /// <param name="request"><see cref="CreateThreadAndRunRequest"/>.</param>
+        /// <param name="streamEventHandler">Optional, <see cref="Action{IStreamEvent}"/> stream callback handler.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="RunResponse"/>.</returns>
-        public async Task<RunResponse> CreateThreadAndStreamRunAsync(Action<IStreamEvent> streamEventHandler, CreateThreadAndRunRequest request = null, CancellationToken cancellationToken = default)
+        public async Task<RunResponse> CreateThreadAndRunAsync(CreateThreadAndRunRequest request = null, Action<IStreamEvent> streamEventHandler = null, CancellationToken cancellationToken = default)
         {
             if (request == null || string.IsNullOrWhiteSpace(request.AssistantId))
             {
@@ -269,103 +237,18 @@ namespace OpenAI.Threads
                 request = new CreateThreadAndRunRequest(assistant, request);
             }
 
-            request.Stream = true;
+            request.Stream = streamEventHandler != null;
+            var endpoint = GetUrl("/runs");
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            return await StreamRunAsync("/runs", payload, streamEventHandler, cancellationToken);
-        }
 
-        private async Task<RunResponse> StreamRunAsync(string endpoint, string payload, Action<IStreamEvent> eventHandler, CancellationToken cancellationToken = default)
-        {
-            RunResponse run = null;
-            RunStepResponse runStep = null;
-            MessageResponse message = null;
-            var response = await Rest.PostAsync(GetUrl(endpoint), payload, (sseResponse, ssEvent) =>
+            if (request.Stream)
             {
-                try
-                {
-                    switch (ssEvent.Value.Value<string>())
-                    {
-                        case "thread.created":
-                            eventHandler?.Invoke(sseResponse.Deserialize<ThreadResponse>(client));
-                            return;
-                        case "thread.run.created":
-                        case "thread.run.queued":
-                        case "thread.run.in_progress":
-                        case "thread.run.requires_action":
-                        case "thread.run.completed":
-                        case "thread.run.incomplete":
-                        case "thread.run.failed":
-                        case "thread.run.cancelling":
-                        case "thread.run.cancelled":
-                        case "thread.run.expired":
-                            var partialRun = sseResponse.Deserialize<RunResponse>(client);
+                return await StreamRunAsync(endpoint, payload, streamEventHandler, cancellationToken);
+            }
 
-                            if (run == null)
-                            {
-                                run = partialRun;
-                            }
-                            else
-                            {
-                                run.Append(partialRun);
-                            }
-
-                            eventHandler?.Invoke(run);
-                            return;
-                        case "thread.run.step.created":
-                        case "thread.run.step.in_progress":
-                        case "thread.run.step.delta":
-                        case "thread.run.step.completed":
-                        case "thread.run.step.failed":
-                        case "thread.run.step.cancelled":
-                        case "thread.run.step.expired":
-                            var partialRunStep = sseResponse.Deserialize<RunStepResponse>(client);
-
-                            if (runStep == null)
-                            {
-                                runStep = partialRunStep;
-                            }
-                            else
-                            {
-                                runStep.Append(partialRunStep);
-                            }
-
-                            eventHandler?.Invoke(runStep);
-                            return;
-                        case "thread.message.created":
-                        case "thread.message.in_progress":
-                        case "thread.message.delta":
-                        case "thread.message.completed":
-                        case "thread.message.incomplete":
-                            var partialMessage = sseResponse.Deserialize<MessageResponse>(client);
-
-                            if (message == null)
-                            {
-                                message = partialMessage;
-                            }
-                            else
-                            {
-                                message.Append(partialMessage);
-                            }
-
-                            eventHandler?.Invoke(message);
-                            return;
-                        case "error":
-                            eventHandler?.Invoke(sseResponse.Deserialize<Error>(client));
-                            return;
-                        default:
-                            Debug.LogWarning($"Unhandled event: {ssEvent}");
-                            return;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"{ssEvent}\n{e}");
-                }
-            }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(endpoint, payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            if (run == null) { return null; }
-            run.SetResponseData(response, client);
-            return run;
+            return response.Deserialize<RunResponse>(client);
         }
 
         /// <summary>
@@ -397,8 +280,8 @@ namespace OpenAI.Threads
         /// <returns><see cref="RunResponse"/>.</returns>
         public async Task<RunResponse> ModifyRunAsync(string threadId, string runId, IReadOnlyDictionary<string, string> metadata, CancellationToken cancellationToken = default)
         {
-            var jsonContent = JsonConvert.SerializeObject(new { metadata }, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs/{runId}"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var payload = JsonConvert.SerializeObject(new { metadata }, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs/{runId}"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<RunResponse>(client);
         }
@@ -411,12 +294,21 @@ namespace OpenAI.Threads
         /// <param name="threadId">The id of the thread to which this run belongs.</param>
         /// <param name="runId">The id of the run that requires the tool output submission.</param>
         /// <param name="request"><see cref="SubmitToolOutputsRequest"/>.</param>
+        /// <param name="streamEventHandler">Optional, <see cref="Action{IStreamEvent}"/> stream callback handler.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="RunResponse"/>.</returns>
-        public async Task<RunResponse> SubmitToolOutputsAsync(string threadId, string runId, SubmitToolOutputsRequest request, CancellationToken cancellationToken = default)
+        public async Task<RunResponse> SubmitToolOutputsAsync(string threadId, string runId, SubmitToolOutputsRequest request, Action<IStreamEvent> streamEventHandler = null, CancellationToken cancellationToken = default)
         {
-            var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs/{runId}/submit_tool_outputs"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            request.Stream = streamEventHandler != null;
+            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            var endpoint = GetUrl($"/{threadId}/runs/{runId}/submit_tool_outputs");
+
+            if (request.Stream)
+            {
+                return await StreamRunAsync(endpoint, payload, streamEventHandler, cancellationToken);
+            }
+
+            var response = await Rest.PostAsync(endpoint, payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<RunResponse>(client);
         }
@@ -502,5 +394,99 @@ namespace OpenAI.Threads
         }
 
         #endregion Files (Obsolete)
+
+        private async Task<RunResponse> StreamRunAsync(string endpoint, string payload, Action<IStreamEvent> streamEventHandler, CancellationToken cancellationToken = default)
+        {
+            RunResponse run = null;
+            RunStepResponse runStep = null;
+            MessageResponse message = null;
+            var response = await Rest.PostAsync(endpoint, payload, (sseResponse, ssEvent) =>
+            {
+                try
+                {
+                    switch (ssEvent.Value.Value<string>())
+                    {
+                        case "thread.created":
+                            streamEventHandler?.Invoke(sseResponse.Deserialize<ThreadResponse>(client));
+                            return;
+                        case "thread.run.created":
+                        case "thread.run.queued":
+                        case "thread.run.in_progress":
+                        case "thread.run.requires_action":
+                        case "thread.run.completed":
+                        case "thread.run.incomplete":
+                        case "thread.run.failed":
+                        case "thread.run.cancelling":
+                        case "thread.run.cancelled":
+                        case "thread.run.expired":
+                            var partialRun = sseResponse.Deserialize<RunResponse>(client);
+
+                            if (run == null)
+                            {
+                                run = partialRun;
+                            }
+                            else
+                            {
+                                run.Append(partialRun);
+                            }
+
+                            streamEventHandler?.Invoke(run);
+                            return;
+                        case "thread.run.step.created":
+                        case "thread.run.step.in_progress":
+                        case "thread.run.step.delta":
+                        case "thread.run.step.completed":
+                        case "thread.run.step.failed":
+                        case "thread.run.step.cancelled":
+                        case "thread.run.step.expired":
+                            var partialRunStep = sseResponse.Deserialize<RunStepResponse>(client);
+
+                            if (runStep == null)
+                            {
+                                runStep = partialRunStep;
+                            }
+                            else
+                            {
+                                runStep.Append(partialRunStep);
+                            }
+
+                            streamEventHandler?.Invoke(runStep);
+                            return;
+                        case "thread.message.created":
+                        case "thread.message.in_progress":
+                        case "thread.message.delta":
+                        case "thread.message.completed":
+                        case "thread.message.incomplete":
+                            var partialMessage = sseResponse.Deserialize<MessageResponse>(client);
+
+                            if (message == null)
+                            {
+                                message = partialMessage;
+                            }
+                            else
+                            {
+                                message.Append(partialMessage);
+                            }
+
+                            streamEventHandler?.Invoke(message);
+                            return;
+                        case "error":
+                            streamEventHandler?.Invoke(sseResponse.Deserialize<Error>(client));
+                            return;
+                        default:
+                            Debug.LogWarning($"Unhandled event: {ssEvent}");
+                            return;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"{ssEvent}\n{e}");
+                }
+            }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            if (run == null) { return null; }
+            run.SetResponseData(response, client);
+            return run;
+        }
     }
 }

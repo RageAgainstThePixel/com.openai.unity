@@ -232,25 +232,22 @@ namespace OpenAI.Tests
             {
                 Assert.NotNull(thread);
                 var message = await thread.CreateMessageAsync("I need to solve the equation `3x + 11 = 14`. Can you help me?");
-
                 Assert.NotNull(message);
-
-                var run = await thread.CreateStreamingRunAsync(streamEvent =>
+                var run = await thread.CreateRunAsync(assistant, streamEvent =>
+                {
+                    switch (streamEvent)
                     {
-                        switch (streamEvent)
-                        {
-                            case MessageResponse messageEvent:
-                                Debug.Log($"{messageEvent.Role}: {messageEvent.PrintContent()}");
-                                break;
-                            case Error error:
-                                Debug.LogError(error.ToString());
-                                break;
-                            default:
-                                Debug.Log(JsonConvert.SerializeObject(streamEvent));
-                                break;
-                        }
-                    }, new CreateRunRequest(assistant));
-
+                        case MessageResponse messageEvent:
+                            Debug.Log($"{messageEvent.Role}: {messageEvent.PrintContent()}");
+                            break;
+                        case Error error:
+                            Debug.LogError(error.ToString());
+                            break;
+                        default:
+                            Debug.Log(JsonConvert.SerializeObject(streamEvent, OpenAIClient.JsonSerializationOptions));
+                            break;
+                    }
+                });
                 Assert.IsNotNull(run);
                 run = await run.WaitForStatusChangeAsync();
                 Assert.IsNotNull(run);
@@ -289,39 +286,46 @@ namespace OpenAI.Tests
 
             try
             {
-                var threadRequest = new CreateThreadRequest("I'm in Kuala-Lumpur, please tell me what's the temperature now?");
-                var run = await assistant.CreateThreadAndStreamRunAsync(async streamEvent =>
+                async void StreamEventHandler(IStreamEvent streamEvent)
                 {
-                    switch (streamEvent)
+                    try
                     {
-                        case ThreadResponse threadResponse:
-                            thread = threadResponse;
-                            break;
-                        case MessageResponse messageEvent:
-                            Debug.Log($"{messageEvent.Role}: {messageEvent.PrintContent()}");
-                            break;
-                        case RunResponse runResponse:
-                            if (runResponse.Status == RunStatus.RequiresAction)
-                            {
-                                var toolOutputs = await assistant.GetToolOutputsAsync(runResponse.RequiredAction.SubmitToolOutputs.ToolCalls);
-
-                                foreach (var toolOutput in toolOutputs)
+                        switch (streamEvent)
+                        {
+                            case ThreadResponse threadResponse:
+                                thread = threadResponse;
+                                break;
+                            case MessageResponse messageEvent:
+                                Debug.Log($"{messageEvent.Role}: {messageEvent.PrintContent()}");
+                                break;
+                            case RunResponse runResponse:
+                                if (runResponse.Status == RunStatus.RequiresAction)
                                 {
-                                    Debug.Log($"tool output: {toolOutput}");
+                                    var toolOutputs = await assistant.GetToolOutputsAsync(runResponse.RequiredAction.SubmitToolOutputs.ToolCalls);
+
+                                    foreach (var toolOutput in toolOutputs)
+                                    {
+                                        Debug.Log($"tool output: {toolOutput}");
+                                    }
+
+                                    await runResponse.SubmitToolOutputsAsync(toolOutputs, StreamEventHandler);
                                 }
-
-                                await runResponse.SubmitToolOutputsAsync(toolOutputs);
-                            }
-                            break;
-                        case Error error:
-                            Debug.LogError(error.ToString());
-                            break;
-                        default:
-                            Debug.Log(JsonConvert.SerializeObject(streamEvent, OpenAIClient.JsonSerializationOptions));
-                            break;
+                                break;
+                            case Error error:
+                                Debug.LogError(error.ToString());
+                                break;
+                            default:
+                                Debug.Log(JsonConvert.SerializeObject(streamEvent, OpenAIClient.JsonSerializationOptions));
+                                break;
+                        }
                     }
-                }, threadRequest);
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
+                }
 
+                var run = await assistant.CreateThreadAndRunAsync("I'm in Kuala-Lumpur, please tell me what's the temperature now?", StreamEventHandler);
                 Assert.NotNull(thread);
                 Assert.IsNotNull(run);
                 run = await run.WaitForStatusChangeAsync();

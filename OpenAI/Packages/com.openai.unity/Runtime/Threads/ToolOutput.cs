@@ -43,5 +43,8 @@ namespace OpenAI.Threads
         [Preserve]
         [JsonProperty("output")]
         public string Output { get; }
+
+        [Preserve]
+        public override string ToString() => Output;
     }
 }
