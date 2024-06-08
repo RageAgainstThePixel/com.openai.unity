@@ -283,8 +283,6 @@ namespace OpenAI.Threads
             {
                 try
                 {
-                    Debug.LogWarning(ssEvent);
-
                     switch (ssEvent.Value.Value<string>())
                     {
                         case "thread.created":
