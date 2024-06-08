@@ -69,7 +69,7 @@ namespace OpenAI
 
             if (!string.IsNullOrWhiteSpace(other.FileId))
             {
-                FileId += other.FileId;
+                FileId = other.FileId;
             }
 
             if (other.Detail > 0)

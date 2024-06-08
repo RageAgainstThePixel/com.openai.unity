@@ -23,6 +23,7 @@ namespace OpenAI.Threads
         internal RunStepResponse(
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
+            [JsonProperty("delta")] RunStepDelta delta,
             [JsonProperty("created_at")] int? createdAtUnixTimeSeconds,
             [JsonProperty("assistant_id")] string assistantId,
             [JsonProperty("thread_id")] string threadId,
@@ -40,6 +41,7 @@ namespace OpenAI.Threads
         {
             Id = id;
             Object = @object;
+            Delta = delta;
             CreatedAtUnixTimeSeconds = createdAtUnixTimeSeconds;
             AssistantId = assistantId;
             ThreadId = threadId;
@@ -61,17 +63,21 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("id")]
-        public string Id { get; private set; }
+        public string Id { get; }
 
         [Preserve]
         [JsonProperty("object")]
-        public string Object { get; private set; }
+        public string Object { get; }
+
+        [Preserve]
+        [JsonProperty("delta", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public RunStepDelta Delta { get; }
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the run step was created.
         /// </summary>
         [Preserve]
-        [JsonProperty("created_at")]
+        [JsonProperty("created_at", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? CreatedAtUnixTimeSeconds { get; private set; }
 
         [JsonIgnore]
@@ -84,21 +90,21 @@ namespace OpenAI.Threads
         /// The ID of the assistant associated with the run step.
         /// </summary>
         [Preserve]
-        [JsonProperty("assistant_id")]
+        [JsonProperty("assistant_id", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string AssistantId { get; private set; }
 
         /// <summary>
         /// The ID of the thread that was run.
         /// </summary>
         [Preserve]
-        [JsonProperty("thread_id")]
+        [JsonProperty("thread_id", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string ThreadId { get; private set; }
 
         /// <summary>
         /// The ID of the run that this run step is a part of.
         /// </summary>
         [Preserve]
-        [JsonProperty("run_id")]
+        [JsonProperty("run_id", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string RunId { get; private set; }
 
         /// <summary>
@@ -119,21 +125,21 @@ namespace OpenAI.Threads
         /// The details of the run step.
         /// </summary>
         [Preserve]
-        [JsonProperty("step_details")]
+        [JsonProperty("step_details", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public StepDetails StepDetails { get; private set; }
 
         /// <summary>
         /// The last error associated with this run step. Will be null if there are no errors.
         /// </summary>
         [Preserve]
-        [JsonProperty("last_error")]
+        [JsonProperty("last_error", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public Error LastError { get; private set; }
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the run step expired. A step is considered expired if the parent run is expired.
         /// </summary>
         [Preserve]
-        [JsonProperty("expired_at")]
+        [JsonProperty("expired_at", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? ExpiredAtUnixTimeSeconds { get; private set; }
 
         [JsonIgnore]
@@ -154,7 +160,7 @@ namespace OpenAI.Threads
         /// The Unix timestamp (in seconds) for when the run step was cancelled.
         /// </summary>
         [Preserve]
-        [JsonProperty("cancelled_at")]
+        [JsonProperty("cancelled_at", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? CancelledAtUnixTimeSeconds { get; private set; }
 
         [Preserve]
@@ -168,7 +174,7 @@ namespace OpenAI.Threads
         /// The Unix timestamp (in seconds) for when the run step failed.
         /// </summary>
         [Preserve]
-        [JsonProperty("failed_at")]
+        [JsonProperty("failed_at", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? FailedAtUnixTimeSeconds { get; private set; }
 
         [Preserve]
@@ -182,7 +188,7 @@ namespace OpenAI.Threads
         /// The Unix timestamp (in seconds) for when the run step completed.
         /// </summary>
         [Preserve]
-        [JsonProperty("completed_at")]
+        [JsonProperty("completed_at", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? CompletedAtUnixTimeSeconds { get; private set; }
 
         [Preserve]
@@ -198,11 +204,11 @@ namespace OpenAI.Threads
         /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
         /// </summary>
         [Preserve]
-        [JsonProperty("metadata")]
+        [JsonProperty("metadata", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyDictionary<string, string> Metadata { get; private set; }
 
         [Preserve]
-        [JsonProperty("usage")]
+        [JsonProperty("usage", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public Usage Usage { get; private set; }
 
         [Preserve]
@@ -215,34 +221,27 @@ namespace OpenAI.Threads
         {
             if (other == null) { return; }
 
-            if (!string.IsNullOrWhiteSpace(other.Id))
+            if (other.Delta != null)
             {
-                Id = other.Id;
-            }
+                if (other.Delta.StepDetails != null)
+                {
+                    if (StepDetails == null)
+                    {
+                        StepDetails = new StepDetails(other.Delta.StepDetails);
+                    }
+                    else
+                    {
+                        StepDetails.Append(other.Delta.StepDetails);
+                    }
+                }
 
-            if (!string.IsNullOrWhiteSpace(other.Object))
-            {
-                Object = other.Object;
+                // don't update other fields if we are just appending Delta
+                return;
             }
 
             if (other.CreatedAtUnixTimeSeconds.HasValue)
             {
                 CreatedAtUnixTimeSeconds = other.CreatedAtUnixTimeSeconds;
-            }
-
-            if (!string.IsNullOrWhiteSpace(other.AssistantId))
-            {
-                AssistantId = other.AssistantId;
-            }
-
-            if (!string.IsNullOrWhiteSpace(other.ThreadId))
-            {
-                ThreadId = other.ThreadId;
-            }
-
-            if (!string.IsNullOrWhiteSpace(other.RunId))
-            {
-                RunId = other.RunId;
             }
 
             if (other.Type > 0)

@@ -274,6 +274,82 @@ namespace OpenAI.Tests
         }
 
         [Test]
+        public async Task Test_06_01_03_CreateStreamingRun_ToolCalls()
+        {
+            Assert.NotNull(OpenAIClient.ThreadsEndpoint);
+            var tools = new List<Tool>
+            {
+                Tool.CodeInterpreter,
+                Tool.GetOrCreateTool(typeof(WeatherService), nameof(WeatherService.GetCurrentWeatherAsync))
+            };
+            var assistantRequest = new CreateAssistantRequest(tools: tools, instructions: "You are a helpful weather assistant. Use the appropriate unit based on geographical location.");
+            var assistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(assistantRequest);
+            Assert.NotNull(assistant);
+            ThreadResponse thread = null;
+
+            try
+            {
+                var threadRequest = new CreateThreadRequest("I'm in Kuala-Lumpur, please tell me what's the temperature now?");
+                var run = await assistant.CreateThreadAndStreamRunAsync(async streamEvent =>
+                {
+                    switch (streamEvent)
+                    {
+                        case ThreadResponse threadResponse:
+                            thread = threadResponse;
+                            break;
+                        case MessageResponse messageEvent:
+                            Debug.Log($"{messageEvent.Role}: {messageEvent.PrintContent()}");
+                            break;
+                        case RunResponse runResponse:
+                            if (runResponse.Status == RunStatus.RequiresAction)
+                            {
+                                var toolOutputs = await assistant.GetToolOutputsAsync(runResponse.RequiredAction.SubmitToolOutputs.ToolCalls);
+
+                                foreach (var toolOutput in toolOutputs)
+                                {
+                                    Debug.Log($"tool output: {toolOutput}");
+                                }
+
+                                await runResponse.SubmitToolOutputsAsync(toolOutputs);
+                            }
+                            break;
+                        case Error error:
+                            Debug.LogError(error.ToString());
+                            break;
+                        default:
+                            Debug.Log(JsonConvert.SerializeObject(streamEvent, OpenAIClient.JsonSerializationOptions));
+                            break;
+                    }
+                }, threadRequest);
+
+                Assert.NotNull(thread);
+                Assert.IsNotNull(run);
+                run = await run.WaitForStatusChangeAsync();
+                Assert.IsNotNull(run);
+                Assert.IsTrue(run.Status == RunStatus.Completed);
+                var messages = await thread.ListMessagesAsync();
+
+                foreach (var response in messages.Items.Reverse())
+                {
+                    Debug.Log($"{response.Role}: {response.PrintContent()}");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+            finally
+            {
+                if (thread != null)
+                {
+                    await thread.DeleteAsync();
+                }
+
+                await assistant.DeleteAsync(deleteToolResources: true);
+            }
+        }
+
+        [Test]
         public async Task Test_06_02_CreateThreadAndRun()
         {
             Assert.NotNull(OpenAIClient.ThreadsEndpoint);

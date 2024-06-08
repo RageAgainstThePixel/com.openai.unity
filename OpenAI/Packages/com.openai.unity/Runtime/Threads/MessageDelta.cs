@@ -26,5 +26,5 @@ namespace OpenAI.Threads
         [Preserve]
         [JsonProperty("content")]
         public IReadOnlyList<Content> Content { get; }
-    };
+    }
 }

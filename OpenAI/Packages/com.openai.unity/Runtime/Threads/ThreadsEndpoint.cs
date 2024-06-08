@@ -217,11 +217,11 @@ namespace OpenAI.Threads
         /// Create a run and stream the events.
         /// </summary>
         /// <param name="threadId">The id of the thread to run.</param>
-        /// <param name="eventHandler">The event handler to handle streamed run events.</param>
+        /// <param name="streamEventHandler">The event handler to handle streamed run events.</param>
         /// <param name="request"><see cref="CreateRunRequest"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="RunResponse"/>.</returns>
-        public async Task<RunResponse> CreateStreamingRunAsync(string threadId, Action<IStreamEvent> eventHandler, CreateRunRequest request = null, CancellationToken cancellationToken = default)
+        public async Task<RunResponse> CreateStreamingRunAsync(string threadId, Action<IStreamEvent> streamEventHandler, CreateRunRequest request = null, CancellationToken cancellationToken = default)
         {
             if (request == null || string.IsNullOrWhiteSpace(request.AssistantId))
             {
@@ -230,14 +230,61 @@ namespace OpenAI.Threads
             }
 
             request.Stream = true;
+            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            return await StreamRunAsync($"/{threadId}/runs", payload, streamEventHandler, cancellationToken);
+        }
+
+        /// <summary>
+        /// Create a thread and run it in one request.
+        /// </summary>
+        /// <param name="request"><see cref="CreateThreadAndRunRequest"/>.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="RunResponse"/>.</returns>
+        public async Task<RunResponse> CreateThreadAndRunAsync(CreateThreadAndRunRequest request = null, CancellationToken cancellationToken = default)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.AssistantId))
+            {
+                var assistant = await client.AssistantsEndpoint.CreateAssistantAsync(cancellationToken: cancellationToken);
+                request = new CreateThreadAndRunRequest(assistant, request);
+            }
+
+            var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl("/runs"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<RunResponse>(client);
+        }
+
+        /// <summary>
+        /// Create a thread and run it in one request.
+        /// </summary>
+        /// <param name="streamEventHandler">The event handler to handle streamed run events.</param>
+        /// <param name="request"><see cref="CreateThreadAndRunRequest"/>.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="RunResponse"/>.</returns>
+        public async Task<RunResponse> CreateThreadAndStreamRunAsync(Action<IStreamEvent> streamEventHandler, CreateThreadAndRunRequest request = null, CancellationToken cancellationToken = default)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.AssistantId))
+            {
+                var assistant = await client.AssistantsEndpoint.CreateAssistantAsync(cancellationToken: cancellationToken);
+                request = new CreateThreadAndRunRequest(assistant, request);
+            }
+
+            request.Stream = true;
+            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            return await StreamRunAsync("/runs", payload, streamEventHandler, cancellationToken);
+        }
+
+        private async Task<RunResponse> StreamRunAsync(string endpoint, string payload, Action<IStreamEvent> eventHandler, CancellationToken cancellationToken = default)
+        {
             RunResponse run = null;
             RunStepResponse runStep = null;
             MessageResponse message = null;
-            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs"), payload, (sseResponse, ssEvent) =>
+            var response = await Rest.PostAsync(GetUrl(endpoint), payload, (sseResponse, ssEvent) =>
             {
                 try
                 {
+                    Debug.LogWarning(ssEvent);
+
                     switch (ssEvent.Value.Value<string>())
                     {
                         case "thread.created":
@@ -257,14 +304,14 @@ namespace OpenAI.Threads
 
                             if (run == null)
                             {
-                                run = new RunResponse(partialRun);
+                                run = partialRun;
                             }
                             else
                             {
                                 run.Append(partialRun);
                             }
 
-                            eventHandler?.Invoke(partialRun);
+                            eventHandler?.Invoke(run);
                             return;
                         case "thread.run.step.created":
                         case "thread.run.step.in_progress":
@@ -277,14 +324,14 @@ namespace OpenAI.Threads
 
                             if (runStep == null)
                             {
-                                runStep = new RunStepResponse(partialRunStep);
+                                runStep = partialRunStep;
                             }
                             else
                             {
                                 runStep.Append(partialRunStep);
                             }
 
-                            eventHandler?.Invoke(partialRunStep);
+                            eventHandler?.Invoke(runStep);
                             return;
                         case "thread.message.created":
                         case "thread.message.in_progress":
@@ -295,7 +342,7 @@ namespace OpenAI.Threads
 
                             if (message == null)
                             {
-                                message = new MessageResponse(partialMessage);
+                                message = partialMessage;
                             }
                             else
                             {
@@ -321,26 +368,6 @@ namespace OpenAI.Threads
             if (run == null) { return null; }
             run.SetResponseData(response, client);
             return run;
-        }
-
-        /// <summary>
-        /// Create a thread and run it in one request.
-        /// </summary>
-        /// <param name="request"><see cref="CreateThreadAndRunRequest"/>.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="RunResponse"/>.</returns>
-        public async Task<RunResponse> CreateThreadAndRunAsync(CreateThreadAndRunRequest request = null, CancellationToken cancellationToken = default)
-        {
-            if (request == null || string.IsNullOrWhiteSpace(request.AssistantId))
-            {
-                var assistant = await client.AssistantsEndpoint.CreateAssistantAsync(cancellationToken: cancellationToken);
-                request = new CreateThreadAndRunRequest(assistant, request);
-            }
-
-            var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl("/runs"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(EnableDebug);
-            return response.Deserialize<RunResponse>(client);
         }
 
         /// <summary>
