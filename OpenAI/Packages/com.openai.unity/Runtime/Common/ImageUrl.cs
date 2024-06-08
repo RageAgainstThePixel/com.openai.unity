@@ -60,6 +60,8 @@ namespace OpenAI
         [JsonProperty("detail")]
         public ImageDetail Detail { get; private set; }
 
+        public override string ToString() => Url;
+
         public void AppendFrom(ImageUrl other)
         {
             if (other == null) { return; }
@@ -74,7 +76,5 @@ namespace OpenAI
                 Detail = other.Detail;
             }
         }
-
-        public override string ToString() => Url;
     }
 }

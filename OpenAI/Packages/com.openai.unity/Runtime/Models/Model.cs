@@ -212,29 +212,5 @@ namespace OpenAI.Models
         public static Model DallE_2 { get; } = new("dall-e-2", "openai");
 
         public static Model DallE_3 { get; } = new("dall-e-3", "openai");
-
-        #region Obsolete
-
-        /// <summary>
-        /// For edit requests.
-        /// </summary>
-        [Obsolete("Removed")]
-        public static Model DavinciEdit { get; } = new("text-davinci-edit-001", "openai");
-
-        /// <summary>
-        /// The 2nd most powerful engine, a bit faster than <see cref="Davinci"/>, and a bit faster.<para/>
-        /// Good at: Language translation, complex classification, text sentiment, summarization.
-        /// </summary>
-        [Obsolete("Removed")]
-        public static Model Curie { get; } = new("text-curie-001", "openai");
-
-        /// <summary>
-        /// The smallest, fastest engine available, although the quality of results may be poor.<para/>
-        /// Good at: Parsing text, simple classification, address correction, keywords
-        /// </summary>
-        [Obsolete("Removed")]
-        public static Model Ada { get; } = new("text-ada-001", "openai");
-
-        #endregion Obsolete
     }
 }

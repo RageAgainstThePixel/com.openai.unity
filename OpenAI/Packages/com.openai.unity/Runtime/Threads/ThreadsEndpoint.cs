@@ -30,7 +30,8 @@ namespace OpenAI.Threads
         /// <returns><see cref="ThreadResponse"/>.</returns>
         public async Task<ThreadResponse> CreateThreadAsync(CreateThreadRequest request = null, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.PostAsync(GetUrl(), request == null ? string.Empty : JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var payload = request != null ? JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions) : string.Empty;
+            var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<ThreadResponse>(client);
         }
@@ -63,8 +64,8 @@ namespace OpenAI.Threads
         /// <returns><see cref="ThreadResponse"/>.</returns>
         public async Task<ThreadResponse> ModifyThreadAsync(string threadId, IReadOnlyDictionary<string, string> metadata, CancellationToken cancellationToken = default)
         {
-            var jsonContent = JsonConvert.SerializeObject(new { metadata }, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl($"/{threadId}"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var payload = JsonConvert.SerializeObject(new { metadata }, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{threadId}"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<ThreadResponse>(client);
         }
@@ -209,8 +210,8 @@ namespace OpenAI.Threads
             }
 
             request.Stream = streamEventHandler != null;
-            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
             var endpoint = GetUrl($"/{threadId}/runs");
+            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
 
             if (request.Stream)
             {

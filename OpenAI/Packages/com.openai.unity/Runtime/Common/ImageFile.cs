@@ -61,8 +61,10 @@ namespace OpenAI
         [JsonProperty("detail")]
         public ImageDetail Detail { get; private set; }
 
+        [Preserve]
         public override string ToString() => FileId;
 
+        [Preserve]
         public void AppendFrom(ImageFile other)
         {
             if (other == null) { return; }

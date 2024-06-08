@@ -61,6 +61,10 @@ namespace OpenAI
         public int? Line { get; }
 
         [Preserve]
+        [JsonIgnore]
+        public string Object => "error";
+
+        [Preserve]
         public override string ToString()
         {
             var builder = new StringBuilder();
@@ -88,9 +92,5 @@ namespace OpenAI
 
             return builder.ToString();
         }
-
-        [Preserve]
-        [JsonIgnore]
-        public string Object => "error";
     }
 }

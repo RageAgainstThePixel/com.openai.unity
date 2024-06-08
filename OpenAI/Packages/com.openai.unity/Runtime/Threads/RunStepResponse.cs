@@ -207,6 +207,9 @@ namespace OpenAI.Threads
         [JsonProperty("metadata", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyDictionary<string, string> Metadata { get; private set; }
 
+        /// <summary>
+        /// Usage statistics related to the run step. This value will be `null` while the run step's status is `in_progress`.
+        /// </summary>
         [Preserve]
         [JsonProperty("usage", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public Usage Usage { get; private set; }

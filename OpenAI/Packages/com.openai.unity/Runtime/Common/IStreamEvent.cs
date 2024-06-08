@@ -7,6 +7,6 @@ namespace OpenAI
     /// </summary>
     public interface IStreamEvent
     {
-        public string Object { get; }
+        string Object { get; }
     }
 }

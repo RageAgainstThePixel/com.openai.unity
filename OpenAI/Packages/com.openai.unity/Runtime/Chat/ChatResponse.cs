@@ -11,7 +11,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Chat
 {
     [Preserve]
-    public sealed class ChatResponse : BaseResponse
+    public sealed class ChatResponse : BaseResponse, IStreamEvent
     {
         [Preserve]
         internal ChatResponse(ChatResponse other) => AppendFrom(other);
@@ -100,7 +100,7 @@ namespace OpenAI.Chat
         public override string ToString() => FirstChoice?.ToString() ?? string.Empty;
 
         [Preserve]
-        public static implicit operator string(ChatResponse response) => response.ToString();
+        public static implicit operator string(ChatResponse response) => response?.ToString();
 
         [Preserve]
         internal void AppendFrom(ChatResponse other)

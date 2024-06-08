@@ -15,7 +15,7 @@ namespace OpenAI
         public TextContent(string value) => Value = value;
 
         [Preserve]
-        public TextContent(string value, IEnumerable<Annotation> annotations)
+        public TextContent(string value, IEnumerable<Annotation> annotations = null)
         {
             Value = value;
             this.annotations = annotations?.ToList();

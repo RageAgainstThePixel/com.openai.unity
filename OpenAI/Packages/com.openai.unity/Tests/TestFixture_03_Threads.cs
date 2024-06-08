@@ -308,9 +308,6 @@ namespace OpenAI.Tests
                                     await runResponse.SubmitToolOutputsAsync(toolOutputs, StreamEventHandler);
                                 }
                                 break;
-                            case Error error:
-                                Debug.LogError(error.ToString());
-                                break;
                             default:
                                 Debug.Log(JsonConvert.SerializeObject(streamEvent, OpenAIClient.JsonSerializationOptions));
                                 break;

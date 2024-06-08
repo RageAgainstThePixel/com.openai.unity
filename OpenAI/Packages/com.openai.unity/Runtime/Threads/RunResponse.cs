@@ -258,6 +258,7 @@ namespace OpenAI.Threads
         [Preserve]
         [JsonProperty("usage", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public Usage Usage { get; private set; }
+
         /// <summary>
         /// The sampling temperature used for this run. If not set, defaults to 1.
         /// </summary>
