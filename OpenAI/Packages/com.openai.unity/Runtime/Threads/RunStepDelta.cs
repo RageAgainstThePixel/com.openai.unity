@@ -16,14 +16,12 @@ namespace OpenAI.Threads
             [JsonProperty("tool_calls")] List<ToolCall> toolCalls)
         {
             StepDetails = stepDetails;
-            this.toolCalls = toolCalls;
+            ToolCalls = toolCalls;
         }
 
         [Preserve]
         [JsonProperty("step_details")]
         public StepDetails StepDetails { get; }
-
-        private List<ToolCall> toolCalls;
 
         [Preserve]
         [JsonProperty("tool_calls")]
