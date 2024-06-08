@@ -78,7 +78,9 @@ namespace OpenAI
         [Preserve]
         public void Append(Tool other)
         {
-            if (!string.IsNullOrWhiteSpace(other?.Id))
+            if (other == null) { return; }
+
+            if (!string.IsNullOrWhiteSpace(other.Id))
             {
                 Id = other.Id;
             }
@@ -88,12 +90,12 @@ namespace OpenAI
                 Index = other.Index.Value;
             }
 
-            if (!string.IsNullOrWhiteSpace(other?.Type))
+            if (!string.IsNullOrWhiteSpace(other.Type))
             {
                 Type = other.Type;
             }
 
-            if (other?.Function != null)
+            if (other.Function != null)
             {
                 if (Function == null)
                 {
