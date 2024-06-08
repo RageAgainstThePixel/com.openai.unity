@@ -7,7 +7,7 @@ using UnityEngine.Scripting;
 namespace OpenAI
 {
     [Preserve]
-    public sealed class Error
+    public sealed class Error : BaseResponse, IStreamEvent
     {
         [Preserve]
         [JsonConstructor]
@@ -60,6 +60,11 @@ namespace OpenAI
         [JsonProperty("line")]
         public int? Line { get; }
 
+        [Preserve]
+        [JsonIgnore]
+        public string Object => "error";
+
+        [Preserve]
         public override string ToString()
         {
             var builder = new StringBuilder();

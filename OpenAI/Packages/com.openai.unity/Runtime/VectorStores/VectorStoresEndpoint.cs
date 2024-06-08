@@ -45,8 +45,8 @@ namespace OpenAI.VectorStores
             if (fileIds is not { Count: not 0 }) { throw new ArgumentNullException(nameof(fileIds)); }
             var expirationPolicy = expiresAfter.HasValue ? new ExpirationPolicy(expiresAfter.Value) : null;
             var request = new { file_ids = fileIds, name, expires_after = expirationPolicy, metadata };
-            var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl(), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<VectorStoreResponse>(client);
         }
@@ -102,8 +102,8 @@ namespace OpenAI.VectorStores
         {
             var expirationPolicy = expiresAfter.HasValue ? new ExpirationPolicy(expiresAfter.Value) : null;
             var request = new { name, expires_after = expirationPolicy, metadata };
-            var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl($"/{vectorStoreId}"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{vectorStoreId}"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<VectorStoreResponse>(client);
         }
@@ -137,8 +137,8 @@ namespace OpenAI.VectorStores
         /// <returns><see cref="VectorStoreFileResponse"/>.</returns>
         public async Task<VectorStoreFileResponse> CreateVectorStoreFileAsync(string vectorStoreId, string fileId, CancellationToken cancellationToken = default)
         {
-            var jsonContent = JsonConvert.SerializeObject(new { file_id = fileId }, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl($"/{vectorStoreId}/files"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var payload = JsonConvert.SerializeObject(new { file_id = fileId }, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{vectorStoreId}/files"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<VectorStoreFileResponse>(client);
         }
@@ -214,8 +214,8 @@ namespace OpenAI.VectorStores
         public async Task<VectorStoreFileBatchResponse> CreateVectorStoreFileBatch(string vectorStoreId, IReadOnlyList<string> fileIds, CancellationToken cancellationToken = default)
         {
             if (fileIds is not { Count: not 0 }) { throw new ArgumentNullException(nameof(fileIds)); }
-            var jsonContent = JsonConvert.SerializeObject(new { file_ids = fileIds }, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl($"/{vectorStoreId}/file_batches"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var payload = JsonConvert.SerializeObject(new { file_ids = fileIds }, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{vectorStoreId}/file_batches"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             return response.Deserialize<VectorStoreFileBatchResponse>(client);
         }
 

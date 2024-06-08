@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +11,10 @@ using UnityEngine.Scripting;
 namespace OpenAI.Chat
 {
     [Preserve]
-    public sealed class ChatResponse : BaseResponse
+    public sealed class ChatResponse : BaseResponse, IStreamEvent
     {
         [Preserve]
-        internal ChatResponse(ChatResponse other) => CopyFrom(other);
+        internal ChatResponse(ChatResponse other) => AppendFrom(other);
 
         [Preserve]
         [JsonConstructor]
@@ -99,10 +100,10 @@ namespace OpenAI.Chat
         public override string ToString() => FirstChoice?.ToString() ?? string.Empty;
 
         [Preserve]
-        public static implicit operator string(ChatResponse response) => response.ToString();
+        public static implicit operator string(ChatResponse response) => response?.ToString();
 
         [Preserve]
-        internal void CopyFrom(ChatResponse other)
+        internal void AppendFrom(ChatResponse other)
         {
             if (other is null) { return; }
 
@@ -129,23 +130,14 @@ namespace OpenAI.Chat
                 }
                 else
                 {
-                    Usage.CopyFrom(other.Usage);
+                    Usage.AppendFrom(other.Usage);
                 }
             }
 
             if (other.Choices is { Count: > 0 })
             {
                 choices ??= new List<Choice>();
-
-                foreach (var otherChoice in other.Choices)
-                {
-                    if (otherChoice.Index + 1 > choices.Count)
-                    {
-                        choices.Insert(otherChoice.Index, otherChoice);
-                    }
-
-                    choices[otherChoice.Index].CopyFrom(otherChoice);
-                }
+                choices.AppendFrom(other.Choices);
             }
         }
 

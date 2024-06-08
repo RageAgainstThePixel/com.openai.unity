@@ -12,7 +12,7 @@ namespace OpenAI.Threads
     /// Threads store Messages and automatically handle truncation to fit content into a model’s context.
     /// </summary>
     [Preserve]
-    public sealed class ThreadResponse : BaseResponse
+    public sealed class ThreadResponse : BaseResponse, IStreamEvent
     {
         [Preserve]
         [JsonConstructor]

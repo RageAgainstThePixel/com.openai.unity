@@ -47,11 +47,13 @@ namespace OpenAI.Chat
             chatRequest.Stream = true;
             ChatResponse chatResponse = null;
             var payload = JsonConvert.SerializeObject(chatRequest, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl("/completions"), payload, eventData =>
+            var response = await Rest.PostAsync(GetUrl("/completions"), payload, (sseResponse, ssEvent) =>
             {
                 try
                 {
-                    var partialResponse = JsonConvert.DeserializeObject<ChatResponse>(eventData, OpenAIClient.JsonSerializationOptions);
+                    if (ssEvent.Event != ServerSentEventKind.Data) { return; }
+
+                    var partialResponse = sseResponse.Deserialize<ChatResponse>(client);
 
                     if (chatResponse == null)
                     {
@@ -59,17 +61,17 @@ namespace OpenAI.Chat
                     }
                     else
                     {
-                        chatResponse.CopyFrom(partialResponse);
+                        chatResponse.AppendFrom(partialResponse);
                     }
 
                     resultHandler?.Invoke(partialResponse);
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"{eventData}\n{e}");
+                    Debug.LogError($"{ssEvent}\n{e}");
                 }
             }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response?.Validate(EnableDebug);
+            response.Validate(EnableDebug);
             if (chatResponse == null) { return null; }
             chatResponse.SetResponseData(response, client);
             resultHandler?.Invoke(chatResponse);

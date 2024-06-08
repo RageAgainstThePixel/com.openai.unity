@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using UnityEngine.Scripting;
 
 namespace OpenAI
@@ -9,7 +10,7 @@ namespace OpenAI
     /// References an image URL in the content of a message.
     /// </summary>
     [Preserve]
-    public sealed class ImageUrl
+    public sealed class ImageUrl : IAppendable<ImageUrl>
     {
         /// <summary>
         /// Constructor.
@@ -22,14 +23,27 @@ namespace OpenAI
         /// 'low' uses fewer tokens, you can opt in to high resolution using 'high'.
         /// </param>
         [Preserve]
-        [JsonConstructor]
-        public ImageUrl(
-            [JsonProperty("url")] string url,
-            [JsonProperty("detail")] ImageDetail detail = ImageDetail.Auto)
+        public ImageUrl(string url, ImageDetail detail = ImageDetail.Auto)
         {
             Url = url;
             Detail = detail;
         }
+
+        [Preserve]
+        [JsonConstructor]
+        internal ImageUrl(
+            [JsonProperty("index")] int? index,
+            [JsonProperty("url")] string url,
+            [JsonProperty("detail")] ImageDetail detail)
+        {
+            Index = index;
+            Url = url;
+            Detail = detail;
+        }
+
+        [Preserve]
+        [JsonProperty("index")]
+        public int? Index { get; }
 
         /// <summary>
         /// The external URL of the image, must be a supported image types: jpeg, jpg, png, gif, webp.
@@ -47,5 +61,20 @@ namespace OpenAI
         public ImageDetail Detail { get; private set; }
 
         public override string ToString() => Url;
+
+        public void AppendFrom(ImageUrl other)
+        {
+            if (other == null) { return; }
+
+            if (!string.IsNullOrWhiteSpace(other.Url))
+            {
+                Url += other.Url;
+            }
+
+            if (other.Detail > 0)
+            {
+                Detail = other.Detail;
+            }
+        }
     }
 }

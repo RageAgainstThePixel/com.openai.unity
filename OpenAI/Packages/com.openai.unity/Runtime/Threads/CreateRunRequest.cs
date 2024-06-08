@@ -313,6 +313,6 @@ namespace OpenAI.Threads
         [Preserve]
         [JsonProperty("response_format")]
         [JsonConverter(typeof(ResponseFormatConverter))]
-        public ChatResponseFormat ResponseFormat { get; private set; }
+        public ChatResponseFormat ResponseFormat { get; }
     }
 }

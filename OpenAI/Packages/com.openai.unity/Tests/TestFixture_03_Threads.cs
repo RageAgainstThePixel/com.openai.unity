@@ -1,5 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using Newtonsoft.Json;
 using NUnit.Framework;
 using OpenAI.Assistants;
 using OpenAI.Files;
@@ -111,6 +112,11 @@ namespace OpenAI.Tests
                         ["test"] = nameof(Test_04_01_CreateMessage)
                     }));
             }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw;
+            }
             finally
             {
                 await CleanupFileAsync(file);
@@ -178,7 +184,7 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_06_01_CreateRun()
+        public async Task Test_06_01_01_CreateRun()
         {
             Assert.NotNull(OpenAIClient.ThreadsEndpoint);
             var assistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(
@@ -188,12 +194,11 @@ namespace OpenAI.Tests
                     model: Model.GPT4o,
                     responseFormat: ChatResponseFormat.Json));
             Assert.NotNull(assistant);
-            testAssistant = assistant;
             var thread = await OpenAIClient.ThreadsEndpoint.CreateThreadAsync();
-            Assert.NotNull(thread);
 
             try
             {
+                Assert.NotNull(thread);
                 var message = await thread.CreateMessageAsync("I need to solve the equation `3x + 11 = 14`. Can you help me?");
                 Assert.NotNull(message);
                 var run = await thread.CreateRunAsync(assistant);
@@ -205,20 +210,155 @@ namespace OpenAI.Tests
 
                 foreach (var response in messages.Items)
                 {
-                    Console.WriteLine($"{response.Role}: {response.PrintContent()}");
+                    Debug.Log($"{response.Role}: {response.PrintContent()}");
                 }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw;
             }
             finally
             {
+                await assistant.DeleteAsync();
                 await thread.DeleteAsync(deleteToolResources: true);
+            }
+        }
+
+        [Test]
+        public async Task Test_06_01_02_CreateStreamingRun()
+        {
+            Assert.NotNull(OpenAIClient.ThreadsEndpoint);
+            var assistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(
+                new CreateAssistantRequest(
+                    name: "Math Tutor",
+                    instructions: "You are a personal math tutor. Answer questions briefly, in a sentence or less. Your responses should be formatted in JSON.",
+                    model: Model.GPT4o,
+                    responseFormat: ChatResponseFormat.Json));
+            Assert.NotNull(assistant);
+            var thread = await OpenAIClient.ThreadsEndpoint.CreateThreadAsync();
+
+            try
+            {
+                Assert.NotNull(thread);
+                var message = await thread.CreateMessageAsync("I need to solve the equation `3x + 11 = 14`. Can you help me?");
+                Assert.NotNull(message);
+
+                var run = await thread.CreateRunAsync(assistant, streamEvent =>
+                {
+                    Debug.Log(JsonConvert.SerializeObject(streamEvent, OpenAIClient.JsonSerializationOptions));
+                });
+
+                Assert.IsNotNull(run);
+                Assert.IsTrue(run.Status == RunStatus.Completed);
+                var messages = await thread.ListMessagesAsync();
+
+                foreach (var response in messages.Items.Reverse())
+                {
+                    Debug.Log($"{response.Role}: {response.PrintContent()}");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw;
+            }
+            finally
+            {
+                await assistant.DeleteAsync();
+                await thread.DeleteAsync(deleteToolResources: true);
+            }
+        }
+
+        [Test]
+        public async Task Test_06_01_03_CreateStreamingRun_ToolCalls()
+        {
+            Assert.NotNull(OpenAIClient.ThreadsEndpoint);
+            var tools = new List<Tool>
+            {
+                Tool.CodeInterpreter,
+                Tool.GetOrCreateTool(typeof(WeatherService), nameof(WeatherService.GetCurrentWeatherAsync))
+            };
+            var assistantRequest = new CreateAssistantRequest(tools: tools, instructions: "You are a helpful weather assistant. Use the appropriate unit based on geographical location.");
+            var assistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(assistantRequest);
+            Assert.NotNull(assistant);
+            ThreadResponse thread = null;
+
+            try
+            {
+                async void StreamEventHandler(IStreamEvent streamEvent)
+                {
+                    try
+                    {
+                        switch (streamEvent)
+                        {
+                            case ThreadResponse threadResponse:
+                                thread = threadResponse;
+                                break;
+                            case RunResponse runResponse:
+                                if (runResponse.Status == RunStatus.RequiresAction)
+                                {
+                                    var toolOutputs = await assistant.GetToolOutputsAsync(runResponse.RequiredAction.SubmitToolOutputs.ToolCalls);
+
+                                    foreach (var toolOutput in toolOutputs)
+                                    {
+                                        Debug.Log($"Tool Output: {toolOutput}");
+                                    }
+
+                                    await runResponse.SubmitToolOutputsAsync(toolOutputs, StreamEventHandler);
+                                }
+                                break;
+                            default:
+                                Debug.Log(JsonConvert.SerializeObject(streamEvent, OpenAIClient.JsonSerializationOptions));
+                                break;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
+                }
+
+                var run = await assistant.CreateThreadAndRunAsync("I'm in Kuala-Lumpur, please tell me what's the temperature now?", StreamEventHandler);
+                Assert.NotNull(thread);
+                Assert.IsNotNull(run);
+                run = await run.WaitForStatusChangeAsync();
+                Assert.IsNotNull(run);
+                Assert.IsTrue(run.Status == RunStatus.Completed);
+                var messages = await thread.ListMessagesAsync();
+
+                foreach (var response in messages.Items.Reverse())
+                {
+                    Debug.Log($"{response.Role}: {response.PrintContent()}");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw;
+            }
+            finally
+            {
+                if (thread != null)
+                {
+                    await thread.DeleteAsync();
+                }
+
+                await assistant.DeleteAsync(deleteToolResources: true);
             }
         }
 
         [Test]
         public async Task Test_06_02_CreateThreadAndRun()
         {
-            Assert.NotNull(testAssistant);
             Assert.NotNull(OpenAIClient.ThreadsEndpoint);
+            testAssistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(
+                new CreateAssistantRequest(
+                    name: "Math Tutor",
+                    instructions: "You are a personal math tutor. Answer questions briefly, in a sentence or less. Your responses should be formatted in JSON.",
+                    model: Model.GPT4o,
+                    responseFormat: ChatResponseFormat.Json));
+            Assert.NotNull(testAssistant);
             var messages = new List<Message> { "I need to solve the equation `3x + 11 = 14`. Can you help me?" };
             var threadRequest = new CreateThreadRequest(messages);
             var run = await testAssistant.CreateThreadAndRunAsync(threadRequest);
@@ -294,7 +434,8 @@ namespace OpenAI.Tests
             catch (Exception e)
             {
                 // Sometimes runs will get stuck in Cancelling state,
-                // for now we just log when it happens.
+                // or will say it is already cancelled, but it was not,
+                // so for now we just log when it happens.
                 Debug.Log(e);
             }
 

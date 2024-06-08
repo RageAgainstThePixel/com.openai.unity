@@ -13,10 +13,10 @@ namespace OpenAI.Threads
         [JsonConstructor]
         internal CodeInterpreter(
             [JsonProperty("input")] string input,
-            [JsonProperty("outputs")] IReadOnlyList<CodeInterpreterOutputs> outputs)
+            [JsonProperty("outputs")] List<CodeInterpreterOutputs> outputs)
         {
             Input = input;
-            Outputs = outputs;
+            this.outputs = outputs;
         }
 
         /// <summary>
@@ -24,7 +24,9 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("input")]
-        public string Input { get; }
+        public string Input { get; private set; }
+
+        private List<CodeInterpreterOutputs> outputs;
 
         /// <summary>
         /// The outputs from the Code Interpreter tool call.
@@ -33,6 +35,22 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("outputs")]
-        public IReadOnlyList<CodeInterpreterOutputs> Outputs { get; }
+        public IReadOnlyList<CodeInterpreterOutputs> Outputs => outputs;
+
+        internal void AppendFrom(CodeInterpreter other)
+        {
+            if (other == null) { return; }
+
+            if (!string.IsNullOrWhiteSpace(other.Input))
+            {
+                Input += other.Input;
+            }
+
+            if (other.Outputs != null)
+            {
+                outputs ??= new List<CodeInterpreterOutputs>();
+                outputs.AddRange(other.Outputs);
+            }
+        }
     }
 }

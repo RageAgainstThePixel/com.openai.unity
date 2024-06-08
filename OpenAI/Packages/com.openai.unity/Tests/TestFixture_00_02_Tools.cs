@@ -47,7 +47,7 @@ namespace OpenAI.Tests
             var toolWithArgs = tools[1];
             Assert.IsNotNull(toolWithArgs);
             var testValue = new { arg1 = DateTime.UtcNow, arg2 = Vector3.one };
-            toolWithArgs.Function.Arguments = JToken.FromObject(testValue, JsonSerializer.Create(OpenAIClient.JsonSerializationOptions));
+            toolWithArgs.Function.Arguments = JToken.FromObject(testValue, OpenAIClient.JsonSerializer);
             var resultWithArgs = toolWithArgs.InvokeFunction<string>();
             Debug.Log(resultWithArgs);
             var testResult = JsonConvert.DeserializeObject(resultWithArgs, testValue.GetType(), OpenAIClient.JsonSerializationOptions);

@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace OpenAI.Chat
         public Message() { }
 
         [Preserve]
-        internal Message(Delta other) => CopyFrom(other);
+        internal Message(Delta other) => AppendFrom(other);
 
         /// <summary>
         /// Creates a new message to insert into a chat conversation.
@@ -177,7 +178,7 @@ namespace OpenAI.Chat
         public static implicit operator string(Message message) => message?.ToString();
 
         [Preserve]
-        internal void CopyFrom(Delta other)
+        internal void AppendFrom(Delta other)
         {
             if (Role == 0 &&
                 other?.Role > 0)
@@ -198,25 +199,7 @@ namespace OpenAI.Chat
             if (other is { ToolCalls: not null })
             {
                 toolCalls ??= new List<Tool>();
-
-                foreach (var otherToolCall in other.ToolCalls)
-                {
-                    if (otherToolCall == null) { continue; }
-
-                    if (otherToolCall.Index.HasValue)
-                    {
-                        if (otherToolCall.Index + 1 > toolCalls.Count)
-                        {
-                            toolCalls.Insert(otherToolCall.Index.Value, new Tool(otherToolCall));
-                        }
-
-                        toolCalls[otherToolCall.Index.Value].CopyFrom(otherToolCall);
-                    }
-                    else
-                    {
-                        toolCalls.Add(new Tool(otherToolCall));
-                    }
-                }
+                toolCalls.AppendFrom(other.ToolCalls);
             }
         }
     }

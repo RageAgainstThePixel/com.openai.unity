@@ -7,18 +7,22 @@ using UnityEngine.Scripting;
 namespace OpenAI.Threads
 {
     [Preserve]
-    public sealed class SubmitToolOutputs
+    public sealed class RunStepDelta
     {
         [Preserve]
         [JsonConstructor]
-        internal SubmitToolOutputs([JsonProperty("tool_calls")] IReadOnlyList<ToolCall> toolCalls)
+        internal RunStepDelta(
+            [JsonProperty("step_details")] StepDetails stepDetails,
+            [JsonProperty("tool_calls")] List<ToolCall> toolCalls)
         {
+            StepDetails = stepDetails;
             ToolCalls = toolCalls;
         }
 
-        /// <summary>
-        /// A list of the relevant tool calls.
-        /// </summary>
+        [Preserve]
+        [JsonProperty("step_details")]
+        public StepDetails StepDetails { get; }
+
         [Preserve]
         [JsonProperty("tool_calls")]
         public IReadOnlyList<ToolCall> ToolCalls { get; }

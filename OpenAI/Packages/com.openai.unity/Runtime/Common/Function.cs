@@ -158,7 +158,7 @@ namespace OpenAI
         #endregion Func<,> Overloads
 
         [Preserve]
-        internal Function(Function other) => CopyFrom(other);
+        internal Function(Function other) => AppendFrom(other);
 
         /// <summary>
         /// The name of the function to generate arguments for.<br/>
@@ -217,7 +217,7 @@ namespace OpenAI
                 if (arguments == null &&
                     !string.IsNullOrWhiteSpace(argumentsString))
                 {
-                    arguments = JToken.FromObject(argumentsString, JsonSerializer.Create(OpenAIClient.JsonSerializationOptions));
+                    arguments = JToken.FromObject(argumentsString, OpenAIClient.JsonSerializer);
                 }
 
                 return arguments;
@@ -240,7 +240,7 @@ namespace OpenAI
         private MethodInfo MethodInfo { get; }
 
         [Preserve]
-        internal void CopyFrom(Function other)
+        internal void AppendFrom(Function other)
         {
             if (!string.IsNullOrWhiteSpace(other.Name))
             {
@@ -429,7 +429,7 @@ namespace OpenAI
                     }
                     else if (value is JObject json)
                     {
-                        invokeArgs[i] = json.ToObject(parameter.ParameterType, JsonSerializer.Create(OpenAIClient.JsonSerializationOptions));
+                        invokeArgs[i] = json.ToObject(parameter.ParameterType, OpenAIClient.JsonSerializer);
                     }
                     else
                     {
