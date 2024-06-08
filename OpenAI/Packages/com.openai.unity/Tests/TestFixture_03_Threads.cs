@@ -112,6 +112,11 @@ namespace OpenAI.Tests
                         ["test"] = nameof(Test_04_01_CreateMessage)
                     }));
             }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw;
+            }
             finally
             {
                 await CleanupFileAsync(file);
@@ -208,6 +213,11 @@ namespace OpenAI.Tests
                     Debug.Log($"{response.Role}: {response.PrintContent()}");
                 }
             }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw;
+            }
             finally
             {
                 await assistant.DeleteAsync();
@@ -233,20 +243,12 @@ namespace OpenAI.Tests
                 Assert.NotNull(thread);
                 var message = await thread.CreateMessageAsync("I need to solve the equation `3x + 11 = 14`. Can you help me?");
                 Assert.NotNull(message);
+
                 var run = await thread.CreateRunAsync(assistant, streamEvent =>
                 {
-                    switch (streamEvent)
-                    {
-                        case MessageResponse messageEvent:
-                            Debug.Log($"{messageEvent.Role}: {messageEvent.PrintContent()}");
-                            break;
-                        default:
-                            Debug.Log(JsonConvert.SerializeObject(streamEvent, OpenAIClient.JsonSerializationOptions));
-                            break;
-                    }
+                    Debug.Log(JsonConvert.SerializeObject(streamEvent, OpenAIClient.JsonSerializationOptions));
                 });
-                Assert.IsNotNull(run);
-                run = await run.WaitForStatusChangeAsync();
+
                 Assert.IsNotNull(run);
                 Assert.IsTrue(run.Status == RunStatus.Completed);
                 var messages = await thread.ListMessagesAsync();
@@ -259,6 +261,7 @@ namespace OpenAI.Tests
             catch (Exception e)
             {
                 Debug.LogException(e);
+                throw;
             }
             finally
             {
@@ -292,9 +295,6 @@ namespace OpenAI.Tests
                             case ThreadResponse threadResponse:
                                 thread = threadResponse;
                                 break;
-                            case MessageResponse messageEvent:
-                                Debug.Log($"{messageEvent.Role}: {messageEvent.PrintContent()}");
-                                break;
                             case RunResponse runResponse:
                                 if (runResponse.Status == RunStatus.RequiresAction)
                                 {
@@ -302,7 +302,7 @@ namespace OpenAI.Tests
 
                                     foreach (var toolOutput in toolOutputs)
                                     {
-                                        Debug.Log($"tool output: {toolOutput}");
+                                        Debug.Log($"Tool Output: {toolOutput}");
                                     }
 
                                     await runResponse.SubmitToolOutputsAsync(toolOutputs, StreamEventHandler);
@@ -335,6 +335,7 @@ namespace OpenAI.Tests
             catch (Exception e)
             {
                 Debug.LogException(e);
+                throw;
             }
             finally
             {
