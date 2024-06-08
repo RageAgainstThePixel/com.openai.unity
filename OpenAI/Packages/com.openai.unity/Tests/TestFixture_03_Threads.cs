@@ -246,7 +246,7 @@ namespace OpenAI.Tests
 
                 var run = await thread.CreateRunAsync(assistant, streamEvent =>
                 {
-                    Debug.Log(JsonConvert.SerializeObject(streamEvent, OpenAIClient.JsonSerializationOptions));
+                    Debug.Log(streamEvent.ToJsonString());
                 });
 
                 Assert.IsNotNull(run);
@@ -309,7 +309,7 @@ namespace OpenAI.Tests
                                 }
                                 break;
                             default:
-                                Debug.Log(JsonConvert.SerializeObject(streamEvent, OpenAIClient.JsonSerializationOptions));
+                                Debug.Log(streamEvent.ToJsonString());
                                 break;
                         }
                     }

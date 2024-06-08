@@ -8,5 +8,7 @@ namespace OpenAI
     public interface IStreamEvent
     {
         string Object { get; }
+
+        string ToJsonString();
     }
 }
