@@ -240,9 +240,6 @@ namespace OpenAI.Tests
                         case MessageResponse messageEvent:
                             Debug.Log($"{messageEvent.Role}: {messageEvent.PrintContent()}");
                             break;
-                        case Error error:
-                            Debug.LogError(error.ToString());
-                            break;
                         default:
                             Debug.Log(JsonConvert.SerializeObject(streamEvent, OpenAIClient.JsonSerializationOptions));
                             break;
@@ -439,7 +436,8 @@ namespace OpenAI.Tests
             catch (Exception e)
             {
                 // Sometimes runs will get stuck in Cancelling state,
-                // for now we just log when it happens.
+                // or will say it is already cancelled, but it was not,
+                // so for now we just log when it happens.
                 Debug.Log(e);
             }
 
