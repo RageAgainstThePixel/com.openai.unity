@@ -109,6 +109,9 @@ namespace OpenAI.Threads
         /// Specifying a particular tool like {"type": "file_search"} or {"type": "function", "function": {"name": "my_function"}}
         /// forces the model to call that tool.
         /// </param>
+        /// <param name="parallelToolCalls">
+        /// Whether to enable parallel function calling during tool use.
+        /// </param>
         /// <param name="responseFormat">
         /// An object specifying the format that the model must output.
         /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
