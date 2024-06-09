@@ -47,6 +47,7 @@ namespace OpenAI.Threads
             [JsonProperty("max_completion_tokens")] int? maxCompletionTokens,
             [JsonProperty("truncation_strategy")] TruncationStrategy truncationStrategy,
             [JsonProperty("tool_choice")] object toolChoice,
+            [JsonProperty("parallel_tool_calls")] bool parallelToolCalls,
             [JsonProperty("response_format")][JsonConverter(typeof(ResponseFormatConverter))] ChatResponseFormat responseFormat)
         {
             Id = id;
@@ -74,6 +75,7 @@ namespace OpenAI.Threads
             MaxCompletionTokens = maxCompletionTokens;
             TruncationStrategy = truncationStrategy;
             ToolChoice = toolChoice;
+            ParallelToolCalls = parallelToolCalls;
             ResponseFormat = responseFormat;
         }
 
@@ -306,6 +308,9 @@ namespace OpenAI.Threads
         [JsonProperty("tool_choice", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public object ToolChoice { get; private set; }
 
+        [Preserve]
+        public bool ParallelToolCalls { get; private set; }
+
         /// <summary>
         /// Specifies the format that the model must output.
         /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
@@ -424,6 +429,7 @@ namespace OpenAI.Threads
                 ToolChoice = other.ToolChoice;
             }
 
+            ParallelToolCalls = other.ParallelToolCalls;
             ResponseFormat = other.ResponseFormat;
         }
     }

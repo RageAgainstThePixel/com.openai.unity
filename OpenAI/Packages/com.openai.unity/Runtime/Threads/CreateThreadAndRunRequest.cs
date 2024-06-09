@@ -35,6 +35,7 @@ namespace OpenAI.Threads
                 request?.MaxCompletionTokens,
                 request?.TruncationStrategy,
                 request?.ToolChoice as string ?? ((Tool)request?.ToolChoice)?.Function?.Name,
+                request?.ParallelToolCalls,
                 request?.ResponseFormat ?? ChatResponseFormat.Auto)
         {
         }
@@ -136,6 +137,7 @@ namespace OpenAI.Threads
             int? maxCompletionTokens = null,
             TruncationStrategy truncationStrategy = null,
             string toolChoice = null,
+            bool? parallelToolCalls = null,
             ChatResponseFormat responseFormat = ChatResponseFormat.Auto,
             CreateThreadRequest createThreadRequest = null)
         {
@@ -177,6 +179,7 @@ namespace OpenAI.Threads
             MaxPromptTokens = maxPromptTokens;
             MaxCompletionTokens = maxCompletionTokens;
             TruncationStrategy = truncationStrategy;
+            ParallelToolCalls = parallelToolCalls;
             ResponseFormat = responseFormat;
             ThreadRequest = createThreadRequest;
         }
@@ -297,6 +300,13 @@ namespace OpenAI.Threads
         [Preserve]
         [JsonProperty("tool_choice")]
         public object ToolChoice { get; }
+
+        /// <summary>
+        /// Whether to enable parallel function calling during tool use.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("parallel_tool_calls")]
+        public bool? ParallelToolCalls { get; }
 
         /// <summary>
         /// An object specifying the format that the model must output.
