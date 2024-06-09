@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Scripting;
+using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI.Threads
 {
@@ -15,7 +16,7 @@ namespace OpenAI.Threads
     /// Messages stored as a list on the Thread.
     /// </summary>
     [Preserve]
-    public sealed class MessageResponse : BaseResponse, IStreamEvent
+    public sealed class MessageResponse : BaseResponse, IServerSentEvent
     {
         [Preserve]
         internal MessageResponse(MessageResponse other) => AppendFrom(other);

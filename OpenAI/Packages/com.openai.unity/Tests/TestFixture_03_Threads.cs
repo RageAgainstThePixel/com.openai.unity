@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
+using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI.Tests
 {
@@ -286,7 +287,7 @@ namespace OpenAI.Tests
 
             try
             {
-                async void StreamEventHandler(IStreamEvent streamEvent)
+                async void StreamEventHandler(IServerSentEvent streamEvent)
                 {
                     try
                     {

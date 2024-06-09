@@ -3,11 +3,12 @@
 using Newtonsoft.Json;
 using System.Text;
 using UnityEngine.Scripting;
+using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI
 {
     [Preserve]
-    public sealed class Error : BaseResponse, IStreamEvent
+    public sealed class Error : BaseResponse, IServerSentEvent
     {
         [Preserve]
         [JsonConstructor]

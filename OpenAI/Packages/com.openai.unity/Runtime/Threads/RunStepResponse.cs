@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Scripting;
+using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI.Threads
 {
@@ -13,7 +14,7 @@ namespace OpenAI.Threads
     /// Examining Run Steps allows you to introspect how the Assistant is getting to it's final results.
     /// </summary>
     [Preserve]
-    public sealed class RunStepResponse : BaseResponse, IStreamEvent
+    public sealed class RunStepResponse : BaseResponse, IServerSentEvent
     {
         [Preserve]
         internal RunStepResponse(RunStepResponse other) => AppendFrom(other);

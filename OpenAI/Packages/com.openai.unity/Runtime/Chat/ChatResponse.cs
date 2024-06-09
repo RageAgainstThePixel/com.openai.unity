@@ -7,11 +7,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Scripting;
+using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI.Chat
 {
     [Preserve]
-    public sealed class ChatResponse : BaseResponse, IStreamEvent
+    public sealed class ChatResponse : BaseResponse, IServerSentEvent
     {
         [Preserve]
         internal ChatResponse(ChatResponse other) => AppendFrom(other);

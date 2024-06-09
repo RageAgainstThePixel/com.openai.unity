@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Scripting;
+using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI.Threads
 {
@@ -12,7 +13,7 @@ namespace OpenAI.Threads
     /// Threads store Messages and automatically handle truncation to fit content into a model’s context.
     /// </summary>
     [Preserve]
-    public sealed class ThreadResponse : BaseResponse, IStreamEvent
+    public sealed class ThreadResponse : BaseResponse, IServerSentEvent
     {
         [Preserve]
         [JsonConstructor]

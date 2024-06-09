@@ -5,6 +5,7 @@ using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Scripting;
+using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI.Threads
 {
@@ -14,7 +15,7 @@ namespace OpenAI.Threads
     /// As part of a Run, the Assistant appends Messages to the Thread.
     /// </summary>
     [Preserve]
-    public sealed class RunResponse : BaseResponse, IStreamEvent
+    public sealed class RunResponse : BaseResponse, IServerSentEvent
     {
         [Preserve]
         internal RunResponse(RunResponse other) => AppendFrom(other);
