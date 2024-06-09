@@ -30,8 +30,9 @@ namespace OpenAI.Chat
             double? temperature = null,
             double? topP = null,
             int? topLogProbs = null,
+            bool? parallelToolCalls = null,
             string user = null)
-            : this(messages, model, frequencyPenalty, logitBias, maxTokens, number, presencePenalty, responseFormat, seed, stops, temperature, topP, topLogProbs, user)
+            : this(messages, model, frequencyPenalty, logitBias, maxTokens, number, presencePenalty, responseFormat, seed, stops, temperature, topP, topLogProbs, parallelToolCalls, user)
         {
             var toolList = tools?.ToList();
 
@@ -126,6 +127,7 @@ namespace OpenAI.Chat
         /// An integer between 0 and 5 specifying the number of most likely tokens to return at each token position,
         /// each with an associated log probability.
         /// </param>
+        /// <param name="parallelToolCalls">Whether to enable parallel function calling during tool use.</param>
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </param>
@@ -144,6 +146,7 @@ namespace OpenAI.Chat
             double? temperature = null,
             double? topP = null,
             int? topLogProbs = null,
+            bool? parallelToolCalls = null,
             string user = null)
         {
             Messages = messages?.ToList();
@@ -166,6 +169,7 @@ namespace OpenAI.Chat
             TopP = topP;
             LogProbs = topLogProbs.HasValue ? topLogProbs.Value > 0 : null;
             TopLogProbs = topLogProbs;
+            ParallelToolCalls = parallelToolCalls;
             User = user;
         }
 
@@ -297,6 +301,10 @@ namespace OpenAI.Chat
         [JsonProperty("stream")]
         public bool Stream { get; internal set; }
 
+        [Preserve]
+        [JsonProperty("stream_options")]
+        public StreamOptions StreamOptions { get; internal set; }
+
         /// <summary>
         /// What sampling temperature to use, between 0 and 2.
         /// Higher values like 0.8 will make the output more random, while lower values like 0.2 will
@@ -339,6 +347,13 @@ namespace OpenAI.Chat
         [Preserve]
         [JsonProperty("tool_choice")]
         public object ToolChoice { get; }
+
+        /// <summary>
+        /// Whether to enable parallel function calling during tool use.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("parallel_tool_calls")]
+        public bool? ParallelToolCalls { get; }
 
         /// <summary>
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.

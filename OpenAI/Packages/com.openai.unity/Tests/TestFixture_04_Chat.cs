@@ -48,13 +48,14 @@ namespace OpenAI.Tests
                 new(Role.System, "You are a helpful assistant."),
                 new(Role.User, "Who won the world series in 2020?"),
                 new(Role.Assistant, "The Los Angeles Dodgers won the World Series in 2020."),
-                new(Role.User, "Where was it played?"),
+                new(Role.User, "Where was it played?")
             };
             var chatRequest = new ChatRequest(messages);
             var cumulativeDelta = string.Empty;
             var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
+                if (partialResponse.Usage != null) { return; }
                 Assert.NotNull(partialResponse.Choices);
                 Assert.NotZero(partialResponse.Choices.Count);
 
@@ -62,7 +63,7 @@ namespace OpenAI.Tests
                 {
                     cumulativeDelta += choice.Delta.Content;
                 }
-            });
+            }, true);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             var choice = response.FirstChoice;
@@ -187,9 +188,10 @@ namespace OpenAI.Tests
             var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
+                if (partialResponse.Usage != null) { return; }
                 Assert.NotNull(partialResponse.Choices);
                 Assert.NotZero(partialResponse.Choices.Count);
-            });
+            }, true);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             Assert.IsTrue(response.Choices.Count == 1);
@@ -202,9 +204,10 @@ namespace OpenAI.Tests
             response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
+                if (partialResponse.Usage != null) { return; }
                 Assert.NotNull(partialResponse.Choices);
                 Assert.NotZero(partialResponse.Choices.Count);
-            });
+            }, true);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             Assert.IsTrue(response.Choices.Count == 1);
@@ -221,9 +224,10 @@ namespace OpenAI.Tests
                 response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
                 {
                     Assert.IsNotNull(partialResponse);
+                    if (partialResponse.Usage != null) { return; }
                     Assert.NotNull(partialResponse.Choices);
                     Assert.NotZero(partialResponse.Choices.Count);
-                });
+                }, true);
                 Assert.IsNotNull(response);
                 Assert.IsNotNull(response.Choices);
                 Assert.IsTrue(response.Choices.Count == 1);
@@ -245,9 +249,10 @@ namespace OpenAI.Tests
             response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
+                if (partialResponse.Usage != null) { return; }
                 Assert.NotNull(partialResponse.Choices);
                 Assert.NotZero(partialResponse.Choices.Count);
-            });
+            }, true);
             Assert.IsNotNull(response);
         }
 
@@ -266,9 +271,10 @@ namespace OpenAI.Tests
             var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
+                if (partialResponse.Usage != null) { return; }
                 Assert.NotNull(partialResponse.Choices);
                 Assert.NotZero(partialResponse.Choices.Count);
-            });
+            }, true);
 
             Assert.IsTrue(response.FirstChoice.FinishReason == "tool_calls");
             messages.Add(response.FirstChoice.Message);
@@ -381,9 +387,10 @@ namespace OpenAI.Tests
             var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
+                if (partialResponse.Usage != null) { return; }
                 Assert.NotNull(partialResponse.Choices);
                 Assert.NotZero(partialResponse.Choices.Count);
-            });
+            }, true);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishDetails}");
@@ -454,6 +461,7 @@ namespace OpenAI.Tests
             var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
+                if (partialResponse.Usage != null) { return; }
                 Assert.NotNull(partialResponse.Choices);
                 Assert.NotZero(partialResponse.Choices.Count);
 
@@ -461,7 +469,7 @@ namespace OpenAI.Tests
                 {
                     cumulativeDelta += choice.Delta.Content;
                 }
-            });
+            }, true);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             var choice = response.FirstChoice;
