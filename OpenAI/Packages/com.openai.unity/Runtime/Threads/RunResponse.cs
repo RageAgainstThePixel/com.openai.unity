@@ -309,6 +309,7 @@ namespace OpenAI.Threads
         public object ToolChoice { get; private set; }
 
         [Preserve]
+        [JsonProperty("parallel_tool_calls")]
         public bool ParallelToolCalls { get; private set; }
 
         /// <summary>
