@@ -32,6 +32,12 @@ namespace OpenAI
             Metadata = metadata;
         }
 
+        /// <inheritdoc />
+        public VectorStoreRequest(string fileId, IReadOnlyDictionary<string, string> metadata = null)
+            : this(new List<string> { fileId }, metadata)
+        {
+        }
+
         /// <summary>
         /// A list of file IDs to add to the vector store.
         /// There can be a maximum of 10000 files in a vector store.
@@ -48,6 +54,8 @@ namespace OpenAI
         [Preserve]
         [JsonProperty("metadata")]
         public IReadOnlyDictionary<string, string> Metadata { get; private set; }
+
+        public static implicit operator VectorStoreRequest(string fileId) => new(fileId);
 
         public static implicit operator VectorStoreRequest(List<string> fileIds) => new(fileIds);
     }

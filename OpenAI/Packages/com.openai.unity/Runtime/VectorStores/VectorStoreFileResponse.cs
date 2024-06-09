@@ -21,7 +21,8 @@ namespace OpenAI.VectorStores
             [JsonProperty("created_at")] int createdAtUnixTimeSeconds,
             [JsonProperty("vector_store_id")] string vectorStoreId,
             [JsonProperty("status")] VectorStoreFileStatus status,
-            [JsonProperty("last_error")] Error lastError)
+            [JsonProperty("last_error")] Error lastError,
+            [JsonProperty("chunking_strategy")] ChunkingStrategy chunkingStrategy)
         {
             Id = id;
             Object = objectValue;
@@ -30,6 +31,7 @@ namespace OpenAI.VectorStores
             VectorStoreId = vectorStoreId;
             Status = status;
             LastError = lastError;
+            ChunkingStrategy = chunkingStrategy;
         }
 
         /// <summary>
@@ -84,5 +86,12 @@ namespace OpenAI.VectorStores
         [Preserve]
         [JsonProperty("last_error")]
         public Error LastError { get; }
+
+        /// <summary>
+        /// The strategy used to chunk the file.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("chunking_strategy")]
+        public ChunkingStrategy ChunkingStrategy { get; }
     }
 }
