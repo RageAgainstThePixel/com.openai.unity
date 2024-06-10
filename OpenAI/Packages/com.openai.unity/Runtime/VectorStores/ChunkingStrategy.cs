@@ -1,11 +1,25 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using UnityEngine.Scripting;
 
 namespace OpenAI.VectorStores
 {
+    [Preserve]
     public sealed class ChunkingStrategy
     {
+        [Preserve]
+        [JsonConstructor]
+        internal ChunkingStrategy(
+            [JsonProperty("type")] ChunkingStrategyType type,
+            [JsonProperty("static")] ChunkingStrategyStatic @static = null)
+        {
+            Type = type;
+            Static = @static;
+        }
+
+        [Preserve]
         public ChunkingStrategy(ChunkingStrategyType type)
         {
             Type = type;
@@ -18,10 +32,12 @@ namespace OpenAI.VectorStores
             }
         }
 
-        [JsonProperty("type")]
+        [Preserve]
+        [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Include)]
         public ChunkingStrategyType Type { get; }
 
-        [JsonProperty("static")]
+        [Preserve]
+        [JsonProperty("static", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public ChunkingStrategyStatic Static { get; }
     }
 }

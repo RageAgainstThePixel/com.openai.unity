@@ -16,14 +16,14 @@ namespace OpenAI.VectorStores
         [JsonConstructor]
         internal VectorStoreFileBatchResponse(
             [JsonProperty("id")] string id,
-            [JsonProperty("object")] string object_,
+            [JsonProperty("object")] string @object,
             [JsonProperty("created_at")] int createdAtUnixTimeSeconds,
             [JsonProperty("vector_store_id")] string vectorStoreId,
             [JsonProperty("status")] VectorStoreFileStatus status,
             [JsonProperty("file_counts")] FileCounts fileCounts)
         {
             Id = id;
-            Object = object_;
+            Object = @object;
             CreatedAtUnixTimeSeconds = createdAtUnixTimeSeconds;
             VectorStoreId = vectorStoreId;
             Status = status;
@@ -71,5 +71,11 @@ namespace OpenAI.VectorStores
         [Preserve]
         [JsonProperty("file_counts")]
         public FileCounts FileCounts { get; }
+
+        [Preserve]
+        public override string ToString() => Id;
+
+        [Preserve]
+        public static implicit operator string(VectorStoreFileBatchResponse response) => response?.ToString();
     }
 }

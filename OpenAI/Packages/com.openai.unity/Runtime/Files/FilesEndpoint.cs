@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Scripting;
+using Utilities.Async;
 using Utilities.WebRequestRest;
 
 namespace OpenAI.Files
@@ -96,6 +97,7 @@ namespace OpenAI.Files
         /// <returns><see cref="FileResponse"/>.</returns>
         public async Task<FileResponse> UploadFileAsync(FileUploadRequest request, IProgress<Progress> uploadProgress = null, CancellationToken cancellationToken = default)
         {
+            await Awaiters.UnityMainThread;
             using var fileData = new MemoryStream();
             var content = new WWWForm();
             await request.File.CopyToAsync(fileData, cancellationToken);

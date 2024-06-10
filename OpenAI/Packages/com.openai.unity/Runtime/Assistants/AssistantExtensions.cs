@@ -193,7 +193,7 @@ namespace OpenAI.Assistants
         [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
         public static async Task<AssistantFileResponse> UploadFileAsync(this AssistantResponse assistant, string filePath, CancellationToken cancellationToken = default)
         {
-            var file = await assistant.Client.FilesEndpoint.UploadFileAsync(new FileUploadRequest(filePath, "assistants"), uploadProgress: null, cancellationToken);
+            var file = await assistant.Client.FilesEndpoint.UploadFileAsync(new FileUploadRequest(filePath, FilePurpose.Assistants), uploadProgress: null, cancellationToken);
             return await assistant.AttachFileAsync(file, cancellationToken);
         }
 
@@ -208,7 +208,7 @@ namespace OpenAI.Assistants
         [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
         public static async Task<AssistantFileResponse> UploadFileAsync(this AssistantResponse assistant, Stream stream, string fileName, CancellationToken cancellationToken = default)
         {
-            var file = await assistant.Client.FilesEndpoint.UploadFileAsync(new FileUploadRequest(stream, fileName, "assistants"), uploadProgress: null, cancellationToken);
+            var file = await assistant.Client.FilesEndpoint.UploadFileAsync(new FileUploadRequest(stream, fileName, FilePurpose.Assistants), uploadProgress: null, cancellationToken);
             return await assistant.AttachFileAsync(file, cancellationToken);
         }
 

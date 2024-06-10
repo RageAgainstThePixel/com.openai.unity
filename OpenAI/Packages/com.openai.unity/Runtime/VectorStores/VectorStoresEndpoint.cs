@@ -2,8 +2,10 @@
 
 using Newtonsoft.Json;
 using OpenAI.Extensions;
+using OpenAI.Files;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Utilities.WebRequestRest;
@@ -192,6 +194,23 @@ namespace OpenAI.VectorStores
         /// <param name="vectorStoreId">
         /// The ID of the vector store for which to create a File Batch.
         /// </param>
+        /// <param name="files">
+        /// A list of Files that the vector store should use. Useful for tools like file_search that can access files.
+        /// </param>
+        /// <param name="chunkingStrategy">
+        /// A file id that the vector store should use. Useful for tools like 'file_search' that can access files.
+        /// </param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="VectorStoreFileBatchResponse"/>.</returns>
+        public async Task<VectorStoreFileBatchResponse> CreateVectorStoreFileBatchAsync(string vectorStoreId, IReadOnlyList<FileResponse> files, ChunkingStrategy chunkingStrategy = null, CancellationToken cancellationToken = default)
+            => await CreateVectorStoreFileBatchAsync(vectorStoreId, files?.Select(file => file.Id).ToList(), chunkingStrategy, cancellationToken);
+
+        /// <summary>
+        /// Create a vector store file batch.
+        /// </summary>
+        /// <param name="vectorStoreId">
+        /// The ID of the vector store for which to create a File Batch.
+        /// </param>
         /// <param name="fileIds">
         /// A list of File IDs that the vector store should use. Useful for tools like file_search that can access files.
         /// </param>
@@ -200,7 +219,7 @@ namespace OpenAI.VectorStores
         /// </param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="VectorStoreFileBatchResponse"/>.</returns>
-        public async Task<VectorStoreFileBatchResponse> CreateVectorStoreFileBatch(string vectorStoreId, IReadOnlyList<string> fileIds, ChunkingStrategy chunkingStrategy = null, CancellationToken cancellationToken = default)
+        public async Task<VectorStoreFileBatchResponse> CreateVectorStoreFileBatchAsync(string vectorStoreId, IReadOnlyList<string> fileIds, ChunkingStrategy chunkingStrategy = null, CancellationToken cancellationToken = default)
         {
             if (fileIds is not { Count: not 0 }) { throw new ArgumentNullException(nameof(fileIds)); }
             var payload = JsonConvert.SerializeObject(new { file_ids = fileIds, chunking_strategy = chunkingStrategy }, OpenAIClient.JsonSerializationOptions);
@@ -217,7 +236,7 @@ namespace OpenAI.VectorStores
         /// <param name="filter">Optional, filter by file status.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="ListResponse{VectorStoreFileBatch}"/>.</returns>
-        public async Task<ListResponse<VectorStoreFileBatchResponse>> ListVectorStoreFileBatchesAsync(string vectorStoreId, string fileBatchId, ListQuery query = null, VectorStoreFileStatus? filter = null, CancellationToken cancellationToken = default)
+        public async Task<ListResponse<VectorStoreFileBatchResponse>> ListVectorStoreBatchFilesAsync(string vectorStoreId, string fileBatchId, ListQuery query = null, VectorStoreFileStatus? filter = null, CancellationToken cancellationToken = default)
         {
             Dictionary<string, string> queryParams = query;
 
@@ -256,12 +275,25 @@ namespace OpenAI.VectorStores
         /// <returns>True, if the vector store file batch was cancelled, otherwise false.</returns>
         public async Task<bool> CancelVectorStoreFileBatchAsync(string vectorStoreId, string fileBatchId, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.PostAsync(GetUrl($"/{vectorStoreId}/file_batches/{fileBatchId}/cancel"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl($"/{vectorStoreId}/file_batches/{fileBatchId}/cancel"), string.Empty, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             var result = response.Deserialize<VectorStoreFileBatchResponse>(client);
-            return result.Status == VectorStoreFileStatus.Cancelled;
-        }
 
-        #endregion Batches
+            try
+            {
+                if (result.Status < VectorStoreFileStatus.Cancelling)
+                {
+                    result = await result.WaitForStatusChangeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                }
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+            return result.Status is VectorStoreFileStatus.Cancelling or VectorStoreFileStatus.Cancelled or VectorStoreFileStatus.Completed or VectorStoreFileStatus.Failed;
+        }
     }
+
+    #endregion Batches
 }

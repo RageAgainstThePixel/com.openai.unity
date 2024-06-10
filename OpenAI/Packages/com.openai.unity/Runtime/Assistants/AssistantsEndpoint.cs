@@ -115,7 +115,7 @@ namespace OpenAI.Assistants
         [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
         public async Task<AssistantFileResponse> AttachFileAsync(string assistantId, FileResponse file, CancellationToken cancellationToken = default)
         {
-            if (file?.Purpose?.Equals("assistants") != true)
+            if (file?.Purpose?.Equals(FilePurpose.Assistants) != true)
             {
                 throw new InvalidOperationException($"{nameof(file)}.{nameof(file.Purpose)} must be 'assistants'!");
             }

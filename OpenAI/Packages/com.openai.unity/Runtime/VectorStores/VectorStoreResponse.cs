@@ -17,7 +17,7 @@ namespace OpenAI.VectorStores
         [JsonConstructor]
         internal VectorStoreResponse(
             [JsonProperty("id")] string id,
-            [JsonProperty("object")] string object_,
+            [JsonProperty("object")] string @object,
             [JsonProperty("created_at")] int createdAtUnixTimeSeconds,
             [JsonProperty("name")] string name,
             [JsonProperty("usage_bytes")] long usageBytes,
@@ -29,7 +29,7 @@ namespace OpenAI.VectorStores
             [JsonProperty("metadata")] Dictionary<string, object> metadata)
         {
             Id = id;
-            Object = object_;
+            Object = @object;
             CreatedAtUnixTimeSeconds = createdAtUnixTimeSeconds;
             Name = name;
             UsageBytes = usageBytes;
@@ -133,6 +133,10 @@ namespace OpenAI.VectorStores
         [JsonProperty("metadata")]
         public Dictionary<string, object> Metadata { get; }
 
+        [Preserve]
         public override string ToString() => Id;
+
+        [Preserve]
+        public static implicit operator string(VectorStoreResponse response) => response?.ToString();
     }
 }

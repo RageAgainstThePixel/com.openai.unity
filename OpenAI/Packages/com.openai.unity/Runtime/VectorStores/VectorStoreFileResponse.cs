@@ -16,7 +16,7 @@ namespace OpenAI.VectorStores
         [JsonConstructor]
         internal VectorStoreFileResponse(
             [JsonProperty("id")] string id,
-            [JsonProperty("object")] string objectValue,
+            [JsonProperty("object")] string @object,
             [JsonProperty("usage_bytes")] long usageBytes,
             [JsonProperty("created_at")] int createdAtUnixTimeSeconds,
             [JsonProperty("vector_store_id")] string vectorStoreId,
@@ -25,7 +25,7 @@ namespace OpenAI.VectorStores
             [JsonProperty("chunking_strategy")] ChunkingStrategy chunkingStrategy)
         {
             Id = id;
-            Object = objectValue;
+            Object = @object;
             UsageBytes = usageBytes;
             CreatedAtUnixTimeSeconds = createdAtUnixTimeSeconds;
             VectorStoreId = vectorStoreId;
@@ -93,5 +93,12 @@ namespace OpenAI.VectorStores
         [Preserve]
         [JsonProperty("chunking_strategy")]
         public ChunkingStrategy ChunkingStrategy { get; }
+
+        [Preserve]
+        public override string ToString() => Id;
+
+        [Preserve]
+
+        public static implicit operator string(VectorStoreFileResponse response) => response?.ToString();
     }
 }

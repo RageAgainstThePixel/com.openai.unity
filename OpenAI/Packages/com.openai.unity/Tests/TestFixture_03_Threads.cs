@@ -1,6 +1,5 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using Newtonsoft.Json;
 using NUnit.Framework;
 using OpenAI.Assistants;
 using OpenAI.Files;
@@ -90,7 +89,7 @@ namespace OpenAI.Tests
             {
                 try
                 {
-                    file = await OpenAIClient.FilesEndpoint.UploadFileAsync(testFilePath, "assistants");
+                    file = await OpenAIClient.FilesEndpoint.UploadFileAsync(testFilePath, FilePurpose.Assistants);
                     Assert.NotNull(file);
                 }
                 finally
@@ -563,7 +562,7 @@ namespace OpenAI.Tests
         {
             await File.WriteAllTextAsync(filePath, "Knowledge is power!");
             Assert.IsTrue(File.Exists(filePath));
-            var file = await OpenAIClient.FilesEndpoint.UploadFileAsync(filePath, "assistants");
+            var file = await OpenAIClient.FilesEndpoint.UploadFileAsync(filePath, FilePurpose.Assistants);
             File.Delete(filePath);
             Assert.IsFalse(File.Exists(filePath));
             return file;

@@ -29,7 +29,7 @@ namespace OpenAI.Tests
             {
                 try
                 {
-                    file = await OpenAIClient.FilesEndpoint.UploadFileAsync(testFilePath, "assistants");
+                    file = await OpenAIClient.FilesEndpoint.UploadFileAsync(testFilePath, FilePurpose.Assistants);
                 }
                 finally
                 {

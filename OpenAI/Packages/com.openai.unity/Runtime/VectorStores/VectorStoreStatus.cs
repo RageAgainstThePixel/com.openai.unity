@@ -12,6 +12,6 @@ namespace OpenAI.VectorStores
         [EnumMember(Value = "completed")]
         Completed,
         [EnumMember(Value = "failed")]
-        Expired
+        Failed
     }
 }
