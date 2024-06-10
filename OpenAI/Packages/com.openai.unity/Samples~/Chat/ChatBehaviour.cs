@@ -123,7 +123,7 @@ namespace OpenAI.Samples.Chat
                     if (deltaResponse?.FirstChoice?.Delta == null) { return; }
                     assistantMessageContent.text += deltaResponse.FirstChoice.Delta.ToString();
                     scrollView.verticalNormalizedPosition = 0f;
-                }, destroyCancellationToken);
+                }, cancellationToken: destroyCancellationToken);
 
                 conversation.AppendMessage(response.FirstChoice.Message);
 
