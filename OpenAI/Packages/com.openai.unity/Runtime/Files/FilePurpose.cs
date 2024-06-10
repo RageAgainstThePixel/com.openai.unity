@@ -7,10 +7,10 @@ namespace OpenAI.Files
     [Preserve]
     public class FilePurpose
     {
-        public static readonly FilePurpose Assistants = "assistants";
-        public static readonly FilePurpose Batch = "batch";
-        public static readonly FilePurpose FineTune = "fine-tune";
-        public static readonly FilePurpose Vision = "vision";
+        public const string Assistants = "assistants";
+        public const string Batch = "batch";
+        public const string FineTune = "fine-tune";
+        public const string Vision = "vision";
 
         [Preserve]
         public FilePurpose(string purpose) => Value = purpose;
