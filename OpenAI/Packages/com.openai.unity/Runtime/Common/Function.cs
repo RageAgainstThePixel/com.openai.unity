@@ -427,9 +427,9 @@ namespace OpenAI
                     {
                         invokeArgs[i] = Enum.Parse(parameter.ParameterType, @enum, true);
                     }
-                    else if (value is JObject json)
+                    else if (value is JToken jToken)
                     {
-                        invokeArgs[i] = json.ToObject(parameter.ParameterType, OpenAIClient.JsonSerializer);
+                        invokeArgs[i] = jToken.ToObject(parameter.ParameterType, OpenAIClient.JsonSerializer);
                     }
                     else
                     {
