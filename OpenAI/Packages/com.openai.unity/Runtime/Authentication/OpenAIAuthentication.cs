@@ -17,10 +17,11 @@ namespace OpenAI
         private const string OPENAI_KEY = nameof(OPENAI_KEY);
         private const string OPENAI_API_KEY = nameof(OPENAI_API_KEY);
         private const string OPENAI_SECRET_KEY = nameof(OPENAI_SECRET_KEY);
+        private const string OPENAI_PROJECT_ID = nameof(OPENAI_PROJECT_ID);
+        private const string OPEN_AI_PROJECT_ID = nameof(OPEN_AI_PROJECT_ID);
         private const string TEST_OPENAI_SECRET_KEY = nameof(TEST_OPENAI_SECRET_KEY);
         private const string OPENAI_ORGANIZATION_ID = nameof(OPENAI_ORGANIZATION_ID);
         private const string OPEN_AI_ORGANIZATION_ID = nameof(OPEN_AI_ORGANIZATION_ID);
-        private const string ORGANIZATION = nameof(ORGANIZATION);
 
         /// <summary>
         /// Allows implicit casting from a string, so that a simple string API key can be provided in place of an instance of <see cref="OpenAIAuthentication"/>.
@@ -51,9 +52,12 @@ namespace OpenAI
         /// For users who belong to multiple organizations, you can pass a header to specify which organization is used for an API request.
         /// Usage from these API requests will count against the specified organization's subscription quota.
         /// </param>
-        public OpenAIAuthentication(string apiKey, string organization)
+        /// <param name="projectId">
+        /// Optional, for users assigned to specific projects.
+        /// </param>
+        public OpenAIAuthentication(string apiKey, string organization, string projectId = null)
         {
-            Info = new OpenAIAuthInfo(apiKey, organization);
+            Info = new OpenAIAuthInfo(apiKey, organization, projectId);
             cachedDefault = this;
         }
 
@@ -71,7 +75,7 @@ namespace OpenAI
         /// Instantiates a new Authentication object with the given <see cref="configuration"/>.
         /// </summary>
         /// <param name="configuration"><see cref="OpenAIConfiguration"/>.</param>
-        public OpenAIAuthentication(OpenAIConfiguration configuration) : this(configuration.ApiKey, configuration.organizationId) { }
+        public OpenAIAuthentication(OpenAIConfiguration configuration) : this(configuration.ApiKey, configuration.OrganizationId, configuration.ProjectId) { }
 
         /// <inheritdoc />
         public override OpenAIAuthInfo Info { get; }
@@ -128,12 +132,14 @@ namespace OpenAI
                 organizationId = Environment.GetEnvironmentVariable(OPENAI_ORGANIZATION_ID);
             }
 
-            if (string.IsNullOrWhiteSpace(organizationId))
+            var projectId = Environment.GetEnvironmentVariable(OPEN_AI_PROJECT_ID);
+
+            if (string.IsNullOrWhiteSpace(projectId))
             {
-                organizationId = Environment.GetEnvironmentVariable(ORGANIZATION);
+                projectId = Environment.GetEnvironmentVariable(OPENAI_PROJECT_ID);
             }
 
-            return string.IsNullOrEmpty(apiKey) ? null : new OpenAIAuthentication(apiKey, organizationId);
+            return string.IsNullOrEmpty(apiKey) ? null : new OpenAIAuthentication(apiKey, organizationId, projectId);
         }
 
         /// <inheritdoc />
@@ -172,7 +178,8 @@ namespace OpenAI
 
                     var lines = File.ReadAllLines(filePath);
                     string apiKey = null;
-                    string organization = null;
+                    string organizationId = null;
+                    string projectId = null;
 
                     foreach (var line in lines)
                     {
@@ -191,16 +198,19 @@ namespace OpenAI
                                 case TEST_OPENAI_SECRET_KEY:
                                     apiKey = nextPart.Trim();
                                     break;
-                                case ORGANIZATION:
                                 case OPEN_AI_ORGANIZATION_ID:
                                 case OPENAI_ORGANIZATION_ID:
-                                    organization = nextPart.Trim();
+                                    organizationId = nextPart.Trim();
+                                    break;
+                                case OPENAI_PROJECT_ID:
+                                case OPEN_AI_PROJECT_ID:
+                                    projectId = nextPart.Trim();
                                     break;
                             }
                         }
                     }
 
-                    tempAuth = new OpenAIAuthInfo(apiKey, organization);
+                    tempAuth = new OpenAIAuthInfo(apiKey, organizationId, projectId);
                 }
 
                 if (searchUp)

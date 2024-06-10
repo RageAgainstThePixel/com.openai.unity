@@ -7,6 +7,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Threads
 {
     [Preserve]
+    [Obsolete("Removed. Use Assistant.ToolResources instead.")]
     public sealed class MessageFileResponse : BaseResponse
     {
         [Preserve]

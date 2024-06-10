@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 namespace OpenAI.Audio
 {
     [Preserve]
-    public class AudioResponse
+    public sealed class AudioResponse
     {
         [Preserve]
         [JsonConstructor]
-        public AudioResponse(
+        internal AudioResponse(
             [JsonProperty("language")] string language,
             [JsonProperty("duration")] double? duration,
             [JsonProperty("text")] string text,

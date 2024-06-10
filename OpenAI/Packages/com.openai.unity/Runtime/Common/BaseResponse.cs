@@ -72,5 +72,8 @@ namespace OpenAI
         /// </summary>
         [JsonIgnore]
         public string ResetTokens { get; internal set; }
+
+        public string ToJsonString()
+            => JsonConvert.SerializeObject(this, OpenAIClient.JsonSerializationOptions);
     }
 }

@@ -10,16 +10,6 @@ namespace OpenAI
     {
         public EventResponse() { }
 
-#pragma warning disable CS0618 // Type or member is obsolete
-        internal EventResponse(Event @event)
-        {
-            Object = @event.Object;
-            CreatedAtUnixTimeSeconds = @event.CreatedAtUnixTime;
-            Level = @event.Level;
-            Message = @event.Message;
-        }
-#pragma warning restore CS0618 // Type or member is obsolete
-
         [Preserve]
         [JsonProperty("object")]
         public string Object { get; private set; }

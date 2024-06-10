@@ -11,7 +11,7 @@ namespace OpenAI.Embeddings
     {
         [Preserve]
         [JsonConstructor]
-        public EmbeddingsResponse(
+        internal EmbeddingsResponse(
             [JsonProperty("object")] string @object,
             [JsonProperty("data")] IReadOnlyList<Datum> data,
             [JsonProperty("model")] string model,
@@ -25,18 +25,18 @@ namespace OpenAI.Embeddings
 
         [Preserve]
         [JsonProperty("object")]
-        public string Object { get; private set; }
+        public string Object { get; }
 
         [Preserve]
         [JsonProperty("data")]
-        public IReadOnlyList<Datum> Data { get; private set; }
+        public IReadOnlyList<Datum> Data { get; }
 
         [Preserve]
         [JsonProperty("model")]
-        public string Model { get; private set; }
+        public string Model { get; }
 
         [Preserve]
         [JsonProperty("usage")]
-        public Usage Usage { get; private set; }
+        public Usage Usage { get; }
     }
 }

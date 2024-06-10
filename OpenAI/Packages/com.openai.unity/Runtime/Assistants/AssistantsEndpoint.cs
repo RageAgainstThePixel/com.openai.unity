@@ -21,7 +21,7 @@ namespace OpenAI.Assistants
         /// </summary>
         /// <param name="query"><see cref="ListQuery"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="ListResponse{Assistant}"/></returns>
+        /// <returns><see cref="ListResponse{AssistantResponse}"/></returns>
         public async Task<ListResponse<AssistantResponse>> ListAssistantsAsync(ListQuery query = null, CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl(queryParameters: query), parameters: new RestParameters(client.DefaultRequestHeaders), cancellationToken);
@@ -38,8 +38,8 @@ namespace OpenAI.Assistants
         public async Task<AssistantResponse> CreateAssistantAsync(CreateAssistantRequest request = null, CancellationToken cancellationToken = default)
         {
             request ??= new CreateAssistantRequest();
-            var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl(), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<AssistantResponse>(client);
         }
@@ -66,8 +66,8 @@ namespace OpenAI.Assistants
         /// <returns><see cref="AssistantResponse"/>.</returns>
         public async Task<AssistantResponse> ModifyAssistantAsync(string assistantId, CreateAssistantRequest request, CancellationToken cancellationToken = default)
         {
-            var jsonContent = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl($"/{assistantId}"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{assistantId}"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<AssistantResponse>(client);
         }
@@ -82,10 +82,10 @@ namespace OpenAI.Assistants
         {
             var response = await Rest.DeleteAsync(GetUrl($"/{assistantId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return JsonConvert.DeserializeObject<DeletedResponse>(response.Body, OpenAIClient.JsonSerializationOptions)?.Deleted ?? false;
+            return response.Deserialize<DeletedResponse>(client)?.Deleted ?? false;
         }
 
-        #region Files
+        #region Files (Obsolete)
 
         /// <summary>
         /// Returns a list of assistant files.
@@ -94,6 +94,7 @@ namespace OpenAI.Assistants
         /// <param name="query"><see cref="ListQuery"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="ListResponse{AssistantFile}"/>.</returns>
+        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
         public async Task<ListResponse<AssistantFileResponse>> ListFilesAsync(string assistantId, ListQuery query = null, CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl($"/{assistantId}/files", query), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
@@ -111,15 +112,16 @@ namespace OpenAI.Assistants
         /// </param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="AssistantFileResponse"/>.</returns>
+        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
         public async Task<AssistantFileResponse> AttachFileAsync(string assistantId, FileResponse file, CancellationToken cancellationToken = default)
         {
-            if (file?.Purpose?.Equals("assistants") != true)
+            if (file?.Purpose?.Equals(FilePurpose.Assistants) != true)
             {
                 throw new InvalidOperationException($"{nameof(file)}.{nameof(file.Purpose)} must be 'assistants'!");
             }
 
-            var jsonContent = JsonConvert.SerializeObject(new { file_id = file.Id }, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl($"/{assistantId}/files"), jsonContent, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var payload = JsonConvert.SerializeObject(new { file_id = file.Id }, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl($"/{assistantId}/files"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<AssistantFileResponse>(client);
         }
@@ -131,6 +133,7 @@ namespace OpenAI.Assistants
         /// <param name="fileId">The ID of the file we're getting.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="AssistantFileResponse"/>.</returns>
+        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
         public async Task<AssistantFileResponse> RetrieveFileAsync(string assistantId, string fileId, CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl($"/{assistantId}/files/{fileId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
@@ -150,13 +153,14 @@ namespace OpenAI.Assistants
         /// <param name="fileId">The ID of the file to delete.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>True, if file was removed.</returns>
+        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
         public async Task<bool> RemoveFileAsync(string assistantId, string fileId, CancellationToken cancellationToken = default)
         {
             var response = await Rest.DeleteAsync(GetUrl($"/{assistantId}/files/{fileId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return JsonConvert.DeserializeObject<DeletedResponse>(response.Body, OpenAIClient.JsonSerializationOptions)?.Deleted ?? false;
+            return response.Deserialize<DeletedResponse>(client)?.Deleted ?? false;
         }
 
-        #endregion Files
+        #endregion Files (Obsolete)
     }
 }

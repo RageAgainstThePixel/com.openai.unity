@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,16 +18,7 @@ namespace OpenAI.Chat
         public Message() { }
 
         [Preserve]
-        internal Message(Delta other) => CopyFrom(other);
-
-        [Preserve]
-        [Obsolete("Use new constructor args")]
-        public Message(Role role, string content, string name, Function function)
-            : this(role, content, name)
-        {
-            Name = name;
-            Function = function;
-        }
+        internal Message(Delta other) => AppendFrom(other);
 
         /// <summary>
         /// Creates a new message to insert into a chat conversation.
@@ -82,6 +74,19 @@ namespace OpenAI.Chat
             : this(Role.Tool, content, tool.Function.Name)
         {
             ToolCallId = tool.Id;
+        }
+
+        /// <summary>
+        /// Creates a new message to insert into a chat conversation.
+        /// </summary>
+        /// <param name="toolCallId">The tool_call_id to use for the message.</param>
+        /// <param name="toolFunctionName">Name of the function call.</param>
+        /// <param name="content">Tool function response.</param>
+        [Preserve]
+        public Message(string toolCallId, string toolFunctionName, IEnumerable<Content> content)
+            : this(Role.Tool, content, toolFunctionName)
+        {
+            ToolCallId = toolCallId;
         }
 
         [SerializeField]
@@ -173,7 +178,7 @@ namespace OpenAI.Chat
         public static implicit operator string(Message message) => message?.ToString();
 
         [Preserve]
-        internal void CopyFrom(Delta other)
+        internal void AppendFrom(Delta other)
         {
             if (Role == 0 &&
                 other?.Role > 0)
@@ -194,40 +199,8 @@ namespace OpenAI.Chat
             if (other is { ToolCalls: not null })
             {
                 toolCalls ??= new List<Tool>();
-
-                foreach (var otherToolCall in other.ToolCalls)
-                {
-                    if (otherToolCall == null) { continue; }
-
-                    if (otherToolCall.Index.HasValue)
-                    {
-                        if (otherToolCall.Index + 1 > toolCalls.Count)
-                        {
-                            toolCalls.Insert(otherToolCall.Index.Value, new Tool(otherToolCall));
-                        }
-
-                        toolCalls[otherToolCall.Index.Value].CopyFrom(otherToolCall);
-                    }
-                    else
-                    {
-                        toolCalls.Add(new Tool(otherToolCall));
-                    }
-                }
+                toolCalls.AppendFrom(other.ToolCalls);
             }
-
-#pragma warning disable CS0618 // Type or member is obsolete
-            if (other?.Function != null)
-            {
-                if (Function == null)
-                {
-                    Function = new Function(other.Function);
-                }
-                else
-                {
-                    Function.CopyFrom(other.Function);
-                }
-            }
-#pragma warning restore CS0618 // Type or member is obsolete
         }
     }
 }

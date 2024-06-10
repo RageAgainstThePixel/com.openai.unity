@@ -10,7 +10,7 @@ namespace OpenAI.Moderations
     {
         [Preserve]
         [JsonConstructor]
-        public Scores(
+        internal Scores(
             [JsonProperty("hate")] double hate,
             [JsonProperty("hate/threatening")] double hateThreatening,
             [JsonProperty("harassment")] double harassment,
@@ -80,6 +80,7 @@ namespace OpenAI.Moderations
         [JsonProperty("violence/graphic")]
         public double ViolenceGraphic { get; }
 
+        [Preserve]
         public override string ToString() =>
             $"Hate: {Hate:0.00 e+00}\n" +
             $"Hate/Threatening: {HateThreatening:0.00 e+00}\n" +
@@ -93,6 +94,7 @@ namespace OpenAI.Moderations
             $"Violence: {Violence:0.00 e+00}\n" +
             $"Violence/Graphic: {ViolenceGraphic:0.00 e+00}\n";
 
+        [Preserve]
         public static implicit operator string(Scores scores) => scores.ToString();
     }
 }
