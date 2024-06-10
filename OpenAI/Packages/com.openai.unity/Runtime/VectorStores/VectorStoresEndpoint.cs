@@ -291,7 +291,7 @@ namespace OpenAI.VectorStores
                 // ignored
             }
 
-            return result.Status is VectorStoreFileStatus.Cancelling or VectorStoreFileStatus.Cancelled or VectorStoreFileStatus.Completed or VectorStoreFileStatus.Failed;
+            return result.Status >= VectorStoreFileStatus.Cancelling;
         }
     }
 

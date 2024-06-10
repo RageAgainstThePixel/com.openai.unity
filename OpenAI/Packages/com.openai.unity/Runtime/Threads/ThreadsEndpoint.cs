@@ -352,11 +352,25 @@ namespace OpenAI.Threads
         /// <param name="runId">The id of the run to cancel.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="RunResponse"/>.</returns>
-        public async Task<RunResponse> CancelRunAsync(string threadId, string runId, CancellationToken cancellationToken = default)
+        public async Task<bool> CancelRunAsync(string threadId, string runId, CancellationToken cancellationToken = default)
         {
             var response = await Rest.PostAsync(GetUrl($"/{threadId}/runs/{runId}/cancel"), string.Empty, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<RunResponse>(client);
+            var run = response.Deserialize<RunResponse>(client);
+
+            if (run.Status < RunStatus.Cancelling)
+            {
+                try
+                {
+                    run = await run.WaitForStatusChangeAsync(cancellationToken: cancellationToken);
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+            }
+
+            return run.Status >= RunStatus.Cancelling;
         }
 
         #endregion Runs

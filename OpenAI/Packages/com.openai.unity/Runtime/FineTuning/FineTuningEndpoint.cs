@@ -71,7 +71,7 @@ namespace OpenAI.FineTuning
         /// <returns><see cref="FineTuneJobResponse"/>.</returns>
         public async Task<bool> CancelJobAsync(string jobId, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.PostAsync(GetUrl($"/jobs/{jobId}/cancel"), jsonData: string.Empty, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl($"/jobs/{jobId}/cancel"), string.Empty, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             var result = response.Deserialize<FineTuneJobResponse>(client);
             return result.Status == JobStatus.Cancelled;
