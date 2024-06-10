@@ -23,10 +23,10 @@ namespace OpenAI.Batch
             [JsonProperty("output_file_id")] string outputFileId,
             [JsonProperty("error_file_id")] string errorFileId,
             [JsonProperty("created_at")] int createdAt,
-            [JsonProperty("in_progress_at")] int inProgressAt,
-            [JsonProperty("expires_at")] int expiresAt,
-            [JsonProperty("finalizing_at")] int finalizingAt,
-            [JsonProperty("completed_at")] int completedAt,
+            [JsonProperty("in_progress_at")] int? inProgressAt,
+            [JsonProperty("expires_at")] int? expiresAt,
+            [JsonProperty("finalizing_at")] int? finalizingAt,
+            [JsonProperty("completed_at")] int? completedAt,
             [JsonProperty("failed_at")] int? failedAt,
             [JsonProperty("expired_at")] int? expiredAt,
             [JsonProperty("cancelled_at")] int? cancelledAt,
@@ -121,6 +121,7 @@ namespace OpenAI.Batch
         [JsonProperty("created_at")]
         public int CreatedAtUnixTimeSeconds { get; }
 
+        [Preserve]
         [JsonIgnore]
         public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTimeSeconds).DateTime;
 
@@ -129,40 +130,56 @@ namespace OpenAI.Batch
         /// </summary>
         [Preserve]
         [JsonProperty("in_progress_at")]
-        public int InProgressAtUnixTimeSeconds { get; }
+        public int? InProgressAtUnixTimeSeconds { get; }
 
+        [Preserve]
         [JsonIgnore]
-        public DateTime InProgressAt => DateTimeOffset.FromUnixTimeSeconds(InProgressAtUnixTimeSeconds).DateTime;
+        public DateTime? InProgressAt
+            => InProgressAtUnixTimeSeconds.HasValue
+                ? DateTimeOffset.FromUnixTimeSeconds(InProgressAtUnixTimeSeconds.Value).DateTime
+                : null;
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the batch will expire.
         /// </summary>
         [Preserve]
         [JsonProperty("expires_at")]
-        public int ExpiresAtUnixTimeSeconds { get; }
+        public int? ExpiresAtUnixTimeSeconds { get; }
 
+        [Preserve]
         [JsonIgnore]
-        public DateTime ExpiresAt => DateTimeOffset.FromUnixTimeSeconds(ExpiresAtUnixTimeSeconds).DateTime;
+        public DateTime? ExpiresAt
+            => ExpiresAtUnixTimeSeconds.HasValue
+                ? DateTimeOffset.FromUnixTimeSeconds(ExpiresAtUnixTimeSeconds.Value).DateTime
+                : null;
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the batch started finalizing.
         /// </summary>
         [Preserve]
         [JsonProperty("finalizing_at")]
-        public int FinalizingAtUnixTimeSeconds { get; }
+        public int? FinalizingAtUnixTimeSeconds { get; }
 
         [Preserve]
-        public DateTime FinalizingAt => DateTimeOffset.FromUnixTimeSeconds(FinalizingAtUnixTimeSeconds).DateTime;
+        [JsonIgnore]
+        public DateTime? FinalizingAt
+            => FinalizingAtUnixTimeSeconds.HasValue
+                ? DateTimeOffset.FromUnixTimeSeconds(FinalizingAtUnixTimeSeconds.Value).DateTime
+                : null;
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the batch was completed.
         /// </summary>
         [Preserve]
         [JsonProperty("completed_at")]
-        public int CompletedAtUnixTimeSeconds { get; }
+        public int? CompletedAtUnixTimeSeconds { get; }
 
+        [Preserve]
         [JsonIgnore]
-        public DateTime CompletedAt => DateTimeOffset.FromUnixTimeSeconds(CompletedAtUnixTimeSeconds).DateTime;
+        public DateTime? CompletedAt
+            => CompletedAtUnixTimeSeconds.HasValue
+                ? DateTimeOffset.FromUnixTimeSeconds(CompletedAtUnixTimeSeconds.Value).DateTime
+                : null;
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the batch failed.
@@ -171,6 +188,7 @@ namespace OpenAI.Batch
         [JsonProperty("failed_at")]
         public int? FailedAtUnixTimeSeconds { get; }
 
+        [Preserve]
         [JsonIgnore]
         public DateTime? FailedAt
             => FailedAtUnixTimeSeconds.HasValue
@@ -218,5 +236,9 @@ namespace OpenAI.Batch
         [Preserve]
         [JsonProperty("metadata")]
         public IReadOnlyDictionary<string, object> Metadata { get; }
+
+        public override string ToString() => Id;
+
+        public static implicit operator string(BatchResponse response) => response?.ToString();
     }
 }
