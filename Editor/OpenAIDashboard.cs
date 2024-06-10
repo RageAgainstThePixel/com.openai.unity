@@ -15,7 +15,7 @@ using Progress = Utilities.WebRequestRest.Progress;
 
 namespace OpenAI.Editor
 {
-    public class OpenAIDashboard : AbstractEditorDashboard
+    public sealed class OpenAIDashboard : AbstractEditorDashboard
     {
         #region GUIContent
 

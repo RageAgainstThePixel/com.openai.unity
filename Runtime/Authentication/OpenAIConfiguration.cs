@@ -1,17 +1,16 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using UnityEngine;
-using UnityEngine.Serialization;
 using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI
 {
     [CreateAssetMenu(fileName = nameof(OpenAIConfiguration), menuName = "OpenAI/" + nameof(OpenAIConfiguration), order = 0)]
-    public class OpenAIConfiguration : ScriptableObject, IConfiguration
+    public sealed class OpenAIConfiguration : ScriptableObject, IConfiguration
     {
         [SerializeField]
         [Tooltip("The OpenAI or Azure api key.")]
-        internal string apiKey;
+        private string apiKey;
 
         /// <summary>
         /// The OpenAI api key.
@@ -23,10 +22,9 @@ namespace OpenAI
         }
 
         [SerializeField]
-        [FormerlySerializedAs("organization")]
         [Tooltip("For users who belong to multiple organizations, you can pass a header to specify which organization is used for an API request.\n\n" +
                  "Usage from these API requests will count against the specified organization's subscription quota.")]
-        internal string organizationId;
+        private string organizationId;
 
         /// <summary>
         /// For users who belong to multiple organizations, you can pass a header to specify which organization is used for an API request.
@@ -36,6 +34,19 @@ namespace OpenAI
         {
             get => organizationId;
             internal set => organizationId = value;
+        }
+
+        [SerializeField]
+        [Tooltip("For users that specify specific projects.")]
+        private string projectId;
+
+        /// <summary>
+        /// For users that specify specific projects.
+        /// </summary>
+        public string ProjectId
+        {
+            get => projectId;
+            internal set => projectId = value;
         }
 
         [SerializeField]

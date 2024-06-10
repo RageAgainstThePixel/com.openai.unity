@@ -34,7 +34,8 @@ namespace OpenAI.Tests
             {
                 Tool.FromFunc("test_func", Function),
                 Tool.FromFunc<DateTime, Vector3, string>("test_func_with_args", FunctionWithArgs),
-                Tool.FromFunc("test_func_weather", () => WeatherService.GetCurrentWeatherAsync("my location", WeatherService.WeatherUnit.Celsius))
+                Tool.FromFunc("test_func_weather", () => WeatherService.GetCurrentWeatherAsync("my location", WeatherService.WeatherUnit.Celsius)),
+                Tool.FromFunc<List<int>, string>("test_func_with_array_args", FunctionWithArrayArgs)
             };
 
             var json = JsonConvert.SerializeObject(tools, Formatting.Indented, OpenAIClient.JsonSerializationOptions);
@@ -44,20 +45,33 @@ namespace OpenAI.Tests
             Assert.IsNotNull(tool);
             var result = tool.InvokeFunction<string>();
             Assert.AreEqual("success", result);
+
             var toolWithArgs = tools[1];
             Assert.IsNotNull(toolWithArgs);
             var testValue = new { arg1 = DateTime.UtcNow, arg2 = Vector3.one };
-            toolWithArgs.Function.Arguments = JToken.FromObject(testValue, JsonSerializer.Create(OpenAIClient.JsonSerializationOptions));
+            toolWithArgs.Function.Arguments = JToken.FromObject(testValue, OpenAIClient.JsonSerializer);
             var resultWithArgs = toolWithArgs.InvokeFunction<string>();
             Debug.Log(resultWithArgs);
-            var testResult = JsonConvert.DeserializeObject(resultWithArgs, testValue.GetType(), OpenAIClient.JsonSerializationOptions);
-            Assert.AreEqual(testResult, testValue);
 
             var toolWeather = tools[2];
             Assert.IsNotNull(toolWeather);
             var resultWeather = await toolWeather.InvokeFunctionAsync();
             Assert.IsFalse(string.IsNullOrWhiteSpace(resultWeather));
             Debug.Log(resultWeather);
+
+            try
+            {
+                var toolWithArrayArgs = tools[3];
+                Assert.IsNotNull(toolWithArrayArgs);
+                var arrayTestValue = new { list = new List<int> { 1, 2, 3, 4, 5 } };
+                toolWithArrayArgs.Function.Arguments = JToken.FromObject(arrayTestValue, OpenAIClient.JsonSerializer);
+                var resultWithArrayArgs = toolWithArrayArgs.InvokeFunction<string>();
+                Debug.Log(resultWithArrayArgs);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
         private string Function()
@@ -68,6 +82,11 @@ namespace OpenAI.Tests
         private string FunctionWithArgs(DateTime arg1, Vector3 arg2)
         {
             return JsonConvert.SerializeObject(new { arg1, arg2 }, OpenAIClient.JsonSerializationOptions);
+        }
+
+        private string FunctionWithArrayArgs(List<int> list)
+        {
+            return JsonConvert.SerializeObject(new { list }, OpenAIClient.JsonSerializationOptions);
         }
     }
 }

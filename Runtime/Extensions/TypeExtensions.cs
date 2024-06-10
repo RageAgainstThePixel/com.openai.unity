@@ -65,14 +65,13 @@ namespace OpenAI.Extensions
         public static JObject GenerateJsonSchema(this Type type, JObject rootSchema)
         {
             var schema = new JObject();
-            var serializer = JsonSerializer.Create(OpenAIClient.JsonSerializationOptions);
 
             if (!type.IsPrimitive &&
                 type != typeof(Guid) &&
                 type != typeof(DateTime) &&
                 type != typeof(DateTimeOffset) &&
                 rootSchema["definitions"] != null &&
-                ((JObject)rootSchema["definitions"]).ContainsKey(type.FullName))
+                ((JObject)rootSchema["definitions"]).ContainsKey(type.FullName!))
             {
                 return new JObject { ["$ref"] = $"#/definitions/{type.FullName}" };
             }
@@ -119,7 +118,7 @@ namespace OpenAI.Extensions
 
                 foreach (var value in Enum.GetValues(type))
                 {
-                    ((JArray)schema["enum"]).Add(JToken.FromObject(value, serializer));
+                    ((JArray)schema["enum"]).Add(JToken.FromObject(value, OpenAIClient.JsonSerializer));
                 }
             }
             else if (type.IsArray || (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>)))
@@ -188,7 +187,7 @@ namespace OpenAI.Extensions
 
                         if (functionPropertyAttribute.DefaultValue != null)
                         {
-                            defaultValue = JToken.FromObject(functionPropertyAttribute.DefaultValue, serializer);
+                            defaultValue = JToken.FromObject(functionPropertyAttribute.DefaultValue, OpenAIClient.JsonSerializer);
                             propertyInfo["default"] = defaultValue;
                         }
 
@@ -198,7 +197,7 @@ namespace OpenAI.Extensions
 
                             foreach (var value in functionPropertyAttribute.PossibleValues)
                             {
-                                var @enum = JToken.FromObject(value, serializer);
+                                var @enum = JToken.FromObject(value, OpenAIClient.JsonSerializer);
 
                                 if (defaultValue == null)
                                 {

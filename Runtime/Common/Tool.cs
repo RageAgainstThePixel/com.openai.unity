@@ -13,13 +13,13 @@ using UnityEngine.Scripting;
 namespace OpenAI
 {
     [Preserve]
-    public sealed class Tool
+    public sealed class Tool : IAppendable<Tool>
     {
         [Preserve]
         public Tool() { }
 
         [Preserve]
-        public Tool(Tool other) => CopyFrom(other);
+        public Tool(Tool other) => AppendFrom(other);
 
         [Preserve]
         public Tool(Function function)
@@ -29,11 +29,31 @@ namespace OpenAI
         }
 
         [Preserve]
+        [JsonConstructor]
+        internal Tool(
+            [JsonProperty("id")] string id,
+            [JsonProperty("index")] int? index,
+            [JsonProperty("type")] string type,
+            [JsonProperty("function")] Function function)
+        {
+            Id = id;
+            Index = index;
+            Type = type;
+            Function = function;
+        }
+
+
+        [Preserve]
         public static implicit operator Tool(Function function) => new(function);
 
         [Preserve]
         [JsonIgnore]
-        public static Tool Retrieval { get; } = new() { Type = "retrieval" };
+        [Obsolete("Use FileSearch")]
+        public static Tool Retrieval { get; } = new() { Type = "file_search" };
+
+        [Preserve]
+        [JsonIgnore]
+        public static Tool FileSearch { get; } = new() { Type = "file_search" };
 
         [Preserve]
         [JsonIgnore]
@@ -56,9 +76,11 @@ namespace OpenAI
         public Function Function { get; private set; }
 
         [Preserve]
-        internal void CopyFrom(Tool other)
+        public void AppendFrom(Tool other)
         {
-            if (!string.IsNullOrWhiteSpace(other?.Id))
+            if (other == null) { return; }
+
+            if (!string.IsNullOrWhiteSpace(other.Id))
             {
                 Id = other.Id;
             }
@@ -68,12 +90,12 @@ namespace OpenAI
                 Index = other.Index.Value;
             }
 
-            if (!string.IsNullOrWhiteSpace(other?.Type))
+            if (!string.IsNullOrWhiteSpace(other.Type))
             {
                 Type = other.Type;
             }
 
-            if (other?.Function != null)
+            if (other.Function != null)
             {
                 if (Function == null)
                 {
@@ -81,7 +103,7 @@ namespace OpenAI
                 }
                 else
                 {
-                    Function.CopyFrom(other.Function);
+                    Function.AppendFrom(other.Function);
                 }
             }
         }
@@ -120,70 +142,13 @@ namespace OpenAI
         public async Task<T> InvokeFunctionAsync<T>(CancellationToken cancellationToken = default)
             => await Function.InvokeAsync<T>(cancellationToken);
 
+        #region Tool Cache
+
         private static readonly List<Tool> toolCache = new()
         {
-            Retrieval,
+            FileSearch,
             CodeInterpreter
         };
-
-        /// <summary>
-        /// Clears the tool cache of all previously registered tools.
-        /// </summary>
-        public static void ClearRegisteredTools()
-        {
-            toolCache.Clear();
-            Function.ClearFunctionCache();
-            toolCache.Add(CodeInterpreter);
-            toolCache.Add(Retrieval);
-        }
-
-        /// <summary>
-        /// Checks if tool exists in cache.
-        /// </summary>
-        /// <param name="tool">The tool to check.</param>
-        /// <returns>True, if the tool is already registered in the tool cache.</returns>
-        public static bool IsToolRegistered(Tool tool)
-            => toolCache.Any(knownTool =>
-                knownTool.Type == "function" &&
-                knownTool.Function.Name == tool.Function.Name &&
-                ReferenceEquals(knownTool.Function.Instance, tool.Function.Instance));
-
-        /// <summary>
-        /// Tries to register a tool into the Tool cache.
-        /// </summary>
-        /// <param name="tool">The tool to register.</param>
-        /// <returns>True, if the tool was added to the cache.</returns>
-        public static bool TryRegisterTool(Tool tool)
-        {
-            if (IsToolRegistered(tool))
-            {
-                return false;
-            }
-
-            if (tool.Type != "function")
-            {
-                throw new InvalidOperationException("Only function tools can be registered.");
-            }
-
-            toolCache.Add(tool);
-            return true;
-
-        }
-
-        private static bool TryGetTool(string name, object instance, out Tool tool)
-        {
-            foreach (var knownTool in toolCache.Where(knownTool =>
-                         knownTool.Type == "function" &&
-                         knownTool.Function.Name == name &&
-                         ReferenceEquals(knownTool, instance)))
-            {
-                tool = knownTool;
-                return true;
-            }
-
-            tool = null;
-            return false;
-        }
 
         /// <summary>
         /// Gets a list of all available tools.
@@ -215,7 +180,7 @@ namespace OpenAI
                     where functionAttribute != null
                     let name = $"{type.FullName}.{method.Name}".Replace('.', '_')
                     let description = functionAttribute.Description
-                    select new Function(name, description, method)
+                    select Function.GetOrCreateFunction(name, description, method)
                     into function
                     select new Tool(function));
 
@@ -230,6 +195,73 @@ namespace OpenAI
             return !includeDefaults
                 ? toolCache.Where(tool => tool.Type == "function").ToList()
                 : toolCache;
+        }
+
+        /// <summary>
+        /// Clears the tool cache of all previously registered tools.
+        /// </summary>
+        [Preserve]
+        public static void ClearRegisteredTools()
+        {
+            toolCache.Clear();
+            Function.ClearFunctionCache();
+            toolCache.Add(CodeInterpreter);
+            toolCache.Add(FileSearch);
+        }
+
+        /// <summary>
+        /// Checks if tool exists in cache.
+        /// </summary>
+        /// <param name="tool">The tool to check.</param>
+        /// <returns>True, if the tool is already registered in the tool cache.</returns>
+        [Preserve]
+        public static bool IsToolRegistered(Tool tool)
+            => toolCache.Any(knownTool =>
+                knownTool.Type == "function" &&
+                knownTool.Function.Name == tool.Function.Name &&
+                ReferenceEquals(knownTool.Function.Instance, tool.Function.Instance));
+
+        /// <summary>
+        /// Tries to register a tool into the Tool cache.
+        /// </summary>
+        /// <param name="tool">The tool to register.</param>
+        /// <returns>True, if the tool was added to the cache.</returns>
+        [Preserve]
+        public static bool TryRegisterTool(Tool tool)
+        {
+            if (IsToolRegistered(tool))
+            {
+                return false;
+            }
+
+            if (tool.Type != "function")
+            {
+                throw new InvalidOperationException("Only function tools can be registered.");
+            }
+
+            toolCache.Add(tool);
+            return true;
+        }
+
+        /// <summary>
+        /// Tries to remove a tool from the Tool cache.
+        /// </summary>
+        /// <param name="tool">The tool to remove.</param>
+        /// <returns>True, if the tool was removed from the cache.</returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public static bool TryUnregisterTool(Tool tool)
+        {
+            if (!IsToolRegistered(tool))
+            {
+                return false;
+            }
+
+            if (tool.Type != "function")
+            {
+                throw new InvalidOperationException("Only function tools can be unregistered.");
+            }
+
+            return Function.TryRemoveFunction(tool.Function.Name) && toolCache.Remove(tool);
         }
 
         /// <summary>
@@ -291,10 +323,27 @@ namespace OpenAI
                 return tool;
             }
 
-            tool = new Tool(new Function(functionName, description ?? string.Empty, method, instance));
+            tool = new Tool(Function.GetOrCreateFunction(functionName, description ?? string.Empty, method, instance));
             toolCache.Add(tool);
             return tool;
         }
+
+        [Preserve]
+        private static bool TryGetTool(string name, object instance, out Tool tool)
+        {
+            foreach (var knownTool in toolCache.Where(knownTool =>
+                         knownTool.Type == "function" && knownTool.Function.Name == name &&
+                         ReferenceEquals(knownTool.Function.Instance, instance)))
+            {
+                tool = knownTool;
+                return true;
+            }
+
+            tool = null;
+            return false;
+        }
+
+        #endregion Tool Cache
 
         #region Func<,> Overloads
 
@@ -322,8 +371,7 @@ namespace OpenAI
             return tool;
         }
 
-        public static Tool FromFunc<T1, T2, TResult>(string name, Func<T1, T2, TResult> function,
-            string description = null)
+        public static Tool FromFunc<T1, T2, TResult>(string name, Func<T1, T2, TResult> function, string description = null)
         {
             if (TryGetTool(name, function, out var tool))
             {
@@ -335,8 +383,7 @@ namespace OpenAI
             return tool;
         }
 
-        public static Tool FromFunc<T1, T2, T3, TResult>(string name, Func<T1, T2, T3, TResult> function,
-            string description = null)
+        public static Tool FromFunc<T1, T2, T3, TResult>(string name, Func<T1, T2, T3, TResult> function, string description = null)
         {
             if (TryGetTool(name, function, out var tool))
             {

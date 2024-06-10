@@ -22,7 +22,7 @@ namespace OpenAI.Embeddings
         /// </param>
         /// <param name="model">
         /// ID of the model to use.<br/>
-        /// Defaults to: <see cref="Model.Embedding_Ada_002"/>
+        /// Defaults to: <see cref="Models.Model.Embedding_Ada_002"/>
         /// </param>
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
@@ -38,7 +38,7 @@ namespace OpenAI.Embeddings
         {
             if (string.IsNullOrWhiteSpace(input))
             {
-                throw new ArgumentNullException(nameof(input));
+                throw new ArgumentNullException(nameof(input), $"Missing required {nameof(input)} parameter");
             }
         }
 
@@ -86,11 +86,11 @@ namespace OpenAI.Embeddings
         public string Model { get; }
 
         [Preserve]
-        [JsonProperty("user")]
-        public string User { get; }
-
-        [Preserve]
         [JsonProperty("dimensions")]
         public int? Dimensions { get; }
+
+        [Preserve]
+        [JsonProperty("user")]
+        public string User { get; }
     }
 }

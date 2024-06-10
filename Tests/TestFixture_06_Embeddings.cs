@@ -9,7 +9,7 @@ namespace OpenAI.Tests
     internal class TestFixture_06_Embeddings : AbstractTestFixture
     {
         [Test]
-        public async Task Test_1_CreateEmbedding()
+        public async Task Test_01_CreateEmbedding()
         {
             Assert.IsNotNull(OpenAIClient.EmbeddingsEndpoint);
             var embedding = await OpenAIClient.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was delicious and the waiter...");
@@ -18,7 +18,7 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_2_CreateEmbeddingWithDimensions()
+        public async Task Test_02_CreateEmbeddingWithDimensions()
         {
             Assert.IsNotNull(OpenAIClient.EmbeddingsEndpoint);
             var embedding = await OpenAIClient.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was delicious and the waiter...",
@@ -29,7 +29,7 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_3_CreateEmbeddingsWithMultipleInputs()
+        public async Task Test_03_CreateEmbeddingsWithMultipleInputs()
         {
             Assert.IsNotNull(OpenAIClient.EmbeddingsEndpoint);
             var embeddings = new[]

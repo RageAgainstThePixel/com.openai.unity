@@ -17,7 +17,6 @@ namespace OpenAI.Chat
         [JsonConstructor]
         public Conversation([JsonProperty("messages")] List<Message> messages = null)
         {
-
             this.messages = new ConcurrentQueue<Message>();
 
             if (messages != null)

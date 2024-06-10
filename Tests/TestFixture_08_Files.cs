@@ -1,10 +1,11 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System.Collections.Generic;
 using NUnit.Framework;
+using OpenAI.Chat;
+using OpenAI.Files;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using OpenAI.Chat;
 using UnityEngine;
 
 namespace OpenAI.Tests
@@ -18,7 +19,7 @@ namespace OpenAI.Tests
             var testData = new Conversation(new List<Message> { new(Role.Assistant, "I'm a learning language model") });
             await File.WriteAllTextAsync("test.jsonl", testData);
             Assert.IsTrue(File.Exists("test.jsonl"));
-            var result = await OpenAIClient.FilesEndpoint.UploadFileAsync("test.jsonl", "fine-tune");
+            var result = await OpenAIClient.FilesEndpoint.UploadFileAsync("test.jsonl", FilePurpose.FineTune);
             Assert.IsNotNull(result);
             Assert.IsTrue(result.FileName == "test.jsonl");
             Debug.Log($"{result.Id} -> {result.Object}");

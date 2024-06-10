@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -18,7 +19,7 @@ namespace OpenAI.Models
     public sealed class ModelsEndpoint : OpenAIBaseEndpoint
     {
         [Preserve]
-        private class ModelsList
+        private class ModelsList : BaseResponse
         {
             [Preserve]
             [JsonConstructor]
@@ -46,7 +47,7 @@ namespace OpenAI.Models
         {
             var response = await Rest.GetAsync(GetUrl(), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
             response.Validate(EnableDebug);
-            return JsonConvert.DeserializeObject<ModelsList>(response.Body, OpenAIClient.JsonSerializationOptions)?.Data;
+            return response.Deserialize<ModelsList>(client)?.Data;
         }
 
         /// <summary>
@@ -84,7 +85,7 @@ namespace OpenAI.Models
             {
                 var response = await Rest.DeleteAsync(GetUrl($"/{model.Id}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken: cancellationToken);
                 response.Validate(EnableDebug);
-                return JsonConvert.DeserializeObject<DeletedResponse>(response.Body, OpenAIClient.JsonSerializationOptions)?.Deleted ?? false;
+                return response.Deserialize<DeletedResponse>(client)?.Deleted ?? false;
             }
             catch (RestException e)
             {

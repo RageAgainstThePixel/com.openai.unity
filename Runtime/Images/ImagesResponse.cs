@@ -11,7 +11,7 @@ namespace OpenAI.Images
     {
         [Preserve]
         [JsonConstructor]
-        public ImagesResponse(
+        internal ImagesResponse(
             [JsonProperty("created")] int created,
             [JsonProperty("data")] IReadOnlyList<ImageResult> results)
         {

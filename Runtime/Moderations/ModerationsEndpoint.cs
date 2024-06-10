@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Linq;
 using System.Threading;
@@ -52,7 +53,7 @@ namespace OpenAI.Moderations
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
             var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return JsonConvert.DeserializeObject<ModerationsResponse>(response.Body, OpenAIClient.JsonSerializationOptions);
+            return response.Deserialize<ModerationsResponse>(client);
         }
 
 

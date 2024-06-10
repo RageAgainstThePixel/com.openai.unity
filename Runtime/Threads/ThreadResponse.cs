@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Scripting;
+using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI.Threads
 {
@@ -12,19 +13,21 @@ namespace OpenAI.Threads
     /// Threads store Messages and automatically handle truncation to fit content into a model’s context.
     /// </summary>
     [Preserve]
-    public sealed class ThreadResponse : BaseResponse
+    public sealed class ThreadResponse : BaseResponse, IServerSentEvent
     {
         [Preserve]
         [JsonConstructor]
-        public ThreadResponse(
+        internal ThreadResponse(
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
             [JsonProperty("created_at")] int createdAtUnitTimeSeconds,
+            [JsonProperty("tool_resources")] ToolResources toolResources,
             [JsonProperty("metadata")] Dictionary<string, string> metadata)
         {
             Id = id;
             Object = @object;
             CreatedAtUnixTimeSeconds = createdAtUnitTimeSeconds;
+            ToolResources = toolResources;
             Metadata = metadata;
         }
 
@@ -52,6 +55,16 @@ namespace OpenAI.Threads
         [Preserve]
         [JsonIgnore]
         public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTimeSeconds).DateTime;
+
+        /// <summary>
+        /// A set of resources that are made available to the assistant's tools in this thread.
+        /// The resources are specific to the type of tool.
+        /// For example, the code_interpreter tool requires a list of file IDs,
+        /// while the file_search tool requires a list of vector store IDs.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("tool_resources")]
+        public ToolResources ToolResources { get; }
 
         /// <summary>
         /// Set of 16 key-value pairs that can be attached to an object.

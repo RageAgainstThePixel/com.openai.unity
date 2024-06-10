@@ -31,7 +31,7 @@ namespace OpenAI.Images
         /// <param name="responseFormat">
         /// The format in which the generated images are returned.
         /// Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
+        /// <para/> Defaults to <see cref="ImageResponseFormat.Url"/>
         /// </param>
         /// <param name="model">
         /// The model to use for image generation.
@@ -42,7 +42,7 @@ namespace OpenAI.Images
             int numberOfResults = 1,
             ImageSize size = ImageSize.Large,
             string user = null,
-            ResponseFormat responseFormat = ResponseFormat.Url,
+            ImageResponseFormat responseFormat = ImageResponseFormat.Url,
             Model model = null)
             : this(imagePath, null, prompt, numberOfResults, size, user, responseFormat, model)
         {
@@ -74,7 +74,7 @@ namespace OpenAI.Images
         /// <param name="responseFormat">
         /// The format in which the generated images are returned.
         /// Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
+        /// <para/> Defaults to <see cref="ImageResponseFormat.Url"/>
         /// </param>
         /// <param name="model">
         /// The model to use for image generation.
@@ -86,7 +86,7 @@ namespace OpenAI.Images
             int numberOfResults = 1,
             ImageSize size = ImageSize.Large,
             string user = null,
-            ResponseFormat responseFormat = ResponseFormat.Url,
+            ImageResponseFormat responseFormat = ImageResponseFormat.Url,
             Model model = null)
             : this(
                 File.OpenRead(imagePath),
@@ -124,7 +124,7 @@ namespace OpenAI.Images
         /// <param name="responseFormat">
         /// The format in which the generated images are returned.
         /// Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
+        /// <para/> Defaults to <see cref="ImageResponseFormat.Url"/>
         /// </param>
         /// <param name="model">
         /// The model to use for image generation.
@@ -135,7 +135,7 @@ namespace OpenAI.Images
             int numberOfResults = 1,
             ImageSize size = ImageSize.Large,
             string user = null,
-            ResponseFormat responseFormat = ResponseFormat.Url,
+            ImageResponseFormat responseFormat = ImageResponseFormat.Url,
             Model model = null)
             : this(texture, null, prompt, numberOfResults, size, user, responseFormat, model)
         {
@@ -167,7 +167,7 @@ namespace OpenAI.Images
         /// <param name="responseFormat">
         /// The format in which the generated images are returned.
         /// Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
+        /// <para/> Defaults to <see cref="ImageResponseFormat.Url"/>
         /// </param>
         /// <param name="model">
         /// The model to use for image generation.
@@ -179,7 +179,7 @@ namespace OpenAI.Images
             int numberOfResults = 1,
             ImageSize size = ImageSize.Large,
             string user = null,
-            ResponseFormat responseFormat = ResponseFormat.Url,
+            ImageResponseFormat responseFormat = ImageResponseFormat.Url,
             Model model = null)
             : this(
                 new MemoryStream(texture.EncodeToPNG()),
@@ -218,7 +218,7 @@ namespace OpenAI.Images
         /// <param name="responseFormat">
         /// The format in which the generated images are returned.
         /// Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
+        /// <para/> Defaults to <see cref="ImageResponseFormat.Url"/>
         /// </param>
         /// <param name="model">
         /// The model to use for image generation.
@@ -230,7 +230,7 @@ namespace OpenAI.Images
             int numberOfResults = 1,
             ImageSize size = ImageSize.Large,
             string user = null,
-            ResponseFormat responseFormat = ResponseFormat.Url,
+            ImageResponseFormat responseFormat = ImageResponseFormat.Url,
             Model model = null)
             : this(image, imageName, null, null, prompt, numberOfResults, size, user, responseFormat, model)
         {
@@ -264,7 +264,7 @@ namespace OpenAI.Images
         /// <param name="responseFormat">
         /// The format in which the generated images are returned.
         /// Must be one of url or b64_json.
-        /// <para/> Defaults to <see cref="ResponseFormat.Url"/>
+        /// <para/> Defaults to <see cref="ImageResponseFormat.Url"/>
         /// </param>
         /// <param name="model">
         /// The model to use for image generation.
@@ -278,7 +278,7 @@ namespace OpenAI.Images
             int numberOfResults = 1,
             ImageSize size = ImageSize.Large,
             string user = null,
-            ResponseFormat responseFormat = ResponseFormat.Url,
+            ImageResponseFormat responseFormat = ImageResponseFormat.Url,
             Model model = null)
             : base(model, numberOfResults, size, responseFormat, user)
         {

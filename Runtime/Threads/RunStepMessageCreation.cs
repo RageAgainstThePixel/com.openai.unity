@@ -10,7 +10,7 @@ namespace OpenAI.Threads
     {
         [Preserve]
         [JsonConstructor]
-        public RunStepMessageCreation([JsonProperty("message_id")] string messageId)
+        internal RunStepMessageCreation([JsonProperty("message_id")] string messageId)
         {
             MessageId = messageId;
         }
@@ -20,6 +20,14 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("message_id")]
-        public string MessageId { get; }
+        public string MessageId { get; private set; }
+
+        internal void AppendFrom(RunStepMessageCreation other)
+        {
+            if (!string.IsNullOrWhiteSpace(other.MessageId))
+            {
+                MessageId = other.MessageId;
+            }
+        }
     }
 }

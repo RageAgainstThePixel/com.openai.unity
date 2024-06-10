@@ -6,18 +6,21 @@ using UnityEngine.Scripting;
 
 namespace OpenAI.Files
 {
-    public sealed class FileResponse
+    /// <summary>
+    /// The File object represents a document that has been uploaded to OpenAI.
+    /// </summary>
+    [Preserve]
+    public sealed class FileResponse : BaseResponse
     {
         [Preserve]
         [JsonConstructor]
-        public FileResponse(
+        internal FileResponse(
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
             [JsonProperty("bytes")] int? size,
             [JsonProperty("created_at")] int createdUnixTimeSeconds,
             [JsonProperty("filename")] string fileName,
-            [JsonProperty("purpose")] string purpose,
-            [JsonProperty("status")] string status)
+            [JsonProperty("purpose")] string purpose)
         {
             Id = id;
             Object = @object;
@@ -25,21 +28,29 @@ namespace OpenAI.Files
             CreatedUnixTimeSeconds = createdUnixTimeSeconds;
             FileName = fileName;
             Purpose = purpose;
-            Status = status;
         }
 
+        /// <summary>
+        /// The file identifier, which can be referenced in the API endpoints.
+        /// </summary>
         [Preserve]
         [JsonProperty("id")]
         public string Id { get; }
 
-        [Preserve]
-        [JsonProperty("object")]
-        public string Object { get; }
-
+        /// <summary>
+        /// The size of the file, in bytes.
+        /// </summary>
         [Preserve]
         [JsonProperty("bytes")]
         public int? Size { get; }
 
+        [Preserve]
+        [JsonIgnore]
+        public int? Bytes => Size;
+
+        /// <summary>
+        /// The Unix timestamp (in seconds) for when the file was created.
+        /// </summary>
         [Preserve]
         [JsonProperty("created_at")]
         public int CreatedUnixTimeSeconds { get; }
@@ -48,18 +59,32 @@ namespace OpenAI.Files
         [JsonIgnore]
         public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedUnixTimeSeconds).DateTime;
 
+        /// <summary>
+        /// The name of the file.
+        /// </summary>
         [Preserve]
         [JsonProperty("filename")]
         public string FileName { get; }
 
+        /// <summary>
+        /// The object type, which is always 'file'.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("object")]
+        public string Object { get; }
+
+        /// <summary>
+        /// The intended purpose of the file.
+        /// Supported values are 'fine-tune', 'fine-tune-results', 'assistants', and 'assistants_output'.
+        /// </summary>
         [Preserve]
         [JsonProperty("purpose")]
         public string Purpose { get; }
 
         [Preserve]
-        [JsonProperty("status")]
-        public string Status { get; }
-
         public static implicit operator string(FileResponse fileData) => fileData.Id;
+
+        [Preserve]
+        public override string ToString() => Id;
     }
 }

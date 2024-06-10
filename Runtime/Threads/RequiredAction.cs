@@ -10,7 +10,7 @@ namespace OpenAI.Threads
     {
         [Preserve]
         [JsonConstructor]
-        public RequiredAction(
+        internal RequiredAction(
             [JsonProperty("type")] string type,
             [JsonProperty("submit_tool_outputs")] SubmitToolOutputs submitToolOutputs)
         {

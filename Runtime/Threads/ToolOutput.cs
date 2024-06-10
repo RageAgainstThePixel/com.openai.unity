@@ -1,3 +1,5 @@
+// Licensed under the MIT License. See LICENSE in the project root for license information.
+
 using Newtonsoft.Json;
 using UnityEngine.Scripting;
 
@@ -41,5 +43,8 @@ namespace OpenAI.Threads
         [Preserve]
         [JsonProperty("output")]
         public string Output { get; }
+
+        [Preserve]
+        public override string ToString() => Output;
     }
 }
