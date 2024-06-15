@@ -34,8 +34,8 @@ namespace OpenAI
         }
 
         [Preserve]
-        [JsonProperty("index")]
-        public int? Index { get; }
+        [JsonProperty("index", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? Index { get; private set; }
 
         /// <summary>
         /// The data that makes up the text.
@@ -66,6 +66,11 @@ namespace OpenAI
         public void AppendFrom(TextContent other)
         {
             if (other == null) { return; }
+
+            if (other.Index.HasValue)
+            {
+                Index = other.Index.Value;
+            }
 
             if (!string.IsNullOrWhiteSpace(other.Value))
             {

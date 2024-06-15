@@ -42,8 +42,8 @@ namespace OpenAI
         }
 
         [Preserve]
-        [JsonProperty("index")]
-        public int? Index { get; }
+        [JsonProperty("index", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? Index { get; private set; }
 
         /// <summary>
         /// The external URL of the image, must be a supported image types: jpeg, jpg, png, gif, webp.
@@ -65,6 +65,11 @@ namespace OpenAI
         public void AppendFrom(ImageUrl other)
         {
             if (other == null) { return; }
+
+            if (other.Index.HasValue)
+            {
+                Index = other.Index.Value;
+            }
 
             if (!string.IsNullOrWhiteSpace(other.Url))
             {

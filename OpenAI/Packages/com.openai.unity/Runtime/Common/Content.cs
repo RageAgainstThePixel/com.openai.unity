@@ -84,8 +84,8 @@ namespace OpenAI
         }
 
         [Preserve]
-        [JsonProperty("index")]
-        public int? Index { get; }
+        [JsonProperty("index", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? Index { get; private set; }
 
         [Preserve]
         [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Populate)]
@@ -132,6 +132,11 @@ namespace OpenAI
             if (other.Type > 0)
             {
                 Type = other.Type;
+            }
+
+            if (other.Index.HasValue)
+            {
+                Index = other.Index.Value;
             }
 
             if (other.Text is TextContent otherTextContent)

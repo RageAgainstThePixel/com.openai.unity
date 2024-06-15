@@ -20,9 +20,16 @@ namespace OpenAI
         /// There can be a maximum of 20 files associated with the tool.
         /// </param>
         [Preserve]
+        [JsonConstructor]
         public CodeInterpreterResources(IReadOnlyList<string> fileIds)
         {
             FileIds = fileIds;
+        }
+
+        /// <inheritdoc />
+        [Preserve]
+        public CodeInterpreterResources(string fileId) : this(new List<string> { fileId })
+        {
         }
 
         /// <summary>
@@ -32,6 +39,9 @@ namespace OpenAI
         [Preserve]
         [JsonProperty("file_ids")]
         public IReadOnlyList<string> FileIds { get; private set; }
+
+        [Preserve]
+        public static implicit operator CodeInterpreterResources(string fileId) => new(fileId);
 
         [Preserve]
         public static implicit operator CodeInterpreterResources(List<string> fileIds) => new(fileIds);

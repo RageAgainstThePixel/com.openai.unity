@@ -33,8 +33,8 @@ namespace OpenAI.Threads
         }
 
         [Preserve]
-        [JsonProperty("index")]
-        public int? Index { get; }
+        [JsonProperty("index", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? Index { get; private set; }
 
         /// <summary>
         /// The ID of the tool call.
@@ -55,14 +55,14 @@ namespace OpenAI.Threads
         /// The definition of the function that was called.
         /// </summary>
         [Preserve]
-        [JsonProperty("function")]
+        [JsonProperty("function", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public FunctionCall FunctionCall { get; private set; }
 
         /// <summary>
         /// The Code Interpreter tool call definition.
         /// </summary>
         [Preserve]
-        [JsonProperty("code_interpreter")]
+        [JsonProperty("code_interpreter", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public CodeInterpreter CodeInterpreter { get; private set; }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace OpenAI.Threads
         /// For now, this is always going to be an empty object.
         /// </remarks>
         [Preserve]
-        [JsonProperty("file_search")]
+        [JsonProperty("file_search", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyDictionary<string, object> FileSearch { get; private set; }
 
         /// <summary>
@@ -81,6 +81,10 @@ namespace OpenAI.Threads
         [JsonIgnore]
         [Obsolete("Removed")]
         public object Retrieval { get; private set; }
+
+        [Preserve]
+        [JsonIgnore]
+        public bool IsFunction => Type == "function";
 
         public void AppendFrom(ToolCall other)
         {
@@ -92,6 +96,11 @@ namespace OpenAI.Threads
             if (!string.IsNullOrWhiteSpace(other.Id))
             {
                 Id = other.Id;
+            }
+
+            if (other.Index.HasValue)
+            {
+                Index = other.Index;
             }
 
             if (other.FunctionCall != null)

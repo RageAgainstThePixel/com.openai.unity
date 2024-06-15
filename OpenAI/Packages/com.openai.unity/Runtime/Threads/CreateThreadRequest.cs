@@ -38,6 +38,7 @@ namespace OpenAI.Threads
             Metadata = metadata;
         }
 
+        /// <inheritdoc />
         [Preserve]
         public CreateThreadRequest(string message) : this(new[] { new Message(message) })
         {

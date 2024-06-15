@@ -34,7 +34,7 @@ namespace OpenAI.VectorStores
             VectorStoreFileBatchResponse result;
             do
             {
-                await Task.Delay(pollingInterval ?? 500, chainedCts.Token);
+                await Task.Delay(pollingInterval ?? 500, chainedCts.Token).ConfigureAwait(true);
                 cancellationToken.ThrowIfCancellationRequested();
                 result = await vectorStoreFileBatchResponse.UpdateAsync(cancellationToken: chainedCts.Token);
             } while (result.Status is VectorStoreFileStatus.NotStarted or VectorStoreFileStatus.InProgress or VectorStoreFileStatus.Cancelling);

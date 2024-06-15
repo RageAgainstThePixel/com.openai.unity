@@ -53,5 +53,8 @@ namespace OpenAI
 
         [Preserve]
         public static implicit operator ToolResources(CodeInterpreterResources codeInterpreter) => new(codeInterpreter);
+
+        [Preserve]
+        public static implicit operator ToolResources(VectorStoreRequest vectorStoreRequest) => new(new FileSearchResources(vectorStoreRequest));
     }
 }

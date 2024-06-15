@@ -24,8 +24,8 @@ namespace OpenAI.Threads
         }
 
         [Preserve]
-        [JsonProperty("index")]
-        public int? Index { get; }
+        [JsonProperty("index", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? Index { get; private set; }
 
         /// <summary>
         /// Output type. Can be either 'logs' or 'image'.
@@ -45,7 +45,7 @@ namespace OpenAI.Threads
         /// Code interpreter image output.
         /// </summary>
         [Preserve]
-        [JsonProperty("image")]
+        [JsonProperty("image", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public ImageFile Image { get; private set; }
 
         public void AppendFrom(CodeInterpreterOutputs other)
@@ -55,6 +55,11 @@ namespace OpenAI.Threads
             if (Type == 0 && other.Type > 0)
             {
                 Type = other.Type;
+            }
+
+            if (other.Index.HasValue)
+            {
+                Index = other.Index.Value;
             }
 
             if (!string.IsNullOrWhiteSpace(other.Logs))
