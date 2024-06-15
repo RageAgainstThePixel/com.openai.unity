@@ -48,7 +48,11 @@ The recommended installation method is though the unity package manager and [Ope
 
 ---
 
-## Documentation
+## [Documentation](https://rageagainstthepixel.github.io/OpenAI-DotNet)
+
+> Check out our new api docs!
+
+<https://rageagainstthepixel.github.io/OpenAI-DotNet> :new:
 
 ### Table of Contents
 

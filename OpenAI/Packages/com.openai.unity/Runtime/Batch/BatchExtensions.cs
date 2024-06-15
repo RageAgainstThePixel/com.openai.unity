@@ -15,7 +15,7 @@ namespace OpenAI.Batch
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="BatchResponse"/>.</returns>
         public static async Task<BatchResponse> UpdateAsync(this BatchResponse batchResponse, CancellationToken cancellationToken = default)
-            => await batchResponse.Client.BatchEndpoint.RetrieveBatchAsync(batchResponse.Id, cancellationToken).ConfigureAwait(false);
+            => await batchResponse.Client.BatchEndpoint.RetrieveBatchAsync(batchResponse.Id, cancellationToken);
 
         /// <summary>
         /// Waits for <see cref="BatchResponse.Status"/> to change.
@@ -34,9 +34,9 @@ namespace OpenAI.Batch
             BatchResponse result;
             do
             {
-                await Task.Delay(pollingInterval ?? 500, chainedCts.Token).ConfigureAwait(false);
+                await Task.Delay(pollingInterval ?? 500, chainedCts.Token).ConfigureAwait(true);
                 cancellationToken.ThrowIfCancellationRequested();
-                result = await batchResponse.UpdateAsync(cancellationToken: chainedCts.Token).ConfigureAwait(false);
+                result = await batchResponse.UpdateAsync(cancellationToken: chainedCts.Token);
             } while (result.Status is BatchStatus.NotStarted or BatchStatus.InProgress or BatchStatus.Cancelling);
             return result;
         }

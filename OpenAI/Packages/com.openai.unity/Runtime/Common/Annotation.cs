@@ -33,7 +33,7 @@ namespace OpenAI
         }
 
         [Preserve]
-        [JsonProperty("index")]
+        [JsonProperty("index", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? Index { get; private set; }
 
         [Preserve]
@@ -53,14 +53,14 @@ namespace OpenAI
         /// Generated when the assistant uses the 'retrieval' tool to search files.
         /// </summary>
         [Preserve]
-        [JsonProperty("file_citation")]
+        [JsonProperty("file_citation", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public FileCitation FileCitation { get; private set; }
 
         /// <summary>
         /// A URL for the file that's generated when the assistant used the 'code_interpreter' tool to generate a file.
         /// </summary>
         [Preserve]
-        [JsonProperty("file_path")]
+        [JsonProperty("file_path", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public FilePath FilePath { get; private set; }
 
         [Preserve]
@@ -74,6 +74,11 @@ namespace OpenAI
         public void AppendFrom(Annotation other)
         {
             if (other == null) { return; }
+
+            if (other.Index.HasValue)
+            {
+                Index = other.Index.Value;
+            }
 
             if (!string.IsNullOrWhiteSpace(other.Text))
             {

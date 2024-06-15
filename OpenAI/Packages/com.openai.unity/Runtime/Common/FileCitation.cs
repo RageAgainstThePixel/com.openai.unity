@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using UnityEngine.Scripting;
 
 namespace OpenAI
@@ -11,11 +12,9 @@ namespace OpenAI
         [Preserve]
         [JsonConstructor]
         public FileCitation(
-            [JsonProperty("file_id")] string fileId,
-            [JsonProperty("quote")] string quote)
+            [JsonProperty("file_id")] string fileId)
         {
             FileId = fileId;
-            Quote = quote;
         }
 
         /// <summary>
@@ -28,7 +27,7 @@ namespace OpenAI
         /// <summary>
         /// The specific quote in the file.
         /// </summary>
-        [Preserve]
+        [Obsolete("Removed")]
         [JsonProperty("quote")]
         public string Quote { get; }
     }

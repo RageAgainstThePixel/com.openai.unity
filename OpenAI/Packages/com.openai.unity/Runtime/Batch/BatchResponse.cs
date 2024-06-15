@@ -73,7 +73,7 @@ namespace OpenAI.Batch
         public string Endpoint { get; }
 
         /// <summary>
-        /// Errors that occured during the batch job.
+        /// Errors that occurred during the batch job.
         /// </summary>
         [Preserve]
         [JsonProperty("errors")]
@@ -202,6 +202,7 @@ namespace OpenAI.Batch
         [JsonProperty("expired_at")]
         public int? ExpiredAtUnixTimeSeconds { get; }
 
+        [Preserve]
         [JsonIgnore]
         public DateTime? ExpiredAt
             => ExpiredAtUnixTimeSeconds.HasValue
@@ -215,6 +216,7 @@ namespace OpenAI.Batch
         [JsonProperty("cancelled_at")]
         public int? CancelledAtUnixTimeSeconds { get; }
 
+        [Preserve]
         [JsonIgnore]
         public DateTime? CancelledAt
             => CancelledAtUnixTimeSeconds.HasValue
@@ -237,8 +239,10 @@ namespace OpenAI.Batch
         [JsonProperty("metadata")]
         public IReadOnlyDictionary<string, object> Metadata { get; }
 
+        [Preserve]
         public override string ToString() => Id;
 
+        [Preserve]
         public static implicit operator string(BatchResponse response) => response?.ToString();
     }
 }
