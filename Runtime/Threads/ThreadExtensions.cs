@@ -43,6 +43,11 @@ namespace OpenAI.Threads
         /// <returns>True, if the thread was successfully deleted.</returns>
         public static async Task<bool> DeleteAsync(this ThreadResponse thread, bool deleteToolResources = false, CancellationToken cancellationToken = default)
         {
+            if (deleteToolResources)
+            {
+                thread = await thread.UpdateAsync(cancellationToken: cancellationToken);
+            }
+
             var deleteTasks = new List<Task<bool>> { thread.Client.ThreadsEndpoint.DeleteThreadAsync(thread, cancellationToken) };
 
             if (deleteToolResources && thread.ToolResources?.FileSearch?.VectorStoreIds is { Count: > 0 })
@@ -275,7 +280,7 @@ namespace OpenAI.Threads
             RunResponse result;
             do
             {
-                await Task.Delay(pollingInterval ?? 500, chainedCts.Token);
+                await Task.Delay(pollingInterval ?? 500, chainedCts.Token).ConfigureAwait(true);
                 cancellationToken.ThrowIfCancellationRequested();
                 result = await run.UpdateAsync(cancellationToken: chainedCts.Token);
             } while (result.Status is RunStatus.Queued or RunStatus.InProgress or RunStatus.Cancelling);

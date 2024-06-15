@@ -270,13 +270,17 @@ namespace OpenAI
             {
                 var (function, invokeArgs) = ValidateFunctionArguments();
 
+                if (function.MethodInfo.ReturnType == typeof(Task))
+                {
+                    throw new InvalidOperationException("Cannot invoke an async function synchronously. Use InvokeAsync() instead.");
+                }
+
+                var result = InvokeInternal<object>(function, invokeArgs);
                 if (function.MethodInfo.ReturnType == typeof(void))
                 {
-                    function.MethodInfo.Invoke(function.Instance, invokeArgs);
                     return "{\"result\": \"success\"}";
                 }
 
-                var result = Invoke<object>();
                 return JsonConvert.SerializeObject(new { result }, OpenAIClient.JsonSerializationOptions);
             }
             catch (Exception e)
@@ -297,8 +301,13 @@ namespace OpenAI
             try
             {
                 var (function, invokeArgs) = ValidateFunctionArguments();
-                var result = function.MethodInfo.Invoke(function.Instance, invokeArgs);
-                return result == null ? default : (T)result;
+
+                if (function.MethodInfo.ReturnType == typeof(Task))
+                {
+                    throw new InvalidOperationException("Cannot invoke an async function synchronously. Use InvokeAsync() instead.");
+                }
+
+                return InvokeInternal<T>(function, invokeArgs);
             }
             catch (Exception e)
             {
@@ -320,19 +329,13 @@ namespace OpenAI
             try
             {
                 var (function, invokeArgs) = ValidateFunctionArguments(cancellationToken);
+                var result = await InvokeInternalAsync<object>(function, invokeArgs);
 
                 if (function.MethodInfo.ReturnType == typeof(Task))
                 {
-                    if (function.MethodInfo.Invoke(function.Instance, invokeArgs) is not Task task)
-                    {
-                        throw new InvalidOperationException($"The function {Name} did not return a valid Task.");
-                    }
-
-                    await task;
                     return "{\"result\": \"success\"}";
                 }
 
-                var result = await InvokeAsync<object>(cancellationToken);
                 return JsonConvert.SerializeObject(new { result }, OpenAIClient.JsonSerializationOptions);
             }
             catch (Exception e)
@@ -357,22 +360,40 @@ namespace OpenAI
             {
                 var (function, invokeArgs) = ValidateFunctionArguments(cancellationToken);
 
-                if (function.MethodInfo.Invoke(function.Instance, invokeArgs) is not Task task)
+                if (function.MethodInfo.ReturnType == typeof(Task))
                 {
-                    throw new InvalidOperationException($"The function {Name} did not return a valid Task.");
+                    throw new InvalidOperationException("Cannot invoke an async function synchronously. Use InvokeAsync() instead.");
                 }
 
-                await task;
-                // ReSharper disable once InconsistentNaming
-                const string Result = nameof(Result);
-                var resultProperty = task.GetType().GetProperty(Result);
-                return (T)resultProperty?.GetValue(task);
+                return await InvokeInternalAsync<T>(function, invokeArgs);
             }
             catch (Exception e)
             {
                 Debug.LogException(e);
                 throw;
             }
+        }
+
+        private static T InvokeInternal<T>(Function function, object[] invokeArgs)
+        {
+            var result = function.MethodInfo.Invoke(function.Instance, invokeArgs);
+            return result == null ? default : (T)result;
+        }
+
+        private static async Task<T> InvokeInternalAsync<T>(Function function, object[] invokeArgs)
+        {
+            var result = InvokeInternal<T>(function, invokeArgs);
+
+            if (result is not Task task)
+            {
+                return result;
+            }
+
+            await task;
+            // ReSharper disable once InconsistentNaming
+            const string Result = nameof(Result);
+            var resultProperty = task.GetType().GetProperty(Result);
+            return (T)resultProperty?.GetValue(task);
         }
 
         private (Function function, object[] invokeArgs) ValidateFunctionArguments(CancellationToken cancellationToken = default)

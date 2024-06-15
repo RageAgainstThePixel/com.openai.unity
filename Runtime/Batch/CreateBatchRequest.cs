@@ -12,7 +12,7 @@ namespace OpenAI.Batch
         private const string DefaultCompletionWindow = "24h";
 
         /// <summary>
-        /// 
+        /// Constructor.
         /// </summary>
         /// <param name="inputFileId">
         /// The ID of an uploaded file that contains requests for the new batch.

@@ -37,7 +37,7 @@ namespace OpenAI.Threads
             [JsonProperty("content")] List<Content> content,
             [JsonProperty("assistant_id")] string assistantId,
             [JsonProperty("run_id")] string runId,
-            [JsonProperty("Attachments")] IReadOnlyList<Attachment> attachments,
+            [JsonProperty("attachments")] IReadOnlyList<Attachment> attachments,
             [JsonProperty("metadata")] Dictionary<string, string> metadata)
         {
             Id = id;
@@ -176,7 +176,7 @@ namespace OpenAI.Threads
         /// A list of files attached to the message, and the tools they were added to.
         /// </summary>
         [Preserve]
-        [JsonProperty("Attachments")]
+        [JsonProperty("attachments")]
         public IReadOnlyList<Attachment> Attachments { get; private set; }
 
         /// <summary>

@@ -246,7 +246,7 @@ namespace OpenAI.Tests
                 if (!files.IsEmpty)
                 {
                     var deleteTasks = files.Select(file => OpenAIClient.FilesEndpoint.DeleteFileAsync(file)).ToList();
-                    await Task.WhenAll(deleteTasks).ConfigureAwait(false);
+                    await Task.WhenAll(deleteTasks);
                     Assert.IsTrue(deleteTasks.TrueForAll(task => task.Result));
                 }
             }

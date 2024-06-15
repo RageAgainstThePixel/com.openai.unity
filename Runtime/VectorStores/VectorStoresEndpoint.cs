@@ -283,7 +283,7 @@ namespace OpenAI.VectorStores
             {
                 if (result.Status < VectorStoreFileStatus.Cancelling)
                 {
-                    result = await result.WaitForStatusChangeAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                    result = await result.WaitForStatusChangeAsync(cancellationToken: cancellationToken);
                 }
             }
             catch (Exception)
