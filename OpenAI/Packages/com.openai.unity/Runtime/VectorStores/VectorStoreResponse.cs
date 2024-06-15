@@ -105,6 +105,7 @@ namespace OpenAI.VectorStores
         [JsonProperty("expires_at")]
         public int? ExpiresAtUnixTimeSeconds { get; }
 
+        [Preserve]
         [JsonIgnore]
         public DateTimeOffset? ExpiresAt
             => ExpiresAtUnixTimeSeconds.HasValue
@@ -118,6 +119,7 @@ namespace OpenAI.VectorStores
         [JsonProperty("last_active_at")]
         public int? LastActiveAtUnixTimeSeconds { get; }
 
+        [Preserve]
         [JsonIgnore]
         public DateTimeOffset? LastActiveAt
             => LastActiveAtUnixTimeSeconds.HasValue

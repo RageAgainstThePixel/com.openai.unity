@@ -27,6 +27,7 @@ namespace OpenAI.VectorStores
         /// <param name="days">
         /// The number of days after the anchor time that the vector store will expire.
         /// </param>
+        [Preserve]
         public ExpirationPolicy(int days)
         {
             Days = days;

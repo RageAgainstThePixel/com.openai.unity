@@ -51,6 +51,7 @@ namespace OpenAI.VectorStores
         [JsonProperty("created_at")]
         public int CreatedAtUnixTimeSeconds { get; }
 
+        [Preserve]
         [JsonIgnore]
         public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTimeSeconds).DateTime;
 
