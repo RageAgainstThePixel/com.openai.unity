@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Threads
@@ -21,10 +22,20 @@ namespace OpenAI.Threads
 
         [Preserve]
         [JsonProperty("role")]
-        public Role Role { get; private set; }
+        public Role Role { get; internal set; }
 
         [Preserve]
         [JsonProperty("content")]
         public IReadOnlyList<Content> Content { get; }
+
+        /// <summary>
+        /// Formats all of the <see cref="Content"/> items into a single string,
+        /// putting each item on a new line.
+        /// </summary>
+        /// <returns><see cref="string"/> of all <see cref="Content"/>.</returns>
+        public string PrintContent()
+            => Content == null
+                ? string.Empty
+                : string.Join("\n", Content.Select(c => c?.ToString()));
     }
 }

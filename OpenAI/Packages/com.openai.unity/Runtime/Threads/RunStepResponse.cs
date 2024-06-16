@@ -64,15 +64,15 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("id")]
-        public string Id { get; }
+        public string Id { get; private set; }
 
         [Preserve]
         [JsonProperty("object")]
-        public string Object { get; }
+        public string Object { get; private set; }
 
         [Preserve]
         [JsonProperty("delta", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public RunStepDelta Delta { get; }
+        public RunStepDelta Delta { get; private set; }
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the run step was created.
@@ -225,6 +225,20 @@ namespace OpenAI.Threads
         {
             if (other == null) { return; }
 
+            if (!string.IsNullOrWhiteSpace(Id))
+            {
+                if (Id != other.Id)
+                {
+                    throw new InvalidOperationException("Attempting to append a different object than the original!");
+                }
+            }
+            else
+            {
+                Id = other.Id;
+            }
+
+            Object = other.Object;
+
             if (other.Delta != null)
             {
                 if (other.Delta.StepDetails != null)
@@ -239,9 +253,13 @@ namespace OpenAI.Threads
                     }
                 }
 
+                Delta = other.Delta;
+
                 // don't update other fields if we are just appending Delta
                 return;
             }
+
+            Delta = null;
 
             if (other.CreatedAtUnixTimeSeconds.HasValue)
             {
