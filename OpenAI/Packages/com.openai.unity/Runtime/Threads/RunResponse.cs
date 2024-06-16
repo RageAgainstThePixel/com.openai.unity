@@ -85,14 +85,14 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("id")]
-        public string Id { get; }
+        public string Id { get; private set; }
 
         /// <summary>
         /// The object type, which is always run.
         /// </summary>
         [Preserve]
         [JsonProperty("object")]
-        public string Object { get; }
+        public string Object { get; private set; }
 
         /// <summary>
         /// The Unix timestamp (in seconds) for when the thread was created.
@@ -326,7 +326,7 @@ namespace OpenAI.Threads
         /// which indicates the generation exceeded max_tokens or the conversation exceeded the max context length.
         /// </remarks>
         [Preserve]
-        [JsonProperty("response_format")]
+        [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [JsonConverter(typeof(ResponseFormatConverter))]
         public ChatResponseFormat ResponseFormat { get; private set; }
 
@@ -339,6 +339,20 @@ namespace OpenAI.Threads
         internal void AppendFrom(RunResponse other)
         {
             if (other is null) { return; }
+
+            if (!string.IsNullOrWhiteSpace(Id))
+            {
+                if (Id != other.Id)
+                {
+                    throw new InvalidOperationException("Attempting to append a different object than the original!");
+                }
+            }
+            else
+            {
+                Id = other.Id;
+            }
+
+            Object = other.Object;
 
             if (other.Status > 0)
             {
