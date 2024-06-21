@@ -38,7 +38,7 @@ namespace OpenAI.Threads
         /// Text output from the Code Interpreter tool call as part of a run step.
         /// </summary>
         [Preserve]
-        [JsonProperty("logs")]
+        [JsonProperty("logs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Logs { get; private set; }
 
         /// <summary>

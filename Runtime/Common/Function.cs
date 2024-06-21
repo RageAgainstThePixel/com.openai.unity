@@ -161,7 +161,7 @@ namespace OpenAI
         /// The optional description of the function.
         /// </summary>
         [Preserve]
-        [JsonProperty("description")]
+        [JsonProperty("description", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Description { get; private set; }
 
         private string parametersString;
@@ -173,7 +173,7 @@ namespace OpenAI
         /// Describe the parameters that the model should generate in JSON schema format (json-schema.org).
         /// </summary>
         [Preserve]
-        [JsonProperty("parameters")]
+        [JsonProperty("parameters", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public JToken Parameters
         {
             get
@@ -197,7 +197,7 @@ namespace OpenAI
         /// The arguments to use when calling the function.
         /// </summary>
         [Preserve]
-        [JsonProperty("arguments")]
+        [JsonProperty("arguments", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public JToken Arguments
         {
             get
