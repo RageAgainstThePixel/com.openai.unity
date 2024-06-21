@@ -23,7 +23,7 @@ namespace OpenAI.Threads
         /// The input to the Code Interpreter tool call.
         /// </summary>
         [Preserve]
-        [JsonProperty("input")]
+        [JsonProperty("input", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Input { get; private set; }
 
         private List<CodeInterpreterOutputs> outputs;
@@ -34,7 +34,7 @@ namespace OpenAI.Threads
         /// Each of these are represented by a different object type.
         /// </summary>
         [Preserve]
-        [JsonProperty("outputs")]
+        [JsonProperty("outputs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyList<CodeInterpreterOutputs> Outputs => outputs;
 
         internal void AppendFrom(CodeInterpreter other)

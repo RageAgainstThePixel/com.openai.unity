@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using System.Text;
 using UnityEngine.Scripting;
 using Utilities.WebRequestRest.Interfaces;
@@ -24,6 +25,14 @@ namespace OpenAI
             Parameter = parameter;
             Type = type;
             Line = line;
+        }
+
+        [Preserve]
+        internal Error(Exception e)
+        {
+            Type = e.GetType().Name;
+            Message = e.Message;
+            Exception = e;
         }
 
         /// <summary>
@@ -64,6 +73,10 @@ namespace OpenAI
         [Preserve]
         [JsonIgnore]
         public string Object => "error";
+
+        [Preserve]
+        [JsonIgnore]
+        public Exception Exception { get; }
 
         [Preserve]
         public override string ToString()
