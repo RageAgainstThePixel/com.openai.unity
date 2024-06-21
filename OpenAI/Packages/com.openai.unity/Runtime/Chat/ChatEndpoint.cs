@@ -39,7 +39,7 @@ namespace OpenAI.Chat
         /// Created a completion for the chat message and stream the results to the <paramref name="resultHandler"/> as they come in.
         /// </summary>
         /// <param name="chatRequest">The chat request which contains the message content.</param>
-        /// <param name="resultHandler">An action to be called as each new result arrives.</param>
+        /// <param name="resultHandler">An <see cref="Action{ChatResponse}"/> to be invoked as each new result arrives.</param>
         /// <param name="streamUsage">
         /// Optional, If set, an additional chunk will be streamed before the 'data: [DONE]' message.
         /// The 'usage' field on this chunk shows the token usage statistics for the entire request,
@@ -49,12 +49,34 @@ namespace OpenAI.Chat
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="ChatResponse"/>.</returns>
         public async Task<ChatResponse> StreamCompletionAsync(ChatRequest chatRequest, Action<ChatResponse> resultHandler, bool streamUsage = false, CancellationToken cancellationToken = default)
+            => await StreamCompletionAsync(chatRequest, response =>
+            {
+                resultHandler.Invoke(response);
+                return Task.CompletedTask;
+            }, streamUsage, cancellationToken);
+
+        /// <summary>
+        /// Created a completion for the chat message and stream the results to the <paramref name="resultHandler"/> as they come in.
+        /// </summary>
+        /// <param name="chatRequest">The chat request which contains the message content.</param>
+        /// <param name="resultHandler">A <see cref="Func{ChatResponse, Task}"/> to to be invoked as each new result arrives.</param>
+        /// <param name="streamUsage">
+        /// Optional, If set, an additional chunk will be streamed before the 'data: [DONE]' message.
+        /// The 'usage' field on this chunk shows the token usage statistics for the entire request,
+        /// and the 'choices' field will always be an empty array. All other chunks will also include a 'usage' field,
+        /// but with a null value.
+        /// </param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="ChatResponse"/>.</returns>
+        public async Task<ChatResponse> StreamCompletionAsync(ChatRequest chatRequest, Func<ChatResponse, Task> resultHandler, bool streamUsage = false, CancellationToken cancellationToken = default)
         {
+            if (chatRequest == null) { throw new ArgumentNullException(nameof(chatRequest)); }
+            if (resultHandler == null) { throw new ArgumentNullException(nameof(resultHandler)); }
             chatRequest.Stream = true;
             chatRequest.StreamOptions = streamUsage ? new StreamOptions() : null;
             ChatResponse chatResponse = null;
             var payload = JsonConvert.SerializeObject(chatRequest, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl("/completions"), payload, (sseResponse, ssEvent) =>
+            var response = await Rest.PostAsync(GetUrl("/completions"), payload, async (sseResponse, ssEvent) =>
             {
                 try
                 {
@@ -71,7 +93,7 @@ namespace OpenAI.Chat
                         chatResponse.AppendFrom(partialResponse);
                     }
 
-                    resultHandler?.Invoke(partialResponse);
+                    await resultHandler.Invoke(partialResponse);
                 }
                 catch (Exception e)
                 {
@@ -81,7 +103,7 @@ namespace OpenAI.Chat
             response.Validate(EnableDebug);
             if (chatResponse == null) { return null; }
             chatResponse.SetResponseData(response, client);
-            resultHandler?.Invoke(chatResponse);
+            await resultHandler.Invoke(chatResponse);
             return chatResponse;
         }
     }
