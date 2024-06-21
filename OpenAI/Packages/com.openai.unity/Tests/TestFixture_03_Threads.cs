@@ -315,10 +315,6 @@ namespace OpenAI.Tests
                         case Error errorEvent:
                             Assert.NotNull(errorEvent);
                             break;
-                            //default:
-                            // handle event not already processed by library
-                            // var @event = JsonSerializer.Deserialize<T>(streamEvent.ToJsonString());
-                            //break;
                     }
 
                     await Task.CompletedTask;
