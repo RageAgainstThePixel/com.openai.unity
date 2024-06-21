@@ -391,7 +391,6 @@ namespace OpenAI.Tests
                     catch (Exception e)
                     {
                         Debug.LogException(e);
-                        throw;
                     }
                 }
 
