@@ -497,9 +497,9 @@ namespace OpenAI.Tests
             try
             {
                 var run = await assistant.CreateThreadAndRunAsync("I need to solve the equation `3x + 11 = 14`. Can you help me?",
-                    async @event =>
+                    async streamEvent =>
                     {
-                        Debug.Log(@event.ToJsonString());
+                        Debug.Log(streamEvent.ToJsonString());
                         await Task.CompletedTask;
                     });
                 Assert.IsNotNull(run);
