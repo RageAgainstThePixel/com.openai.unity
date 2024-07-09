@@ -183,6 +183,7 @@ namespace OpenAI.Audio
                 case TimestampGranularity.Segment:
                 case TimestampGranularity.Word:
                     form.AddField("timestamp_granularities[]", request.TimestampGranularities.ToString().ToLower());
+                    form.AddField("timestamp_granularities[]", "segment");
                     break;
             }
 
