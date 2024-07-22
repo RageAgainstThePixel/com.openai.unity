@@ -98,7 +98,20 @@ namespace OpenAI.Models
         public string Parent { get; }
 
         /// <summary>
-        /// GPT-4o (�o� for �omni�) is our most advanced model.
+        /// GPT-4o mini (“o” for “omni”) is our most advanced model in the small models category,
+        /// and our cheapest model yet. 
+        /// It is multimodal (accepting text or image inputs and outputting text),
+        /// has higher intelligence than gpt-3.5-turbo but is just as fast.
+        /// It is meant to be used for smaller tasks, including vision tasks.
+        /// We recommend choosing gpt-4o-mini where you would have previously used gpt-3.5-turbo as this model is more capable and cheaper.
+        /// </summary>
+        /// <remarks>
+        /// Context Window: 128,000 tokens
+        /// </remarks>
+        public static Model GPT4o_Mini { get; } = new("gpt-4o-mini", "openai");
+
+        /// <summary>
+        /// GPT-4o (“o” for “omni”) is our most advanced model.
         /// It is multimodal (accepting text or image inputs and outputting text),
         /// and it has the same high intelligence as GPT-4 Turbo but is much more efficient.
         /// It generates text 2x faster and is 50% cheaper.
