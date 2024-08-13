@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,14 @@ namespace OpenAI
         {
             Function = function;
             Type = nameof(function);
+        }
+
+        [Preserve]
+        public Tool(string toolCallId, string functionName, JToken functionArguments)
+        {
+            Function = new Function(functionName, arguments: functionArguments);
+            Type = "function";
+            Id = toolCallId;
         }
 
         [Preserve]
