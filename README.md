@@ -10,8 +10,6 @@ An OpenAI API account is required.
 
 ***All copyrights, trademarks, logos, and assets are the property of their respective owners.***
 
-> This repository is available to transfer to the OpenAI organization if they so choose to accept it.
-
 ## Installing
 
 Requires Unity 2021.3 LTS or higher.
