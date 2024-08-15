@@ -80,6 +80,13 @@ namespace OpenAI
         }
 
         [Preserve]
+        internal Function(string name, JToken arguments)
+        {
+            Name = name;
+            Arguments = arguments;
+        }
+
+        [Preserve]
         private Function(string name, string description, MethodInfo method, object instance = null)
         {
             if (!Regex.IsMatch(name, NameRegex))
