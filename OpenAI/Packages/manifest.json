@@ -3,7 +3,8 @@
     "com.unity.ide.rider": "3.0.31",
     "com.unity.ide.visualstudio": "2.0.22",
     "com.unity.textmeshpro": "3.0.9",
-    "com.utilities.buildpipeline": "1.4.0"
+    "com.unity.ugui": "1.0.0",
+    "com.utilities.buildpipeline": "1.4.1"
   },
   "scopedRegistries": [
     {
