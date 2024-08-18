@@ -1,10 +1,8 @@
 name: upm-subtree-split
-
 on:
   push:
     branches:
     - main
-
 jobs:
   upm-subtree-split:
     runs-on: ubuntu-latest
@@ -12,5 +10,4 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-
     - uses: RageAgainstThePixel/upm-subtree-split@v1.1

@@ -1,0 +1,63 @@
+name: Unity Build And Test
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Every Sunday at midnight
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - '*'
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  checks: write
+  pull-requests: write
+jobs:
+  build:
+    env:
+      UNITY_PROJECT_PATH: ''
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-13]
+        unity-versions:
+          - 2021.3.42f1 (f1197811e8ce)
+          - 2022.3.40f1 (cbdda657d2f0)
+          - 6000.0.13f1 (53a692e3fca9)
+        include:
+          - os: ubuntu-latest
+            build-target: StandaloneLinux64
+          - os: windows-latest
+            build-target: StandaloneWindows64
+          - os: macos-13
+            build-target: StandaloneOSX
+    steps:
+      - uses: actions/checkout@v4
+      - uses: RageAgainstThePixel/unity-setup@v1
+        with:
+          unity-version: ${{ matrix.unity-versions }}
+          build-targets: ${{ matrix.build-target }}
+      - uses: RageAgainstThePixel/activate-unity-license@v1
+        with:
+          license: 'Personal'
+          username: ${{ secrets.UNITY_USERNAME }}
+          password: ${{ secrets.UNITY_PASSWORD }}
+      - uses: RageAgainstThePixel/unity-action@v1
+        name: '${{ matrix.build-target }}-Validate'
+        with:
+          log-name: '${{ matrix.build-target }}-Validate'
+          args: '-quit -nographics -batchmode -executeMethod Utilities.Editor.BuildPipeline.UnityPlayerBuildTools.ValidateProject -importTMProEssentialsAsset'
+      - uses: RageAgainstThePixel/unity-action@v1
+        name: '${{ matrix.build-target }}-Build'
+        with:
+          log-name: '${{ matrix.build-target }}-Build'
+          args: '-quit -nographics -batchmode -executeMethod Utilities.Editor.BuildPipeline.UnityPlayerBuildTools.StartCommandLineBuild'
+      - uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: ${{ matrix.unity-versions }} ${{ matrix.build-target }}-Build
+          path: '${{ github.workspace }}/**/*.log'
