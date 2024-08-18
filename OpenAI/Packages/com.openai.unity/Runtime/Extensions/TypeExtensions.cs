@@ -11,14 +11,9 @@ namespace OpenAI.Extensions
 {
     internal static class TypeExtensions
     {
-        public static JObject GenerateJsonSchema(this MethodInfo methodInfo)
+        public static JObject GenerateJsonSchema(this MethodInfo methodInfo, JsonSerializer serializer = null)
         {
             var parameters = methodInfo.GetParameters();
-
-            if (parameters.Length == 0)
-            {
-                return null;
-            }
 
             var schema = new JObject
             {
@@ -29,10 +24,7 @@ namespace OpenAI.Extensions
 
             foreach (var parameter in parameters)
             {
-                if (parameter.ParameterType == typeof(CancellationToken))
-                {
-                    continue;
-                }
+                if (parameter.ParameterType == typeof(CancellationToken)) { continue; }
 
                 if (string.IsNullOrWhiteSpace(parameter.Name))
                 {
@@ -44,7 +36,7 @@ namespace OpenAI.Extensions
                     requiredParameters.Add(parameter.Name);
                 }
 
-                schema["properties"]![parameter.Name] = GenerateJsonSchema(parameter.ParameterType, schema);
+                schema["properties"]![parameter.Name] = GenerateJsonSchema(parameter.ParameterType, schema, serializer);
 
                 var functionParameterAttribute = parameter.GetCustomAttribute<FunctionParameterAttribute>();
 
@@ -59,11 +51,13 @@ namespace OpenAI.Extensions
                 schema["required"] = requiredParameters;
             }
 
+            schema["additionalProperties"] = false;
             return schema;
         }
 
-        public static JObject GenerateJsonSchema(this Type type, JObject rootSchema)
+        public static JObject GenerateJsonSchema(this Type type, JObject rootSchema, JsonSerializer serializer = null)
         {
+            serializer ??= OpenAIClient.JsonSerializer;
             var schema = new JObject();
 
             if (!type.IsPrimitive &&
@@ -118,7 +112,7 @@ namespace OpenAI.Extensions
 
                 foreach (var value in Enum.GetValues(type))
                 {
-                    ((JArray)schema["enum"]).Add(JToken.FromObject(value, OpenAIClient.JsonSerializer));
+                    ((JArray)schema["enum"]).Add(JToken.FromObject(value, serializer));
                 }
             }
             else if (type.IsArray || (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>)))
@@ -127,7 +121,7 @@ namespace OpenAI.Extensions
                 var elementType = type.GetElementType() ?? type.GetGenericArguments()[0];
 
                 if (rootSchema["definitions"] != null &&
-                         ((JObject)rootSchema["definitions"]).ContainsKey(elementType.FullName))
+                         ((JObject)rootSchema["definitions"]).ContainsKey(elementType.FullName!))
                 {
                     schema["items"] = new JObject { ["$ref"] = $"#/definitions/{elementType.FullName}" };
                 }
@@ -140,7 +134,7 @@ namespace OpenAI.Extensions
             {
                 schema["type"] = "object";
                 rootSchema["definitions"] ??= new JObject();
-                rootSchema["definitions"][type.FullName] = new JObject();
+                rootSchema["definitions"][type.FullName!] = new JObject();
 
                 var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
                 var fields = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
@@ -187,7 +181,7 @@ namespace OpenAI.Extensions
 
                         if (functionPropertyAttribute.DefaultValue != null)
                         {
-                            defaultValue = JToken.FromObject(functionPropertyAttribute.DefaultValue, OpenAIClient.JsonSerializer);
+                            defaultValue = JToken.FromObject(functionPropertyAttribute.DefaultValue, serializer);
                             propertyInfo["default"] = defaultValue;
                         }
 
@@ -197,7 +191,7 @@ namespace OpenAI.Extensions
 
                             foreach (var value in functionPropertyAttribute.PossibleValues)
                             {
-                                var @enum = JToken.FromObject(value, OpenAIClient.JsonSerializer);
+                                var @enum = JToken.FromObject(value, serializer);
 
                                 if (defaultValue == null)
                                 {
@@ -253,6 +247,7 @@ namespace OpenAI.Extensions
                     schema["required"] = requiredMembers;
                 }
 
+                schema["additionalProperties"] = false;
                 rootSchema["definitions"] ??= new JObject();
                 rootSchema["definitions"][type.FullName] = schema;
                 return new JObject { ["$ref"] = $"#/definitions/{type.FullName}" };
