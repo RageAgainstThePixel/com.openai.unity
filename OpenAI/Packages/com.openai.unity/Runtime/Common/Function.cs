@@ -6,6 +6,7 @@ using OpenAI.Extensions;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -40,8 +41,14 @@ namespace OpenAI
         /// <param name="parameters">
         /// An optional JSON object describing the parameters of the function that the model can generate.
         /// </param>
+        /// <param name="strict">
+        /// Whether to enable strict schema adherence when generating the function call.
+        /// If set to true, the model will follow the exact schema defined in the parameters field.
+        /// Only a subset of JSON Schema is supported when strict is true. Learn more about Structured Outputs in the function calling guide.<br/>
+        /// <see href="https://platform.openai.com/docs/api-reference/assistants/docs/guides/function-calling"/>
+        /// </param>
         [Preserve]
-        public Function(string name, string description = null, JToken parameters = null)
+        public Function(string name, string description = null, JToken parameters = null, bool? strict = null)
         {
             if (!Regex.IsMatch(name, NameRegex))
             {
@@ -51,6 +58,7 @@ namespace OpenAI
             Name = name;
             Description = description;
             Parameters = parameters;
+            Strict = strict;
         }
 
         /// <summary>
@@ -66,8 +74,14 @@ namespace OpenAI
         /// <param name="parameters">
         /// An optional JSON describing the parameters of the function that the model can generate.
         /// </param>
+        /// <param name="strict">
+        /// Whether to enable strict schema adherence when generating the function call.
+        /// If set to true, the model will follow the exact schema defined in the parameters field.
+        /// Only a subset of JSON Schema is supported when strict is true. Learn more about Structured Outputs in the function calling guide.<br/>
+        /// <see href="https://platform.openai.com/docs/api-reference/assistants/docs/guides/function-calling"/>
+        /// </param>
         [Preserve]
-        public Function(string name, string description, string parameters)
+        public Function(string name, string description, string parameters, bool? strict = null)
         {
             if (!Regex.IsMatch(name, NameRegex))
             {
@@ -77,17 +91,19 @@ namespace OpenAI
             Name = name;
             Description = description;
             Parameters = new JObject(parameters);
+            Strict = strict;
         }
 
         [Preserve]
-        internal Function(string name, JToken arguments)
+        internal Function(string name, JToken arguments, bool? strict = null)
         {
             Name = name;
             Arguments = arguments;
+            Strict = strict;
         }
 
         [Preserve]
-        private Function(string name, string description, MethodInfo method, object instance = null)
+        private Function(string name, string description, MethodInfo method, object instance = null, bool? strict = null)
         {
             if (!Regex.IsMatch(name, NameRegex))
             {
@@ -104,51 +120,52 @@ namespace OpenAI
             MethodInfo = method;
             Parameters = method.GenerateJsonSchema();
             Instance = instance;
+            Strict = strict;
             functionCache[Name] = this;
         }
 
-        internal static Function GetOrCreateFunction(string name, string description, MethodInfo method, object instance = null)
+        internal static Function GetOrCreateFunction(string name, string description, MethodInfo method, object instance = null, bool? strict = null)
             => functionCache.TryGetValue(name, out var function)
                 ? function
-                : new Function(name, description, method, instance);
+                : new Function(name, description, method, instance, strict);
 
         #region Func<,> Overloads
 
-        public static Function FromFunc<TResult>(string name, Func<TResult> function, string description = null)
-            => GetOrCreateFunction(name, description, function.Method, function.Target);
+        public static Function FromFunc<TResult>(string name, Func<TResult> function, string description = null, bool? strict = null)
+            => GetOrCreateFunction(name, description, function.Method, function.Target, strict);
 
-        public static Function FromFunc<T1, TResult>(string name, Func<T1, TResult> function, string description = null)
-            => GetOrCreateFunction(name, description, function.Method, function.Target);
+        public static Function FromFunc<T1, TResult>(string name, Func<T1, TResult> function, string description = null, bool? strict = null)
+            => GetOrCreateFunction(name, description, function.Method, function.Target, strict);
 
-        public static Function FromFunc<T1, T2, TResult>(string name, Func<T1, T2, TResult> function, string description = null)
-            => GetOrCreateFunction(name, description, function.Method, function.Target);
+        public static Function FromFunc<T1, T2, TResult>(string name, Func<T1, T2, TResult> function, string description = null, bool? strict = null)
+            => GetOrCreateFunction(name, description, function.Method, function.Target, strict);
 
-        public static Function FromFunc<T1, T2, T3, TResult>(string name, Func<T1, T2, T3, TResult> function, string description = null)
-            => GetOrCreateFunction(name, description, function.Method, function.Target);
+        public static Function FromFunc<T1, T2, T3, TResult>(string name, Func<T1, T2, T3, TResult> function, string description = null, bool? strict = null)
+            => GetOrCreateFunction(name, description, function.Method, function.Target, strict);
 
-        public static Function FromFunc<T1, T2, T3, T4, TResult>(string name, Func<T1, T2, T3, T4, TResult> function, string description = null)
-            => GetOrCreateFunction(name, description, function.Method, function.Target);
+        public static Function FromFunc<T1, T2, T3, T4, TResult>(string name, Func<T1, T2, T3, T4, TResult> function, string description = null, bool? strict = null)
+            => GetOrCreateFunction(name, description, function.Method, function.Target, strict);
 
-        public static Function FromFunc<T1, T2, T3, T4, T5, TResult>(string name, Func<T1, T2, T3, T4, T5, TResult> function, string description = null)
-            => GetOrCreateFunction(name, description, function.Method, function.Target);
+        public static Function FromFunc<T1, T2, T3, T4, T5, TResult>(string name, Func<T1, T2, T3, T4, T5, TResult> function, string description = null, bool? strict = null)
+            => GetOrCreateFunction(name, description, function.Method, function.Target, strict);
 
-        public static Function FromFunc<T1, T2, T3, T4, T5, T6, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, TResult> function, string description = null)
-            => GetOrCreateFunction(name, description, function.Method, function.Target);
+        public static Function FromFunc<T1, T2, T3, T4, T5, T6, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, TResult> function, string description = null, bool? strict = null)
+            => GetOrCreateFunction(name, description, function.Method, function.Target, strict);
 
-        public static Function FromFunc<T1, T2, T3, T4, T5, T6, T7, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, TResult> function, string description = null)
-            => GetOrCreateFunction(name, description, function.Method, function.Target);
+        public static Function FromFunc<T1, T2, T3, T4, T5, T6, T7, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, TResult> function, string description = null, bool? strict = null)
+            => GetOrCreateFunction(name, description, function.Method, function.Target, strict);
 
-        public static Function FromFunc<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> function, string description = null)
-            => GetOrCreateFunction(name, description, function.Method, function.Target);
+        public static Function FromFunc<T1, T2, T3, T4, T5, T6, T7, T8, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, TResult> function, string description = null, bool? strict = null)
+            => GetOrCreateFunction(name, description, function.Method, function.Target, strict);
 
-        public static Function FromFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> function, string description = null)
-            => GetOrCreateFunction(name, description, function.Method, function.Target);
+        public static Function FromFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, TResult> function, string description = null, bool? strict = null)
+            => GetOrCreateFunction(name, description, function.Method, function.Target, strict);
 
-        public static Function FromFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> function, string description = null)
-            => GetOrCreateFunction(name, description, function.Method, function.Target);
+        public static Function FromFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, TResult> function, string description = null, bool? strict = null)
+            => GetOrCreateFunction(name, description, function.Method, function.Target, strict);
 
-        public static Function FromFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> function, string description = null)
-            => GetOrCreateFunction(name, description, function.Method, function.Target);
+        public static Function FromFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult>(string name, Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, TResult> function, string description = null, bool? strict = null)
+            => GetOrCreateFunction(name, description, function.Method, function.Target, strict);
 
         #endregion Func<,> Overloads
 
@@ -219,6 +236,17 @@ namespace OpenAI
             }
             internal set => arguments = value;
         }
+
+        /// <summary>
+        /// Whether to enable strict schema adherence when generating the function call.
+        /// If set to true, the model will follow the exact schema defined in the parameters field.
+        /// </summary>
+        /// <remarks>
+        /// Only a subset of JSON Schema is supported when strict is true.
+        /// </remarks>
+        [Preserve]
+        [JsonProperty("strict", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public bool? Strict { get; private set; }
 
         /// <summary>
         /// The instance of the object to invoke the method on.
@@ -405,7 +433,7 @@ namespace OpenAI
 
         private (Function function, object[] invokeArgs) ValidateFunctionArguments(CancellationToken cancellationToken = default)
         {
-            if (Parameters is { HasValues: true } && Arguments == null)
+            if (Parameters?["properties"] is { HasValues: true } && Arguments == null)
             {
                 throw new ArgumentException($"Function {Name} has parameters but no arguments are set.");
             }

@@ -49,7 +49,7 @@ namespace OpenAI.Threads
             [JsonProperty("truncation_strategy")] TruncationStrategy truncationStrategy,
             [JsonProperty("tool_choice")] object toolChoice,
             [JsonProperty("parallel_tool_calls")] bool parallelToolCalls,
-            [JsonProperty("response_format")][JsonConverter(typeof(ResponseFormatConverter))] ChatResponseFormat responseFormat)
+            [JsonProperty("response_format")] ResponseFormatObject responseFormat)
         {
             Id = id;
             Object = @object;
@@ -77,7 +77,7 @@ namespace OpenAI.Threads
             TruncationStrategy = truncationStrategy;
             ToolChoice = toolChoice;
             ParallelToolCalls = parallelToolCalls;
-            ResponseFormat = responseFormat;
+            ResponseFormatObject = responseFormat;
         }
 
         /// <summary>
@@ -315,7 +315,7 @@ namespace OpenAI.Threads
 
         /// <summary>
         /// Specifies the format that the model must output.
-        /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
+        /// Setting to <see cref="ChatResponseFormat.Json"/> or <see cref="ChatResponseFormat.JsonSchema"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.
         /// </summary>
         /// <remarks>
@@ -327,8 +327,10 @@ namespace OpenAI.Threads
         /// </remarks>
         [Preserve]
         [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        [JsonConverter(typeof(ResponseFormatConverter))]
-        public ChatResponseFormat ResponseFormat { get; private set; }
+        public ResponseFormatObject ResponseFormatObject { get; private set; }
+
+        [JsonIgnore]
+        public ChatResponseFormat ResponseFormat => ResponseFormatObject ?? ChatResponseFormat.Auto;
 
         [Preserve]
         public static implicit operator string(RunResponse run) => run?.ToString();
@@ -340,7 +342,7 @@ namespace OpenAI.Threads
         {
             if (other is null) { return; }
 
-            if (!string.IsNullOrWhiteSpace(Id))
+            if (!string.IsNullOrWhiteSpace(Id) && !string.IsNullOrWhiteSpace(other.Id))
             {
                 if (Id != other.Id)
                 {
@@ -446,7 +448,11 @@ namespace OpenAI.Threads
             }
 
             ParallelToolCalls = other.ParallelToolCalls;
-            ResponseFormat = other.ResponseFormat;
+
+            if (other.ResponseFormatObject != null)
+            {
+                ResponseFormatObject = other.ResponseFormatObject;
+            }
         }
     }
 }
