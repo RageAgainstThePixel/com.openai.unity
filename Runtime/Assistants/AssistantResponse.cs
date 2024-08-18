@@ -1,7 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Scripting;
@@ -29,7 +28,7 @@ namespace OpenAI.Assistants
             [JsonProperty("metadata")] Dictionary<string, string> metadata,
             [JsonProperty("temperature")] double temperature,
             [JsonProperty("top_p")] double topP,
-            [JsonProperty("response_format")][JsonConverter(typeof(ResponseFormatConverter))] ChatResponseFormat responseFormat)
+            [JsonProperty("response_format")] ResponseFormatObject responseFormat)
         {
             Id = id;
             Object = @object;
@@ -43,7 +42,7 @@ namespace OpenAI.Assistants
             Metadata = metadata;
             Temperature = temperature;
             TopP = topP;
-            ResponseFormat = responseFormat;
+            ResponseFormatObject = responseFormat;
         }
 
         /// <summary>
@@ -173,8 +172,10 @@ namespace OpenAI.Assistants
         /// </remarks>
         [Preserve]
         [JsonProperty("response_format")]
-        [JsonConverter(typeof(ResponseFormatConverter))]
-        public ChatResponseFormat ResponseFormat { get; }
+        public ResponseFormatObject ResponseFormatObject { get; }
+
+        [JsonIgnore]
+        public ChatResponseFormat ResponseFormat => ResponseFormatObject ?? ChatResponseFormat.Auto;
 
         [Preserve]
         public static implicit operator string(AssistantResponse assistant) => assistant?.Id;

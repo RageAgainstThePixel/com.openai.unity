@@ -21,6 +21,8 @@ namespace OpenAI.Chat
         /// <inheritdoc />
         protected override string Root => "chat";
 
+        protected override bool? IsAzureDeployment => true;
+
         /// <summary>
         /// Creates a completion for the chat message.
         /// </summary>
