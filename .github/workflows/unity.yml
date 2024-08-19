@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ ( github.event_name == 'pull_request' || github.event.action == 'synchronize' ) }}
 permissions:
   checks: write
   pull-requests: write
@@ -24,10 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13]
-        unity-versions:
-          - 2021.3.42f1 (f1197811e8ce)
-          - 2022.3.40f1 (cbdda657d2f0)
-          - 6000.0.13f1 (53a692e3fca9)
+        unity-versions: [2020.x, 2021.x, 2022.x, 6000.x]
         include:
           - os: ubuntu-latest
             build-target: StandaloneLinux64
@@ -59,5 +56,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
-          name: ${{ matrix.unity-versions }} ${{ matrix.build-target }}-Build
+          name: '${{ github.run_number }}.${{ github.run_attempt }}-${{ matrix.os }}-${{ matrix.unity-versions }}-${{ matrix.build-target }}-Artifacts'
           path: '${{ github.workspace }}/**/*.log'
