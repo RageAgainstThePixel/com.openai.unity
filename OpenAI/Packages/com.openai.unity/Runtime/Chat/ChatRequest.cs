@@ -287,7 +287,7 @@ namespace OpenAI.Chat
         /// </remarks>
         [Preserve]
         [JsonProperty("response_format")]
-        public ResponseFormatObject ResponseFormatObject { get; }
+        public ResponseFormatObject ResponseFormatObject { get; internal set; }
 
         [JsonIgnore]
         public ChatResponseFormat ResponseFormat => ResponseFormatObject ?? ChatResponseFormat.Auto;

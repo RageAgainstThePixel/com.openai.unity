@@ -13,14 +13,14 @@ namespace OpenAI.Extensions
     {
         public static JObject GenerateJsonSchema(this MethodInfo methodInfo, JsonSerializer serializer = null)
         {
-            var parameters = methodInfo.GetParameters();
-
             var schema = new JObject
             {
                 ["type"] = "object",
                 ["properties"] = new JObject()
             };
+
             var requiredParameters = new JArray();
+            var parameters = methodInfo.GetParameters();
 
             foreach (var parameter in parameters)
             {
@@ -49,6 +49,34 @@ namespace OpenAI.Extensions
             if (requiredParameters.Count > 0)
             {
                 schema["required"] = requiredParameters;
+            }
+
+            schema["additionalProperties"] = false;
+            return schema;
+        }
+
+        public static JObject GenerateJsonSchema(this Type type, JsonSerializer serializer = null)
+        {
+            var schema = new JObject
+            {
+                ["type"] = "object",
+                ["properties"] = new JObject()
+            };
+
+            var requiredProperties = new JArray();
+            var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+            foreach (var property in properties)
+            {
+                var propertyNameAttribute = property.GetCustomAttribute<JsonPropertyAttribute>();
+                var propertyName = propertyNameAttribute?.PropertyName ?? property.Name;
+                requiredProperties.Add(propertyName);
+                schema["properties"]![propertyName] = GenerateJsonSchema(property.PropertyType, schema, serializer);
+            }
+
+            if (requiredProperties.Count > 0)
+            {
+                schema["required"] = requiredProperties;
             }
 
             schema["additionalProperties"] = false;
@@ -115,7 +143,9 @@ namespace OpenAI.Extensions
                     ((JArray)schema["enum"]).Add(JToken.FromObject(value, serializer));
                 }
             }
-            else if (type.IsArray || (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>)))
+            else if (type.IsArray ||
+                     type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(List<>) ||
+                                            type.GetGenericTypeDefinition() == typeof(IReadOnlyList<>)))
             {
                 schema["type"] = "array";
                 var elementType = type.GetElementType() ?? type.GetGenericArguments()[0];
@@ -158,7 +188,7 @@ namespace OpenAI.Extensions
                     JObject propertyInfo;
 
                     if (rootSchema["definitions"] != null &&
-                            ((JObject)rootSchema["definitions"]).ContainsKey(memberType.FullName))
+                            ((JObject)rootSchema["definitions"]).ContainsKey(memberType.FullName!))
                     {
                         propertyInfo = new JObject { ["$ref"] = $"#/definitions/{memberType.FullName}" };
                     }
@@ -218,11 +248,11 @@ namespace OpenAI.Extensions
                     {
                         switch (jsonPropertyAttribute.Required)
                         {
+                            case Required.Default:
                             case Required.Always:
                             case Required.AllowNull:
                                 requiredMembers.Add(propertyName);
                                 break;
-                            case Required.Default:
                             case Required.DisallowNull:
                             default:
                                 requiredMembers.Remove(propertyName);
