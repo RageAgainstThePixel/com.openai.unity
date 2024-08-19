@@ -113,7 +113,7 @@ The recommended installation method is though the unity package manager and [Ope
   - [Streaming](#chat-streaming)
   - [Tools](#chat-tools)
   - [Vision](#chat-vision)
-  - [Json Schema](#chat-json-schema) :new:
+  - [Structured Outputs](#chat-structured-outputs) :new:
   - [Json Mode](#chat-json-mode)
 - [Audio](#audio)
   - [Create Speech](#create-speech)
@@ -814,62 +814,86 @@ Structured Outputs is the evolution of JSON mode. While both ensure valid JSON i
 > - When using JSON mode, always instruct the model to produce JSON via some message in the conversation, for example via your system message. If you don't include an explicit instruction to generate JSON, the model may generate an unending stream of whitespace and the request may run continually until it reaches the token limit. To help ensure you don't forget, the API will throw an error if the string "JSON" does not appear somewhere in the context.
 > - The JSON in the message the model returns may be partial (i.e. cut off) if `finish_reason` is length, which indicates the generation exceeded max_tokens or the conversation exceeded the token limit. To guard against this, check `finish_reason` before parsing the response.
 
+First define the structure of your responses. These will be used as your schema.
+These are the objects you'll deserialize to, so be sure to use standard Json object models.
+
 ```csharp
-var mathSchema = new JsonSchema("math_response", @"
+public class MathResponse
 {
-  ""type"": ""object"",
-  ""properties"": {
-    ""steps"": {
-      ""type"": ""array"",
-      ""items"": {
-        ""type"": ""object"",
-        ""properties"": {
-          ""explanation"": {
-            ""type"": ""string""
-          },
-          ""output"": {
-            ""type"": ""string""
-          }
-        },
-        ""required"": [
-          ""explanation"",
-          ""output""
-        ],
-        ""additionalProperties"": false
-      }
-    },
-    ""final_answer"": {
-      ""type"": ""string""
-    }
-  },
-  ""required"": [
-    ""steps"",
-    ""final_answer""
-  ],
-  ""additionalProperties"": false
-}");
-var assistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(
+    [JsonProperty("steps")]
+    public IReadOnlyList<MathStep> Steps { get; private set; }
+
+    [JsonProperty("final_answer")]
+    public string FinalAnswer { get; private set; }
+}
+
+public class MathStep
+{
+    [JsonProperty("explanation")]
+    public string Explanation { get; private set; }
+
+    [JsonProperty("output")]
+    public string Output { get; private set; }
+}
+```
+
+To use, simply specify the `MathResponse` type as a generic constraint in either `CreateAssistantAsync`, `CreateRunAsync`, or `CreateThreadAndRunAsync`.
+
+```csharp
+var assistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync<MathResponse>(
     new CreateAssistantRequest(
         name: "Math Tutor",
         instructions: "You are a helpful math tutor. Guide the user through the solution step by step.",
-        model: "gpt-4o-2024-08-06",
-        jsonSchema: mathSchema));
+        model: "gpt-4o-2024-08-06"));
 ThreadResponse thread = null;
 
 try
 {
-    var run = await assistant.CreateThreadAndRunAsync("how can I solve 8x + 7 = -23",
-        async @event =>
+    async Task StreamEventHandler(IServerSentEvent @event)
+    {
+        try
         {
-            Debug.Log(@event.ToJsonString());
-            await Task.CompletedTask;
-        });
+            switch (@event)
+            {
+                case MessageResponse message:
+                    if (message.Status != MessageStatus.Completed)
+                    {
+                        Debug.Log(@event.ToJsonString());
+                        break;
+                    }
+
+                    var mathResponse = message.FromSchema<MathResponse>();
+
+                    for (var i = 0; i < mathResponse.Steps.Count; i++)
+                    {
+                        var step = mathResponse.Steps[i];
+                        Debug.Log($"Step {i}: {step.Explanation}");
+                        Debug.Log($"Result: {step.Output}");
+                    }
+
+                    Debug.Log($"Final Answer: {mathResponse.FinalAnswer}");
+                    break;
+                default:
+                    Debug.Log(@event.ToJsonString());
+                    break;
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+            throw;
+        }
+
+        await Task.CompletedTask;
+    }
+
+    var run = await assistant.CreateThreadAndRunAsync("how can I solve 8x + 7 = -23", StreamEventHandler);
     thread = await run.GetThreadAsync();
     run = await run.WaitForStatusChangeAsync();
     Debug.Log($"Created thread and run: {run.ThreadId} -> {run.Id} -> {run.CreatedAt}");
     var messages = await thread.ListMessagesAsync();
 
-    foreach (var response in messages.Items)
+    foreach (var response in messages.Items.OrderBy(response => response.CreatedAt))
     {
         Debug.Log($"{response.Role}: {response.PrintContent()}");
     }
@@ -881,7 +905,6 @@ finally
     if (thread != null)
     {
         var isDeleted = await thread.DeleteAsync(deleteToolResources: true);
-        Assert.IsTrue(isDeleted);
     }
 }
 ```
@@ -1251,7 +1274,7 @@ var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
 Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice} | Finish Reason: {result.FirstChoice.FinishDetails}");
 ```
 
-#### [Chat Json Schema](https://platform.openai.com/docs/guides/structured-outputs)
+#### [Chat Structured Outputs](https://platform.openai.com/docs/guides/structured-outputs)
 
 The evolution of  [Json Mode](#chat-json-mode). While both ensure valid JSON is produced, only Structured Outputs ensure schema adherence.
 
@@ -1260,6 +1283,35 @@ The evolution of  [Json Mode](#chat-json-mode). While both ensure valid JSON is 
 > - When using JSON mode, always instruct the model to produce JSON via some message in the conversation, for example via your system message. If you don't include an explicit instruction to generate JSON, the model may generate an unending stream of whitespace and the request may run continually until it reaches the token limit. To help ensure you don't forget, the API will throw an error if the string "JSON" does not appear somewhere in the context.
 > - The JSON in the message the model returns may be partial (i.e. cut off) if `finish_reason` is length, which indicates the generation exceeded max_tokens or the conversation exceeded the token limit. To guard against this, check `finish_reason` before parsing the response.
 
+First define the structure of your responses. These will be used as your schema.
+These are the objects you'll deserialize to, so be sure to use standard Json object models.
+
+```csharp
+public class MathResponse
+{
+    [JsonInclude]
+    [JsonPropertyName("steps")]
+    public IReadOnlyList<MathStep> Steps { get; private set; }
+
+    [JsonInclude]
+    [JsonPropertyName("final_answer")]
+    public string FinalAnswer { get; private set; }
+}
+
+public class MathStep
+{
+    [JsonInclude]
+    [JsonPropertyName("explanation")]
+    public string Explanation { get; private set; }
+
+    [JsonInclude]
+    [JsonPropertyName("output")]
+    public string Output { get; private set; }
+}
+```
+
+To use, simply specify the `MathResponse` type as a generic constraint when requesting a completion.
+
 ```csharp
 var messages = new List<Message>
 {
@@ -1267,48 +1319,18 @@ var messages = new List<Message>
     new(Role.User, "how can I solve 8x + 7 = -23")
 };
 
-var mathSchema = new JsonSchema("math_response", @"
-{
-  ""type"": ""object"",
-  ""properties"": {
-    ""steps"": {
-      ""type"": ""array"",
-      ""items"": {
-        ""type"": ""object"",
-        ""properties"": {
-          ""explanation"": {
-            ""type"": ""string""
-          },
-          ""output"": {
-            ""type"": ""string""
-          }
-        },
-        ""required"": [
-          ""explanation"",
-          ""output""
-        ],
-        ""additionalProperties"": false
-      }
-    },
-    ""final_answer"": {
-      ""type"": ""string""
-    }
-  },
-  ""required"": [
-    ""steps"",
-    ""final_answer""
-  ],
-  ""additionalProperties"": false
-}");
-var chatRequest = new ChatRequest(messages, model: new("gpt-4o-2024-08-06"), jsonSchema: mathSchema);
-var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
+var chatRequest = new ChatRequest<MathResponse>(messages, model: new("gpt-4o-2024-08-06"));
+var (mathResponse, chatResponse) = await OpenAIClient.ChatEndpoint.GetCompletionAsync<MathResponse>(chatRequest);
 
-foreach (var choice in response.Choices)
+for (var i = 0; i < mathResponse.Steps.Count; i++)
 {
-    Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice} | Finish Reason: {choice.FinishReason}");
+    var step = mathResponse.Steps[i];
+    Debug.Log($"Step {i}: {step.Explanation}");
+    Debug.Log($"Result: {step.Output}");
 }
 
-response.GetUsage();
+Debug.Log($"Final Answer: {mathResponse.FinalAnswer}");
+chatResponse.GetUsage();
 ```
 
 #### [Chat Json Mode](https://platform.openai.com/docs/guides/text-generation/json-mode)
