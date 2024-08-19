@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13]
-        unity-versions: [2020.x, 2021.x, 2022.x, 6000.x]
+        unity-versions: [2021.x, 2022.x, 6000.x]
         include:
           - os: ubuntu-latest
             build-target: StandaloneLinux64
