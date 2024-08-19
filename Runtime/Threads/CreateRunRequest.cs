@@ -21,7 +21,7 @@ namespace OpenAI.Threads
         /// The ID of the assistant used for execution of this run.
         /// </param>
         /// <param name="request"><see cref="CreateRunRequest"/>.</param>
-        [Preserve]
+        [Obsolete("Removed")]
         public CreateRunRequest(string assistantId, CreateRunRequest request)
             : this(
                 assistantId,
@@ -196,7 +196,7 @@ namespace OpenAI.Threads
         /// </summary>
         [Preserve]
         [JsonProperty("assistant_id")]
-        public string AssistantId { get; }
+        public string AssistantId { get; internal set; }
 
         /// <summary>
         /// The model that the assistant used for this run.
@@ -331,7 +331,7 @@ namespace OpenAI.Threads
         /// </remarks>
         [Preserve]
         [JsonProperty("response_format")]
-        public ResponseFormatObject ResponseFormatObject { get; }
+        public ResponseFormatObject ResponseFormatObject { get; internal set; }
 
         [JsonIgnore]
         public ChatResponseFormat ResponseFormat => ResponseFormatObject ?? ChatResponseFormat.Auto;

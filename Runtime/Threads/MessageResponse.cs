@@ -209,6 +209,18 @@ namespace OpenAI.Threads
                 ? string.Empty
                 : string.Join("\n", content.Select(c => c?.ToString()));
 
+        /// <summary>
+        /// Converts the <see cref="Content"/> to the specified <see cref="JsonSchema"/>.
+        /// </summary>
+        /// <typeparam name="T"><see cref="JsonSchema"/> to used for structured outputs.</typeparam>
+        /// <param name="settings"><see cref="JsonSerializerSettings"/>.</param>
+        /// <returns>Deserialized <see cref="JsonSchema"/> object.</returns>
+        public T FromSchema<T>(JsonSerializerSettings settings = null)
+        {
+            settings ??= OpenAIClient.JsonSerializationOptions;
+            return JsonConvert.DeserializeObject<T>(PrintContent(), settings);
+        }
+
         internal void AppendFrom(MessageResponse other)
         {
             if (other == null) { return; }

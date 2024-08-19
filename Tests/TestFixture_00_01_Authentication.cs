@@ -186,9 +186,9 @@ namespace OpenAI.Tests
             var auth = new OpenAIAuthentication("testKeyAaBbCcDd");
             var settings = new OpenAISettings(resourceName: "test-resource", deploymentId: "deployment-id-test");
             var api = new OpenAIClient(auth, settings);
-            Debug.Log(api.Settings.Info.DeploymentId);
             Debug.Log(api.Settings.Info.BaseRequest);
             Debug.Log(api.Settings.Info.BaseRequestUrlFormat);
+            Assert.AreEqual("https://test-resource.openai.azure.com/openai/{0}", api.Settings.Info.BaseRequestUrlFormat);
         }
 
         [Test]
@@ -199,6 +199,7 @@ namespace OpenAI.Tests
             var api = new OpenAIClient(auth, settings);
             Debug.Log(api.Settings.Info.BaseRequest);
             Debug.Log(api.Settings.Info.BaseRequestUrlFormat);
+            Assert.AreEqual("https://api.your-custom-domain.com/v1/{0}", api.Settings.Info.BaseRequestUrlFormat);
         }
 
         [TearDown]
