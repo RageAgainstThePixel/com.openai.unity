@@ -2,6 +2,8 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OpenAI.Extensions;
+using System;
 using UnityEngine.Scripting;
 
 namespace OpenAI
@@ -49,14 +51,14 @@ namespace OpenAI
         /// </summary>
         [Preserve]
         [JsonProperty("name")]
-        public string Name { get; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// A description of what the response format is for, used by the model to determine how to respond in the format.
         /// </summary>
         [Preserve]
         [JsonProperty("description")]
-        public string Description { get; }
+        public string Description { get; private set; }
 
         /// <summary>
         /// Whether to enable strict schema adherence when generating the output.
@@ -67,16 +69,22 @@ namespace OpenAI
         /// </remarks>
         [Preserve]
         [JsonProperty("strict")]
-        public bool Strict { get; }
+        public bool Strict { get; private set; }
 
         /// <summary>
         /// The schema for the response format, described as a JSON Schema object.
         /// </summary>
         [Preserve]
         [JsonProperty("schema")]
-        public JToken Schema { get; }
+        public JToken Schema { get; private set; }
 
         [Preserve]
         public static implicit operator ResponseFormatObject(JsonSchema jsonSchema) => new(jsonSchema);
+
+        public static implicit operator JsonSchema(Type type) => new(type.Name, type.GenerateJsonSchema());
+
+        /// <inheritdoc />
+        public override string ToString()
+            => JsonConvert.SerializeObject(this, OpenAIClient.JsonSerializationOptions);
     }
 }
