@@ -12,11 +12,12 @@ namespace OpenAI
         [Preserve]
         [JsonConstructor]
         public FileSearchOptions(
-            [JsonProperty("max_num_results")] int maxNumberOfResults,
+            [JsonProperty("max_num_results")] int? maxNumberOfResults,
             [JsonProperty("ranking_options")] RankingOptions rankingOptions = null)
         {
             MaxNumberOfResults = maxNumberOfResults switch
             {
+                null => null,
                 < 1 => throw new ArgumentOutOfRangeException(nameof(maxNumberOfResults), "Max number of results must be greater than 0."),
                 > 50 => throw new ArgumentOutOfRangeException(nameof(maxNumberOfResults), "Max number of results must be less than 50."),
                 _ => maxNumberOfResults
@@ -25,11 +26,11 @@ namespace OpenAI
         }
 
         [Preserve]
-        [JsonProperty("max_num_results")]
-        public int MaxNumberOfResults { get; }
+        [JsonProperty("max_num_results", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? MaxNumberOfResults { get; }
 
         [Preserve]
-        [JsonProperty("ranking_options")]
+        [JsonProperty("ranking_options", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public RankingOptions RankingOptions { get; }
     }
 }
