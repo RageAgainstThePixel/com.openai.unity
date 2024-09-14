@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Schema;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -289,6 +290,7 @@ namespace OpenAI.Assistants
         /// which indicates the generation exceeded max_tokens or the conversation exceeded the max context length.
         /// </remarks>
         [Preserve]
+        [JsonConverter(typeof(ResponseFormatConverter))]
         [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public ResponseFormatObject ResponseFormatObject { get; internal set; }
 

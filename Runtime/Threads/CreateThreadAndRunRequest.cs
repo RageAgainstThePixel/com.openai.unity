@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -332,6 +333,7 @@ namespace OpenAI.Threads
         /// </remarks>
         [Preserve]
         [JsonProperty("response_format")]
+        [JsonConverter(typeof(ResponseFormatConverter))]
         public ResponseFormatObject ResponseFormatObject { get; internal set; }
 
         [JsonIgnore]
