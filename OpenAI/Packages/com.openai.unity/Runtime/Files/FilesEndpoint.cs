@@ -98,13 +98,21 @@ namespace OpenAI.Files
         public async Task<FileResponse> UploadFileAsync(FileUploadRequest request, IProgress<Progress> uploadProgress = null, CancellationToken cancellationToken = default)
         {
             await Awaiters.UnityMainThread;
-            using var fileData = new MemoryStream();
-            var content = new WWWForm();
-            await request.File.CopyToAsync(fileData, cancellationToken);
-            content.AddField("purpose", request.Purpose);
-            content.AddBinaryData("file", fileData.ToArray(), request.FileName);
-            request.Dispose();
-            var response = await Rest.PostAsync(GetUrl(), content, new RestParameters(client.DefaultRequestHeaders, uploadProgress), cancellationToken);
+            var payload = new WWWForm();
+
+            try
+            {
+                using var fileData = new MemoryStream();
+                await request.File.CopyToAsync(fileData, cancellationToken);
+                payload.AddField("purpose", request.Purpose);
+                payload.AddBinaryData("file", fileData.ToArray(), request.FileName);
+            }
+            finally
+            {
+                request.Dispose();
+            }
+
+            var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders, uploadProgress), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<FileResponse>(client);
         }

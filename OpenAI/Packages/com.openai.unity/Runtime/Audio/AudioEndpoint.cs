@@ -156,41 +156,47 @@ namespace OpenAI.Audio
 
         private async Task<string> Internal_CreateTranscriptionAsync(AudioTranscriptionRequest request, CancellationToken cancellationToken = default)
         {
-            var form = new WWWForm();
-            using var audioData = new MemoryStream();
-            await request.Audio.CopyToAsync(audioData, cancellationToken);
-            form.AddBinaryData("file", audioData.ToArray(), request.AudioName);
-            form.AddField("model", request.Model);
+            var payload = new WWWForm();
 
-            if (!string.IsNullOrWhiteSpace(request.Prompt))
+            try
             {
-                form.AddField("prompt", request.Prompt);
+                using var audioData = new MemoryStream();
+                await request.Audio.CopyToAsync(audioData, cancellationToken);
+                payload.AddBinaryData("file", audioData.ToArray(), request.AudioName);
+                payload.AddField("model", request.Model);
+
+                if (!string.IsNullOrWhiteSpace(request.Prompt))
+                {
+                    payload.AddField("prompt", request.Prompt);
+                }
+
+                var responseFormat = request.ResponseFormat;
+                payload.AddField("response_format", responseFormat.ToString().ToLower());
+
+                if (request.Temperature.HasValue)
+                {
+                    payload.AddField("temperature", request.Temperature.Value.ToString(CultureInfo.InvariantCulture));
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.Language))
+                {
+                    payload.AddField("language", request.Language);
+                }
+
+                switch (request.TimestampGranularities)
+                {
+                    case TimestampGranularity.Segment:
+                    case TimestampGranularity.Word:
+                        payload.AddField("timestamp_granularities[]", request.TimestampGranularities.ToString().ToLower());
+                        break;
+                }
+            }
+            finally
+            {
+                request.Dispose();
             }
 
-            var responseFormat = request.ResponseFormat;
-            form.AddField("response_format", responseFormat.ToString().ToLower());
-
-            if (request.Temperature.HasValue)
-            {
-                form.AddField("temperature", request.Temperature.Value.ToString(CultureInfo.InvariantCulture));
-            }
-
-            if (!string.IsNullOrWhiteSpace(request.Language))
-            {
-                form.AddField("language", request.Language);
-            }
-
-            switch (request.TimestampGranularities)
-            {
-                case TimestampGranularity.Segment:
-                case TimestampGranularity.Word:
-                    form.AddField("timestamp_granularities[]", request.TimestampGranularities.ToString().ToLower());
-                    break;
-            }
-
-            request.Dispose();
-
-            var response = await Rest.PostAsync(GetUrl("/transcriptions"), form, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl("/transcriptions"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Body;
         }
@@ -233,28 +239,34 @@ namespace OpenAI.Audio
 
         private async Task<string> Internal_CreateTranslationAsync(AudioTranslationRequest request, CancellationToken cancellationToken)
         {
-            var form = new WWWForm();
-            using var audioData = new MemoryStream();
-            await request.Audio.CopyToAsync(audioData, cancellationToken);
-            form.AddBinaryData("file", audioData.ToArray(), request.AudioName);
-            form.AddField("model", request.Model);
+            var payload = new WWWForm();
 
-            if (!string.IsNullOrWhiteSpace(request.Prompt))
+            try
             {
-                form.AddField("prompt", request.Prompt);
+                using var audioData = new MemoryStream();
+                await request.Audio.CopyToAsync(audioData, cancellationToken);
+                payload.AddBinaryData("file", audioData.ToArray(), request.AudioName);
+                payload.AddField("model", request.Model);
+
+                if (!string.IsNullOrWhiteSpace(request.Prompt))
+                {
+                    payload.AddField("prompt", request.Prompt);
+                }
+
+                var responseFormat = request.ResponseFormat;
+                payload.AddField("response_format", responseFormat.ToString().ToLower());
+
+                if (request.Temperature.HasValue)
+                {
+                    payload.AddField("temperature", request.Temperature.Value.ToString(CultureInfo.InvariantCulture));
+                }
+            }
+            finally
+            {
+                request.Dispose();
             }
 
-            var responseFormat = request.ResponseFormat;
-            form.AddField("response_format", responseFormat.ToString().ToLower());
-
-            if (request.Temperature.HasValue)
-            {
-                form.AddField("temperature", request.Temperature.Value.ToString(CultureInfo.InvariantCulture));
-            }
-
-            request.Dispose();
-
-            var response = await Rest.PostAsync(GetUrl("/translations"), form, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl("/translations"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Body;
         }
