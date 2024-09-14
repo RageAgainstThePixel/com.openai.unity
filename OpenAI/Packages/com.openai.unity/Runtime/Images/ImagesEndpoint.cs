@@ -51,31 +51,37 @@ namespace OpenAI.Images
         [Function("Creates an edited or extended image given an original image and a prompt.")]
         public async Task<IReadOnlyList<ImageResult>> CreateImageEditAsync(ImageEditRequest request, CancellationToken cancellationToken = default)
         {
-            var form = new WWWForm();
-            using var imageData = new MemoryStream();
-            await request.Image.CopyToAsync(imageData, cancellationToken);
-            form.AddBinaryData("image", imageData.ToArray(), request.ImageName);
+            var payload = new WWWForm();
 
-            if (request.Mask != null)
+            try
             {
-                using var maskData = new MemoryStream();
-                await request.Mask.CopyToAsync(maskData, cancellationToken);
-                form.AddBinaryData("mask", maskData.ToArray(), request.MaskName);
+                using var imageData = new MemoryStream();
+                await request.Image.CopyToAsync(imageData, cancellationToken);
+                payload.AddBinaryData("image", imageData.ToArray(), request.ImageName);
+
+                if (request.Mask != null)
+                {
+                    using var maskData = new MemoryStream();
+                    await request.Mask.CopyToAsync(maskData, cancellationToken);
+                    payload.AddBinaryData("mask", maskData.ToArray(), request.MaskName);
+                }
+
+                payload.AddField("prompt", request.Prompt);
+                payload.AddField("n", request.Number.ToString());
+                payload.AddField("size", request.Size);
+                payload.AddField("response_format", request.ResponseFormat.ToString().ToLower());
+
+                if (!string.IsNullOrWhiteSpace(request.User))
+                {
+                    payload.AddField("user", request.User);
+                }
+            }
+            finally
+            {
+                request.Dispose();
             }
 
-            form.AddField("prompt", request.Prompt);
-            form.AddField("n", request.Number.ToString());
-            form.AddField("size", request.Size);
-            form.AddField("response_format", request.ResponseFormat.ToString().ToLower());
-
-            if (!string.IsNullOrWhiteSpace(request.User))
-            {
-                form.AddField("user", request.User);
-            }
-
-            request.Dispose();
-
-            var response = await Rest.PostAsync(GetUrl("/edits"), form, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl("/edits"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             return await DeserializeResponseAsync(response, cancellationToken);
         }
 
@@ -88,22 +94,28 @@ namespace OpenAI.Images
         [Function("Creates a variation of a given image.")]
         public async Task<IReadOnlyList<ImageResult>> CreateImageVariationAsync(ImageVariationRequest request, CancellationToken cancellationToken = default)
         {
-            var form = new WWWForm();
-            using var imageData = new MemoryStream();
-            await request.Image.CopyToAsync(imageData, cancellationToken);
-            form.AddBinaryData("image", imageData.ToArray(), request.ImageName);
-            form.AddField("n", request.Number.ToString());
-            form.AddField("size", request.Size);
-            form.AddField("response_format", request.ResponseFormat.ToString().ToLower());
+            var payload = new WWWForm();
 
-            if (!string.IsNullOrWhiteSpace(request.User))
+            try
             {
-                form.AddField("user", request.User);
+                using var imageData = new MemoryStream();
+                await request.Image.CopyToAsync(imageData, cancellationToken);
+                payload.AddBinaryData("image", imageData.ToArray(), request.ImageName);
+                payload.AddField("n", request.Number.ToString());
+                payload.AddField("size", request.Size);
+                payload.AddField("response_format", request.ResponseFormat.ToString().ToLower());
+
+                if (!string.IsNullOrWhiteSpace(request.User))
+                {
+                    payload.AddField("user", request.User);
+                }
+            }
+            finally
+            {
+                request.Dispose();
             }
 
-            request.Dispose();
-
-            var response = await Rest.PostAsync(GetUrl("/variations"), form, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl("/variations"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             return await DeserializeResponseAsync(response, cancellationToken);
         }
 
