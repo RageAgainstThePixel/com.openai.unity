@@ -49,7 +49,7 @@ namespace OpenAI.Tests
                         ["int"] = "1",
                         ["test"] = Guid.NewGuid().ToString()
                     },
-                    tools: new[] { new Tool(new FileSearchOptions(15)) });
+                    tools: new[] { new Tool(new FileSearchOptions(15, new RankingOptions("auto", 0.5f))) });
                 var assistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(request);
                 Assert.IsNotNull(assistant);
 
