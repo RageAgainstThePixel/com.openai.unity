@@ -50,7 +50,7 @@ The recommended installation method is though the unity package manager and [Ope
 
 > Check out our new api docs!
 
-<https://rageagainstthepixel.github.io/OpenAI-DotNet> :new:
+<https://rageagainstthepixel.github.io/OpenAI-DotNet>
 
 ### Table of Contents
 
@@ -88,7 +88,7 @@ The recommended installation method is though the unity package manager and [Ope
       - [Retrieve Run](#retrieve-thread-run)
       - [Modify Run](#modify-thread-run)
       - [Submit Tool Outputs to Run](#thread-submit-tool-outputs-to-run)
-      - [Structured Outputs](#thread-structured-outputs) :new:
+      - [Structured Outputs](#thread-structured-outputs)
       - [List Run Steps](#list-thread-run-steps)
       - [Retrieve Run Step](#retrieve-thread-run-step)
       - [Cancel Run](#cancel-thread-run)
@@ -113,7 +113,7 @@ The recommended installation method is though the unity package manager and [Ope
   - [Streaming](#chat-streaming)
   - [Tools](#chat-tools)
   - [Vision](#chat-vision)
-  - [Structured Outputs](#chat-structured-outputs) :new:
+  - [Structured Outputs](#chat-structured-outputs)
   - [Json Mode](#chat-json-mode)
 - [Audio](#audio)
   - [Create Speech](#create-speech)
@@ -840,7 +840,8 @@ public class MathStep
 To use, simply specify the `MathResponse` type as a generic constraint in either `CreateAssistantAsync`, `CreateRunAsync`, or `CreateThreadAndRunAsync`.
 
 ```csharp
-var assistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync<MathResponse>(
+var api = new OpenAIClient();
+var assistant = await api.AssistantsEndpoint.CreateAssistantAsync<MathResponse>(
     new CreateAssistantRequest(
         name: "Math Tutor",
         instructions: "You are a helpful math tutor. Guide the user through the solution step by step.",
@@ -909,6 +910,81 @@ finally
 }
 ```
 
+You can also manually create json schema json string as well, but you will be responsible for deserializing your response data:
+
+```csharp
+var api = new OpenAIClient();
+var mathSchema = new JsonSchema("math_response", @"
+{
+  ""type"": ""object"",
+  ""properties"": {
+    ""steps"": {
+      ""type"": ""array"",
+      ""items"": {
+        ""type"": ""object"",
+        ""properties"": {
+          ""explanation"": {
+            ""type"": ""string""
+          },
+          ""output"": {
+            ""type"": ""string""
+          }
+        },
+        ""required"": [
+          ""explanation"",
+          ""output""
+        ],
+        ""additionalProperties"": false
+      }
+    },
+    ""final_answer"": {
+      ""type"": ""string""
+    }
+  },
+  ""required"": [
+    ""steps"",
+    ""final_answer""
+  ],
+  ""additionalProperties"": false
+}");
+var assistant = await api.AssistantsEndpoint.CreateAssistantAsync(
+    new CreateAssistantRequest(
+        name: "Math Tutor",
+        instructions: "You are a helpful math tutor. Guide the user through the solution step by step.",
+        model: "gpt-4o-2024-08-06",
+        jsonSchema: mathSchema));
+ThreadResponse thread = null;
+
+try
+{
+    var run = await assistant.CreateThreadAndRunAsync("how can I solve 8x + 7 = -23",
+        async @event =>
+        {
+            Debug.Log(@event.ToJsonString());
+            await Task.CompletedTask;
+        });
+    thread = await run.GetThreadAsync();
+    run = await run.WaitForStatusChangeAsync();
+    Debug.Log($"Created thread and run: {run.ThreadId} -> {run.Id} -> {run.CreatedAt}");
+    var messages = await thread.ListMessagesAsync();
+
+    foreach (var response in messages.Items)
+    {
+        Debug.Log($"{response.Role}: {response.PrintContent()}");
+    }
+}
+finally
+{
+    await assistant.DeleteAsync(deleteToolResources: thread == null);
+
+    if (thread != null)
+    {
+        var isDeleted = await thread.DeleteAsync(deleteToolResources: true);
+        Assert.IsTrue(isDeleted);
+    }
+}
+```
+
 ###### [List Thread Run Steps](https://platform.openai.com/docs/api-reference/runs/listRunSteps)
 
 Returns a list of run steps belonging to a run.
@@ -964,7 +1040,7 @@ Returns a list of vector stores.
 
 ```csharp
 var api = new OpenAIClient();
-var vectorStores = await OpenAIClient.VectorStoresEndpoint.ListVectorStoresAsync();
+var vectorStores = await api.VectorStoresEndpoint.ListVectorStoresAsync();
 
 foreach (var vectorStore in vectorStores.Items)
 {
@@ -1313,6 +1389,7 @@ public class MathStep
 To use, simply specify the `MathResponse` type as a generic constraint when requesting a completion.
 
 ```csharp
+var api = new OpenAIClient();
 var messages = new List<Message>
 {
     new(Role.System, "You are a helpful math tutor. Guide the user through the solution step by step."),
@@ -1320,7 +1397,7 @@ var messages = new List<Message>
 };
 
 var chatRequest = new ChatRequest<MathResponse>(messages, model: new("gpt-4o-2024-08-06"));
-var (mathResponse, chatResponse) = await OpenAIClient.ChatEndpoint.GetCompletionAsync<MathResponse>(chatRequest);
+var (mathResponse, chatResponse) = await api.ChatEndpoint.GetCompletionAsync<MathResponse>(chatRequest);
 
 for (var i = 0; i < mathResponse.Steps.Count; i++)
 {
@@ -1383,7 +1460,7 @@ Generate streamed audio from the input text.
 ```csharp
 var api = new OpenAIClient();
 var request = new SpeechRequest("Hello world!");
-var (path, clip) = await OpenAIClient.AudioEndpoint.CreateSpeechStreamAsync(request, partialClip => audioSource.PlayOneShot(partialClip));
+var (path, clip) = await api.AudioEndpoint.CreateSpeechStreamAsync(request, partialClip => audioSource.PlayOneShot(partialClip));
 Debug.Log(path);
 ```
 
@@ -1538,7 +1615,7 @@ Returns information about a specific file.
 
 ```csharp
 var api = new OpenAIClient();
-var file = await  api.FilesEndpoint.GetFileInfoAsync(fileId);
+var file = await api.FilesEndpoint.GetFileInfoAsync(fileId);
 Debug.Log($"{file.Id} -> {file.Object}: {file.FileName} | {file.Size} bytes");
 ```
 
@@ -1638,7 +1715,7 @@ List your organization's batches.
 
 ```csharp
 var api = new OpenAIClient();
-var batches = await api.await OpenAIClient.BatchEndpoint.ListBatchesAsync();
+var batches = await api.BatchEndpoint.ListBatchesAsync();
 
 foreach (var batch in listResponse.Items)
 {
