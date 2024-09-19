@@ -1365,23 +1365,19 @@ These are the objects you'll deserialize to, so be sure to use standard Json obj
 ```csharp
 public class MathResponse
 {
-    [JsonInclude]
-    [JsonPropertyName("steps")]
+    [JsonProperty("steps")]
     public IReadOnlyList<MathStep> Steps { get; private set; }
 
-    [JsonInclude]
-    [JsonPropertyName("final_answer")]
+    [JsonProperty("final_answer")]
     public string FinalAnswer { get; private set; }
 }
 
 public class MathStep
 {
-    [JsonInclude]
-    [JsonPropertyName("explanation")]
+    [JsonProperty("explanation")]
     public string Explanation { get; private set; }
 
-    [JsonInclude]
-    [JsonPropertyName("output")]
+    [JsonProperty("output")]
     public string Output { get; private set; }
 }
 ```
@@ -1396,7 +1392,7 @@ var messages = new List<Message>
     new(Role.User, "how can I solve 8x + 7 = -23")
 };
 
-var chatRequest = new ChatRequest<MathResponse>(messages, model: new("gpt-4o-2024-08-06"));
+var chatRequest = new ChatRequest(messages, model: "gpt-4o-2024-08-06");
 var (mathResponse, chatResponse) = await api.ChatEndpoint.GetCompletionAsync<MathResponse>(chatRequest);
 
 for (var i = 0; i < mathResponse.Steps.Count; i++)
