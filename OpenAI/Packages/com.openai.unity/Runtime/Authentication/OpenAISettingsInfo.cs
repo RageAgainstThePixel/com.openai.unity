@@ -8,6 +8,9 @@ namespace OpenAI
 {
     public sealed class OpenAISettingsInfo : ISettingsInfo
     {
+        internal const string WS = "ws://";
+        internal const string WSS = "wss://";
+        internal const string Http = "http://";
         internal const string Https = "https://";
         internal const string OpenAIDomain = "api.openai.com";
         internal const string DefaultOpenAIApiVersion = "v1";
@@ -24,6 +27,7 @@ namespace OpenAI
             DeploymentId = string.Empty;
             BaseRequest = $"/{ApiVersion}/";
             BaseRequestUrlFormat = $"{Https}{ResourceName}{BaseRequest}{{0}}";
+            BaseWebSocketUrlFormat = $"{WSS}{ResourceName}{BaseRequest}{{0}}";
             UseOAuthAuthentication = true;
         }
 
@@ -50,11 +54,16 @@ namespace OpenAI
                 apiVersion = DefaultOpenAIApiVersion;
             }
 
-            ResourceName = domain.Contains("http") ? domain : $"{Https}{domain}";
+            ResourceName = domain.Contains(Http)
+                ? domain
+                : $"{Https}{domain}";
             ApiVersion = apiVersion;
             DeploymentId = string.Empty;
             BaseRequest = $"/{ApiVersion}/";
             BaseRequestUrlFormat = $"{ResourceName}{BaseRequest}{{0}}";
+            BaseWebSocketUrlFormat = ResourceName.Contains(Https)
+                ? $"{WSS}{ResourceName}{BaseRequest}{{0}}"
+                : $"{WS}{ResourceName}{BaseRequest}{{0}}";
             UseOAuthAuthentication = true;
         }
 
@@ -97,6 +106,7 @@ namespace OpenAI
             ApiVersion = apiVersion;
             BaseRequest = "/openai/";
             BaseRequestUrlFormat = $"{Https}{ResourceName}.{AzureOpenAIDomain}{BaseRequest}{{0}}";
+            BaseWebSocketUrlFormat = $"{WSS}{ResourceName}.{AzureOpenAIDomain}{BaseRequest}{{0}}";
             defaultQueryParameters.Add("api-version", ApiVersion);
             UseOAuthAuthentication = useActiveDirectoryAuthentication;
         }
@@ -110,6 +120,8 @@ namespace OpenAI
         public string BaseRequest { get; }
 
         internal string BaseRequestUrlFormat { get; }
+
+        internal string BaseWebSocketUrlFormat { get; }
 
         internal bool UseOAuthAuthentication { get; }
 

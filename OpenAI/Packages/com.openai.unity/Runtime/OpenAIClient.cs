@@ -13,11 +13,13 @@ using OpenAI.FineTuning;
 using OpenAI.Images;
 using OpenAI.Models;
 using OpenAI.Moderations;
+using OpenAI.Realtime;
 using OpenAI.Threads;
 using OpenAI.VectorStores;
 using System.Collections.Generic;
 using System.Security.Authentication;
 using Utilities.WebRequestRest;
+using Utilities.WebSockets;
 
 namespace OpenAI
 {
@@ -59,6 +61,7 @@ namespace OpenAI
             AssistantsEndpoint = new AssistantsEndpoint(this);
             BatchEndpoint = new BatchEndpoint(this);
             VectorStoresEndpoint = new VectorStoresEndpoint(this);
+            RealtimeEndpoint = new RealtimeEndpoint(this);
         }
 
         protected override void SetupDefaultRequestHeaders()
@@ -126,7 +129,8 @@ namespace OpenAI
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             Converters = new List<JsonConverter>
             {
-                new StringEnumConverter(new SnakeCaseNamingStrategy())
+                new StringEnumConverter(new SnakeCaseNamingStrategy()),
+                new RealtimeEventConverter()
             }
         };
 
@@ -206,5 +210,26 @@ namespace OpenAI
         /// <see href="https://platform.openai.com/docs/api-reference/vector-stores"/>
         /// </summary>
         public VectorStoresEndpoint VectorStoresEndpoint { get; }
+
+        public RealtimeEndpoint RealtimeEndpoint { get; }
+
+        internal WebSocket CreateWebSocket(string url)
+        {
+            return new WebSocket(url, new Dictionary<string, string>
+            {
+#if !PLATFORM_WEBGL
+                { "User-Agent", "OpenAI-DotNet" },
+                { "OpenAI-Beta", "realtime=v1" },
+                { "Authorization", $"Bearer {Authentication.Info.ApiKey}" }
+#endif
+            }, new List<string>
+            {
+#if PLATFORM_WEBGL // Web browsers do not support headers. https://github.com/openai/openai-realtime-api-beta/blob/339e9553a757ef1cf8c767272fc750c1e62effbb/lib/api.js#L76-L80
+                "realtime",
+                $"openai-insecure-api-key.{Authentication.Info.ApiKey}",
+                "openai-beta.realtime-v1"
+#endif
+            });
+        }
     }
 }

@@ -20,6 +20,11 @@ namespace OpenAI
         /// </remarks>
         protected virtual bool? IsAzureDeployment => null;
 
+        /// <summary>
+        /// Indicates if the endpoint is for a WebSocket.
+        /// </summary>
+        protected virtual bool? IsWebSocketEndpoint => null;
+
         protected override string GetUrl(string endpoint = "", Dictionary<string, string> queryParameters = null)
         {
             string route;
@@ -33,7 +38,10 @@ namespace OpenAI
                 route = $"{Root}{endpoint}";
             }
 
-            var result = string.Format(client.Settings.Info.BaseRequestUrlFormat, route);
+            var baseUrlFormat = IsWebSocketEndpoint == true
+                ? client.Settings.Info.BaseWebSocketUrlFormat
+                : client.Settings.Info.BaseRequestUrlFormat;
+            var result = string.Format(baseUrlFormat, route);
 
             foreach (var defaultQueryParameter in client.Settings.Info.DefaultQueryParameters)
             {
