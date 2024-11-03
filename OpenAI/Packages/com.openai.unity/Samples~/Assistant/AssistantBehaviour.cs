@@ -61,6 +61,7 @@ namespace OpenAI.Samples.Assistant
 
 #if !UNITY_2022_3_OR_NEWER
         private readonly CancellationTokenSource lifetimeCts = new();
+        // ReSharper disable once InconsistentNaming
         private CancellationToken destroyCancellationToken => lifetimeCts.Token;
 #endif
 
@@ -86,7 +87,6 @@ namespace OpenAI.Samples.Assistant
             submitButton.onClick.AddListener(SubmitChat);
             recordButton.onClick.AddListener(ToggleRecording);
         }
-
 
 #if !UNITY_2022_3_OR_NEWER
         private void OnDestroy()
@@ -335,6 +335,7 @@ namespace OpenAI.Samples.Assistant
             else
             {
                 inputField.interactable = false;
+                // ReSharper disable once MethodSupportsCancellation
                 RecordingManager.StartRecording<WavEncoder>(callback: ProcessRecording);
             }
         }

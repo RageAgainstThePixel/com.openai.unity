@@ -61,6 +61,7 @@ namespace OpenAI.Samples.Realtime
 
 #if !UNITY_2022_3_OR_NEWER
         private readonly CancellationTokenSource lifetimeCts = new();
+        // ReSharper disable once InconsistentNaming
         private CancellationToken destroyCancellationToken => lifetimeCts.Token;
 #endif
 
@@ -335,6 +336,7 @@ namespace OpenAI.Samples.Realtime
             else
             {
                 inputField.interactable = false;
+                // ReSharper disable once MethodSupportsCancellation
                 RecordingManager.StartRecording<WavEncoder>(callback: ProcessRecording);
             }
         }
