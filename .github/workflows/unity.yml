@@ -11,26 +11,24 @@ on:
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ ( github.event_name == 'pull_request' || github.event.action == 'synchronize' ) }}
-permissions:
-  checks: write
-  pull-requests: write
+  cancel-in-progress: ${{ (github.event_name == 'pull_request' || github.event.action == 'synchronize') }}
 jobs:
   build:
-    env:
-      UNITY_PROJECT_PATH: ''
+    permissions:
+      checks: write
+      pull-requests: write
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13]
+        os: [ubuntu-latest, windows-latest, macos-15]
         unity-versions: [2021.x, 2022.x, 6000.x]
         include:
           - os: ubuntu-latest
             build-target: StandaloneLinux64
           - os: windows-latest
             build-target: StandaloneWindows64
-          - os: macos-13
+          - os: macos-15
             build-target: StandaloneOSX
     steps:
       - uses: actions/checkout@v4
@@ -46,11 +44,13 @@ jobs:
       - uses: RageAgainstThePixel/unity-action@v1
         name: '${{ matrix.build-target }}-Validate'
         with:
+          build-target: ${{ matrix.build-target }}
           log-name: '${{ matrix.build-target }}-Validate'
           args: '-quit -nographics -batchmode -executeMethod Utilities.Editor.BuildPipeline.UnityPlayerBuildTools.ValidateProject -importTMProEssentialsAsset'
       - uses: RageAgainstThePixel/unity-action@v1
         name: '${{ matrix.build-target }}-Build'
         with:
+          build-target: ${{ matrix.build-target }}
           log-name: '${{ matrix.build-target }}-Build'
           args: '-quit -nographics -batchmode -executeMethod Utilities.Editor.BuildPipeline.UnityPlayerBuildTools.StartCommandLineBuild'
       - uses: actions/upload-artifact@v4
