@@ -113,9 +113,9 @@ namespace OpenAI
 
         public string ResourceName { get; }
 
-        public string ApiVersion { get; }
-
         public string DeploymentId { get; }
+
+        public string ApiVersion { get; }
 
         public string BaseRequest { get; }
 
