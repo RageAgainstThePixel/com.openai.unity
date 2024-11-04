@@ -112,7 +112,16 @@ namespace OpenAI.Samples.Assistant
             }
             catch (Exception e)
             {
-                Debug.LogError(e);
+                switch (e)
+                {
+                    case ObjectDisposedException:
+                        // ignored
+                        break;
+                    default:
+                        Debug.LogError(e);
+                        break;
+
+                }
             }
             finally
             {

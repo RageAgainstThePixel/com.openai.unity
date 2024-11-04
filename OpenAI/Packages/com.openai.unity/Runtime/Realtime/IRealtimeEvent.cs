@@ -12,11 +12,11 @@ namespace OpenAI.Realtime
         /// The unique ID of the server event.
         /// </summary>
         [Preserve]
-        [JsonProperty("object")]
+        [JsonProperty("event_id")]
         public string EventId { get; }
 
         [Preserve]
-        [JsonProperty("object")]
+        [JsonProperty("type")]
         public string Type { get; }
 
         public string ToJsonString();

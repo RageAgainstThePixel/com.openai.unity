@@ -2,9 +2,11 @@
 
 using Newtonsoft.Json;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Scripting;
+using Utilities.Async;
 using Utilities.WebSockets;
 
 namespace OpenAI.Realtime
@@ -12,21 +14,34 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class RealtimeSession : IDisposable
     {
+        [Preserve]
         public event Action<IRealtimeEvent> OnEventReceived;
+
+        [Preserve]
+        public event Action<Error> OnError;
 
         private readonly WebSocket websocketClient;
 
-        internal RealtimeSession(WebSocket wsClient)
+        [Preserve]
+        public bool EnableDebug { get; set; }
+
+        [Preserve]
+        internal RealtimeSession(WebSocket wsClient, bool enableDebug)
         {
             websocketClient = wsClient;
+            EnableDebug = enableDebug;
             websocketClient.OnMessage += OnMessage;
         }
 
+        [Preserve]
         private void OnMessage(DataFrame dataFrame)
         {
             if (dataFrame.Type == OpCode.Text)
             {
-                Debug.Log($"[dataframe] {dataFrame.Text}");
+                if (EnableDebug)
+                {
+                    Debug.Log(dataFrame.Text);
+                }
 
                 try
                 {
@@ -35,17 +50,19 @@ namespace OpenAI.Realtime
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(e);
+                    OnError?.Invoke(new Error(e));
                 }
             }
         }
 
+        [Preserve]
         ~RealtimeSession() => Dispose(false);
 
         #region IDisposable
 
         private bool isDisposed;
 
+        [Preserve]
         public void Dispose()
         {
             Dispose(true);
@@ -64,7 +81,8 @@ namespace OpenAI.Realtime
 
         #endregion IDisposable
 
-        internal async Task ConnectAsync()
+        [Preserve]
+        internal async Task ConnectAsync(CancellationToken cancellationToken = default)
         {
             var connectTcs = new TaskCompletionSource<State>();
             websocketClient.OnOpen += OnWebsocketClientOnOnOpen;
@@ -72,8 +90,10 @@ namespace OpenAI.Realtime
 
             try
             {
+                // ReSharper disable once MethodHasAsyncOverloadWithCancellation
+                // don't call async because it is blocking until connection is closed.
                 websocketClient.Connect();
-                await connectTcs.Task;
+                await connectTcs.Task.WithCancellation(cancellationToken);
 
                 if (websocketClient.State != State.Open)
                 {

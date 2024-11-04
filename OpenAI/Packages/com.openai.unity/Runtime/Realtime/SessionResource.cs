@@ -5,18 +5,53 @@ using OpenAI.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Scripting;
 
 namespace OpenAI.Realtime
 {
+    [Preserve]
     public sealed class SessionResource
     {
+        [Preserve]
         [JsonConstructor]
-        internal SessionResource() { }
+        internal SessionResource(
+            [JsonProperty("id")] string id,
+            [JsonProperty("object")] string @object,
+            [JsonProperty("model")] string model,
+            [JsonProperty("modalities")] RealtimeModality modalities,
+            [JsonProperty("voice")] string voice,
+            [JsonProperty("instructions")] string instructions,
+            [JsonProperty("input_audio_format")] RealtimeAudioFormat inputAudioFormat,
+            [JsonProperty("output_audio_format")] RealtimeAudioFormat outputAudioFormat,
+            [JsonProperty("input_audio_transcription")] InputAudioTranscriptionSettings inputAudioTranscriptionSettings,
+            [JsonProperty("turn_detection")] VoiceActivityDetectionSettings voiceActivityDetectionSettings,
+            [JsonProperty("tools")] IReadOnlyList<Tool> tools,
+            [JsonProperty("tool_choice")] object toolChoice,
+            [JsonProperty("temperature")] float? temperature,
+            [JsonProperty("max_response_output_tokens")] object maxResponseOutputTokens
+        )
+        {
+            Id = id;
+            Object = @object;
+            Model = model;
+            Modalities = modalities;
+            Voice = voice;
+            Instructions = instructions;
+            InputAudioFormat = inputAudioFormat;
+            OutputAudioFormat = outputAudioFormat;
+            InputAudioTranscriptionSettings = inputAudioTranscriptionSettings;
+            VoiceActivityDetectionSettings = voiceActivityDetectionSettings;
+            Tools = tools;
+            ToolChoice = toolChoice;
+            Temperature = temperature;
+            MaxResponseOutputTokens = maxResponseOutputTokens;
+        }
 
+        [Preserve]
         public SessionResource(
             Model model,
             RealtimeModality modalities = RealtimeModality.Text & RealtimeModality.Audio,
-            string voice = "alloy",
+            Voice voice = null,
             string instructions = null,
             RealtimeAudioFormat inputAudioFormat = RealtimeAudioFormat.PCM16,
             RealtimeAudioFormat outputAudioFormat = RealtimeAudioFormat.PCM16,
@@ -31,7 +66,7 @@ namespace OpenAI.Realtime
                 ? "gpt-4o-realtime-preview-2024-10-01"
                 : model;
             Modalities = modalities;
-            Voice = voice;
+            Voice = voice ?? Realtime.Voice.Alloy;
             Instructions = string.IsNullOrWhiteSpace(instructions)
                 ? "Your knowledge cutoff is 2023-10. You are a helpful, witty, and friendly AI. Act like a human, " +
                   "but remember that you aren't a human and that you can't do human things in the real world. " +
@@ -92,43 +127,68 @@ namespace OpenAI.Realtime
             }
         }
 
+        [Preserve]
         [JsonProperty("id")]
         public string Id { get; private set; }
 
-        [JsonProperty("model")]
-        public Model Model { get; private set; }
+        [Preserve]
+        [JsonProperty("object")]
+        public string Object { get; private set; }
 
+        [Preserve]
+        [JsonProperty("model")]
+        public string Model { get; private set; }
+
+        [Preserve]
+        [JsonProperty("expires_at")]
+        public int ExpiresAtTimeUnixSeconds;
+
+        [Preserve]
+        [JsonIgnore]
+        public DateTime ExpiresAt => DateTimeOffset.FromUnixTimeSeconds(ExpiresAtTimeUnixSeconds).DateTime;
+
+        [Preserve]
         [JsonProperty("modalities")]
         [JsonConverter(typeof(RealtimeModalityConverter))]
         public RealtimeModality Modalities { get; private set; }
 
+        [Preserve]
         [JsonProperty("voice")]
         public string Voice { get; private set; }
 
+        [Preserve]
         [JsonProperty("instructions")]
         public string Instructions { get; private set; }
 
-        [JsonProperty("input_audio_format")]
+        [Preserve]
+        [JsonProperty("input_audio_format", DefaultValueHandling = DefaultValueHandling.Include)]
         public RealtimeAudioFormat InputAudioFormat { get; private set; }
 
-        [JsonProperty("output_audio_format")]
+        [Preserve]
+        [JsonProperty("output_audio_format", DefaultValueHandling = DefaultValueHandling.Include)]
         public RealtimeAudioFormat OutputAudioFormat { get; private set; }
 
+        [Preserve]
         [JsonProperty("input_audio_transcription")]
         public InputAudioTranscriptionSettings InputAudioTranscriptionSettings { get; private set; }
 
+        [Preserve]
         [JsonProperty("turn_detection")]
         public VoiceActivityDetectionSettings VoiceActivityDetectionSettings { get; private set; }
 
+        [Preserve]
         [JsonProperty("tools")]
         public IReadOnlyList<Tool> Tools { get; private set; }
 
+        [Preserve]
         [JsonProperty("tool_choice")]
         public object ToolChoice { get; private set; }
 
+        [Preserve]
         [JsonProperty("temperature")]
         public float? Temperature { get; private set; }
 
+        [Preserve]
         [JsonProperty("max_response_output_tokens")]
         public object MaxResponseOutputTokens { get; private set; }
     }

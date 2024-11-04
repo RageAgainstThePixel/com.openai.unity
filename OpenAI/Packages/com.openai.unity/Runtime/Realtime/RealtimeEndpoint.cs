@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
+using Utilities.Async;
 
 namespace OpenAI.Realtime
 {
@@ -18,7 +20,7 @@ namespace OpenAI.Realtime
 
         public async Task<RealtimeSession> CreateSessionAsync(SessionResource options = null, Action<IRealtimeEvent> sessionEvents = null, CancellationToken cancellationToken = default)
         {
-            var model = string.IsNullOrWhiteSpace(options?.Model) ? Model.GPT4oRealtime : options!.Model;
+            string model = string.IsNullOrWhiteSpace(options?.Model) ? Model.GPT4oRealtime : options!.Model;
             var queryParameters = new Dictionary<string, string>();
 
             if (client.Settings.Info.IsAzureOpenAI)
@@ -30,35 +32,52 @@ namespace OpenAI.Realtime
                 queryParameters["model"] = model;
             }
 
-            var session = new RealtimeSession(client.CreateWebSocket(GetUrl(queryParameters: queryParameters)));
-            var sessionCreatedTcs = new TaskCompletionSource<SessionResponse>(new CancellationTokenSource(500));
+            var session = new RealtimeSession(client.CreateWebSocket(GetUrl(queryParameters: queryParameters)), EnableDebug);
+            var sessionCreatedTcs = new TaskCompletionSource<SessionResponse>();
 
             try
             {
                 session.OnEventReceived += OnEventReceived;
-                await session.ConnectAsync();
-                await sessionCreatedTcs.Task;
+                session.OnError += OnError;
+                await session.ConnectAsync(cancellationToken);
+                await sessionCreatedTcs.Task.WithCancellation(cancellationToken);
             }
             finally
             {
                 session.OnEventReceived -= OnEventReceived;
+                session.OnError -= OnError;
             }
 
             return session;
 
+            void OnError(Error error)
+            {
+                sessionCreatedTcs.SetException(error.Exception ?? new Exception(error.Message));
+            }
+
             void OnEventReceived(IRealtimeEvent @event)
             {
-                switch (@event)
+                try
                 {
-                    case SessionResponse sessionResponse:
-                        sessionCreatedTcs.SetResult(sessionResponse);
-                        break;
-                    case RealtimeEventError realtimeEventError:
-                        sessionCreatedTcs.SetException(new Exception(realtimeEventError.Error.Message));
-                        break;
+                    switch (@event)
+                    {
+                        case SessionResponse sessionResponse:
+                            sessionCreatedTcs.SetResult(sessionResponse);
+                            break;
+                        case RealtimeEventError realtimeEventError:
+                            sessionCreatedTcs.SetException(new Exception(realtimeEventError.Error.Message));
+                            break;
+                    }
                 }
-
-                sessionEvents?.Invoke(@event);
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                    sessionCreatedTcs.SetException(e);
+                }
+                finally
+                {
+                    sessionEvents?.Invoke(@event);
+                }
             }
         }
     }

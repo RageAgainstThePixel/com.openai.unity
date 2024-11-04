@@ -17,7 +17,7 @@ namespace OpenAI.Realtime
         /// The event type, must be "conversation.item.created".
         /// </summary>
         [Preserve]
-        [JsonProperty("object")]
+        [JsonProperty("type")]
         public string Type { get; }
 
         /// <summary>

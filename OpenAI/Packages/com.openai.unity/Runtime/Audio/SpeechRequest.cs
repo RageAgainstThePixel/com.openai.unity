@@ -49,7 +49,7 @@ namespace OpenAI.Audio
         /// </summary>
         [Preserve]
         [JsonProperty("voice", DefaultValueHandling = DefaultValueHandling.Include)]
-        [FunctionProperty("The voice to use when generating the audio.", true)]
+        [FunctionProperty("The voice to use when generating the audio.", true, SpeechVoice.Alloy, SpeechVoice.Echo, SpeechVoice.Fable, SpeechVoice.Onyx, SpeechVoice.Nova, SpeechVoice.Shimmer)]
         public SpeechVoice Voice { get; }
 
         /// <summary>

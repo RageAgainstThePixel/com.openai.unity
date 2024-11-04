@@ -11,10 +11,17 @@ namespace OpenAI.Realtime
         public override void WriteJson(JsonWriter writer, RealtimeModality value, JsonSerializer serializer)
         {
             writer.WriteStartArray();
-            foreach (var modality in value.ToString().Split(", "))
+
+            if (value.HasFlag(RealtimeModality.Text))
             {
-                writer.WriteValue(modality);
+                writer.WriteValue("text");
             }
+
+            if (value.HasFlag(RealtimeModality.Audio))
+            {
+                writer.WriteValue("audio");
+            }
+
             writer.WriteEndArray();
         }
 
