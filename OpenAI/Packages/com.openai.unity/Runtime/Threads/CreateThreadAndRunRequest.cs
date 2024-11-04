@@ -341,8 +341,8 @@ namespace OpenAI.Threads
         /// which indicates the generation exceeded max_tokens or the conversation exceeded the max context length.
         /// </remarks>
         [Preserve]
-        [JsonProperty("response_format")]
         [JsonConverter(typeof(ResponseFormatConverter))]
+        [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public ResponseFormatObject ResponseFormatObject { get; internal set; }
 
         [JsonIgnore]
