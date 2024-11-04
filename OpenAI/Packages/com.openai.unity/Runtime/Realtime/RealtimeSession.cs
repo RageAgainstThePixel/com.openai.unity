@@ -18,6 +18,9 @@ namespace OpenAI.Realtime
         public event Action<IServerEvent> OnEventReceived;
 
         [Preserve]
+        public event Action<IClientEvent> OnEventSent;
+
+        [Preserve]
         public event Action<Error> OnError;
 
         private readonly WebSocket websocketClient;
@@ -130,6 +133,7 @@ namespace OpenAI.Realtime
                 Debug.Log(payload);
             }
 
+            OnEventSent?.Invoke(@event);
             await websocketClient.SendAsync(payload, cancellationToken);
         }
     }
