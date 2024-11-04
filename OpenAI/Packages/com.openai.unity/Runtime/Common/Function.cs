@@ -416,11 +416,11 @@ namespace OpenAI
 
         private static async Task<T> InvokeInternalAsync<T>(Function function, object[] invokeArgs)
         {
-            var result = InvokeInternal<T>(function, invokeArgs);
+            var result = function.MethodInfo.Invoke(function.Instance, invokeArgs);
 
             if (result is not Task task)
             {
-                return result;
+                return result == null ? default : (T)result;
             }
 
             await task;

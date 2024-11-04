@@ -179,7 +179,7 @@ namespace OpenAI.Samples.Chat
 
                         try
                         {
-                            var imageResults = await toolCall.InvokeFunctionAsync<IReadOnlyList<ImageResult>>().ConfigureAwait(true);
+                            var imageResults = await toolCall.InvokeFunctionAsync<IReadOnlyList<ImageResult>>(destroyCancellationToken).ConfigureAwait(true);
 
                             foreach (var imageResult in imageResults)
                             {
@@ -204,7 +204,7 @@ namespace OpenAI.Samples.Chat
                 try
                 {
                     var toolCallRequest = new ChatRequest(conversation.Messages, tools: assistantTools);
-                    toolCallResponse = await openAI.ChatEndpoint.GetCompletionAsync(toolCallRequest);
+                    toolCallResponse = await openAI.ChatEndpoint.GetCompletionAsync(toolCallRequest, destroyCancellationToken);
                     conversation.AppendMessage(toolCallResponse.FirstChoice.Message);
                 }
                 catch (RestException restEx)
@@ -217,7 +217,7 @@ namespace OpenAI.Samples.Chat
                     }
 
                     var toolCallRequest = new ChatRequest(conversation.Messages, tools: assistantTools);
-                    toolCallResponse = await openAI.ChatEndpoint.GetCompletionAsync(toolCallRequest);
+                    toolCallResponse = await openAI.ChatEndpoint.GetCompletionAsync(toolCallRequest, destroyCancellationToken);
                     conversation.AppendMessage(toolCallResponse.FirstChoice.Message);
                 }
 

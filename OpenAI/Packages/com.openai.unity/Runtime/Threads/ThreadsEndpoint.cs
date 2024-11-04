@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 using Utilities.WebRequestRest;
 using Utilities.WebRequestRest.Interfaces;
 
@@ -641,18 +642,15 @@ namespace OpenAI.Threads
                             }
 
                             serverSentEvent = message;
-
                             break;
                         case "error":
                             serverSentEvent = sseResponse.Deserialize<Error>(client);
-
                             break;
                         default:
                             // if not properly handled raise it up to caller to deal with it themselves.
                             serverSentEvent = ssEvent;
                             break;
                     }
-
                 }
                 catch (Exception e)
                 {
@@ -661,6 +659,11 @@ namespace OpenAI.Threads
                 }
                 finally
                 {
+                    if (EnableDebug)
+                    {
+                        Debug.Log($"{{\"{@event}\":{serverSentEvent!.ToJsonString()}}}");
+                    }
+
                     await streamEventHandler.Invoke(@event, serverSentEvent);
                 }
             }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);

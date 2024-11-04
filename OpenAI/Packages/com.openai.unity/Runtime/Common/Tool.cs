@@ -241,7 +241,7 @@ namespace OpenAI
                     where functionAttribute != null
                     let name = GetFunctionName(type, method)
                     let description = functionAttribute.Description
-                    select Function.GetOrCreateFunction(name, description, method, strict: true)
+                    select Function.GetOrCreateFunction(name, description, method, strict: false)
                     into function
                     select new Tool(function));
 
@@ -365,7 +365,6 @@ namespace OpenAI
         public static Tool GetOrCreateTool(object instance, string methodName, string description = null)
         {
             var type = instance.GetType();
-
             var method = type.GetMethod(methodName) ??
                 throw new InvalidOperationException($"Failed to find a valid method for {type.FullName}.{methodName}()");
             return GetOrCreateToolInternal(type, method, description, instance);
@@ -374,12 +373,13 @@ namespace OpenAI
         private static Tool GetOrCreateToolInternal(Type type, MethodInfo method, string description, object instance = null)
         {
             var functionName = GetFunctionName(type, method);
+
             if (TryGetTool(functionName, instance, out var tool))
             {
                 return tool;
             }
 
-            tool = new Tool(Function.GetOrCreateFunction(functionName, description, method, instance, strict: true));
+            tool = new Tool(Function.GetOrCreateFunction(functionName, description, method, instance, strict: false));
             toolCache.Add(tool);
             return tool;
         }

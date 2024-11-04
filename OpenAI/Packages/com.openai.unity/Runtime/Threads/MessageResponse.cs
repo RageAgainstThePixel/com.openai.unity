@@ -205,9 +205,13 @@ namespace OpenAI.Threads
         /// <returns><see cref="string"/> of all <see cref="Content"/>.</returns>
         [Preserve]
         public string PrintContent()
-            => content == null
-                ? string.Empty
-                : string.Join("\n", content.Select(c => c?.ToString()));
+        {
+            return Delta != null
+                ? Delta.PrintContent()
+                : content == null
+                    ? string.Empty
+                    : string.Join("\n", content.Select(c => c?.ToString()));
+        }
 
         /// <summary>
         /// Converts the <see cref="Content"/> to the specified <see cref="JsonSchema"/>.
