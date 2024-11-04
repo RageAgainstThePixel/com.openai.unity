@@ -14,7 +14,7 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("id")]
-        public string Id { get; }
+        public string Id { get; private set; }
 
         /// <summary>
         /// The object type, must be "realtime.item".

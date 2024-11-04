@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class ConversationItemInputAudioTranscriptionResponse : BaseRealtimeEventResponse, IRealtimeEvent
+    public sealed class ConversationItemInputAudioTranscriptionResponse : BaseRealtimeEventResponse, IServerEvent
     {
         /// <inheritdoc />
         [Preserve]

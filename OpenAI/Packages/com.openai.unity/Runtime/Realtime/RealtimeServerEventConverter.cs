@@ -6,7 +6,7 @@ using System;
 
 namespace OpenAI.Realtime
 {
-    internal class RealtimeEventConverter : JsonConverter
+    internal class RealtimeServerEventConverter : JsonConverter
     {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
             => serializer.Serialize(writer, value);
@@ -39,6 +39,6 @@ namespace OpenAI.Realtime
             };
         }
 
-        public override bool CanConvert(Type objectType) => typeof(IRealtimeEvent) == objectType;
+        public override bool CanConvert(Type objectType) => typeof(IServerEvent) == objectType;
     }
 }

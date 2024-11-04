@@ -21,4 +21,14 @@ namespace OpenAI.Realtime
 
         public string ToJsonString();
     }
+
+    [Preserve]
+    public interface IClientEvent : IRealtimeEvent
+    {
+    }
+
+    [Preserve]
+    public interface IServerEvent : IRealtimeEvent
+    {
+    }
 }

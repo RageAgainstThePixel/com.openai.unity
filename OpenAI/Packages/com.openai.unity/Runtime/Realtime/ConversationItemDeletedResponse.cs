@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class ConversationItemDeletedResponse : BaseRealtimeEventResponse, IRealtimeEvent
+    public sealed class ConversationItemDeletedResponse : BaseRealtimeEventResponse, IServerEvent
     {
         /// <inheritdoc />
         [Preserve]

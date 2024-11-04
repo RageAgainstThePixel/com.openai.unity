@@ -25,11 +25,10 @@ namespace OpenAI.Realtime
             [JsonProperty("output_audio_format")] RealtimeAudioFormat outputAudioFormat,
             [JsonProperty("input_audio_transcription")] InputAudioTranscriptionSettings inputAudioTranscriptionSettings,
             [JsonProperty("turn_detection")] VoiceActivityDetectionSettings voiceActivityDetectionSettings,
-            [JsonProperty("tools")] IReadOnlyList<Tool> tools,
+            [JsonProperty("tools")] IReadOnlyList<Function> tools,
             [JsonProperty("tool_choice")] object toolChoice,
             [JsonProperty("temperature")] float? temperature,
-            [JsonProperty("max_response_output_tokens")] object maxResponseOutputTokens
-        )
+            [JsonProperty("max_response_output_tokens")] object maxResponseOutputTokens)
         {
             Id = id;
             Object = @object;
@@ -63,7 +62,7 @@ namespace OpenAI.Realtime
             int? maxResponseOutputTokens = null)
         {
             Model = string.IsNullOrWhiteSpace(model.Id)
-                ? "gpt-4o-realtime-preview-2024-10-01"
+                ? "gpt-4o-realtime-preview"
                 : model;
             Modalities = modalities;
             Voice = voice ?? Realtime.Voice.Alloy;
@@ -113,7 +112,11 @@ namespace OpenAI.Realtime
                 }
             }
 
-            Tools = toolList?.ToList();
+            Tools = toolList?.Select(tool =>
+            {
+                tool.Function.Type = "function";
+                return tool.Function;
+            }).ToList();
             Temperature = temperature;
 
             if (maxResponseOutputTokens.HasValue)
@@ -178,7 +181,7 @@ namespace OpenAI.Realtime
 
         [Preserve]
         [JsonProperty("tools")]
-        public IReadOnlyList<Tool> Tools { get; private set; }
+        public IReadOnlyList<Function> Tools { get; private set; }
 
         [Preserve]
         [JsonProperty("tool_choice")]

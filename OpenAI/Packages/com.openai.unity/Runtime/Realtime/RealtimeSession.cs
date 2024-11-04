@@ -15,7 +15,7 @@ namespace OpenAI.Realtime
     public sealed class RealtimeSession : IDisposable
     {
         [Preserve]
-        public event Action<IRealtimeEvent> OnEventReceived;
+        public event Action<IServerEvent> OnEventReceived;
 
         [Preserve]
         public event Action<Error> OnError;
@@ -45,7 +45,7 @@ namespace OpenAI.Realtime
 
                 try
                 {
-                    var @event = JsonConvert.DeserializeObject<IRealtimeEvent>(dataFrame.Text, OpenAIClient.JsonSerializationOptions);
+                    var @event = JsonConvert.DeserializeObject<IServerEvent>(dataFrame.Text, OpenAIClient.JsonSerializationOptions);
                     OnEventReceived?.Invoke(@event);
                 }
                 catch (Exception e)
@@ -113,6 +113,24 @@ namespace OpenAI.Realtime
 
             void OnWebsocketClientOnOnOpen()
                 => connectTcs.TrySetResult(websocketClient.State);
+        }
+
+        [Preserve]
+        public async Task SendAsync<T>(T @event, CancellationToken cancellationToken = default) where T : IClientEvent
+        {
+            if (websocketClient.State != State.Open)
+            {
+                throw new Exception($"Websocket connection is not open! {websocketClient.State}");
+            }
+
+            var payload = @event.ToJsonString();
+
+            if (EnableDebug)
+            {
+                Debug.Log(payload);
+            }
+
+            await websocketClient.SendAsync(payload, cancellationToken);
         }
     }
 }

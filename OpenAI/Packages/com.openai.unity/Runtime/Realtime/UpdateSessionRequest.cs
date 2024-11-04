@@ -6,21 +6,27 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class SessionResponse : BaseRealtimeEventResponse, IServerEvent
+    public sealed class UpdateSessionRequest : BaseRealtimeEventResponse, IClientEvent
     {
         [Preserve]
+        public UpdateSessionRequest(SessionResource options)
+        {
+            Session = options;
+        }
+
+        [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; private set; }
+        public string EventId { get; }
 
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; private set; }
+        public string Type { get; } = "session.update";
 
         /// <summary>
         /// The session resource.
         /// </summary>
         [Preserve]
         [JsonProperty("session")]
-        public SessionResource Session { get; private set; }
+        public SessionResource Session { get; }
     }
 }

@@ -6,19 +6,19 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class ConversationItemCreatedResponse : BaseRealtimeEventResponse, IRealtimeEvent
+    public sealed class ConversationItemCreatedResponse : BaseRealtimeEventResponse, IServerEvent
     {
         /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; }
+        public string EventId { get; private set; }
 
         /// <summary>
         /// The event type, must be "conversation.item.created".
         /// </summary>
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; }
+        public string Type { get; private set; }
 
         /// <summary>
         /// The ID of the preceding item.
@@ -32,6 +32,6 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("item")]
-        public ConversationItem Item { get; }
+        public ConversationItem Item { get; private set; }
     }
 }

@@ -57,7 +57,7 @@ namespace OpenAI
             Name = name;
             Description = description;
             Parameters = parameters;
-            Strict = strict;
+            Strict = strict ?? false;
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace OpenAI
             Name = name;
             Description = description;
             Parameters = new JObject(parameters);
-            Strict = strict;
+            Strict = strict ?? false;
         }
 
         [Preserve]
@@ -98,7 +98,7 @@ namespace OpenAI
         {
             Name = name;
             Arguments = arguments;
-            Strict = strict;
+            Strict = strict ?? false;
         }
 
         [Preserve]
@@ -119,7 +119,7 @@ namespace OpenAI
             MethodInfo = method;
             Parameters = method.GenerateJsonSchema();
             Instance = instance;
-            Strict = strict;
+            Strict = strict ?? false;
             functionCache[Name] = this;
         }
 
@@ -179,6 +179,10 @@ namespace OpenAI
         [Preserve]
         [JsonProperty("name")]
         public string Name { get; private set; }
+
+        [Preserve]
+        [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Type { get; internal set; }
 
         /// <summary>
         /// The optional description of the function.
@@ -245,7 +249,7 @@ namespace OpenAI
         /// </remarks>
         [Preserve]
         [JsonProperty("strict", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool? Strict { get; private set; }
+        public bool Strict { get; private set; }
 
         /// <summary>
         /// The instance of the object to invoke the method on.

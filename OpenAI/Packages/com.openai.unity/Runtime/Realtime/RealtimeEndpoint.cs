@@ -41,6 +41,7 @@ namespace OpenAI.Realtime
                 session.OnError += OnError;
                 await session.ConnectAsync(cancellationToken);
                 await sessionCreatedTcs.Task.WithCancellation(cancellationToken);
+                await session.SendAsync(new UpdateSessionRequest(options), cancellationToken);
             }
             finally
             {
