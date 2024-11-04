@@ -293,6 +293,7 @@ namespace OpenAI.Assistants
         [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public ResponseFormatObject ResponseFormatObject { get; internal set; }
 
+        [Preserve]
         [JsonIgnore]
         public ChatResponseFormat ResponseFormat => ResponseFormatObject ?? ChatResponseFormat.Auto;
 
@@ -301,6 +302,7 @@ namespace OpenAI.Assistants
         /// This can be useful for storing additional information about the object in a structured format.
         /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
         /// </summary>
+        [Preserve]
         [JsonProperty("metadata")]
         public IReadOnlyDictionary<string, string> Metadata { get; }
     }
