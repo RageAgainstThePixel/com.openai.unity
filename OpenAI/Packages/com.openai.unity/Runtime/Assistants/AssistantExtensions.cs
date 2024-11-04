@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Utilities.Async;
 using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI.Assistants
@@ -118,6 +117,27 @@ namespace OpenAI.Assistants
                 throw new InvalidOperationException($"Failed to find a valid tool for [{toolCall.Id}] {toolCall.FunctionCall.Name}");
             tool.Function.Arguments = toolCall.FunctionCall.Arguments;
             return tool.InvokeFunction();
+        }
+
+        /// <summary>
+        /// Invoke the assistant's tool function using the <see cref="ToolCall"/>.
+        /// </summary>
+        /// <typeparam name="T">The expected signature return type.</typeparam>
+        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
+        /// <param name="toolCall"><see cref="ToolCall"/>.</param>
+        /// <returns>Tool output result as <see cref="string"/>.</returns>
+        /// <remarks>Only call this directly on your <see cref="ToolCall"/> if you know the method is synchronous.</remarks>
+        public static T InvokeToolCall<T>(this AssistantResponse assistant, ToolCall toolCall)
+        {
+            if (!toolCall.IsFunction)
+            {
+                throw new InvalidOperationException($"Cannot invoke built in tool {toolCall.Type}");
+            }
+
+            var tool = assistant.Tools.FirstOrDefault(tool => tool.IsFunction && tool.Function.Name == toolCall.FunctionCall.Name) ??
+                throw new InvalidOperationException($"Failed to find a valid tool for [{toolCall.Id}] {toolCall.FunctionCall.Name}");
+            tool.Function.Arguments = toolCall.FunctionCall.Arguments;
+            return tool.InvokeFunction<T>();
         }
 
         /// <summary>
