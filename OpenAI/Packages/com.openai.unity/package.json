@@ -18,8 +18,8 @@
   },
   "dependencies": {
     "com.utilities.rest": "3.3.0",
-    "com.utilities.encoder.wav": "1.2.2",
-    "com.utilities.websockets": "1.0.0"
+    "com.utilities.encoder.wav": "1.2.3",
+    "com.utilities.websockets": "1.0.1"
   },
   "samples": [
     {
