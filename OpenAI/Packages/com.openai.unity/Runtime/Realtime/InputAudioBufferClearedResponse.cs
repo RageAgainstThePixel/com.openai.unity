@@ -8,16 +8,24 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class InputAudioBufferClearedResponse : BaseRealtimeEvent, IServerEvent
     {
+        [Preserve]
+        [JsonConstructor]
+        internal InputAudioBufferClearedResponse(
+            [JsonProperty("event_id")] string eventId,
+            [JsonProperty("type")] string type)
+        {
+            EventId = eventId;
+            Type = type;
+        }
+
         /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; private set; }
+        public override string EventId { get; internal set; }
 
-        /// <summary>
-        /// The event type, must be "input_audio_buffer.cleared".
-        /// </summary>
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; private set; }
+        public override string Type { get; }
     }
 }

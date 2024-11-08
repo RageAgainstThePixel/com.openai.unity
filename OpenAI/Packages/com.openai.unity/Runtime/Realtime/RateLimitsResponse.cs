@@ -9,23 +9,33 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class RateLimitsResponse : BaseRealtimeEvent, IServerEvent
     {
+        [Preserve]
+        [JsonConstructor]
+        internal RateLimitsResponse(
+            [JsonProperty("event_id")] string eventId,
+            [JsonProperty("type")] string type,
+            [JsonProperty("rate_limits")] IReadOnlyList<RateLimit> rateLimits)
+        {
+            EventId = eventId;
+            Type = type;
+            RateLimits = rateLimits;
+        }
+
         /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; private set; }
+        public override string EventId { get; internal set; }
 
-        /// <summary>
-        /// The event type, must be "rate_limits.updated".
-        /// </summary>
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; private set; }
+        public override string Type { get; }
 
         /// <summary>
         /// List of rate limit information.
         /// </summary>
         [Preserve]
         [JsonProperty("rate_limits")]
-        public IReadOnlyList<RateLimit> RateLimits { get; private set; }
+        public IReadOnlyList<RateLimit> RateLimits { get; }
     }
 }

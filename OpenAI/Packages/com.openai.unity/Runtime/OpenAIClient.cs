@@ -130,7 +130,8 @@ namespace OpenAI
             Converters = new List<JsonConverter>
             {
                 new StringEnumConverter(new SnakeCaseNamingStrategy()),
-                new RealtimeServerEventConverter()
+                new RealtimeClientEventConverter(),
+                new RealtimeServerEventConverter(),
             }
         };
 

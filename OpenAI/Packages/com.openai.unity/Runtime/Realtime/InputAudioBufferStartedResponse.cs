@@ -8,30 +8,42 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class InputAudioBufferStartedResponse : BaseRealtimeEvent, IServerEvent
     {
+        [Preserve]
+        [JsonConstructor]
+        internal InputAudioBufferStartedResponse(
+            [JsonProperty("event_id")] string eventId,
+            [JsonProperty("type")] string type,
+            [JsonProperty("audio_start_ms")] int audioStartMs,
+            [JsonProperty("item_id")] string itemId)
+        {
+            EventId = eventId;
+            Type = type;
+            AudioStartMs = audioStartMs;
+            ItemId = itemId;
+        }
+
         /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; private set; }
+        public override string EventId { get; internal set; }
 
-        /// <summary>
-        /// The event type, must be "input_audio_buffer.started".
-        /// </summary>
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; private set; }
+        public override string Type { get; }
 
         /// <summary>
         /// Milliseconds since the session started when speech was detected.
         /// </summary>
         [Preserve]
         [JsonProperty("audio_start_ms")]
-        public int AudioStartMs { get; private set; }
+        public int AudioStartMs { get; }
 
         /// <summary>
         /// The ID of the user message item that will be created when speech stops.
         /// </summary>
         [Preserve]
         [JsonProperty("item_id")]
-        public string ItemId { get; private set; }
+        public string ItemId { get; }
     }
 }

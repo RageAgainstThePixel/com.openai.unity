@@ -21,13 +21,15 @@ namespace OpenAI.Realtime
             Item = item;
         }
 
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; }
+        public override string EventId { get; internal set; }
 
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; } = "conversation.item.create";
+        public override string Type { get; } = "conversation.item.create";
 
         /// <summary>
         /// The ID of the preceding item after which the new item will be inserted.

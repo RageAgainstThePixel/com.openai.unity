@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Utilities.Async;
@@ -87,9 +88,7 @@ namespace OpenAI.Samples.Realtime
                     model: Model.GPT4oRealtime,
                     instructions: systemPrompt,
                     tools: tools);
-                session = await openAI.RealtimeEndpoint.CreateSessionAsync(sessionOptions, OnSessionEvent, destroyCancellationToken);
-                session.OnEventReceived += OnSessionEvent;
-                session.OnEventSent += OnSessionEvent;
+                session = await openAI.RealtimeEndpoint.CreateSessionAsync(sessionOptions, cancellationToken: destroyCancellationToken);
                 inputField.onSubmit.AddListener(SubmitChat);
                 submitButton.onClick.AddListener(SubmitChat);
                 recordButton.onClick.AddListener(ToggleRecording);
@@ -138,81 +137,6 @@ namespace OpenAI.Samples.Realtime
             }
         }
 
-        private void OnSessionEvent(IRealtimeEvent serverEvent)
-        {
-            switch (serverEvent)
-            {
-                case ConversationItemCreateRequest conversationItemCreateRequest:
-                    break;
-                case ConversationItemCreatedResponse conversationItemCreatedResponse:
-                    break;
-                case ConversationItemDeleteRequest conversationItemDeleteRequest:
-                    break;
-                case ConversationItemDeletedResponse conversationItemDeletedResponse:
-                    break;
-                case ConversationItemInputAudioTranscriptionResponse conversationItemInputAudioTranscriptionResponse:
-                    break;
-                case ConversationItemTruncateRequest conversationItemTruncateRequest:
-                    break;
-                case ConversationItemTruncatedResponse conversationItemTruncatedResponse:
-                    break;
-                case InputAudioBufferAppendRequest inputAudioBufferAppendRequest:
-                    break;
-                case InputAudioBufferClearRequest inputAudioBufferClearRequest:
-                    break;
-                case InputAudioBufferClearedResponse inputAudioBufferClearedResponse:
-                    break;
-                case InputAudioBufferCommitRequest inputAudioBufferCommitRequest:
-                    break;
-                case InputAudioBufferCommittedResponse inputAudioBufferCommittedResponse:
-                    break;
-                case InputAudioBufferStartedResponse inputAudioBufferStartedResponse:
-                    break;
-                case InputAudioBufferStoppedResponse inputAudioBufferStoppedResponse:
-                    break;
-                case RateLimitsResponse rateLimitsResponse:
-                    break;
-                case RealtimeConversationResponse realtimeConversationResponse:
-                    break;
-                case RealtimeEventError realtimeEventError:
-                    Debug.LogError(realtimeEventError.Error.ToString());
-                    break;
-                case RealtimeResponse realtimeResponse:
-                    break;
-                case ResponseAudioResponse responseAudioResponse:
-                    break;
-                case ResponseAudioTranscriptResponse responseAudioTranscriptResponse:
-                    break;
-                case ResponseCancelRequest responseCancelRequest:
-                    break;
-                case ResponseCancelledResponse responseCancelledResponse:
-                    break;
-                case ResponseContentPartResponse responseContentPartResponse:
-                    break;
-                case ResponseCreateRequest responseCreateRequest:
-                    break;
-                case ResponseFunctionCallArguments responseFunctionCallArguments:
-                    break;
-                case ResponseOutputItemResponse responseOutputItemResponse:
-                    break;
-                case ResponseTextResponse responseTextResponse:
-                    break;
-                case UpdateSessionRequest updateSessionRequest:
-                    break;
-                case SessionResponse sessionResponse:
-                    switch (sessionResponse.Type)
-                    {
-                        case "session.created":
-                            Debug.Log("new session created!");
-                            break;
-                        case "session.updated":
-                            Debug.Log("session updated!");
-                            break;
-                    }
-                    break;
-            }
-        }
-
 #if !UNITY_2022_3_OR_NEWER
         private void OnDestroy()
         {
@@ -242,8 +166,12 @@ namespace OpenAI.Samples.Realtime
 
             try
             {
-                await session.SendAsync(new ConversationItemCreateRequest(userMessage), destroyCancellationToken);
-                await session.SendAsync(new ResponseCreateRequest(), destroyCancellationToken);
+                var createItemResponse = await session.SendAsync(new ConversationItemCreateRequest(userMessage), cancellationToken: destroyCancellationToken);
+                Debug.Log("created conversation item");
+                Assert.IsNotNull(createItemResponse);
+                var createResponse = await session.SendAsync(new ResponseCreateRequest(), cancellationToken: destroyCancellationToken);
+                Debug.Log("created response");
+                Assert.IsNotNull(createResponse);
             }
             catch (Exception e)
             {

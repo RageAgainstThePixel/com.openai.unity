@@ -6,18 +6,32 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class RealtimeEventError : BaseRealtimeEvent, IServerEvent, IClientEvent
+    public sealed class RealtimeEventError : BaseRealtimeEvent, IServerEvent
     {
         [Preserve]
-        [JsonProperty("event_id")]
-        public string EventId { get; private set; }
+        [JsonConstructor]
+        internal RealtimeEventError(
+            [JsonProperty("event_id")] string eventId,
+            [JsonProperty("type")] string type,
+            [JsonProperty("error")] Error error)
+        {
+            EventId = eventId;
+            Type = type;
+            Error = error;
+        }
 
+        /// <inheritdoc />
+        [Preserve]
+        [JsonProperty("event_id")]
+        public override string EventId { get; internal set; }
+
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; private set; }
+        public override string Type { get; }
 
         [Preserve]
         [JsonProperty("error")]
-        public Error Error { get; private set; }
+        public Error Error { get; }
     }
 }

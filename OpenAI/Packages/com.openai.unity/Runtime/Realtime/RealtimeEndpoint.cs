@@ -41,12 +41,12 @@ namespace OpenAI.Realtime
                 session.OnError += OnError;
                 await session.ConnectAsync(cancellationToken).ConfigureAwait(true);
                 await sessionCreatedTcs.Task.WithCancellation(cancellationToken).ConfigureAwait(true);
-                await session.SendAsync(new UpdateSessionRequest(options), cancellationToken).ConfigureAwait(true);
+                await session.SendAsync(new UpdateSessionRequest(options), cancellationToken: cancellationToken).ConfigureAwait(true);
             }
             finally
             {
-                session.OnEventReceived -= OnEventReceived;
                 session.OnError -= OnError;
+                session.OnEventReceived -= OnEventReceived;
             }
 
             return session;
@@ -63,17 +63,17 @@ namespace OpenAI.Realtime
                     switch (@event)
                     {
                         case SessionResponse sessionResponse:
-                            sessionCreatedTcs.SetResult(sessionResponse);
+                            sessionCreatedTcs.TrySetResult(sessionResponse);
                             break;
                         case RealtimeEventError realtimeEventError:
-                            sessionCreatedTcs.SetException(new Exception(realtimeEventError.Error.Message));
+                            sessionCreatedTcs.TrySetException(new Exception(realtimeEventError.Error.Message));
                             break;
                     }
                 }
                 catch (Exception e)
                 {
                     Debug.LogError(e);
-                    sessionCreatedTcs.SetException(e);
+                    sessionCreatedTcs.TrySetException(e);
                 }
                 finally
                 {

@@ -8,23 +8,33 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class ConversationItemDeletedResponse : BaseRealtimeEvent, IServerEvent
     {
+        [Preserve]
+        [JsonConstructor]
+        internal ConversationItemDeletedResponse(
+            [JsonProperty("event_id")] string eventId,
+            [JsonProperty("type")] string type,
+            [JsonProperty("item_id")] string itemId)
+        {
+            EventId = eventId;
+            Type = type;
+            ItemId = itemId;
+        }
+
         /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; private set; }
+        public override string EventId { get; internal set; }
 
-        /// <summary>
-        /// The event type, must be "conversation.item.deleted".
-        /// </summary>
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; private set; }
+        public override string Type { get; }
 
         /// <summary>
         /// The ID of the item that was deleted.
         /// </summary>
         [Preserve]
         [JsonProperty("item_id")]
-        public string ItemId { get; private set; }
+        public string ItemId { get; }
     }
 }

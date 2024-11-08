@@ -26,13 +26,15 @@ namespace OpenAI.Realtime
             AudioEndMs = audioEndMs;
         }
 
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; }
+        public override string EventId { get; internal set; }
 
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; } = "conversation.item.truncate";
+        public override string Type { get; } = "conversation.item.truncate";
 
         /// <summary>
         /// The ID of the assistant message item to truncate. Only assistant message items can be truncated.

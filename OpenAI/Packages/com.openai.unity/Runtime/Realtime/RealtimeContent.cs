@@ -47,29 +47,29 @@ namespace OpenAI.Realtime
         /// The content type ("text", "audio", "input_text", "input_audio").
         /// </summary>
         [Preserve]
-        [JsonProperty("type")]
-        public RealtimeContentType Type { get; private set; }
+        [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Include)]
+        public RealtimeContentType Type { get; }
 
         /// <summary>
         /// The text content.
         /// </summary>
         [Preserve]
         [JsonProperty("text")]
-        public string Text { get; private set; }
+        public string Text { get; }
 
         /// <summary>
         /// Base64-encoded audio data.
         /// </summary>
         [Preserve]
         [JsonProperty("audio")]
-        public string Audio { get; private set; }
+        public string Audio { get; }
 
         /// <summary>
         /// The transcript of the audio.
         /// </summary>
         [Preserve]
         [JsonProperty("transcript")]
-        public string Transcript { get; private set; }
+        public string Transcript { get; }
 
         [Preserve]
         public static implicit operator RealtimeContent(string text) => new(text);

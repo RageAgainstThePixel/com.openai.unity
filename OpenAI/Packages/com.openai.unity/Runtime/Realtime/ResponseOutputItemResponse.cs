@@ -8,37 +8,51 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class ResponseOutputItemResponse : BaseRealtimeEvent, IServerEvent
     {
+        [Preserve]
+        [JsonConstructor]
+        internal ResponseOutputItemResponse(
+            [JsonProperty("event_id")] string eventId,
+            [JsonProperty("type")] string type,
+            [JsonProperty("response_id")] string responseId,
+            [JsonProperty("output_index")] string outputIndex,
+            [JsonProperty("item")] ConversationItem item)
+        {
+            EventId = eventId;
+            Type = type;
+            ResponseId = responseId;
+            OutputIndex = outputIndex;
+            Item = item;
+        }
+
         /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; private set; }
+        public override string EventId { get; internal set; }
 
-        /// <summary>
-        /// The event type, "response.output_item.added" or "response.output_item.done".
-        /// </summary>
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; private set; }
+        public override string Type { get; }
 
         /// <summary>
         /// The ID of the response to which the item belongs.
         /// </summary>
         [Preserve]
         [JsonProperty("response_id")]
-        public string ResponseId { get; private set; }
+        public string ResponseId { get; }
 
         /// <summary>
         /// The index of the output item in the response.
         /// </summary>
         [Preserve]
         [JsonProperty("output_index")]
-        public string OutputIndex { get; private set; }
+        public string OutputIndex { get; }
 
         /// <summary>
         /// The item that was added.
         /// </summary>
         [Preserve]
         [JsonProperty("item")]
-        public ConversationItem Item { get; private set; }
+        public ConversationItem Item { get; }
     }
 }

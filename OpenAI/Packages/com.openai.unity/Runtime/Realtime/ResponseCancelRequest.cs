@@ -7,17 +7,19 @@ namespace OpenAI.Realtime
 {
     /// <summary>
     /// Send this event to cancel an in-progress response.
-    /// The server will respond with a response.cancelled event or an error if there is no response to cancel.
+    /// The server will respond with a `response.cancelled` event or an error if there is no response to cancel.
     /// </summary>
     [Preserve]
     public sealed class ResponseCancelRequest : BaseRealtimeEvent, IClientEvent
     {
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; }
+        public override string EventId { get; internal set; }
 
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; } = "response.cancel";
+        public override string Type { get; } = "response.cancel";
     }
 }

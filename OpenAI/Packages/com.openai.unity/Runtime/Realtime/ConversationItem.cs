@@ -57,7 +57,7 @@ namespace OpenAI.Realtime
         /// The object type, must be "realtime.item".
         /// </summary>
         [Preserve]
-        [JsonProperty("object", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonProperty("object")]
         public string Object { get; private set; }
 
         /// <summary>
@@ -71,14 +71,14 @@ namespace OpenAI.Realtime
         /// The status of the item ("completed", "in_progress", "incomplete").
         /// </summary>
         [Preserve]
-        [JsonProperty("status", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonProperty("status")]
         public RealtimeResponseStatus Status { get; private set; }
 
         /// <summary>
         /// The role associated with the item ("user", "assistant", "system").
         /// </summary>
         [Preserve]
-        [JsonProperty("role", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonProperty("role")]
         public Role Role { get; private set; }
 
         /// <summary>

@@ -8,23 +8,33 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class RealtimeResponse : BaseRealtimeEvent, IServerEvent
     {
+        [Preserve]
+        [JsonConstructor]
+        internal RealtimeResponse(
+            [JsonProperty("event_id")] string eventId,
+            [JsonProperty("type")] string type,
+            [JsonProperty("response")] RealtimeResponseResource response)
+        {
+            EventId = eventId;
+            Type = type;
+            Response = response;
+        }
+
         /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; private set; }
+        public override string EventId { get; internal set; }
 
-        /// <summary>
-        /// The event type, must be "response.created".
-        /// </summary>
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; private set; }
+        public override string Type { get; }
 
         /// <summary>
         /// The response resource.
         /// </summary>
         [Preserve]
         [JsonProperty("response")]
-        public RealtimeResponseResource Response { get; private set; }
+        public RealtimeResponseResource Response { get; }
     }
 }

@@ -9,18 +9,32 @@ namespace OpenAI.Realtime
     public sealed class SessionResponse : BaseRealtimeEvent, IServerEvent
     {
         [Preserve]
-        [JsonProperty("event_id")]
-        public string EventId { get; private set; }
+        [JsonConstructor]
+        internal SessionResponse(
+            [JsonProperty("event_id")] string eventId,
+            [JsonProperty("type")] string type,
+            [JsonProperty("session")] SessionResource session)
+        {
+            EventId = eventId;
+            Type = type;
+            Session = session;
+        }
 
+        /// <inheritdoc />
+        [Preserve]
+        [JsonProperty("event_id")]
+        public override string EventId { get; internal set; }
+
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; private set; }
+        public override string Type { get; }
 
         /// <summary>
         /// The session resource.
         /// </summary>
         [Preserve]
         [JsonProperty("session")]
-        public SessionResource Session { get; private set; }
+        public SessionResource Session { get; }
     }
 }

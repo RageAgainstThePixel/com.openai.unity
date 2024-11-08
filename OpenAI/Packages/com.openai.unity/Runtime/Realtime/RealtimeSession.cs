@@ -29,6 +29,9 @@ namespace OpenAI.Realtime
         public bool EnableDebug { get; set; }
 
         [Preserve]
+        public int EventTimeout { get; set; } = 30;
+
+        [Preserve]
         internal RealtimeSession(WebSocket wsClient, bool enableDebug)
         {
             websocketClient = wsClient;
@@ -118,22 +121,88 @@ namespace OpenAI.Realtime
         }
 
         [Preserve]
-        public async Task SendAsync<T>(T @event, CancellationToken cancellationToken = default) where T : IClientEvent
+        public async Task<IServerEvent> SendAsync<T>(T clientEvent, Action<IServerEvent> sessionEvents = null, CancellationToken cancellationToken = default)
+            where T : IClientEvent
         {
             if (websocketClient.State != State.Open)
             {
                 throw new Exception($"Websocket connection is not open! {websocketClient.State}");
             }
 
-            var payload = @event.ToJsonString();
+            var payload = clientEvent.ToJsonString();
 
             if (EnableDebug)
             {
                 Debug.Log(payload);
             }
 
-            OnEventSent?.Invoke(@event);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(EventTimeout));
+            using var eventCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token);
+            var tcs = new TaskCompletionSource<IServerEvent>();
+            eventCts.Token.Register(() => tcs.TrySetCanceled());
+            OnEventReceived += EventCallback;
+            OnEventSent?.Invoke(clientEvent);
             await websocketClient.SendAsync(payload, cancellationToken).ConfigureAwait(true);
+            return await tcs.Task.WithCancellation(eventCts.Token);
+
+            void EventCallback(IServerEvent serverEvent)
+            {
+                sessionEvents?.Invoke(serverEvent);
+
+                try
+                {
+                    if (serverEvent is RealtimeEventError serverError)
+                    {
+                        Debug.LogWarning($"{clientEvent.Type} -> {serverEvent.Type}");
+                        tcs.TrySetException(new Exception(serverError.ToString()));
+                        OnEventReceived -= EventCallback;
+                        return;
+                    }
+
+                    if (clientEvent is UpdateSessionRequest &&
+                        serverEvent is SessionResponse)
+                    {
+                        Complete();
+                        return;
+                    }
+
+                    if (clientEvent is ConversationItemCreateRequest &&
+                        serverEvent is ConversationItemCreatedResponse)
+                    {
+                        Complete();
+                        return;
+                    }
+
+                    if (clientEvent is ResponseCreateRequest &&
+                        serverEvent is RealtimeResponse response)
+                    {
+                        if (response.Response.Status == RealtimeResponseStatus.InProgress)
+                        {
+                            return;
+                        }
+
+                        if (response.Response.Status != RealtimeResponseStatus.Completed)
+                        {
+                            tcs.TrySetException(new Exception(response.Response.StatusDetails.Error.ToString()));
+                        }
+                        else
+                        {
+                            Complete();
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+
+                void Complete()
+                {
+                    Debug.LogWarning($"{clientEvent.Type} -> {serverEvent.Type}");
+                    tcs.TrySetResult(serverEvent);
+                    OnEventReceived -= EventCallback;
+                }
+            }
         }
     }
 }

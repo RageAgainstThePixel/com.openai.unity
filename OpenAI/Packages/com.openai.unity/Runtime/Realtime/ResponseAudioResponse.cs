@@ -8,48 +8,66 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class ResponseAudioResponse : BaseRealtimeEvent, IServerEvent
     {
+        [Preserve]
+        [JsonConstructor]
+        internal ResponseAudioResponse(
+            [JsonProperty("event_id")] string eventId,
+            [JsonProperty("type")] string type,
+            [JsonProperty("response_id")] string responseId,
+            [JsonProperty("item_id")] string itemId,
+            [JsonProperty("output_index")] string outputIndex,
+            [JsonProperty("content_index")] string contentIndex,
+            [JsonProperty("delta")] string delta)
+        {
+            EventId = eventId;
+            Type = type;
+            ResponseId = responseId;
+            ItemId = itemId;
+            OutputIndex = outputIndex;
+            ContentIndex = contentIndex;
+            Delta = delta;
+        }
+
         /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; private set; }
+        public override string EventId { get; internal set; }
 
-        /// <summary>
-        /// "response.audio.delta" or "response.audio.done"
-        /// </summary>
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; private set; }
+        public override string Type { get; }
 
         /// <summary>
         /// The ID of the response.
         /// </summary>
         [Preserve]
         [JsonProperty("response_id")]
-        public string ResponseId { get; private set; }
+        public string ResponseId { get; }
 
         /// <summary>
         /// The ID of the item.
         /// </summary>
         [Preserve]
         [JsonProperty("item_id")]
-        public string ItemId { get; private set; }
+        public string ItemId { get; }
 
         /// <summary>
         /// The index of the output item in the response.
         /// </summary>
         [Preserve]
         [JsonProperty("output_index")]
-        public string OutputIndex { get; private set; }
+        public string OutputIndex { get; }
 
         /// <summary>
         /// The index of the content part in the item's content array.
         /// </summary>
         [Preserve]
         [JsonProperty("content_index")]
-        public string ContentIndex { get; private set; }
+        public string ContentIndex { get; }
 
         [Preserve]
         [JsonProperty("delta")]
-        public string Delta { get; private set; }
+        public string Delta { get; }
     }
 }

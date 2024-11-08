@@ -15,19 +15,22 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class UpdateSessionRequest : BaseRealtimeEvent, IClientEvent
     {
+
         [Preserve]
         public UpdateSessionRequest(SessionResource options)
         {
             Session = options;
         }
 
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; }
+        public override string EventId { get; internal set; }
 
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; } = "session.update";
+        public override string Type { get; } = "session.update";
 
         /// <summary>
         /// The session resource.

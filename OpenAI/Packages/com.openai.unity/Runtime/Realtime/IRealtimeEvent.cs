@@ -19,6 +19,7 @@ namespace OpenAI.Realtime
         [JsonProperty("type")]
         public string Type { get; }
 
+        [Preserve]
         public string ToJsonString();
     }
 

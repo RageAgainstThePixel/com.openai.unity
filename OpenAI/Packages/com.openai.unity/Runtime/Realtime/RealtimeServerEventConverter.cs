@@ -8,8 +8,12 @@ namespace OpenAI.Realtime
 {
     internal class RealtimeServerEventConverter : JsonConverter
     {
+        public override bool CanWrite => false;
+
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-            => serializer.Serialize(writer, value);
+            => throw new NotImplementedException();
+
+        public override bool CanConvert(Type objectType) => typeof(IServerEvent) == objectType;
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
@@ -29,16 +33,16 @@ namespace OpenAI.Realtime
                 "input_audio_buffer.cleared" => jObject.ToObject<InputAudioBufferClearedResponse>(serializer),
                 "input_audio_buffer.speech_started" => jObject.ToObject<InputAudioBufferStartedResponse>(serializer),
                 "input_audio_buffer.speech_stopped" => jObject.ToObject<InputAudioBufferStoppedResponse>(serializer),
-                _ when type.StartsWith("response.output_item") => jObject.ToObject<ResponseOutputItemResponse>(serializer),
-                _ when type.StartsWith("response.content_part") => jObject.ToObject<ResponseContentPartResponse>(serializer),
                 _ when type.StartsWith("response.audio_transcript") => jObject.ToObject<ResponseAudioTranscriptResponse>(serializer),
+                _ when type.StartsWith("response.audio") => jObject.ToObject<ResponseAudioResponse>(),
+                _ when type.StartsWith("response.content_part") => jObject.ToObject<ResponseContentPartResponse>(serializer),
                 _ when type.StartsWith("response.function_call_arguments") => jObject.ToObject<ResponseFunctionCallArguments>(serializer),
+                _ when type.StartsWith("response.output_item") => jObject.ToObject<ResponseOutputItemResponse>(serializer),
+                _ when type.StartsWith("response.text") => jObject.ToObject<ResponseTextResponse>(serializer),
                 _ when type.StartsWith("response") => jObject.ToObject<RealtimeResponse>(serializer),
                 _ when type.StartsWith("rate_limits") => jObject.ToObject<RateLimitsResponse>(serializer),
                 _ => throw new NotImplementedException($"Unknown event type: {type}")
             };
         }
-
-        public override bool CanConvert(Type objectType) => typeof(IServerEvent) == objectType;
     }
 }

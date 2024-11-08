@@ -18,12 +18,14 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class InputAudioBufferCommitRequest : BaseRealtimeEvent, IClientEvent
     {
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; }
+        public override string EventId { get; internal set; }
 
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; } = "input_audio_buffer.commit";
+        public override string Type { get; } = "input_audio_buffer.commit";
     }
 }

@@ -20,13 +20,15 @@ namespace OpenAI.Realtime
             ItemId = itemId;
         }
 
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; }
+        public override string EventId { get; internal set; }
 
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; } = "conversation.item.delete";
+        public override string Type { get; } = "conversation.item.delete";
 
         /// <summary>
         /// The ID of the item to delete.

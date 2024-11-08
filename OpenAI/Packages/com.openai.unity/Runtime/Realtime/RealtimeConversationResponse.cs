@@ -8,24 +8,34 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class RealtimeConversationResponse : BaseRealtimeEvent, IServerEvent
     {
+        [Preserve]
+        [JsonConstructor]
+        internal RealtimeConversationResponse(
+            [JsonProperty("event_id")] string eventId,
+            [JsonProperty("type")] string type,
+            [JsonProperty("conversation")] RealtimeConversation conversation)
+        {
+            EventId = eventId;
+            Type = type;
+            Conversation = conversation;
+        }
+
         /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
-        public string EventId { get; private set; }
+        public override string EventId { get; internal set; }
 
-        /// <summary>
-        /// The event type, must be "conversation.created".
-        /// </summary>
+        /// <inheritdoc />
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; private set; }
+        public override string Type { get; }
 
         /// <summary>
         /// The conversation resource.
         /// </summary>
         [Preserve]
         [JsonProperty("conversation")]
-        public RealtimeConversation Conversation { get; private set; }
+        public RealtimeConversation Conversation { get; }
 
         [Preserve]
         public static implicit operator RealtimeConversation(RealtimeConversationResponse response) => response?.Conversation;
