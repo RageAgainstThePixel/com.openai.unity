@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class InputAudioBufferStartedResponse : BaseRealtimeEventResponse, IServerEvent
+    public sealed class InputAudioBufferStartedResponse : BaseRealtimeEvent, IServerEvent
     {
         /// <inheritdoc />
         [Preserve]

@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class ResponseFunctionCallArguments : BaseRealtimeEventResponse, IServerEvent
+    public sealed class ResponseFunctionCallArguments : BaseRealtimeEvent, IServerEvent
     {
         /// <inheritdoc />
         [Preserve]

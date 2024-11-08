@@ -7,7 +7,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class RateLimitsResponse : BaseRealtimeEventResponse, IServerEvent
+    public sealed class RateLimitsResponse : BaseRealtimeEvent, IServerEvent
     {
         /// <inheritdoc />
         [Preserve]

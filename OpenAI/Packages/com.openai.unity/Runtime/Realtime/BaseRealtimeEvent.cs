@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace OpenAI.Realtime
 {
-    public abstract class BaseRealtimeEventResponse
+    public abstract class BaseRealtimeEvent
     {
         public string ToJsonString() => JsonConvert.SerializeObject(this, OpenAIClient.JsonSerializationOptions);
     }

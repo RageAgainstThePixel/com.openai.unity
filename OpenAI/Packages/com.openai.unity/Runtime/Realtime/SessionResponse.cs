@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class SessionResponse : BaseRealtimeEventResponse, IServerEvent
+    public sealed class SessionResponse : BaseRealtimeEvent, IServerEvent
     {
         [Preserve]
         [JsonProperty("event_id")]
