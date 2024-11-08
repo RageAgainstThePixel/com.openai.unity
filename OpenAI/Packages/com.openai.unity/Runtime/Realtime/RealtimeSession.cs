@@ -96,7 +96,7 @@ namespace OpenAI.Realtime
                 // ReSharper disable once MethodHasAsyncOverloadWithCancellation
                 // don't call async because it is blocking until connection is closed.
                 websocketClient.Connect();
-                await connectTcs.Task.WithCancellation(cancellationToken);
+                await connectTcs.Task.WithCancellation(cancellationToken).ConfigureAwait(true);
 
                 if (websocketClient.State != State.Open)
                 {
@@ -113,7 +113,6 @@ namespace OpenAI.Realtime
 
             void OnWebsocketClientOnOnError(Exception e)
                 => connectTcs.TrySetException(e);
-
             void OnWebsocketClientOnOnOpen()
                 => connectTcs.TrySetResult(websocketClient.State);
         }
@@ -134,7 +133,7 @@ namespace OpenAI.Realtime
             }
 
             OnEventSent?.Invoke(@event);
-            await websocketClient.SendAsync(payload, cancellationToken);
+            await websocketClient.SendAsync(payload, cancellationToken).ConfigureAwait(true);
         }
     }
 }

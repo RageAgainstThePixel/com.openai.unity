@@ -9,7 +9,7 @@ namespace OpenAI.Realtime
     public enum RealtimeResponseStatus
     {
         [EnumMember(Value = "in_progress")]
-        InProgress,
+        InProgress = 1,
         [EnumMember(Value = "completed")]
         Completed,
         [EnumMember(Value = "cancelled")]

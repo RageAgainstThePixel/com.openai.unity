@@ -9,6 +9,24 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class RealtimeResponseResource
     {
+        [Preserve]
+        [JsonConstructor]
+        internal RealtimeResponseResource(
+            [JsonProperty("id")] string id,
+            [JsonProperty("object")] string @object,
+            [JsonProperty("status")] RealtimeResponseStatus status,
+            [JsonProperty("status_details")] StatusDetails statusDetails,
+            [JsonProperty("output")] IReadOnlyList<ConversationItem> output,
+            [JsonProperty("usage")] Usage usage)
+        {
+            Id = id;
+            Object = @object;
+            Status = status;
+            StatusDetails = statusDetails;
+            Output = output;
+            Usage = usage;
+        }
+
         /// <summary>
         /// The unique ID of the response.
         /// </summary>
@@ -20,14 +38,14 @@ namespace OpenAI.Realtime
         /// The object type, must be "realtime.response".
         /// </summary>
         [Preserve]
-        [JsonProperty("object")]
+        [JsonProperty("object", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Object { get; private set; }
 
         /// <summary>
         /// The status of the response ("in_progress").
         /// </summary>
         [Preserve]
-        [JsonProperty("status")]
+        [JsonProperty("status", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public RealtimeResponseStatus Status { get; private set; }
 
         /// <summary>

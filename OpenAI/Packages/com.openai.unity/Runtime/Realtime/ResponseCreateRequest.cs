@@ -18,10 +18,7 @@ namespace OpenAI.Realtime
     public sealed class ResponseCreateRequest : BaseRealtimeEvent, IClientEvent
     {
         [Preserve]
-        public ResponseCreateRequest(RealtimeResponseResource response)
-        {
-            Response = response;
-        }
+        public ResponseCreateRequest() { }
 
         [Preserve]
         [JsonProperty("event_id")]
@@ -30,9 +27,5 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonProperty("type")]
         public string Type { get; } = "response.create";
-
-        [Preserve]
-        [JsonProperty("response")]
-        public RealtimeResponseResource Response { get; }
     }
 }

@@ -9,6 +9,43 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class ConversationItem
     {
+        [Preserve]
+        [JsonConstructor]
+        internal ConversationItem(
+            [JsonProperty("id")] string id,
+            [JsonProperty("object")] string @object,
+            [JsonProperty("type")] ConversationItemType type,
+            [JsonProperty("status")] RealtimeResponseStatus status,
+            [JsonProperty("role")] Role role,
+            [JsonProperty("content")] IReadOnlyList<RealtimeContent> content,
+            [JsonProperty("call_id")] string functionCallId,
+            [JsonProperty("name")] string functionName,
+            [JsonProperty("arguments")] string functionArguments,
+            [JsonProperty("output")] string functionOutput)
+        {
+            Id = id;
+            Object = @object;
+            Type = type;
+            Status = status;
+            Role = role;
+            Content = content;
+            FunctionCallId = functionCallId;
+            FunctionName = functionName;
+            FunctionArguments = functionArguments;
+            FunctionOutput = functionOutput;
+        }
+
+        [Preserve]
+        public ConversationItem(RealtimeContent content)
+        {
+            Type = ConversationItemType.Message;
+            Role = Role.User;
+            Content = new List<RealtimeContent> { content };
+        }
+
+        [Preserve]
+        public static implicit operator ConversationItem(string text) => new(text);
+
         /// <summary>
         /// The unique ID of the item.
         /// </summary>
@@ -20,28 +57,28 @@ namespace OpenAI.Realtime
         /// The object type, must be "realtime.item".
         /// </summary>
         [Preserve]
-        [JsonProperty("object")]
+        [JsonProperty("object", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Object { get; private set; }
 
         /// <summary>
         /// The type of the item ("message", "function_call", "function_call_output").
         /// </summary>
         [Preserve]
-        [JsonProperty("type")]
+        [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Include)]
         public ConversationItemType Type { get; private set; }
 
         /// <summary>
         /// The status of the item ("completed", "in_progress", "incomplete").
         /// </summary>
         [Preserve]
-        [JsonProperty("status")]
+        [JsonProperty("status", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public RealtimeResponseStatus Status { get; private set; }
 
         /// <summary>
         /// The role associated with the item ("user", "assistant", "system").
         /// </summary>
         [Preserve]
-        [JsonProperty("role")]
+        [JsonProperty("role", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public Role Role { get; private set; }
 
         /// <summary>
