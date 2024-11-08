@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class ResponseAudioTranscriptResponse : BaseRealtimeEvent, IServerEvent
+    public sealed class ResponseAudioTranscriptResponse : BaseRealtimeEvent, IServerEvent, IRealtimeEventStream
     {
         [Preserve]
         [JsonConstructor]
@@ -81,6 +81,14 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonProperty("transcript")]
         public string Transcript { get; }
+
+        [Preserve]
+        [JsonIgnore]
+        public bool IsDelta => Type.EndsWith("delta");
+
+        [Preserve]
+        [JsonIgnore]
+        public bool IsDone => Type.EndsWith("done");
 
         [Preserve]
         public override string ToString()

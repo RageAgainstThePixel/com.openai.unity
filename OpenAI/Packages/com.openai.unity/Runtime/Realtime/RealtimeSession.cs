@@ -75,6 +75,7 @@ namespace OpenAI.Realtime
             GC.SuppressFinalize(this);
         }
 
+        [Preserve]
         private void Dispose(bool disposing)
         {
             if (!isDisposed && disposing)
@@ -121,14 +122,18 @@ namespace OpenAI.Realtime
         }
 
         [Preserve]
-        public async Task<IServerEvent> SendAsync<T>(T clientEvent, Action<IServerEvent> sessionEvents = null, CancellationToken cancellationToken = default)
-            where T : IClientEvent
+        public async Task<IServerEvent> SendAsync<T>(T @event, CancellationToken cancellationToken = default) where T : IClientEvent
+            => await SendAsync(@event, null, cancellationToken);
+
+        [Preserve]
+        public async Task<IServerEvent> SendAsync<T>(T @event, Action<IServerEvent> sessionEvents = null, CancellationToken cancellationToken = default) where T : IClientEvent
         {
             if (websocketClient.State != State.Open)
             {
                 throw new Exception($"Websocket connection is not open! {websocketClient.State}");
             }
 
+            IClientEvent clientEvent = @event;
             var payload = clientEvent.ToJsonString();
 
             if (EnableDebug)
@@ -153,41 +158,39 @@ namespace OpenAI.Realtime
                 {
                     if (serverEvent is RealtimeEventError serverError)
                     {
-                        Debug.LogWarning($"{clientEvent.Type} -> {serverEvent.Type}");
-                        tcs.TrySetException(new Exception(serverError.ToString()));
+                        tcs.TrySetException(serverError);
                         OnEventReceived -= EventCallback;
                         return;
                     }
 
-                    if (clientEvent is UpdateSessionRequest &&
-                        serverEvent is SessionResponse)
+                    switch (clientEvent)
                     {
-                        Complete();
-                        return;
-                    }
-
-                    if (clientEvent is ConversationItemCreateRequest &&
-                        serverEvent is ConversationItemCreatedResponse)
-                    {
-                        Complete();
-                        return;
-                    }
-
-                    if (clientEvent is ResponseCreateRequest &&
-                        serverEvent is RealtimeResponse response)
-                    {
-                        if (response.Response.Status == RealtimeResponseStatus.InProgress)
-                        {
-                            return;
-                        }
-
-                        if (response.Response.Status != RealtimeResponseStatus.Completed)
-                        {
-                            tcs.TrySetException(new Exception(response.Response.StatusDetails.Error.ToString()));
-                        }
-                        else
-                        {
+                        case UpdateSessionRequest when serverEvent is SessionResponse:
+                        case InputAudioBufferAppendRequest: // has no sever response
+                        case InputAudioBufferCommitRequest when serverEvent is InputAudioBufferCommittedResponse:
+                        case InputAudioBufferClearRequest when serverEvent is InputAudioBufferClearedResponse:
+                        case ConversationItemCreateRequest when serverEvent is ConversationItemCreatedResponse:
+                        case ConversationItemTruncateRequest when serverEvent is ConversationItemTruncatedResponse:
+                        case ConversationItemDeleteRequest when serverEvent is ConversationItemDeletedResponse:
                             Complete();
+                            return;
+                        case ResponseCreateRequest when serverEvent is RealtimeResponse response:
+                        {
+                            if (response.Response.Status == RealtimeResponseStatus.InProgress)
+                            {
+                                return;
+                            }
+
+                            if (response.Response.Status != RealtimeResponseStatus.Completed)
+                            {
+                                tcs.TrySetException(new Exception(response.Response.StatusDetails.Error.ToString()));
+                            }
+                            else
+                            {
+                                Complete();
+                            }
+
+                            break;
                         }
                     }
                 }
@@ -198,7 +201,11 @@ namespace OpenAI.Realtime
 
                 void Complete()
                 {
-                    Debug.LogWarning($"{clientEvent.Type} -> {serverEvent.Type}");
+                    if (EnableDebug)
+                    {
+                        Debug.Log($"{clientEvent.Type} -> {serverEvent.Type}");
+                    }
+
                     tcs.TrySetResult(serverEvent);
                     OnEventReceived -= EventCallback;
                 }

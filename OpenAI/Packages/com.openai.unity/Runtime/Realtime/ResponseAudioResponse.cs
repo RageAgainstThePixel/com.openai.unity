@@ -1,12 +1,14 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using UnityEngine;
 using UnityEngine.Scripting;
+using Utilities.Audio;
 
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class ResponseAudioResponse : BaseRealtimeEvent, IServerEvent
+    public sealed class ResponseAudioResponse : BaseRealtimeEvent, IServerEvent, IRealtimeEventStream
     {
         [Preserve]
         [JsonConstructor]
@@ -69,5 +71,22 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonProperty("delta")]
         public string Delta { get; }
+
+        [Preserve]
+        [JsonIgnore]
+        public bool IsDelta => Type.EndsWith("delta");
+
+        [Preserve]
+        [JsonIgnore]
+        public bool IsDone => Type.EndsWith("done");
+
+        [Preserve]
+        public static implicit operator AudioClip(ResponseAudioResponse response)
+        {
+            var audioSamples = PCMEncoder.Decode(System.Convert.FromBase64String(response.Delta));
+            var audioClip = AudioClip.Create($"{response.ItemId}_{response.OutputIndex}", audioSamples.Length, 1, 24000, false);
+            audioClip.SetData(audioSamples, 0);
+            return audioClip;
+        }
     }
 }

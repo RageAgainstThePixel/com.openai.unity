@@ -10,7 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Utilities.Async;
@@ -117,9 +116,6 @@ namespace OpenAI.Samples.Realtime
             {
                 switch (e)
                 {
-                    case ObjectDisposedException:
-                        // ignored
-                        break;
                     default:
                         Debug.LogError(e);
                         break;
@@ -132,7 +128,7 @@ namespace OpenAI.Samples.Realtime
 
                 if (enableDebug)
                 {
-                    Debug.Log("Session destroyed");
+                    Debug.Log("Session disposed");
                 }
             }
         }
@@ -141,7 +137,6 @@ namespace OpenAI.Samples.Realtime
         private void OnDestroy()
         {
             lifetimeCts.Cancel();
-            lifetimeCts.Dispose();
         }
 #endif
 
@@ -166,12 +161,83 @@ namespace OpenAI.Samples.Realtime
 
             try
             {
-                var createItemResponse = await session.SendAsync(new ConversationItemCreateRequest(userMessage), cancellationToken: destroyCancellationToken);
-                Debug.Log("created conversation item");
-                Assert.IsNotNull(createItemResponse);
-                var createResponse = await session.SendAsync(new ResponseCreateRequest(), cancellationToken: destroyCancellationToken);
-                Debug.Log("created response");
-                Assert.IsNotNull(createResponse);
+                await session.SendAsync(new ConversationItemCreateRequest(userMessage), cancellationToken: destroyCancellationToken);
+                var streamClipQueue = new Queue<AudioClip>();
+                var streamTcs = new TaskCompletionSource<bool>();
+                var audioPlaybackTask = PlayStreamQueueAsync(streamTcs.Task);
+                await session.SendAsync(new ResponseCreateRequest(), ResponseEvents, cancellationToken: destroyCancellationToken);
+                streamTcs.SetResult(true);
+                await audioPlaybackTask;
+
+                void ResponseEvents(IServerEvent responseEvents)
+                {
+                    switch (responseEvents)
+                    {
+                        case ResponseAudioResponse audioResponse:
+                            if (audioResponse.IsDelta)
+                            {
+                                streamClipQueue.Enqueue(audioResponse);
+                            }
+                            break;
+                        case ResponseAudioTranscriptResponse transcriptResponse:
+                            if (transcriptResponse.IsDelta)
+                            {
+                                assistantMessageContent.text += transcriptResponse.Delta;
+                            }
+                            break;
+                        case ResponseFunctionCallArguments functionCallResponse:
+                            if (functionCallResponse.IsDone)
+                            {
+
+                            }
+                            break;
+                    }
+                }
+
+                async Task PlayStreamQueueAsync(Task streamTask)
+                {
+                    try
+                    {
+                        await new WaitUntil(() => streamClipQueue.Count > 0);
+
+                        do
+                        {
+                            if (!audioSource.isPlaying &&
+                                streamClipQueue.TryDequeue(out var clip))
+                            {
+                                if (enableDebug)
+                                {
+                                    Debug.Log($"playing partial clip: {clip.name} | ({streamClipQueue.Count} remaining)");
+                                }
+
+                                audioSource.PlayOneShot(clip);
+                                // ReSharper disable once MethodSupportsCancellation
+                                await Task.Delay(TimeSpan.FromSeconds(clip.length)).ConfigureAwait(true);
+                            }
+                            else
+                            {
+                                await Task.Yield();
+                            }
+
+                            if (streamTask.IsCompleted && !audioSource.isPlaying && streamClipQueue.Count == 0)
+                            {
+                                return;
+                            }
+                        } while (!destroyCancellationToken.IsCancellationRequested);
+                    }
+                    catch (Exception e)
+                    {
+                        switch (e)
+                        {
+                            case TaskCanceledException:
+                            case OperationCanceledException:
+                                break;
+                            default:
+                                Debug.LogError(e);
+                                break;
+                        }
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -179,6 +245,7 @@ namespace OpenAI.Samples.Realtime
                 {
                     case TaskCanceledException:
                     case OperationCanceledException:
+                        // ignored
                         break;
                     default:
                         Debug.LogError(e);
@@ -195,72 +262,6 @@ namespace OpenAI.Samples.Realtime
                 }
 
                 isChatPending = false;
-            }
-        }
-
-        private async Task GenerateSpeechAsync(string text, CancellationToken cancellationToken)
-        {
-            text = text.Replace("![Image](output.jpg)", string.Empty);
-            if (string.IsNullOrWhiteSpace(text)) { return; }
-            var request = new SpeechRequest(text, Model.TTS_1, voice, SpeechResponseFormat.PCM);
-            var streamClipQueue = new Queue<AudioClip>();
-            var streamTcs = new TaskCompletionSource<bool>();
-            var audioPlaybackTask = PlayStreamQueueAsync(streamTcs.Task);
-            var (clipPath, fullClip) = await openAI.AudioEndpoint.CreateSpeechStreamAsync(request, clip => streamClipQueue.Enqueue(clip), destroyCancellationToken);
-            streamTcs.SetResult(true);
-
-            if (enableDebug)
-            {
-                Debug.Log(clipPath);
-            }
-
-            await audioPlaybackTask;
-            audioSource.clip = fullClip;
-
-            async Task PlayStreamQueueAsync(Task streamTask)
-            {
-                try
-                {
-                    await new WaitUntil(() => streamClipQueue.Count > 0);
-                    var endOfFrame = new WaitForEndOfFrame();
-
-                    do
-                    {
-                        if (!audioSource.isPlaying &&
-                            streamClipQueue.TryDequeue(out var clip))
-                        {
-                            if (enableDebug)
-                            {
-                                Debug.Log($"playing partial clip: {clip.name} | ({streamClipQueue.Count} remaining)");
-                            }
-
-                            audioSource.PlayOneShot(clip);
-                            // ReSharper disable once MethodSupportsCancellation
-                            await Task.Delay(TimeSpan.FromSeconds(clip.length)).ConfigureAwait(true);
-                        }
-                        else
-                        {
-                            await endOfFrame;
-                        }
-
-                        if (streamTask.IsCompleted && !audioSource.isPlaying && streamClipQueue.Count == 0)
-                        {
-                            return;
-                        }
-                    } while (!cancellationToken.IsCancellationRequested);
-                }
-                catch (Exception e)
-                {
-                    switch (e)
-                    {
-                        case TaskCanceledException:
-                        case OperationCanceledException:
-                            break;
-                        default:
-                            Debug.LogError(e);
-                            break;
-                    }
-                }
             }
         }
 

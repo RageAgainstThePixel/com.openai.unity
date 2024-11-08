@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class ResponseFunctionCallArguments : BaseRealtimeEvent, IServerEvent
+    public sealed class ResponseFunctionCallArguments : BaseRealtimeEvent, IServerEvent, IRealtimeEventStream
     {
         [Preserve]
         [JsonConstructor]
@@ -81,5 +81,13 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonProperty("arguments")]
         public string Arguments { get; }
+
+        [Preserve]
+        [JsonIgnore]
+        public bool IsDelta => Type.EndsWith("delta");
+
+        [Preserve]
+        [JsonIgnore]
+        public bool IsDone => Type.EndsWith("done");
     }
 }

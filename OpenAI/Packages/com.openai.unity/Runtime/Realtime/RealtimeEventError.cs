@@ -1,6 +1,7 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Realtime
@@ -33,5 +34,13 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonProperty("error")]
         public Error Error { get; }
+
+        [Preserve]
+        public override string ToString()
+            => Error.ToString();
+
+        [Preserve]
+        public static implicit operator Exception(RealtimeEventError error)
+            => error.Error?.Exception ?? new Exception(error.ToString());
     }
 }

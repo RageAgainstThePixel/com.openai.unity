@@ -32,4 +32,14 @@ namespace OpenAI.Realtime
     public interface IServerEvent : IRealtimeEvent
     {
     }
+
+    [Preserve]
+    internal interface IRealtimeEventStream
+    {
+        [Preserve]
+        public bool IsDone { get; }
+
+        [Preserve]
+        public bool IsDelta { get; }
+    }
 }

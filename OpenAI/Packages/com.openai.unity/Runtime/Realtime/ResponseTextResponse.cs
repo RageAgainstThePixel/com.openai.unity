@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class ResponseTextResponse : BaseRealtimeEvent, IServerEvent
+    public sealed class ResponseTextResponse : BaseRealtimeEvent, IServerEvent, IRealtimeEventStream
     {
         [Preserve]
         [JsonConstructor]
@@ -83,8 +83,16 @@ namespace OpenAI.Realtime
         public string Text { get; }
 
         [Preserve]
+        [JsonIgnore]
+        public bool IsDelta => Type.EndsWith("delta");
+
+        [Preserve]
+        [JsonIgnore]
+        public bool IsDone => Type.EndsWith("done");
+
+        [Preserve]
         public override string ToString()
-            => !string.IsNullOrWhiteSpace(Delta) ? Delta : Text;
+            => IsDelta ? Delta : Text;
 
         [Preserve]
         public static implicit operator string(ResponseTextResponse response)
