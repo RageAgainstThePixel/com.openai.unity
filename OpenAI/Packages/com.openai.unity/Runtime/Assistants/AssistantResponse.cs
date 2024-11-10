@@ -124,15 +124,6 @@ namespace OpenAI.Assistants
         public ToolResources ToolResources { get; }
 
         /// <summary>
-        /// A list of file IDs attached to this assistant.
-        /// There can be a maximum of 20 files attached to the assistant.
-        /// Files are ordered by their creation date in ascending order.
-        /// </summary>
-        [JsonIgnore]
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public IReadOnlyList<string> FileIds => null;
-
-        /// <summary>
         /// Set of 16 key-value pairs that can be attached to an object.
         /// This can be useful for storing additional information about the object in a structured format.
         /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.

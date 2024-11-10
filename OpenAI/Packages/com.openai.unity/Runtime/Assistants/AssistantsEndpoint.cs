@@ -2,8 +2,6 @@
 
 using Newtonsoft.Json;
 using OpenAI.Extensions;
-using OpenAI.Files;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Utilities.WebRequestRest;
@@ -105,83 +103,5 @@ namespace OpenAI.Assistants
             response.Validate(EnableDebug);
             return response.Deserialize<DeletedResponse>(client)?.Deleted ?? false;
         }
-
-        #region Files (Obsolete)
-
-        /// <summary>
-        /// Returns a list of assistant files.
-        /// </summary>
-        /// <param name="assistantId">The ID of the assistant the file belongs to.</param>
-        /// <param name="query"><see cref="ListQuery"/>.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="ListResponse{AssistantFile}"/>.</returns>
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public async Task<ListResponse<AssistantFileResponse>> ListFilesAsync(string assistantId, ListQuery query = null, CancellationToken cancellationToken = default)
-        {
-            var response = await Rest.GetAsync(GetUrl($"/{assistantId}/files", query), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(EnableDebug);
-            return response.Deserialize<ListResponse<AssistantFileResponse>>(client);
-        }
-
-        /// <summary>
-        /// Attach a file to an assistant.
-        /// </summary>
-        /// <param name="assistantId"> The ID of the assistant for which to attach a file. </param>
-        /// <param name="file">
-        /// A <see cref="FileResponse"/> (with purpose="assistants") that the assistant should use.
-        /// Useful for tools like retrieval and code_interpreter that can access files.
-        /// </param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="AssistantFileResponse"/>.</returns>
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public async Task<AssistantFileResponse> AttachFileAsync(string assistantId, FileResponse file, CancellationToken cancellationToken = default)
-        {
-            if (file?.Purpose?.Equals(FilePurpose.Assistants) != true)
-            {
-                throw new InvalidOperationException($"{nameof(file)}.{nameof(file.Purpose)} must be 'assistants'!");
-            }
-
-            var payload = JsonConvert.SerializeObject(new { file_id = file.Id }, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl($"/{assistantId}/files"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(EnableDebug);
-            return response.Deserialize<AssistantFileResponse>(client);
-        }
-
-        /// <summary>
-        /// Retrieves an AssistantFile.
-        /// </summary>
-        /// <param name="assistantId">The ID of the assistant who the file belongs to.</param>
-        /// <param name="fileId">The ID of the file we're getting.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="AssistantFileResponse"/>.</returns>
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public async Task<AssistantFileResponse> RetrieveFileAsync(string assistantId, string fileId, CancellationToken cancellationToken = default)
-        {
-            var response = await Rest.GetAsync(GetUrl($"/{assistantId}/files/{fileId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(EnableDebug);
-            return response.Deserialize<AssistantFileResponse>(client);
-        }
-
-        /// <summary>
-        /// Remove an assistant file.
-        /// </summary>
-        /// <remarks>
-        /// Note that removing an AssistantFile does not delete the original File object,
-        /// it simply removes the association between that File and the Assistant.
-        /// To delete a File, use the File delete endpoint instead.
-        /// </remarks>
-        /// <param name="assistantId">The ID of the assistant that the file belongs to.</param>
-        /// <param name="fileId">The ID of the file to delete.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns>True, if file was removed.</returns>
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public async Task<bool> RemoveFileAsync(string assistantId, string fileId, CancellationToken cancellationToken = default)
-        {
-            var response = await Rest.DeleteAsync(GetUrl($"/{assistantId}/files/{fileId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(EnableDebug);
-            return response.Deserialize<DeletedResponse>(client)?.Deleted ?? false;
-        }
-
-        #endregion Files (Obsolete)
     }
 }

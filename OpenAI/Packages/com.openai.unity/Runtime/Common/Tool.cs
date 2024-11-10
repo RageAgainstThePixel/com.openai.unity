@@ -67,11 +67,6 @@ namespace OpenAI
 
         [Preserve]
         [JsonIgnore]
-        [Obsolete("Use FileSearch")]
-        public static Tool Retrieval { get; } = new() { Type = "file_search" };
-
-        [Preserve]
-        [JsonIgnore]
         public static Tool FileSearch { get; } = new() { Type = "file_search" };
 
         [Preserve]

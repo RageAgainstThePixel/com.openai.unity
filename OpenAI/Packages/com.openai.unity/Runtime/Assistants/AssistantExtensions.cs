@@ -1,10 +1,8 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using OpenAI.Files;
 using OpenAI.Threads;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -223,133 +221,5 @@ namespace OpenAI.Assistants
             => await GetToolOutputsAsync(assistant, run.RequiredAction.SubmitToolOutputs.ToolCalls, cancellationToken);
 
         #endregion Tools
-
-        #region Files (Obsolete)
-
-        /// <summary>
-        /// Returns a list of assistant files.
-        /// </summary>
-        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
-        /// <param name="query"><see cref="ListQuery"/>.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="ListResponse{AssistantFile}"/>.</returns>
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public static async Task<ListResponse<AssistantFileResponse>> ListFilesAsync(this AssistantResponse assistant, ListQuery query = null, CancellationToken cancellationToken = default)
-            => await assistant.Client.AssistantsEndpoint.ListFilesAsync(assistant.Id, query, cancellationToken);
-
-        /// <summary>
-        /// Attach a file to the  <see cref="assistant"/>.
-        /// </summary>
-        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
-        /// <param name="file">
-        /// A <see cref="FileResponse"/> (with purpose="assistants") that the assistant should use.
-        /// Useful for tools like retrieval and code_interpreter that can access files.
-        /// </param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="AssistantFileResponse"/>.</returns>
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public static async Task<AssistantFileResponse> AttachFileAsync(this AssistantResponse assistant, FileResponse file, CancellationToken cancellationToken = default)
-            => await assistant.Client.AssistantsEndpoint.AttachFileAsync(assistant.Id, file, cancellationToken);
-
-        /// <summary>
-        /// Uploads a new file at the specified <see cref="filePath"/> and attaches it to the <see cref="assistant"/>.
-        /// </summary>
-        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
-        /// <param name="filePath">The local file path to upload.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="AssistantFileResponse"/>.</returns>
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public static async Task<AssistantFileResponse> UploadFileAsync(this AssistantResponse assistant, string filePath, CancellationToken cancellationToken = default)
-        {
-            var file = await assistant.Client.FilesEndpoint.UploadFileAsync(new FileUploadRequest(filePath, FilePurpose.Assistants), uploadProgress: null, cancellationToken);
-            return await assistant.AttachFileAsync(file, cancellationToken);
-        }
-
-        /// <summary>
-        /// Uploads a new file at the specified path and attaches it to the assistant.
-        /// </summary>
-        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
-        /// <param name="stream">The file contents to upload.</param>
-        /// <param name="fileName">The name of the file.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="AssistantFileResponse"/>.</returns>
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public static async Task<AssistantFileResponse> UploadFileAsync(this AssistantResponse assistant, Stream stream, string fileName, CancellationToken cancellationToken = default)
-        {
-            var file = await assistant.Client.FilesEndpoint.UploadFileAsync(new FileUploadRequest(stream, fileName, FilePurpose.Assistants), uploadProgress: null, cancellationToken);
-            return await assistant.AttachFileAsync(file, cancellationToken);
-        }
-
-        /// <summary>
-        /// Retrieves the <see cref="AssistantFileResponse"/>.
-        /// </summary>
-        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
-        /// <param name="fileId">The ID of the file we're getting.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="AssistantFileResponse"/>.</returns>
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public static async Task<AssistantFileResponse> RetrieveFileAsync(this AssistantResponse assistant, string fileId, CancellationToken cancellationToken = default)
-            => await assistant.Client.AssistantsEndpoint.RetrieveFileAsync(assistant.Id, fileId, cancellationToken);
-
-        /// <summary>
-        /// Remove the file from the assistant it is attached to.
-        /// </summary>
-        /// <remarks>
-        /// Note that removing an AssistantFile does not delete the original File object,
-        /// it simply removes the association between that File and the Assistant.
-        /// To delete a File, use <see cref="DeleteFileAsync(AssistantFileResponse,CancellationToken)"/>.
-        /// </remarks>
-        /// <param name="file"><see cref="AssistantResponse"/>.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns>True, if file was removed.</returns>
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public static async Task<bool> RemoveFileAsync(this AssistantFileResponse file, CancellationToken cancellationToken = default)
-            => await file.Client.AssistantsEndpoint.RemoveFileAsync(file.AssistantId, file.Id, cancellationToken);
-
-        /// <summary>
-        /// Remove the file from the assistant it is attached to.
-        /// </summary>
-        /// <remarks>
-        /// Note that removing an AssistantFile does not delete the original File object,
-        /// it simply removes the association between that File and the Assistant.
-        /// To delete a File, use <see cref="DeleteFileAsync(AssistantFileResponse,CancellationToken)"/>.
-        /// </remarks>
-        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
-        /// <param name="fileId">The ID of the file to remove.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns>True, if file was removed.</returns>
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public static async Task<bool> RemoveFileAsync(this AssistantResponse assistant, string fileId, CancellationToken cancellationToken = default)
-            => await assistant.Client.AssistantsEndpoint.RemoveFileAsync(assistant.Id, fileId, cancellationToken);
-
-        /// <summary>
-        /// Removes and Deletes a file from the assistant.
-        /// </summary>
-        /// <param name="file"><see cref="AssistantResponse"/>.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns>True, if the file was successfully removed from the assistant and deleted.</returns>
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public static async Task<bool> DeleteFileAsync(this AssistantFileResponse file, CancellationToken cancellationToken = default)
-        {
-            var isRemoved = await file.RemoveFileAsync(cancellationToken);
-            return isRemoved && await file.Client.FilesEndpoint.DeleteFileAsync(file.Id, cancellationToken);
-        }
-
-        /// <summary>
-        /// Removes and Deletes a file from the <see cref="assistant"/>.
-        /// </summary>
-        /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
-        /// <param name="fileId">The ID of the file to delete.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns>True, if the file was successfully removed from the assistant and deleted.</returns>
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public static async Task<bool> DeleteFileAsync(this AssistantResponse assistant, string fileId, CancellationToken cancellationToken = default)
-        {
-            var isRemoved = await assistant.Client.AssistantsEndpoint.RemoveFileAsync(assistant.Id, fileId, cancellationToken);
-            if (!isRemoved) { return false; }
-            return await assistant.Client.FilesEndpoint.DeleteFileAsync(fileId, cancellationToken);
-        }
-
-        #endregion Files (Obsolete)
     }
 }

@@ -2,7 +2,6 @@
 
 using Newtonsoft.Json;
 using OpenAI.Extensions;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Scripting;
@@ -98,19 +97,6 @@ namespace OpenAI.Assistants
             topP ?? assistant.TopP,
             jsonSchema ?? assistant.ResponseFormatObject?.JsonSchema,
             responseFormat ?? assistant.ResponseFormat)
-        {
-        }
-
-        [Obsolete("use new .ctr")]
-        public CreateAssistantRequest(
-            AssistantResponse assistant,
-            string model,
-            string name,
-            string description,
-            string instructions,
-            IEnumerable<Tool> tools,
-            IEnumerable<string> files,
-            IReadOnlyDictionary<string, string> metadata)
         {
         }
 

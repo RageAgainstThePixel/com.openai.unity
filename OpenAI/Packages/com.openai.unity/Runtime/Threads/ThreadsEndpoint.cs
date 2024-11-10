@@ -194,14 +194,6 @@ namespace OpenAI.Threads
             return response.Deserialize<ListResponse<RunResponse>>(client);
         }
 
-        [Obsolete("use new overload with Func<IServerSentEvent, Task> instead.")]
-        public async Task<RunResponse> CreateRunAsync(string threadId, CreateRunRequest request, Action<IServerSentEvent> streamEventHandler, CancellationToken cancellationToken = default)
-            => await CreateRunAsync(threadId, request, streamEventHandler == null ? null : serverSentEvent =>
-            {
-                streamEventHandler.Invoke(serverSentEvent);
-                return Task.CompletedTask;
-            }, cancellationToken);
-
         /// <summary>
         /// Create a run.
         /// </summary>
@@ -286,14 +278,6 @@ namespace OpenAI.Threads
             response.Validate(EnableDebug);
             return response.Deserialize<RunResponse>(client);
         }
-
-        [Obsolete("use new overload with Func<IServerSentEvent, Task> instead.")]
-        public async Task<RunResponse> CreateThreadAndRunAsync(CreateThreadAndRunRequest request, Action<IServerSentEvent> streamEventHandler, CancellationToken cancellationToken = default)
-            => await CreateThreadAndRunAsync(request, streamEventHandler == null ? null : serverSentEvent =>
-            {
-                streamEventHandler.Invoke(serverSentEvent);
-                return Task.CompletedTask;
-            }, cancellationToken);
 
         /// <summary>
         /// Create a thread and run it in one request.
@@ -514,42 +498,6 @@ namespace OpenAI.Threads
         }
 
         #endregion Runs
-
-        #region Files (Obsolete)
-
-        /// <summary>
-        /// Returns a list of message files.
-        /// </summary>
-        /// <param name="threadId">The id of the thread that the message and files belong to.</param>
-        /// <param name="messageId">The id of the message that the files belongs to.</param>
-        /// <param name="query"><see cref="ListQuery"/>.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="ListResponse{ThreadMessageFile}"/>.</returns>
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public async Task<ListResponse<MessageFileResponse>> ListFilesAsync(string threadId, string messageId, ListQuery query = null, CancellationToken cancellationToken = default)
-        {
-            var response = await Rest.GetAsync(GetUrl($"/{threadId}/messages/{messageId}/files", query), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(EnableDebug);
-            return response.Deserialize<ListResponse<MessageFileResponse>>(client);
-        }
-
-        /// <summary>
-        /// Retrieve message file.
-        /// </summary>
-        /// <param name="threadId">The id of the thread to which the message and file belong.</param>
-        /// <param name="messageId">The id of the message the file belongs to.</param>
-        /// <param name="fileId">The id of the file being retrieved.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="MessageFileResponse"/>.</returns>
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public async Task<MessageFileResponse> RetrieveFileAsync(string threadId, string messageId, string fileId, CancellationToken cancellationToken = default)
-        {
-            var response = await Rest.GetAsync(GetUrl($"/{threadId}/messages/{messageId}/files/{fileId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            response.Validate(EnableDebug);
-            return response.Deserialize<MessageFileResponse>(client);
-        }
-
-        #endregion Files (Obsolete)
 
         private async Task<RunResponse> StreamRunAsync(string endpoint, string payload, Func<string, IServerSentEvent, Task> streamEventHandler, CancellationToken cancellationToken = default)
         {
