@@ -84,7 +84,7 @@ namespace OpenAI.Realtime
         public static implicit operator AudioClip(ResponseAudioResponse response)
         {
             var audioSamples = PCMEncoder.Decode(System.Convert.FromBase64String(response.Delta));
-            var audioClip = AudioClip.Create($"{response.ItemId}_{response.OutputIndex}", audioSamples.Length, 1, 24000, false);
+            var audioClip = AudioClip.Create($"{response.ItemId}_{response.OutputIndex}_delta", audioSamples.Length, 1, 24000, false);
             audioClip.SetData(audioSamples, 0);
             return audioClip;
         }

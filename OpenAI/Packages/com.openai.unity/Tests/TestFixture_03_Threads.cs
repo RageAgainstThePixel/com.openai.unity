@@ -355,6 +355,7 @@ namespace OpenAI.Tests
             {
                 Tool.GetOrCreateTool(typeof(WeatherService), nameof(WeatherService.GetCurrentWeatherAsync))
             };
+            Assert.IsTrue(tools.All(tool => tool.Function?.Arguments == null), "Expected all tool function arguments to be null");
             var assistantRequest = new CreateAssistantRequest(tools: tools, instructions: "You are a helpful weather assistant. Use the appropriate unit based on geographical location.");
             var assistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(assistantRequest);
             Assert.NotNull(assistant);
@@ -542,6 +543,7 @@ namespace OpenAI.Tests
             {
                 Tool.GetOrCreateTool(typeof(DateTimeUtility), nameof(DateTimeUtility.GetDateTime))
             };
+            Assert.IsTrue(tools.All(tool => tool.Function?.Arguments == null), "Expected all tool function arguments to be null");
             var assistantRequest = new CreateAssistantRequest(
                 instructions: "You are a helpful assistant.",
                 tools: tools);
@@ -572,7 +574,7 @@ namespace OpenAI.Tests
                                     var toolOutputs = await assistant.GetToolOutputsAsync(runResponse);
                                     var toolRun = await runResponse.SubmitToolOutputsAsync(toolOutputs, StreamEventHandler);
                                     Assert.NotNull(toolRun);
-                                    Assert.IsTrue(toolRun.Status == RunStatus.Completed);
+                                    Assert.IsTrue(toolRun.Status == RunStatus.Completed, $"Failed to complete submit tool outputs! {toolRun.Status}");
                                 }
 
                                 break;
@@ -582,17 +584,17 @@ namespace OpenAI.Tests
                     }
                     catch (Exception e)
                     {
-                        Debug.LogError(e);
+                        Debug.LogException(e);
                         exceptionThrown = true;
                     }
                 }
 
                 var run = await assistant.CreateThreadAndRunAsync("What date is it?", StreamEventHandler);
+                Assert.IsNotNull(run);
                 Assert.IsTrue(hasInvokedCallback);
                 Assert.NotNull(thread);
-                Assert.IsNotNull(run);
                 Assert.IsFalse(exceptionThrown);
-                Assert.IsTrue(run.Status == RunStatus.Completed);
+                Assert.IsTrue(run.Status == RunStatus.Completed, $"Failed to complete run! {run.Status}");
             }
             catch (Exception e)
             {
@@ -619,6 +621,7 @@ namespace OpenAI.Tests
                 Tool.CodeInterpreter,
                 Tool.GetOrCreateTool(typeof(WeatherService), nameof(WeatherService.GetCurrentWeatherAsync))
             };
+            Assert.IsTrue(tools.All(tool => tool.Function?.Arguments == null), "Expected all tool function arguments to be null");
             var assistantRequest = new CreateAssistantRequest(tools: tools, instructions: "You are a helpful weather assistant. Use the appropriate unit based on geographical location.");
             var assistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(assistantRequest);
             Assert.IsNotNull(assistant);

@@ -195,11 +195,12 @@ namespace OpenAI.Tests
         public void Test_12_CustomDomainConfigurationSettings()
         {
             var auth = new OpenAIAuthentication("sess-customIssuedToken");
-            var settings = new OpenAISettings(domain: "OpenAIClient.your-custom-domain.com");
+            const string domain = "api.your-custom-domain.com";
+            var settings = new OpenAISettings(domain: domain);
             var api = new OpenAIClient(auth, settings);
             Debug.Log(api.Settings.Info.BaseRequest);
             Debug.Log(api.Settings.Info.BaseRequestUrlFormat);
-            Assert.AreEqual("https://api.your-custom-domain.com/v1/{0}", api.Settings.Info.BaseRequestUrlFormat);
+            Assert.AreEqual($"https://{domain}/v1/{{0}}", api.Settings.Info.BaseRequestUrlFormat);
         }
 
         [TearDown]

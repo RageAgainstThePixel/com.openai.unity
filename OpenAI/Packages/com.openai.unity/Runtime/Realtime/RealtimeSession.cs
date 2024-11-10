@@ -32,6 +32,9 @@ namespace OpenAI.Realtime
         public int EventTimeout { get; set; } = 30;
 
         [Preserve]
+        public SessionResource Options { get; private set; }
+
+        [Preserve]
         internal RealtimeSession(WebSocket wsClient, bool enableDebug)
         {
             websocketClient = wsClient;
@@ -165,7 +168,10 @@ namespace OpenAI.Realtime
 
                     switch (clientEvent)
                     {
-                        case UpdateSessionRequest when serverEvent is SessionResponse:
+                        case UpdateSessionRequest when serverEvent is SessionResponse sessionResponse:
+                            Options = sessionResponse.Session;
+                            Complete();
+                            return;
                         case InputAudioBufferAppendRequest: // has no sever response
                         case InputAudioBufferCommitRequest when serverEvent is InputAudioBufferCommittedResponse:
                         case InputAudioBufferClearRequest when serverEvent is InputAudioBufferClearedResponse:

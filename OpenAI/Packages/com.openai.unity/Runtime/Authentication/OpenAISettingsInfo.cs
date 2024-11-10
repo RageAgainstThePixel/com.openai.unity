@@ -125,9 +125,6 @@ namespace OpenAI
 
         internal bool UseOAuthAuthentication { get; }
 
-        [Obsolete("Use IsAzureOpenAI")]
-        public bool IsAzureDeployment => IsAzureOpenAI;
-
         public bool IsAzureOpenAI => BaseRequestUrlFormat.Contains(AzureOpenAIDomain);
 
         private readonly Dictionary<string, string> defaultQueryParameters = new();

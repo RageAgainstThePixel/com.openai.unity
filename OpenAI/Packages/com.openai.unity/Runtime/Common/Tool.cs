@@ -30,6 +30,7 @@ namespace OpenAI
         }
 
         [Preserve]
+        [Obsolete("use new OpenAI.Tools.ToolCall class")]
         public Tool(string toolCallId, string functionName, JToken functionArguments)
         {
             Function = new Function(functionName, arguments: functionArguments);
@@ -139,18 +140,39 @@ namespace OpenAI
             }
         }
 
-        /// <summary>
-        /// Invokes the function and returns the result as json.
-        /// </summary>
-        /// <returns>The result of the function as json.</returns>
-        [Preserve]
-        public string InvokeFunction()
+        #region Tool Calling
+
+        private void ValidateToolCall(ToolCall toolCall)
         {
             if (!IsFunction)
             {
                 throw new InvalidOperationException("This tool is not a function.");
             }
 
+            if (Function.Name != toolCall.Function.Name)
+            {
+                throw new InvalidOperationException("Tool does not match tool call!");
+            }
+        }
+
+        [Preserve]
+        [Obsolete("Use overload with ToolCall parameter")]
+        public string InvokeFunction()
+            => IsFunction
+                ? Function.Invoke()
+                : throw new InvalidOperationException("This tool is not a function.");
+
+        /// <summary>
+        /// Invokes the function and returns the result as json.
+        /// </summary>
+        /// <param name="toolCall">The <see cref="ToolCall"/> with the function arguments to invoke.</param>
+        /// <returns>The result of the function as json.</returns>
+        /// <exception cref="InvalidOperationException">Raised if function call is invalid or tool is not a function.</exception>
+        [Preserve]
+        public string InvokeFunction(ToolCall toolCall)
+        {
+            ValidateToolCall(toolCall);
+            Function.Arguments = toolCall.Function.Arguments;
             return Function.Invoke();
         }
 
@@ -160,13 +182,24 @@ namespace OpenAI
         /// <typeparam name="T">The type to deserialize the result to.</typeparam>
         /// <returns>The result of the function.</returns>
         [Preserve]
+        [Obsolete("Use overload with ToolCall parameter")]
         public T InvokeFunction<T>()
-        {
-            if (!IsFunction)
-            {
-                throw new InvalidOperationException("This tool is not a function.");
-            }
+            => IsFunction
+                ? Function.Invoke<T>()
+                : throw new InvalidOperationException("This tool is not a function.");
 
+        /// <summary>
+        /// Invokes the function and returns the result.
+        /// </summary>
+        /// <typeparam name="T">The type to deserialize the result to.</typeparam>
+        /// <param name="toolCall">The <see cref="ToolCall"/> with the function arguments to invoke.</param>
+        /// <returns>The result of the function.</returns>
+        /// <exception cref="InvalidOperationException">Raised if function call is invalid or tool is not a function.</exception>
+        [Preserve]
+        public T InvokeFunction<T>(ToolCall toolCall)
+        {
+            ValidateToolCall(toolCall);
+            Function.Arguments = toolCall.Function.Arguments;
             return Function.Invoke<T>();
         }
 
@@ -176,13 +209,24 @@ namespace OpenAI
         /// <param name="cancellationToken">Optional, A token to cancel the request.</param>
         /// <returns>The result of the function as json.</returns>
         [Preserve]
+        [Obsolete("Use overload with ToolCall parameter")]
         public async Task<string> InvokeFunctionAsync(CancellationToken cancellationToken = default)
-        {
-            if (!IsFunction)
-            {
-                throw new InvalidOperationException("This tool is not a function.");
-            }
+            => IsFunction
+                ? await Function.InvokeAsync(cancellationToken)
+                : throw new InvalidOperationException("This tool is not a function.");
 
+        /// <summary>
+        /// Invokes the function and returns the result as json.
+        /// </summary>
+        /// <param name="toolCall">The <see cref="ToolCall"/> with the function arguments to invoke.</param>
+        /// <param name="cancellationToken">Optional, A token to cancel the request.</param>
+        /// <returns>The result of the function as json.</returns>
+        /// <exception cref="InvalidOperationException">Raised if function call is invalid or tool is not a function.</exception>
+        [Preserve]
+        public async Task<string> InvokeFunctionAsync(ToolCall toolCall, CancellationToken cancellationToken = default)
+        {
+            ValidateToolCall(toolCall);
+            Function.Arguments = toolCall.Function.Arguments;
             return await Function.InvokeAsync(cancellationToken);
         }
 
@@ -193,15 +237,29 @@ namespace OpenAI
         /// <param name="cancellationToken">Optional, A token to cancel the request.</param>
         /// <returns>The result of the function.</returns>
         [Preserve]
+        [Obsolete("Use overload with ToolCall parameter")]
         public async Task<T> InvokeFunctionAsync<T>(CancellationToken cancellationToken = default)
-        {
-            if (!IsFunction)
-            {
-                throw new InvalidOperationException("This tool is not a function.");
-            }
+            => IsFunction
+                ? await Function.InvokeAsync<T>(cancellationToken)
+                : throw new InvalidOperationException("This tool is not a function.");
 
+        /// <summary>
+        /// Invokes the function and returns the result.
+        /// </summary>
+        /// <typeparam name="T">The type to deserialize the result to.</typeparam>
+        /// <param name="toolCall">The <see cref="ToolCall"/> with the function arguments to invoke.</param>
+        /// <param name="cancellationToken">Optional, A token to cancel the request.</param>
+        /// <returns>The result of the function.</returns>
+        /// <exception cref="InvalidOperationException">Raised if function call is invalid or tool is not a function.</exception>
+        [Preserve]
+        public async Task<T> InvokeFunctionAsync<T>(ToolCall toolCall, CancellationToken cancellationToken = default)
+        {
+            ValidateToolCall(toolCall);
+            Function.Arguments = toolCall.Function.Arguments;
             return await Function.InvokeAsync<T>(cancellationToken);
         }
+
+        #endregion Tool Calling
 
         #region Tool Cache
 
@@ -397,6 +455,15 @@ namespace OpenAI
 
             tool = null;
             return false;
+        }
+
+        [Preserve]
+        internal static bool TryGetTool(ToolCall toolCall, out Tool tool)
+        {
+            tool = toolCache
+                .Where(knownTool => knownTool.Type == toolCall.Type)
+                .FirstOrDefault(knownTool => knownTool.Function.Name == toolCall.Function.Name);
+            return tool != null;
         }
 
         [Preserve]

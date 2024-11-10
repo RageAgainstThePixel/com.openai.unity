@@ -25,22 +25,39 @@ namespace OpenAI.Realtime
             Transcript = transcript;
         }
 
-        public RealtimeContent(string text)
+        [Preserve]
+        public RealtimeContent(string text, RealtimeContentType type)
         {
-            Type = RealtimeContentType.InputText;
-            Text = text;
+            Type = type;
+            Text = type switch
+            {
+                RealtimeContentType.InputText or RealtimeContentType.Text => text,
+                _ => throw new ArgumentException($"Invalid content type {type} for text content")
+            };
         }
 
-        public RealtimeContent(AudioClip audioClip)
+        [Preserve]
+        public RealtimeContent(AudioClip audioClip, RealtimeContentType type, string transcript = null)
         {
-            Type = RealtimeContentType.InputAudio;
-            Audio = Convert.ToBase64String(audioClip.EncodeToPCM());
+            Type = type;
+            Audio = type switch
+            {
+                RealtimeContentType.InputAudio or RealtimeContentType.Audio => Convert.ToBase64String(audioClip.EncodeToPCM()),
+                _ => throw new ArgumentException($"Invalid content type {type} for audio content")
+            };
+            Transcript = transcript;
         }
 
-        public RealtimeContent(byte[] audioData)
+        [Preserve]
+        public RealtimeContent(byte[] audioData, RealtimeContentType type, string transcript = null)
         {
-            Type = RealtimeContentType.InputAudio;
-            Audio = Convert.ToBase64String(audioData);
+            Type = type;
+            Audio = type switch
+            {
+                RealtimeContentType.InputAudio or RealtimeContentType.Audio => Convert.ToBase64String(audioData),
+                _ => throw new ArgumentException($"Invalid content type {type} for audio content")
+            };
+            Transcript = transcript;
         }
 
         /// <summary>
@@ -72,6 +89,12 @@ namespace OpenAI.Realtime
         public string Transcript { get; }
 
         [Preserve]
-        public static implicit operator RealtimeContent(string text) => new(text);
+        public static implicit operator RealtimeContent(string text) => new(text, RealtimeContentType.InputText);
+
+        [Preserve]
+        public static implicit operator RealtimeContent(AudioClip audioClip) => new(audioClip, RealtimeContentType.InputAudio);
+
+        [Preserve]
+        public static implicit operator RealtimeContent(byte[] audioData) => new(audioData, RealtimeContentType.InputAudio);
     }
 }

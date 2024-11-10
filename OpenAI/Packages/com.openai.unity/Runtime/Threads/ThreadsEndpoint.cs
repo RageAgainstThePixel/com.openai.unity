@@ -411,14 +411,6 @@ namespace OpenAI.Threads
             return response.Deserialize<RunResponse>(client);
         }
 
-        [Obsolete("use new overload with Func<IServerSentEvent, Task> instead.")]
-        public async Task<RunResponse> SubmitToolOutputsAsync(string threadId, string runId, SubmitToolOutputsRequest request, Action<IServerSentEvent> streamEventHandler, CancellationToken cancellationToken = default)
-            => await SubmitToolOutputsAsync(threadId, runId, request, streamEventHandler == null ? null : serverSentEvent =>
-            {
-                streamEventHandler.Invoke(serverSentEvent);
-                return Task.CompletedTask;
-            }, cancellationToken);
-
         /// <summary>
         /// When a run has the status: "requires_action" and required_action.type is submit_tool_outputs,
         /// this endpoint can be used to submit the outputs from the tool calls once they're all completed.

@@ -65,7 +65,7 @@ namespace OpenAI.Realtime
                 ? "gpt-4o-realtime-preview"
                 : model;
             Modalities = modalities;
-            Voice = voice ?? Realtime.Voice.Alloy;
+            Voice = voice ?? OpenAI.Voice.Alloy;
             Instructions = string.IsNullOrWhiteSpace(instructions)
                 ? "Your knowledge cutoff is 2023-10. You are a helpful, witty, and friendly AI. Act like a human, " +
                   "but remember that you aren't a human and that you can't do human things in the real world. " +

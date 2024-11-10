@@ -1,7 +1,11 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Realtime
@@ -34,13 +38,54 @@ namespace OpenAI.Realtime
             FunctionArguments = functionArguments;
             FunctionOutput = functionOutput;
         }
+        [Preserve]
+        public ConversationItem(Role role, IEnumerable<RealtimeContent> content)
+        {
+            Role = role;
+            Type = ConversationItemType.Message;
+            Content = content?.ToList() ?? new List<RealtimeContent>();
+
+            if (role is not (Role.Assistant or Role.User))
+            {
+                throw new ArgumentException("Role must be either 'user' or 'assistant'.");
+            }
+
+            if (role == Role.User && !Content.All(c => c.Type is RealtimeContentType.InputAudio or RealtimeContentType.InputText))
+            {
+                throw new ArgumentException("User messages must contain only input text or input audio content.");
+            }
+
+            if (role == Role.Assistant && !Content.All(c => c.Type is RealtimeContentType.Text or RealtimeContentType.Audio))
+            {
+                throw new ArgumentException("Assistant messages must contain only text or audio content.");
+            }
+        }
+
+        [Preserve]
+        public ConversationItem(Role role, RealtimeContent content)
+            : this(role, new[] { content })
+        {
+        }
 
         [Preserve]
         public ConversationItem(RealtimeContent content)
+            : this(Role.User, new[] { content })
         {
-            Type = ConversationItemType.Message;
-            Role = Role.User;
-            Content = new List<RealtimeContent> { content };
+        }
+
+        [Preserve]
+        public ConversationItem(ToolCall toolCall, string output)
+        {
+            Type = ConversationItemType.FunctionCallOutput;
+            FunctionCallId = toolCall.Id;
+            FunctionOutput = output;
+        }
+
+        [Preserve]
+        public ConversationItem(Tool tool)
+        {
+            Type = ConversationItemType.FunctionCall;
+            FunctionName = tool.Function.Name;
         }
 
         [Preserve]
@@ -107,7 +152,7 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("arguments")]
-        public string FunctionArguments { get; private set; }
+        public JToken FunctionArguments { get; private set; }
 
         /// <summary>
         /// The output of the function call (for "function_call_output" items).

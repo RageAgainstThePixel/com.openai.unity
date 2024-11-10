@@ -178,14 +178,6 @@ namespace OpenAI.Threads
 
         #region Runs
 
-        [Obsolete("use new overload with Func<IServerSentEvent, Task> instead.")]
-        public static async Task<RunResponse> CreateRunAsync(this ThreadResponse thread, CreateRunRequest request, Action<IServerSentEvent> streamEventHandler, CancellationToken cancellationToken = default)
-            => await thread.CreateRunAsync(request, async streamEvent =>
-            {
-                streamEventHandler?.Invoke(streamEvent);
-                await Task.CompletedTask;
-            }, cancellationToken);
-
         /// <summary>
         /// Create a run.
         /// </summary>
@@ -196,14 +188,6 @@ namespace OpenAI.Threads
         /// <returns><see cref="RunResponse"/>.</returns>
         public static async Task<RunResponse> CreateRunAsync(this ThreadResponse thread, CreateRunRequest request = null, Func<IServerSentEvent, Task> streamEventHandler = null, CancellationToken cancellationToken = default)
             => await thread.Client.ThreadsEndpoint.CreateRunAsync(thread, request, streamEventHandler, cancellationToken);
-
-        [Obsolete("use new overload with Func<IServerSentEvent, Task> instead.")]
-        public static async Task<RunResponse> CreateRunAsync(this ThreadResponse thread, AssistantResponse assistant, Action<IServerSentEvent> streamEventHandler, CancellationToken cancellationToken = default)
-            => await thread.CreateRunAsync(assistant, async streamEvent =>
-            {
-                streamEventHandler?.Invoke(streamEvent);
-                await Task.CompletedTask;
-            }, cancellationToken);
 
         /// <summary>
         /// Create a run.
@@ -293,23 +277,16 @@ namespace OpenAI.Threads
                 ? new CancellationTokenSource()
                 : new CancellationTokenSource(TimeSpan.FromSeconds(timeout ?? 30));
             using var chainedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, cancellationToken);
-            RunResponse result;
+            var result = await run.UpdateAsync(cancellationToken: chainedCts.Token).ConfigureAwait(true);
+            if (result.Status is not RunStatus.Queued and not RunStatus.InProgress and not RunStatus.Cancelling) { return result; }
             do
             {
                 await Task.Delay(pollingInterval ?? 500, chainedCts.Token).ConfigureAwait(true);
                 cancellationToken.ThrowIfCancellationRequested();
-                result = await run.UpdateAsync(cancellationToken: chainedCts.Token);
+                result = await run.UpdateAsync(cancellationToken: chainedCts.Token).ConfigureAwait(true);
             } while (result.Status is RunStatus.Queued or RunStatus.InProgress or RunStatus.Cancelling);
             return result;
         }
-
-        [Obsolete("use new overload with Func<IServerSentEvent, Task> instead.")]
-        public static async Task<RunResponse> SubmitToolOutputsAsync(this RunResponse run, SubmitToolOutputsRequest request, Action<IServerSentEvent> streamEventHandler, CancellationToken cancellationToken = default)
-            => await run.SubmitToolOutputsAsync(request, async streamEvent =>
-            {
-                streamEventHandler?.Invoke(streamEvent);
-                await Task.CompletedTask;
-            }, cancellationToken);
 
         /// <summary>
         /// When a run has the status: "requires_action" and required_action.type is submit_tool_outputs,
@@ -323,14 +300,6 @@ namespace OpenAI.Threads
         /// <returns><see cref="RunResponse"/>.</returns>
         public static async Task<RunResponse> SubmitToolOutputsAsync(this RunResponse run, SubmitToolOutputsRequest request, Func<IServerSentEvent, Task> streamEventHandler = null, CancellationToken cancellationToken = default)
             => await run.Client.ThreadsEndpoint.SubmitToolOutputsAsync(run.ThreadId, run.Id, request, streamEventHandler, cancellationToken);
-
-        [Obsolete("use new overload with Func<IServerSentEvent, Task> instead.")]
-        public static async Task<RunResponse> SubmitToolOutputsAsync(this RunResponse run, IEnumerable<ToolOutput> outputs, Action<IServerSentEvent> streamEventHandler, CancellationToken cancellationToken = default)
-            => await run.SubmitToolOutputsAsync(new SubmitToolOutputsRequest(outputs), async streamEvent =>
-            {
-                streamEventHandler?.Invoke(streamEvent);
-                await Task.CompletedTask;
-            }, cancellationToken);
 
         /// <summary>
         /// When a run has the status: "requires_action" and required_action.type is submit_tool_outputs,

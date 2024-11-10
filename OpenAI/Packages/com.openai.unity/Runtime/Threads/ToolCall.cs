@@ -86,6 +86,7 @@ namespace OpenAI.Threads
         [JsonIgnore]
         public bool IsFunction => Type == "function";
 
+        [Preserve]
         public void AppendFrom(ToolCall other)
         {
             if (other == null)
@@ -132,5 +133,9 @@ namespace OpenAI.Threads
                 FileSearch = other.FileSearch;
             }
         }
+
+        [Preserve]
+        public static implicit operator OpenAI.ToolCall(ToolCall toolCall)
+            => new(toolCall.Id, toolCall.FunctionCall.Name, toolCall.FunctionCall.Arguments);
     }
 }

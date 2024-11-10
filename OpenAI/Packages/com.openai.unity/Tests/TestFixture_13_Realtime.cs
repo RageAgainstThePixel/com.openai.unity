@@ -21,10 +21,11 @@ namespace OpenAI.Tests
                 var sessionCreatedTcs = new TaskCompletionSource<SessionResponse>(new CancellationTokenSource(500));
                 var sessionOptions = new SessionResource(Model.GPT4oRealtime);
                 using var session = await OpenAIClient.RealtimeEndpoint.CreateSessionAsync(sessionOptions, OnRealtimeEvent);
-
                 try
                 {
                     Assert.IsNotNull(session);
+                    Assert.IsNotNull(session.Options);
+                    Assert.AreEqual(sessionOptions.Model, session.Options.Model);
                     session.OnEventReceived += OnRealtimeEvent;
                 }
                 finally

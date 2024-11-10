@@ -352,6 +352,10 @@ namespace OpenAI
                 Debug.LogException(e);
                 throw;
             }
+            finally
+            {
+                Arguments = null;
+            }
         }
 
         /// <summary>
@@ -381,6 +385,10 @@ namespace OpenAI
                 Debug.LogException(e);
                 return JsonConvert.SerializeObject(new { error = e.Message }, OpenAIClient.JsonSerializationOptions);
             }
+            finally
+            {
+                Arguments = null;
+            }
         }
 
         /// <summary>
@@ -409,6 +417,10 @@ namespace OpenAI
             {
                 Debug.LogException(e);
                 throw;
+            }
+            finally
+            {
+                Arguments = null;
             }
         }
 

@@ -17,7 +17,7 @@ namespace OpenAI.Chat
             [JsonProperty("role")] Role role,
             [JsonProperty("content")] string content,
             [JsonProperty("name")] string name,
-            [JsonProperty("function_call")] IReadOnlyList<Tool> toolCalls)
+            [JsonProperty("function_call")] IReadOnlyList<ToolCall> toolCalls)
         {
             Role = role;
             Content = content;
@@ -44,7 +44,7 @@ namespace OpenAI.Chat
         /// </summary>
         [Preserve]
         [JsonProperty("tool_calls")]
-        public IReadOnlyList<Tool> ToolCalls { get; private set; }
+        public IReadOnlyList<ToolCall> ToolCalls { get; private set; }
 
         /// <summary>
         /// Optional, The name of the author of this message.<br/>

@@ -1,6 +1,7 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Realtime
@@ -18,6 +19,7 @@ namespace OpenAI.Realtime
             [JsonProperty("output_index")] string outputIndex,
             [JsonProperty("call_id")] string callId,
             [JsonProperty("delta")] string delta,
+            [JsonProperty("name")] string name,
             [JsonProperty("arguments")] string arguments)
         {
             EventId = eventId;
@@ -27,6 +29,7 @@ namespace OpenAI.Realtime
             OutputIndex = outputIndex;
             CallId = callId;
             Delta = delta;
+            Name = name;
             Arguments = arguments;
         }
 
@@ -75,12 +78,16 @@ namespace OpenAI.Realtime
         [JsonProperty("delta")]
         public string Delta { get; }
 
+        [Preserve]
+        [JsonProperty("name")]
+        public string Name { get; }
+
         /// <summary>
         /// The final arguments as a JSON string.
         /// </summary>
         [Preserve]
         [JsonProperty("arguments")]
-        public string Arguments { get; }
+        public JToken Arguments { get; }
 
         [Preserve]
         [JsonIgnore]
@@ -89,5 +96,9 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonIgnore]
         public bool IsDone => Type.EndsWith("done");
+
+        [Preserve]
+        public static implicit operator ToolCall(ResponseFunctionCallArguments response)
+            => new(response.CallId, response.Name, response.Arguments);
     }
 }

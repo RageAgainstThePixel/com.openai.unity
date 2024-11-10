@@ -49,6 +49,7 @@ namespace OpenAI.Samples.Assistant
         private AudioSource audioSource;
 
         [SerializeField]
+        [Obsolete]
         private SpeechVoice voice;
 
         [SerializeField]
@@ -257,7 +258,7 @@ namespace OpenAI.Samples.Assistant
             {
                 Debug.Log(nameof(ProcessToolCalls));
                 var toolCalls = run.RequiredAction.SubmitToolOutputs.ToolCalls;
-                var toolOutputs = await Task.WhenAll(toolCalls.Select(ProcessToolCall)).ConfigureAwait(true);
+                var toolOutputs = await Task.WhenAll(toolCalls.Select(toolCall => ProcessToolCall(toolCall))).ConfigureAwait(true);
                 await run.SubmitToolOutputsAsync(new SubmitToolOutputsRequest(toolOutputs), cancellationToken: destroyCancellationToken);
             }
 
@@ -304,7 +305,9 @@ namespace OpenAI.Samples.Assistant
             {
                 text = text.Replace("![Image](output.jpg)", string.Empty);
                 if (string.IsNullOrWhiteSpace(text)) { return; }
+#pragma warning disable CS0612 // Type or member is obsolete
                 var request = new SpeechRequest(text, Model.TTS_1, voice, SpeechResponseFormat.PCM);
+#pragma warning restore CS0612 // Type or member is obsolete
                 var streamClipQueue = new Queue<AudioClip>();
                 var streamTcs = new TaskCompletionSource<bool>();
                 var audioPlaybackTask = PlayStreamQueueAsync(streamTcs.Task);
@@ -323,7 +326,11 @@ namespace OpenAI.Samples.Assistant
                 {
                     try
                     {
-                        await new WaitUntil(() => streamClipQueue.Count > 0);
+                        bool IsStreamTaskDone()
+                            => streamTask.IsCompleted || destroyCancellationToken.IsCancellationRequested;
+
+                        await new WaitUntil(() => streamClipQueue.Count > 0 || IsStreamTaskDone());
+                        if (IsStreamTaskDone()) { return; }
                         var endOfFrame = new WaitForEndOfFrame();
 
                         do
