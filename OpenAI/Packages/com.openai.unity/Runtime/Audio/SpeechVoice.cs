@@ -2,7 +2,7 @@
 
 using System;
 
-namespace OpenAI
+namespace OpenAI.Audio
 {
     [Obsolete("Use OpenAI.Voice instead.")]
     public enum SpeechVoice

@@ -4,20 +4,20 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 
-namespace OpenAI.Realtime
+namespace OpenAI
 {
-    internal class RealtimeModalityConverter : JsonConverter<RealtimeModality>
+    internal class ModalityConverter : JsonConverter<Modality>
     {
-        public override void WriteJson(JsonWriter writer, RealtimeModality value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, Modality value, JsonSerializer serializer)
         {
             writer.WriteStartArray();
 
-            if (value.HasFlag(RealtimeModality.Text))
+            if (value.HasFlag(Modality.Text))
             {
                 writer.WriteValue("text");
             }
 
-            if (value.HasFlag(RealtimeModality.Audio))
+            if (value.HasFlag(Modality.Audio))
             {
                 writer.WriteValue("audio");
             }
@@ -25,16 +25,16 @@ namespace OpenAI.Realtime
             writer.WriteEndArray();
         }
 
-        public override RealtimeModality ReadJson(JsonReader reader, Type objectType, RealtimeModality existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override Modality ReadJson(JsonReader reader, Type objectType, Modality existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             var modalityArray = JArray.Load(reader);
-            var modality = RealtimeModality.None;
+            var modality = Modality.None;
             foreach (var modalityString in modalityArray)
             {
                 modality |= modalityString.Value<string>() switch
                 {
-                    "text" => RealtimeModality.Text,
-                    "audio" => RealtimeModality.Audio,
+                    "text" => Modality.Text,
+                    "audio" => Modality.Audio,
                     _ => throw new NotImplementedException($"Unknown modality: {modalityString}")
                 };
             }

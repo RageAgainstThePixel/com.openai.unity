@@ -2,7 +2,7 @@
 
 using System.Runtime.Serialization;
 
-namespace OpenAI
+namespace OpenAI.Realtime
 {
     public enum RealtimeAudioFormat
     {

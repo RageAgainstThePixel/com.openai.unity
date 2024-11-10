@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace OpenAI
 {
     [Flags]
-    public enum RealtimeModality
+    public enum Modality
     {
         None = 0,
         [EnumMember(Value = "text")]

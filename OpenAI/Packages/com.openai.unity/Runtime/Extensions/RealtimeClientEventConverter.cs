@@ -2,9 +2,10 @@
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OpenAI.Realtime;
 using System;
 
-namespace OpenAI.Realtime
+namespace OpenAI
 {
     internal class RealtimeClientEventConverter : JsonConverter
     {

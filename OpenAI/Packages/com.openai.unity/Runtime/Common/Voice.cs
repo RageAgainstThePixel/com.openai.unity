@@ -35,16 +35,16 @@ namespace OpenAI
         public static readonly Voice Verse = new("verse");
 
 #pragma warning disable CS0618 // Type or member is obsolete
-        public static implicit operator Voice(SpeechVoice voice)
+        public static implicit operator Voice(Audio.SpeechVoice voice)
         {
             return voice switch
             {
-                SpeechVoice.Alloy => Alloy,
-                SpeechVoice.Echo => Echo,
-                SpeechVoice.Fable => Fable,
-                SpeechVoice.Onyx => Onyx,
-                SpeechVoice.Nova => Nova,
-                SpeechVoice.Shimmer => Shimmer,
+                Audio.SpeechVoice.Alloy => Alloy,
+                Audio.SpeechVoice.Echo => Echo,
+                Audio.SpeechVoice.Fable => Fable,
+                Audio.SpeechVoice.Onyx => Onyx,
+                Audio.SpeechVoice.Nova => Nova,
+                Audio.SpeechVoice.Shimmer => Shimmer,
                 _ => null
             };
         }
