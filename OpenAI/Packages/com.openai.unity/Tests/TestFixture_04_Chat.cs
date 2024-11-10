@@ -134,7 +134,7 @@ namespace OpenAI.Tests
             {
                 Tool.GetOrCreateTool(typeof(WeatherService), nameof(WeatherService.GetCurrentWeatherAsync))
             };
-
+            Assert.IsTrue(tools.All(tool => tool.Function?.Arguments == null));
             var chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "none");
             var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
@@ -206,9 +206,8 @@ namespace OpenAI.Tests
             {
                 Tool.GetOrCreateTool(typeof(WeatherService), nameof(WeatherService.GetCurrentWeatherAsync))
             };
-
+            Assert.IsTrue(tools.All(tool => tool.Function?.Arguments == null));
             var chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "none");
-
             var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
@@ -319,8 +318,8 @@ namespace OpenAI.Tests
             };
 
             var tools = Tool.GetAllAvailableTools(false, forceUpdate: true, clearCache: true);
+            Assert.IsTrue(tools.All(tool => tool.Function?.Arguments == null));
             var chatRequest = new ChatRequest(messages, model: Model.GPT4o, tools: tools, toolChoice: "auto", parallelToolCalls: true);
-
             var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
             {
                 Assert.IsNotNull(partialResponse);
@@ -371,6 +370,7 @@ namespace OpenAI.Tests
             }
 
             var tools = Tool.GetAllAvailableTools(false, forceUpdate: true, clearCache: true);
+            Assert.IsTrue(tools.All(tool => tool.Function?.Arguments == null));
             var chatRequest = new ChatRequest(messages, tools: tools, toolChoice: "none");
             var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
