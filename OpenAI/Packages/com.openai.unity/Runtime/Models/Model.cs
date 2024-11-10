@@ -117,6 +117,8 @@ namespace OpenAI.Models
 
         public static Model GPT4oMini { get; } = new("gpt-4o-mini", "openai");
 
+        public static Model GPT4oAudio { get; } = new("gpt-4o-audio-preview", "openai");
+
         /// <summary>
         /// More capable than any GPT-3.5 model, able to do more complex tasks, and optimized for chat.
         /// Will be updated with our latest model iteration.

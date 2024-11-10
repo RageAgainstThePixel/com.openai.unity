@@ -55,6 +55,7 @@ namespace OpenAI.Chat
         [JsonProperty("created")]
         public int CreatedAtUnixTimeSeconds { get; private set; }
 
+        [Preserve]
         [JsonIgnore]
         public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTimeSeconds).DateTime;
 

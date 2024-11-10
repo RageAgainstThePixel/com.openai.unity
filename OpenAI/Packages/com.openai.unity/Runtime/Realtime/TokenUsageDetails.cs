@@ -5,7 +5,8 @@ using UnityEngine.Scripting;
 
 namespace OpenAI.Realtime
 {
-    public sealed class TokenDetails
+    [Preserve]
+    public sealed class TokenUsageDetails
     {
         /// <summary>
         /// The number of cached tokens used in the Response.
@@ -19,13 +20,13 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("text_tokens")]
-        public int Text { get; }
+        public int? Text { get; }
 
         /// <summary>
         /// The number of audio tokens used in the Response.
         /// </summary>
         [Preserve]
         [JsonProperty("audio_tokens")]
-        public int Audio { get; }
+        public int? Audio { get; }
     }
 }

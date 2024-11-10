@@ -5,6 +5,7 @@ using UnityEngine.Scripting;
 
 namespace OpenAI.Realtime
 {
+    [Preserve]
     public sealed class Usage
     {
         /// <summary>
@@ -12,22 +13,22 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("total_tokens")]
-        public int TotalTokens { get; }
+        public int? TotalTokens { get; }
 
         [Preserve]
         [JsonProperty("input_tokens")]
-        public int InputTokens { get; }
+        public int? InputTokens { get; }
 
         [Preserve]
         [JsonProperty("output_tokens")]
-        public int OutputTokens { get; }
+        public int? OutputTokens { get; }
 
         [Preserve]
         [JsonProperty("input_token_details")]
-        public TokenDetails InputTokenDetails { get; }
+        public TokenUsageDetails InputTokenDetails { get; }
 
         [Preserve]
         [JsonProperty("output_token_details")]
-        public TokenDetails OutputTokenDetails { get; }
+        public TokenUsageDetails OutputTokenDetails { get; }
     }
 }

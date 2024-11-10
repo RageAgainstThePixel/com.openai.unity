@@ -163,6 +163,10 @@ namespace OpenAI.Chat
             }
         }
 
+        [Preserve]
+        [JsonProperty("refusal")]
+        public string Refusal { get; private set; }
+
         private List<ToolCall> toolCalls;
 
         /// <summary>
@@ -179,6 +183,13 @@ namespace OpenAI.Chat
         [Preserve]
         [JsonProperty("tool_call_id")]
         public string ToolCallId { get; private set; }
+
+        /// <summary>
+        /// If the audio output modality is requested, this object contains data about the audio response from the model. 
+        /// </summary>
+        [Preserve]
+        [JsonProperty("audio")]
+        public AudioOutput AudioOutput { get; }
 
         [Preserve]
         public override string ToString() => Content?.ToString() ?? string.Empty;
@@ -198,6 +209,11 @@ namespace OpenAI.Chat
             if (other?.Content != null)
             {
                 content += other.Content;
+            }
+
+            if (!string.IsNullOrWhiteSpace(other?.Refusal))
+            {
+                Refusal += other.Refusal;
             }
 
             if (!string.IsNullOrWhiteSpace(other?.Name))
