@@ -14,15 +14,15 @@ namespace OpenAI.Realtime
             [JsonProperty("event_id")] string eventId,
             [JsonProperty("type")] string type,
             [JsonProperty("item_id")] string itemId,
-            [JsonProperty("content_index")] int contentIndex,
-            [JsonProperty("transcription")] string transcription,
+            [JsonProperty("content_index")] int? contentIndex,
+            [JsonProperty("transcript")] string transcript,
             [JsonProperty("error")] Error error)
         {
             EventId = eventId;
             Type = type;
             ItemId = itemId;
             ContentIndex = contentIndex;
-            Transcription = transcription;
+            Transcript = transcript;
             Error = error;
         }
 
@@ -48,19 +48,20 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("content_index")]
-        public int ContentIndex { get; }
+        public int? ContentIndex { get; }
 
         /// <summary>
         /// The transcribed text.
         /// </summary>
         [Preserve]
-        [JsonProperty("transcription")]
-        public string Transcription { get; }
+        [JsonProperty("transcript")]
+        public string Transcript { get; }
 
         /// <summary>
         /// Details of the transcription error.
         /// </summary>
         [Preserve]
+        [JsonProperty("error")]
         public Error Error { get; }
     }
 }

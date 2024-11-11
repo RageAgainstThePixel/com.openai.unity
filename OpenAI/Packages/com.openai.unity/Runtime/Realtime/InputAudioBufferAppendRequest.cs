@@ -1,6 +1,7 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using UnityEngine;
 using UnityEngine.Scripting;
 using Utilities.Audio;
@@ -22,13 +23,25 @@ namespace OpenAI.Realtime
         [Preserve]
         public InputAudioBufferAppendRequest(AudioClip audioClip)
         {
-            Audio = System.Convert.ToBase64String(audioClip.EncodeToPCM());
+            Audio = Convert.ToBase64String(audioClip.EncodeToPCM());
         }
 
         [Preserve]
-        public InputAudioBufferAppendRequest(byte[] audioBytes)
+        public InputAudioBufferAppendRequest(ReadOnlyMemory<byte> audioData)
+            : this(audioData.Span)
         {
-            Audio = System.Convert.ToBase64String(audioBytes);
+        }
+
+        [Preserve]
+        public InputAudioBufferAppendRequest(ReadOnlySpan<byte> audioData)
+        {
+            Audio = Convert.ToBase64String(audioData);
+        }
+
+        [Preserve]
+        public InputAudioBufferAppendRequest(byte[] audioData)
+        {
+            Audio = Convert.ToBase64String(audioData);
         }
 
         /// <inheritdoc />

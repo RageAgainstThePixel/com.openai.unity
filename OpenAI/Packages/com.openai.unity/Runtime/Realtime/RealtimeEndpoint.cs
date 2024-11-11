@@ -18,7 +18,7 @@ namespace OpenAI.Realtime
 
         protected override bool? IsWebSocketEndpoint => true;
 
-        public async Task<RealtimeSession> CreateSessionAsync(SessionResource options = null, Action<IRealtimeEvent> sessionEvents = null, CancellationToken cancellationToken = default)
+        public async Task<RealtimeSession> CreateSessionAsync(SessionResource options = null, CancellationToken cancellationToken = default)
         {
             string model = string.IsNullOrWhiteSpace(options?.Model) ? Model.GPT4oRealtime : options!.Model;
             var queryParameters = new Dictionary<string, string>();
@@ -51,9 +51,9 @@ namespace OpenAI.Realtime
 
             return session;
 
-            void OnError(Error error)
+            void OnError(Exception e)
             {
-                sessionCreatedTcs.SetException(error.Exception ?? new Exception(error.Message));
+                sessionCreatedTcs.SetException(e);
             }
 
             void OnEventReceived(IRealtimeEvent @event)
@@ -63,7 +63,10 @@ namespace OpenAI.Realtime
                     switch (@event)
                     {
                         case SessionResponse sessionResponse:
-                            sessionCreatedTcs.TrySetResult(sessionResponse);
+                            if (sessionResponse.Type == "session.created")
+                            {
+                                sessionCreatedTcs.TrySetResult(sessionResponse);
+                            }
                             break;
                         case RealtimeEventError realtimeEventError:
                             sessionCreatedTcs.TrySetException(new Exception(realtimeEventError.Error.Message));
@@ -74,10 +77,6 @@ namespace OpenAI.Realtime
                 {
                     Debug.LogError(e);
                     sessionCreatedTcs.TrySetException(e);
-                }
-                finally
-                {
-                    sessionEvents?.Invoke(@event);
                 }
             }
         }

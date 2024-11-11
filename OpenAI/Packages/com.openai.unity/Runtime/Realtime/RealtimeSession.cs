@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -15,17 +16,6 @@ namespace OpenAI.Realtime
     public sealed class RealtimeSession : IDisposable
     {
         [Preserve]
-        public event Action<IServerEvent> OnEventReceived;
-
-        [Preserve]
-        public event Action<IClientEvent> OnEventSent;
-
-        [Preserve]
-        public event Action<Error> OnError;
-
-        private readonly WebSocket websocketClient;
-
-        [Preserve]
         public bool EnableDebug { get; set; }
 
         [Preserve]
@@ -33,6 +23,18 @@ namespace OpenAI.Realtime
 
         [Preserve]
         public SessionResource Options { get; private set; }
+
+        #region Internal
+
+        internal event Action<IServerEvent> OnEventReceived;
+
+        internal event Action<Exception> OnError;
+
+        private readonly WebSocket websocketClient;
+        private readonly ConcurrentQueue<IRealtimeEvent> events = new();
+        private readonly object eventLock = new();
+
+        private bool collectEvents;
 
         [Preserve]
         internal RealtimeSession(WebSocket wsClient, bool enableDebug)
@@ -42,7 +44,6 @@ namespace OpenAI.Realtime
             websocketClient.OnMessage += OnMessage;
         }
 
-        [Preserve]
         private void OnMessage(DataFrame dataFrame)
         {
             if (dataFrame.Type == OpCode.Text)
@@ -55,11 +56,21 @@ namespace OpenAI.Realtime
                 try
                 {
                     var @event = JsonConvert.DeserializeObject<IServerEvent>(dataFrame.Text, OpenAIClient.JsonSerializationOptions);
+
+                    lock (eventLock)
+                    {
+                        if (collectEvents)
+                        {
+                            events.Enqueue(@event);
+                        }
+                    }
+
                     OnEventReceived?.Invoke(@event);
                 }
                 catch (Exception e)
                 {
-                    OnError?.Invoke(new Error(e));
+                    Debug.LogException(e);
+                    OnError?.Invoke(e);
                 }
             }
         }
@@ -124,12 +135,71 @@ namespace OpenAI.Realtime
                 => connectTcs.TrySetResult(websocketClient.State);
         }
 
+        #endregion Internal
+
+        [Preserve]
+        public async Task ReceiveUpdatesAsync<T>(Action<T> sessionEvent, CancellationToken cancellationToken) where T : IRealtimeEvent
+        {
+            try
+            {
+                lock (eventLock)
+                {
+                    if (collectEvents)
+                    {
+                        Debug.LogWarning($"{nameof(ReceiveUpdatesAsync)} is already running!");
+                        return;
+                    }
+
+                    collectEvents = true;
+                }
+
+                do
+                {
+                    try
+                    {
+                        T @event = default;
+
+                        lock (eventLock)
+                        {
+                            if (events.TryDequeue(out var dequeuedEvent) &&
+                                dequeuedEvent is T typedEvent)
+                            {
+                                @event = typedEvent;
+                            }
+                        }
+
+                        if (@event != null)
+                        {
+                            sessionEvent(@event);
+                        }
+
+                        await Task.Yield();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
+                } while (!cancellationToken.IsCancellationRequested && websocketClient.State == State.Open);
+            }
+            finally
+            {
+                lock (eventLock)
+                {
+                    collectEvents = false;
+                }
+            }
+        }
+
+        [Preserve]
+        public async void Send<T>(T @event) where T : IClientEvent
+            => await SendAsync(@event);
+
         [Preserve]
         public async Task<IServerEvent> SendAsync<T>(T @event, CancellationToken cancellationToken = default) where T : IClientEvent
             => await SendAsync(@event, null, cancellationToken);
 
         [Preserve]
-        public async Task<IServerEvent> SendAsync<T>(T @event, Action<IServerEvent> sessionEvents = null, CancellationToken cancellationToken = default) where T : IClientEvent
+        public async Task<IServerEvent> SendAsync<T>(T @event, Action<IServerEvent> sessionEvents, CancellationToken cancellationToken = default) where T : IClientEvent
         {
             if (websocketClient.State != State.Open)
             {
@@ -141,7 +211,10 @@ namespace OpenAI.Realtime
 
             if (EnableDebug)
             {
-                Debug.Log(payload);
+                if (@event is not InputAudioBufferAppendRequest)
+                {
+                    Debug.Log(payload);
+                }
             }
 
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(EventTimeout));
@@ -149,9 +222,49 @@ namespace OpenAI.Realtime
             var tcs = new TaskCompletionSource<IServerEvent>();
             eventCts.Token.Register(() => tcs.TrySetCanceled());
             OnEventReceived += EventCallback;
-            OnEventSent?.Invoke(clientEvent);
-            await websocketClient.SendAsync(payload, cancellationToken).ConfigureAwait(true);
-            return await tcs.Task.WithCancellation(eventCts.Token);
+
+            lock (eventLock)
+            {
+                if (collectEvents)
+                {
+                    events.Enqueue(clientEvent);
+                }
+            }
+
+            var eventId = Guid.NewGuid().ToString("N");
+
+            if (EnableDebug)
+            {
+                if (@event is not InputAudioBufferAppendRequest)
+                {
+                    Debug.Log($"[{eventId}] sending {clientEvent.Type}");
+                }
+            }
+
+            await websocketClient.SendAsync(payload, cancellationToken);
+
+            if (EnableDebug)
+            {
+                if (@event is not InputAudioBufferAppendRequest)
+                {
+                    Debug.Log($"[{eventId}] sent {clientEvent.Type}");
+                }
+            }
+
+            if (@event is InputAudioBufferAppendRequest)
+            {
+                // no response for this client event
+                return default;
+            }
+
+            var response = await tcs.Task.WithCancellation(eventCts.Token);
+
+            if (EnableDebug)
+            {
+                Debug.Log($"[{eventId}] received {response.Type}");
+            }
+
+            return response;
 
             void EventCallback(IServerEvent serverEvent)
             {
@@ -172,7 +285,6 @@ namespace OpenAI.Realtime
                             Options = sessionResponse.Session;
                             Complete();
                             return;
-                        case InputAudioBufferAppendRequest: // has no sever response
                         case InputAudioBufferCommitRequest when serverEvent is InputAudioBufferCommittedResponse:
                         case InputAudioBufferClearRequest when serverEvent is InputAudioBufferClearedResponse:
                         case ConversationItemCreateRequest when serverEvent is ConversationItemCreatedResponse:
@@ -180,16 +292,16 @@ namespace OpenAI.Realtime
                         case ConversationItemDeleteRequest when serverEvent is ConversationItemDeletedResponse:
                             Complete();
                             return;
-                        case ResponseCreateRequest when serverEvent is RealtimeResponse response:
+                        case ResponseCreateRequest when serverEvent is RealtimeResponse serverResponse:
                         {
-                            if (response.Response.Status == RealtimeResponseStatus.InProgress)
+                            if (serverResponse.Response.Status == RealtimeResponseStatus.InProgress)
                             {
                                 return;
                             }
 
-                            if (response.Response.Status != RealtimeResponseStatus.Completed)
+                            if (serverResponse.Response.Status != RealtimeResponseStatus.Completed)
                             {
-                                tcs.TrySetException(new Exception(response.Response.StatusDetails.Error.ToString()));
+                                tcs.TrySetException(new Exception(serverResponse.Response.StatusDetails.Error.ToString()));
                             }
                             else
                             {
@@ -204,6 +316,8 @@ namespace OpenAI.Realtime
                 {
                     Debug.LogException(e);
                 }
+
+                return;
 
                 void Complete()
                 {
