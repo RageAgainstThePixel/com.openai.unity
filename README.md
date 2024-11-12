@@ -475,6 +475,8 @@ The library implements `IClientEvent` interface for outgoing client sent events.
 
 ##### Server Events
 
+The library implements `IServerEvent` interface for incoming server sent events.
+
 - [`RealtimeEventError`](https://platform.openai.com/docs/api-reference/realtime-server-events/error): Returned when an error occurs, which could be a client problem or a server problem.
 - [`SessionResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/session): Returned for both a `session.created` and `session.updated` event.
 - [`RealtimeConversationResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/created): Returned when a new conversation item is created.
