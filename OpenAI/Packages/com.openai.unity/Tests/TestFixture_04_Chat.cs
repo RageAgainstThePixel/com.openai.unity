@@ -570,7 +570,7 @@ namespace OpenAI.Tests
 
 
         [Test]
-        public async Task Test_06_01_GetChat_JsonSchema()
+        public async Task Test_05_01_GetChat_JsonSchema()
         {
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
 
@@ -604,7 +604,7 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_06_01_GetChat_JsonSchema_Streaming()
+        public async Task Test_05_02_GetChat_JsonSchema_Streaming()
         {
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
 
