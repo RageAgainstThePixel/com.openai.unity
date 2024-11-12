@@ -62,7 +62,9 @@ The recommended installation method is though the unity package manager and [Ope
   - [Retrieve Models](#retrieve-model)
   - [Delete Fine Tuned Model](#delete-fine-tuned-model)
 - [Realtime](#realtime) :new:
-  - [Create Realtime Session](#create-realtime-session)
+  - [Create Realtime Session](#create-realtime-session) :new:
+    - [Client Events](#client-events) :new:
+    - [Server Events](#server-events) :new:
 - [Assistants](#assistants)
   - [List Assistants](#list-assistants)
   - [Create Assistant](#create-assistant)
@@ -449,7 +451,7 @@ void ServerEvents(IServerEvent @event)
 }
 ```
 
-#### Client Events
+##### Client Events
 
 The library implements `IClientEvent` interface for outgoing client sent events.
 
@@ -463,7 +465,7 @@ The library implements `IClientEvent` interface for outgoing client sent events.
 - [`CreateResponseRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/response/create): Create a response from the model. Send this event after creating new conversation items or invoking tool calls. This will trigger the model to generate a response.
 - [`ResponseCancelRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/response/cancel) -Send this event to cancel an in-progress response.
 
-#### Server Events
+##### Server Events
 
 - [`RealtimeEventError`](https://platform.openai.com/docs/api-reference/realtime-server-events/error): Returned when an error occurs, which could be a client problem or a server problem.
 - [`SessionResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/session): Returned for both a `session.created` and `session.updated` event.
@@ -484,6 +486,8 @@ The library implements `IClientEvent` interface for outgoing client sent events.
 - [`ResponseAudioResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/audio): Returned when a response audio is updated or done.
 - [`ResponseFunctionCallArgumentsResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/function_call_arguments): Returned when a response function call arguments are updated or done.
 - [`RateLimitsResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/rate_limits): Returned when rate limits are updated.
+
+---
 
 ### [Assistants](https://platform.openai.com/docs/api-reference/assistants)
 
