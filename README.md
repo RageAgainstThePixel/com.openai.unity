@@ -242,6 +242,8 @@ Use your system's environment variables specify an api key and organization to u
 var api = new OpenAIClient(new OpenAIAuthentication().LoadFromEnvironment());
 ```
 
+---
+
 ### [Azure OpenAI](https://learn.microsoft.com/en-us/azure/cognitive-services/openai)
 
 You can also choose to use Microsoft's Azure OpenAI deployments as well.
@@ -277,6 +279,8 @@ var auth = new OpenAIAuthentication(accessToken);
 var settings = new OpenAISettings(resourceName: "your-resource", deploymentId: "deployment-id", apiVersion: "api-version", useActiveDirectoryAuthentication: true);
 var api = new OpenAIClient(auth, settings);
 ```
+
+---
 
 ### [OpenAI API Proxy](https://github.com/RageAgainstThePixel/OpenAI-DotNet/blob/main/OpenAI-DotNet-Proxy/Readme.md)
 
@@ -348,7 +352,9 @@ public partial class Program
 }
 ```
 
-Once you have set up your proxy server, your end users can now make authenticated requests to your proxy api instead of directly to the OpenAI API. The proxy server will handle authentication and forward requests to the OpenAI API, ensuring that your API keys and other sensitive information remain secure.
+Once you have set up your proxy server, your end users can now make authenticated requests to your proxy api instead of directly to the OpenAI API. The proxy server will handle authentication and forward requests to the OpenAI API, ensuring that your API keys and other sensitive information remain secure
+
+---
 
 ### [Models](https://platform.openai.com/docs/api-reference/models)
 
@@ -397,6 +403,8 @@ var api = new OpenAIClient();
 var isDeleted = await api.ModelsEndpoint.DeleteFineTuneModelAsync("your-fine-tuned-model");
 Assert.IsTrue(isDeleted);
 ```
+
+---
 
 ### [Realtime](https://platform.openai.com/docs/api-reference/realtime)
 
@@ -1286,6 +1294,8 @@ var api = new OpenAIClient();
 var isCancelled = await api.VectorStoresEndpoint.CancelVectorStoreFileBatchAsync("vector-store-id", "vector-store-file-batch-id");
 ```
 
+---
+
 ### [Chat](https://platform.openai.com/docs/api-reference/chat)
 
 Given a chat conversation, the model will return a chat completion response.
@@ -1525,6 +1535,8 @@ foreach (var choice in response.Choices)
 response.GetUsage();
 ```
 
+---
+
 ### [Audio](https://platform.openai.com/docs/api-reference/audio)
 
 Converts audio into text.
@@ -1588,6 +1600,8 @@ var request = new AudioTranslationRequest(audioClip);
 var result = await api.AudioEndpoint.CreateTranslationAsync(request);
 Debug.Log(result);
 ```
+
+---
 
 ### [Images](https://platform.openai.com/docs/api-reference/images)
 
@@ -1657,6 +1671,8 @@ foreach (var result in imageResults)
 }
 ```
 
+---
+
 ### [Files](https://platform.openai.com/docs/api-reference/files)
 
 Files are used to upload documents that can be used with features like [Fine-tuning](#fine-tuning).
@@ -1719,6 +1735,8 @@ var downloadedFilePath = await api.FilesEndpoint.DownloadFileAsync(fileId);
 Debug.Log(downloadedFilePath);
 Assert.IsTrue(File.Exists(downloadedFilePath));
 ```
+
+---
 
 ### [Fine Tuning](https://platform.openai.com/docs/api-reference/fine-tuning)
 
@@ -1791,6 +1809,8 @@ foreach (var @event in eventList.Items.OrderByDescending(@event => @event.Create
 }
 ```
 
+---
+
 ### [Batches](https://platform.openai.com/docs/api-reference/batch)
 
 Create large batches of API requests for asynchronous processing. The Batch API returns completions within 24 hours for a 50% discount.
@@ -1845,6 +1865,8 @@ var isCancelled = await api.BatchEndpoint.CancelBatchAsync(batch);
 Assert.IsTrue(isCancelled);
 ```
 
+---
+
 ### [Embeddings](https://platform.openai.com/docs/api-reference/embeddings)
 
 Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.
@@ -1862,6 +1884,8 @@ var api = new OpenAIClient();
 var response = await api.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was delicious and the waiter...", Models.Embedding_Ada_002);
 Debug.Log(response);
 ```
+
+---
 
 ### [Moderations](https://platform.openai.com/docs/api-reference/moderations)
 
