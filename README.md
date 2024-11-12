@@ -475,13 +475,11 @@ The library implements `IClientEvent` interface for outgoing client sent events.
 - [`CreateResponseRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/response/create): Create a response from the model. Send this event after creating new conversation items or invoking tool calls. This will trigger the model to generate a response.
 - [`ResponseCancelRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/response/cancel) -Send this event to cancel an in-progress response.
 
-##### Sending Client Events
+###### Sending Client Events
 
 You can send client events at any time to the server by calling the `RealtimeSession.SendAsync` method on the session object. The send call will return a `IServerEvent` handle that best represents the appropriate response from the server for that event. This is useful if you want to handle server responses in a more granular way.
 
 Ideally though, you may want to handle all server responses in the `RealtimeSession.ReceiveUpdatesAsync` callback.
-
-```csharp
 
 > [!NOTE]
 > The server will not send a confirmation response to the `InputAudioBufferAppendRequest` event.
