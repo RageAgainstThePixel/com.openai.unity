@@ -28,7 +28,7 @@ namespace OpenAI.Tests
                     Tool.FromFunc("goodbye", () =>
                     {
                         cts.Cancel();
-                        return "goodbye!";
+                        return "Goodbye!";
                     })
                 };
 

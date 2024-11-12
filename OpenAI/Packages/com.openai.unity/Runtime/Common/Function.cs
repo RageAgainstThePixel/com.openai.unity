@@ -308,7 +308,8 @@ namespace OpenAI
             {
                 var (function, invokeArgs) = ValidateFunctionArguments();
 
-                if (function.MethodInfo.ReturnType == typeof(Task))
+                if (function.MethodInfo.ReturnType == typeof(Task) ||
+                    function.MethodInfo.ReturnType == typeof(Task<>))
                 {
                     throw new InvalidOperationException("Cannot invoke an async function synchronously. Use InvokeAsync() instead.");
                 }
@@ -340,7 +341,8 @@ namespace OpenAI
             {
                 var (function, invokeArgs) = ValidateFunctionArguments();
 
-                if (function.MethodInfo.ReturnType == typeof(Task))
+                if (function.MethodInfo.ReturnType == typeof(Task) ||
+                    function.MethodInfo.ReturnType == typeof(Task<>))
                 {
                     throw new InvalidOperationException("Cannot invoke an async function synchronously. Use InvokeAsync() instead.");
                 }
@@ -406,7 +408,8 @@ namespace OpenAI
             {
                 var (function, invokeArgs) = ValidateFunctionArguments(cancellationToken);
 
-                if (function.MethodInfo.ReturnType == typeof(Task))
+                if (function.MethodInfo.ReturnType == typeof(Task) ||
+                    function.MethodInfo.ReturnType == typeof(Task<>))
                 {
                     throw new InvalidOperationException("Cannot invoke an async function synchronously. Use InvokeAsync() instead.");
                 }
