@@ -407,9 +407,7 @@ The Realtime API enables you to build low-latency, multi-modal conversational ex
 
 The Assistants API is accessed via `OpenAIClient.RealtimeEndpoint`
 
-#### [Create Realtime Session]
-
-Create a new Realtime session.
+#### Create Realtime Session
 
 ```csharp
 var api = new OpenAIClient();
