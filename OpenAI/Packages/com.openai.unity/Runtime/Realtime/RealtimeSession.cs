@@ -22,7 +22,7 @@ namespace OpenAI.Realtime
         public int EventTimeout { get; set; } = 30;
 
         [Preserve]
-        public SessionResource Options { get; private set; }
+        public Options Options { get; private set; }
 
         #region Internal
 
@@ -292,7 +292,7 @@ namespace OpenAI.Realtime
                         case ConversationItemDeleteRequest when serverEvent is ConversationItemDeletedResponse:
                             Complete();
                             return;
-                        case ResponseCreateRequest when serverEvent is RealtimeResponse serverResponse:
+                        case CreateResponseRequest when serverEvent is RealtimeResponse serverResponse:
                         {
                             if (serverResponse.Response.Status == RealtimeResponseStatus.InProgress)
                             {

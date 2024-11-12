@@ -93,11 +93,11 @@ namespace OpenAI.Samples.Realtime
                 {
                     Tool.GetOrCreateTool(openAI.ImagesEndPoint, nameof(ImagesEndpoint.GenerateImageAsync))
                 };
-                var sessionOptions = new SessionResource(
+                var options = new Options(
                     model: Model.GPT4oRealtime,
                     instructions: systemPrompt,
                     tools: tools);
-                session = await openAI.RealtimeEndpoint.CreateSessionAsync(sessionOptions, destroyCancellationToken);
+                session = await openAI.RealtimeEndpoint.CreateSessionAsync(options, destroyCancellationToken);
                 inputField.onSubmit.AddListener(SubmitChat);
                 submitButton.onClick.AddListener(SubmitChat);
                 recordButton.onClick.AddListener(ToggleRecording);
@@ -364,7 +364,7 @@ namespace OpenAI.Samples.Realtime
                     }
 
                     break;
-                case ResponseFunctionCallArguments functionCallResponse:
+                case ResponseFunctionCallArgumentsResponse functionCallResponse:
                     if (functionCallResponse.IsDone)
                     {
                         ProcessToolCall(functionCallResponse);
@@ -377,7 +377,7 @@ namespace OpenAI.Samples.Realtime
         private async Task GetResponseAsync(IClientEvent @event)
         {
             await session.SendAsync(@event, destroyCancellationToken);
-            await session.SendAsync(new ResponseCreateRequest(), destroyCancellationToken);
+            await session.SendAsync(new CreateResponseRequest(), destroyCancellationToken);
         }
 
         private async void ProcessToolCall(ToolCall toolCall)

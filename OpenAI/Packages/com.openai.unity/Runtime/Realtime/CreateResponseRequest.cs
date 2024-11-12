@@ -15,8 +15,23 @@ namespace OpenAI.Realtime
     /// These fields will override the Session's configuration for this Response only.
     /// </summary>
     [Preserve]
-    public sealed class ResponseCreateRequest : BaseRealtimeEvent, IClientEvent
+    public sealed class CreateResponseRequest : BaseRealtimeEvent, IClientEvent
     {
+        [Preserve]
+        public CreateResponseRequest()
+        {
+        }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="options">Inference configuration <see cref="Realtime.Options"/> to override the <see cref="RealtimeSession.Options"/> for this response only.</param>
+        [Preserve]
+        public CreateResponseRequest(Options options)
+        {
+            Options = options;
+        }
+
         /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
@@ -26,5 +41,9 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonProperty("type")]
         public override string Type { get; } = "response.create";
+
+        [Preserve]
+        [JsonProperty("response")]
+        public Options Options { get; }
     }
 }

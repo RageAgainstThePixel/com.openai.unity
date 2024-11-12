@@ -42,7 +42,6 @@ The recommended installation method is though the unity package manager and [Ope
   - [com.utilities.rest](https://github.com/RageAgainstThePixel/com.utilities.rest)
   - [com.utilities.audio](https://github.com/RageAgainstThePixel/com.utilities.audio)
   - [com.utilities.encoder.wav](https://github.com/RageAgainstThePixel/com.utilities.encoder.wav)
-  - [com.utilities.encoder.ogg](https://github.com/RageAgainstThePixel/com.utilities.encoder.ogg)
 
 ---
 
@@ -62,6 +61,8 @@ The recommended installation method is though the unity package manager and [Ope
   - [List Models](#list-models)
   - [Retrieve Models](#retrieve-model)
   - [Delete Fine Tuned Model](#delete-fine-tuned-model)
+- [Realtime](#realtime) :new:
+  - [Create Realtime Session](#create-realtime-session)
 - [Assistants](#assistants)
   - [List Assistants](#list-assistants)
   - [Create Assistant](#create-assistant)
@@ -394,6 +395,97 @@ var api = new OpenAIClient();
 var isDeleted = await api.ModelsEndpoint.DeleteFineTuneModelAsync("your-fine-tuned-model");
 Assert.IsTrue(isDeleted);
 ```
+
+### [Realtime](https://platform.openai.com/docs/api-reference/realtime)
+
+> [!WARNING]
+> Beta Feature. API subject to breaking changes.
+
+- [Realtime Guide](https://platform.openai.com/docs/guides/realtime)
+
+The Realtime API enables you to build low-latency, multi-modal conversational experiences. It currently supports text and audio as both input and output, as well as function calling.
+
+The Assistants API is accessed via `OpenAIClient.RealtimeEndpoint`
+
+#### [Create Realtime Session]
+
+Create a new Realtime session.
+
+```csharp
+var api = new OpenAIClient();
+var cancellationTokenSource = new CancellationTokenSource();
+var tools = new List<Tool>
+{
+    Tool.FromFunc("goodbye", () =>
+    {
+        cancellationTokenSource.Cancel();
+        return "Goodbye!";
+    })
+};
+var options = new Options(Model.GPT4oRealtime, tools: tools);
+using var session = await api.RealtimeEndpoint.CreateSessionAsync(options);
+var responseTask = await session.ReceiveUpdatesAsync<IServerEvent>(ServerEvents, cancellationTokenSource.Token);
+await session.SendAsync(new ConversationItemCreateRequest("Hello!"));
+await session.SendAsync(new CreateResponseRequest());
+await Task.Delay(5000);
+await session.SendAsync(new ConversationItemCreateRequest("GoodBye!"));
+await session.SendAsync(new CreateResponseRequest());
+await responseTask;
+
+void ServerEvents(IServerEvent @event)
+{
+    switch (@event)
+    {
+        case ResponseAudioTranscriptResponse transcriptResponse:
+            Debug.Log(transcriptResponse.ToString());
+            break;
+        case ResponseFunctionCallArgumentsResponse functionCallResponse:
+            if (functionCallResponse.IsDone)
+            {
+                ToolCall toolCall = functionCallResponse;
+                toolCall.InvokeFunction();
+            }
+
+            break;
+    }
+}
+```
+
+#### Client Events
+
+The library implements `IClientEvent` interface for outgoing client sent events.
+
+- [`UpdateSessionRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/session/update): Update the session with new session options.
+- [`InputAudioBufferAppendRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/input-audio-buffer/append): Append audio to the input audio buffer. (Unlike made other client events, the server will not send a confirmation response to this event).
+- [`InputAudioBufferCommitRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/input-audio-buffer/commit): Commit the input audio buffer. (When in Server VAD mode, the client does not need to send this event).
+- [`InputAudioBufferClearRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/input-audio-buffer/clear): Clear the input audio buffer.
+- [`ConversationItemCreateRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/conversation/item/create): Create a new conversation item. This is the main way to send user content to the model.
+- [`ConversationItemTruncateRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/conversation/item/truncate): Send this event to truncate a previous assistant message’s audio.
+- [`ConversationItemDeleteRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/conversation/item/delete): Delete a conversation item. This is useful when you want to remove a message from the conversation history.
+- [`CreateResponseRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/response/create): Create a response from the model. Send this event after creating new conversation items or invoking tool calls. This will trigger the model to generate a response.
+- [`ResponseCancelRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/response/cancel) -Send this event to cancel an in-progress response.
+
+#### Server Events
+
+- [`RealtimeEventError`](https://platform.openai.com/docs/api-reference/realtime-server-events/error): Returned when an error occurs, which could be a client problem or a server problem.
+- [`SessionResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/session): Returned for both a `session.created` and `session.updated` event.
+- [`RealtimeConversationResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/created): Returned when a new conversation item is created.
+- [`ConversationItemCreatedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/item/created): Returned when a new conversation item is created.
+- [`ConversationItemInputAudioTranscriptionResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation): Returned when the input audio transcription is completed or failed.
+- [`ConversationItemTruncatedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/item/truncated): Returned when a conversation item is truncated.
+- [`ConversationItemDeletedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/item/deleted): Returned when a conversation item is deleted.
+- [`InputAudioBufferCommittedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/input_audio_buffer/committed): Returned when an input audio buffer is committed, either by the client or automatically in server VAD mode.
+- [`InputAudioBufferClearedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/input_audio_buffer/cleared): Returned when an input audio buffer is cleared.
+- [`InputAudioBufferStartedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/input_audio_buffer/speech_started): Sent by the server when in server_vad mode to indicate that speech has been detected in the audio buffer. This can happen any time audio is added to the buffer (unless speech is already detected). The client may want to use this event to interrupt audio playback or provide visual feedback to the user.
+- [`InputAudioBufferStoppedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/input_audio_buffer/speech_stopped): Returned in server_vad mode when the server detects the end of speech in the audio buffer.
+- [`RealtimeResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response): Returned when a response is created or done.
+- [`ResponseOutputItemResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/output_item): Returned when a response output item is added or done.
+- [`ResponseContentPartResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/content_part): Returned when a response content part is added or done.
+- [`ResponseTextResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/text): Returned when a response text is updated or done.
+- [`ResponseAudioTranscriptResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/audio_transcript): Returned when a response audio transcript is updated or done.
+- [`ResponseAudioResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/audio): Returned when a response audio is updated or done.
+- [`ResponseFunctionCallArgumentsResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/function_call_arguments): Returned when a response function call arguments are updated or done.
+- [`RateLimitsResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/rate_limits): Returned when rate limits are updated.
 
 ### [Assistants](https://platform.openai.com/docs/api-reference/assistants)
 

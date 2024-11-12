@@ -7,11 +7,11 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class ResponseFunctionCallArguments : BaseRealtimeEvent, IServerEvent, IRealtimeEventStream
+    public sealed class ResponseFunctionCallArgumentsResponse : BaseRealtimeEvent, IServerEvent, IRealtimeEventStream
     {
         [Preserve]
         [JsonConstructor]
-        internal ResponseFunctionCallArguments(
+        internal ResponseFunctionCallArgumentsResponse(
             [JsonProperty("event_id")] string eventId,
             [JsonProperty("type")] string type,
             [JsonProperty("response_id")] string responseId,
@@ -98,7 +98,7 @@ namespace OpenAI.Realtime
         public bool IsDone => Type.EndsWith("done");
 
         [Preserve]
-        public static implicit operator ToolCall(ResponseFunctionCallArguments response)
+        public static implicit operator ToolCall(ResponseFunctionCallArgumentsResponse response)
             => new(response.CallId, response.Name, response.Arguments);
     }
 }

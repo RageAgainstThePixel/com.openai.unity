@@ -10,11 +10,11 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class SessionResource
+    public sealed class Options
     {
         [Preserve]
         [JsonConstructor]
-        internal SessionResource(
+        internal Options(
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
             [JsonProperty("model")] string model,
@@ -47,7 +47,7 @@ namespace OpenAI.Realtime
         }
 
         [Preserve]
-        public SessionResource(
+        public Options(
             Model model,
             Modality modalities = Modality.Text & Modality.Audio,
             Voice voice = null,
@@ -144,11 +144,14 @@ namespace OpenAI.Realtime
 
         [Preserve]
         [JsonProperty("expires_at")]
-        public int ExpiresAtTimeUnixSeconds;
+        public int? ExpiresAtTimeUnixSeconds;
 
         [Preserve]
         [JsonIgnore]
-        public DateTime ExpiresAt => DateTimeOffset.FromUnixTimeSeconds(ExpiresAtTimeUnixSeconds).DateTime;
+        public DateTime? ExpiresAt =>
+            ExpiresAtTimeUnixSeconds.HasValue
+                ? DateTimeOffset.FromUnixTimeSeconds(ExpiresAtTimeUnixSeconds.Value).DateTime
+                : null;
 
         [Preserve]
         [JsonProperty("modalities")]

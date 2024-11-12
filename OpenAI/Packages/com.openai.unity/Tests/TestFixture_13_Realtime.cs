@@ -32,29 +32,18 @@ namespace OpenAI.Tests
                     })
                 };
 
-                var sessionOptions = new SessionResource(
-                    Model.GPT4oRealtime,
-                    tools: tools);
-
-                session = await OpenAIClient.RealtimeEndpoint.CreateSessionAsync(sessionOptions, cts.Token);
+                var options = new Options(Model.GPT4oRealtime, tools: tools);
+                session = await OpenAIClient.RealtimeEndpoint.CreateSessionAsync(options, cts.Token);
+                var responseTask = session.ReceiveUpdatesAsync<IServerEvent>(SessionEvents, cts.Token);
                 Assert.IsNotNull(session);
                 Assert.IsNotNull(session.Options);
-                Assert.AreEqual(sessionOptions.Model, session.Options.Model);
+                Assert.AreEqual(options.Model, session.Options.Model);
 
-                var tasks = new List<Task>
-                {
-                    SendResponses(session),
-                    session.ReceiveUpdatesAsync<IServerEvent>(SessionEvents, cts.Token)
-                };
-
-                async Task SendResponses(RealtimeSession s)
-                {
-                    await s.SendAsync(new ConversationItemCreateRequest("Hello!"), cts.Token);
-                    await s.SendAsync(new ResponseCreateRequest(), cts.Token);
-                    await Task.Delay(5000, cts.Token).ConfigureAwait(true);
-                    await s.SendAsync(new ConversationItemCreateRequest("Goodbye!"), cts.Token);
-                    await s.SendAsync(new ResponseCreateRequest(), cts.Token);
-                }
+                await session.SendAsync(new ConversationItemCreateRequest("Hello!"), cts.Token);
+                await session.SendAsync(new CreateResponseRequest(), cts.Token);
+                await Task.Delay(5000, cts.Token).ConfigureAwait(true);
+                await session.SendAsync(new ConversationItemCreateRequest("Goodbye!"), cts.Token);
+                await session.SendAsync(new CreateResponseRequest(), cts.Token);
 
                 void SessionEvents(IServerEvent @event)
                 {
@@ -63,7 +52,7 @@ namespace OpenAI.Tests
                         case ResponseAudioTranscriptResponse transcriptResponse:
                             Debug.Log(transcriptResponse.ToString());
                             break;
-                        case ResponseFunctionCallArguments functionCallResponse:
+                        case ResponseFunctionCallArgumentsResponse functionCallResponse:
                             if (functionCallResponse.IsDone)
                             {
                                 ToolCall toolCall = functionCallResponse;
@@ -74,7 +63,7 @@ namespace OpenAI.Tests
                     }
                 }
 
-                await Task.WhenAll(tasks).ConfigureAwait(true);
+                await responseTask.ConfigureAwait(true);
             }
             catch (Exception e)
             {

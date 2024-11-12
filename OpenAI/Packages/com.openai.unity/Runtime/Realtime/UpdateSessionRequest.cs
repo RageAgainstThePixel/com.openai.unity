@@ -15,9 +15,8 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class UpdateSessionRequest : BaseRealtimeEvent, IClientEvent
     {
-
         [Preserve]
-        public UpdateSessionRequest(SessionResource options)
+        public UpdateSessionRequest(Options options)
         {
             Session = options;
         }
@@ -37,6 +36,6 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("session")]
-        public SessionResource Session { get; }
+        public Options Session { get; }
     }
 }

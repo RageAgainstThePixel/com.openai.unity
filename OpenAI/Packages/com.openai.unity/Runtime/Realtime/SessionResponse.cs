@@ -13,7 +13,7 @@ namespace OpenAI.Realtime
         internal SessionResponse(
             [JsonProperty("event_id")] string eventId,
             [JsonProperty("type")] string type,
-            [JsonProperty("session")] SessionResource session)
+            [JsonProperty("session")] Options session)
         {
             EventId = eventId;
             Type = type;
@@ -35,6 +35,6 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("session")]
-        public SessionResource Session { get; }
+        public Options Session { get; }
     }
 }

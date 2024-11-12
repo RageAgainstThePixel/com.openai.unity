@@ -37,7 +37,7 @@ namespace OpenAI
                 _ when type.StartsWith("response.audio_transcript") => jObject.ToObject<ResponseAudioTranscriptResponse>(serializer),
                 _ when type.StartsWith("response.audio") => jObject.ToObject<ResponseAudioResponse>(),
                 _ when type.StartsWith("response.content_part") => jObject.ToObject<ResponseContentPartResponse>(serializer),
-                _ when type.StartsWith("response.function_call_arguments") => jObject.ToObject<ResponseFunctionCallArguments>(serializer),
+                _ when type.StartsWith("response.function_call_arguments") => jObject.ToObject<ResponseFunctionCallArgumentsResponse>(serializer),
                 _ when type.StartsWith("response.output_item") => jObject.ToObject<ResponseOutputItemResponse>(serializer),
                 _ when type.StartsWith("response.text") => jObject.ToObject<ResponseTextResponse>(serializer),
                 _ when type.StartsWith("response") => jObject.ToObject<RealtimeResponse>(serializer),

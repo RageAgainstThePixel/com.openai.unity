@@ -30,7 +30,7 @@ namespace OpenAI
                 "conversation.item.create" => jObject.ToObject<ConversationItemCreateRequest>(serializer),
                 "conversation.item.truncate" => jObject.ToObject<ConversationItemTruncateRequest>(serializer),
                 "conversation.item.delete" => jObject.ToObject<ConversationItemDeleteRequest>(serializer),
-                "response.create" => jObject.ToObject<ResponseCreateRequest>(serializer),
+                "response.create" => jObject.ToObject<CreateResponseRequest>(serializer),
                 "response.cancel" => jObject.ToObject<ResponseCancelRequest>(serializer),
                 _ => throw new NotImplementedException($"Unknown event type: {type}")
             };
