@@ -490,8 +490,9 @@ Ideally though, you may want to handle all server responses in the `RealtimeSess
 > You will also need to send `CreateResponseRequest` to trigger the model to generate a response.
 
 ```csharp
-await session.SendAsync(new ConversationItemCreateRequest("Hello!"));
-var serverEvent = await session.SendAsync(new CreateResponseRequest());
+var serverEvent = await session.SendAsync(new ConversationItemCreateRequest("Hello!"));
+Debug.Log(serverEvent.ToJsonString());
+serverEvent = await session.SendAsync(new CreateResponseRequest());
 Debug.Log(serverEvent.ToJsonString());
 ```
 
