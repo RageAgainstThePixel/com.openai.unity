@@ -475,7 +475,7 @@ The library implements `IClientEvent` interface for outgoing client sent events.
 - [`CreateResponseRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/response/create): Create a response from the model. Send this event after creating new conversation items or invoking tool calls. This will trigger the model to generate a response.
 - [`ResponseCancelRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/response/cancel) -Send this event to cancel an in-progress response.
 
-###### Sending Client Events
+##### Sending Client Events
 
 You can send client events at any time to the server by calling the `RealtimeSession.SendAsync` method on the session object. The send call will return a `IServerEvent` handle that best represents the appropriate response from the server for that event. This is useful if you want to handle server responses in a more granular way.
 
@@ -517,7 +517,7 @@ The library implements `IServerEvent` interface for incoming server sent events.
 - [`ResponseFunctionCallArgumentsResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/function_call_arguments): Returned when a response function call arguments are updated or done.
 - [`RateLimitsResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/rate_limits): Returned when rate limits are updated.
 
-###### Receiving Server Events
+##### Receiving Server Events
 
 To receive server events, you will need to call the `RealtimeSession.ReceiveUpdatesAsync` method on the session object. This method will return a `Task` that will complete when the session is closed or when the cancellation token is triggered. Ideally this method should be called once and awaited for the duration of the session.
 
