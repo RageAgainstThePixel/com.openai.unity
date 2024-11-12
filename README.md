@@ -64,7 +64,9 @@ The recommended installation method is though the unity package manager and [Ope
 - [Realtime](#realtime) :new:
   - [Create Realtime Session](#create-realtime-session) :new:
     - [Client Events](#client-events) :new:
+    - [Sending Client Events](#sending-client-events) :new:
     - [Server Events](#server-events) :new:
+    - [Receiving Server Events](#receiving-server-events) :new:
 - [Assistants](#assistants)
   - [List Assistants](#list-assistants)
   - [Create Assistant](#create-assistant)
