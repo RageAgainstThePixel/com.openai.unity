@@ -258,7 +258,7 @@ namespace OpenAI.Samples.Realtime
                     }
                     finally
                     {
-                        ArrayPool<byte>.Shared.Return(buffer, true);
+                        ArrayPool<byte>.Shared.Return(buffer);
                     }
                 } while (!cancellationToken.IsCancellationRequested);
             }
