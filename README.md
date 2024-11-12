@@ -63,9 +63,9 @@ The recommended installation method is though the unity package manager and [Ope
   - [Delete Fine Tuned Model](#delete-fine-tuned-model)
 - [Realtime](#realtime) :new:
   - [Create Realtime Session](#create-realtime-session) :new:
-    - [Client Events](#client-events) :new:
+  - [Client Events](#client-events) :new:
     - [Sending Client Events](#sending-client-events) :new:
-    - [Server Events](#server-events) :new:
+  - [Server Events](#server-events) :new:
     - [Receiving Server Events](#receiving-server-events) :new:
 - [Assistants](#assistants)
   - [List Assistants](#list-assistants)
@@ -463,7 +463,7 @@ void ServerEvents(IServerEvent @event)
 }
 ```
 
-##### Client Events
+#### Client Events
 
 The library implements `IClientEvent` interface for outgoing client sent events.
 
@@ -495,7 +495,7 @@ var serverEvent = await session.SendAsync(new CreateResponseRequest());
 Debug.Log(serverEvent.ToJsonString());
 ```
 
-##### Server Events
+#### Server Events
 
 The library implements `IServerEvent` interface for incoming server sent events.
 
