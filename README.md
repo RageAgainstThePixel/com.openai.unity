@@ -419,6 +419,8 @@ The Assistants API is accessed via `OpenAIClient.RealtimeEndpoint`
 
 #### Create Realtime Session
 
+Here is a simple example of how to create a realtime session and to send and receive messages from the model.
+
 ```csharp
 var api = new OpenAIClient();
 var cancellationTokenSource = new CancellationTokenSource();
@@ -473,6 +475,26 @@ The library implements `IClientEvent` interface for outgoing client sent events.
 - [`CreateResponseRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/response/create): Create a response from the model. Send this event after creating new conversation items or invoking tool calls. This will trigger the model to generate a response.
 - [`ResponseCancelRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/response/cancel) -Send this event to cancel an in-progress response.
 
+##### Sending Client Events
+
+You can send client events at any time to the server by calling the `RealtimeSession.SendAsync` method on the session object. The send call will return a `IServerEvent` handle that best represents the appropriate response from the server for that event. This is useful if you want to handle server responses in a more granular way.
+
+Ideally though, you may want to handle all server responses in the `RealtimeSession.ReceiveUpdatesAsync` callback.
+
+```csharp
+
+> [!NOTE]
+> The server will not send a confirmation response to the `InputAudioBufferAppendRequest` event.
+
+> [!IMPORTANT]
+> You will also need to send `CreateResponseRequest` to trigger the model to generate a response.
+
+```csharp
+await session.SendAsync(new ConversationItemCreateRequest("Hello!"));
+var serverEvent = await session.SendAsync(new CreateResponseRequest());
+Debug.Log(serverEvent.ToJsonString());
+```
+
 ##### Server Events
 
 The library implements `IServerEvent` interface for incoming server sent events.
@@ -496,6 +518,80 @@ The library implements `IServerEvent` interface for incoming server sent events.
 - [`ResponseAudioResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/audio): Returned when a response audio is updated or done.
 - [`ResponseFunctionCallArgumentsResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/function_call_arguments): Returned when a response function call arguments are updated or done.
 - [`RateLimitsResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/rate_limits): Returned when rate limits are updated.
+
+###### Receiving Server Events
+
+To receive server events, you will need to call the `RealtimeSession.ReceiveUpdatesAsync` method on the session object. This method will return a `Task` that will complete when the session is closed or when the cancellation token is triggered. Ideally this method should be called once and awaited for the duration of the session.
+
+This method will call the `StreamEventHandler` callback for each server event received.
+
+> [!NOTE]
+> You can also get sent `IClientEvent` callbacks as well by using the `IRealtimeEvent` interface instead of `IServerEvent`.
+
+```csharp
+await session.ReceiveUpdatesAsync<IServerEvent>(ServerEvents, cancellationTokenSource.Token);
+
+void ServerEvents(IServerEvent @event)
+{
+    switch (@event)
+    {
+        case RealtimeEventError error:
+            // raised anytime an error occurs
+            break;
+        case SessionResponse sessionResponse:
+            // raised when a session is created or updated
+            break;
+        case RealtimeConversationResponse conversationResponse:
+            // raised when a new conversation is created
+            break;
+        case ConversationItemCreatedResponse conversationItemCreated:
+            // raised when a new conversation item is created
+            break;
+        case ConversationItemInputAudioTranscriptionResponse conversationItemTranscription:
+            // raised when the input audio transcription is completed or failed
+            break;
+        case ConversationItemTruncatedResponse conversationItemTruncated:
+            // raised when a conversation item is truncated
+            break;
+        case ConversationItemDeletedResponse conversationItemDeleted:
+            // raised when a conversation item is deleted
+            break;
+        case InputAudioBufferCommittedResponse committedResponse:
+            // raised when an input audio buffer is committed
+            break;
+        case InputAudioBufferClearedResponse clearedResponse:
+            // raised when an input audio buffer is cleared
+            break;
+        case InputAudioBufferStartedResponse startedResponse:
+            // raised when speech is detected in the audio buffer
+            break;
+        case InputAudioBufferStoppedResponse stoppedResponse:
+            // raised when speech stops in the audio buffer
+            break;
+        case RealtimeResponse realtimeResponse:
+            // raised when a response is created or done
+            break;
+        case ResponseOutputItemResponse outputItemResponse:
+            // raised when a response output item is added or done
+            break;
+        case ResponseContentPartResponse contentPartResponse:
+            // raised when a response content part is added or done
+            break;
+        case ResponseTextResponse textResponse:
+            // raised when a response text is updated or done
+            break;
+        case ResponseAudioTranscriptResponse transcriptResponse:
+            // raised when a response audio transcript is updated or done
+            break;
+        case ResponseFunctionCallArgumentsResponse functionCallResponse:
+            // raised when a response function call arguments are updated or done
+            break;
+        case RateLimitsResponse rateLimitsResponse:
+            // raised when rate limits are updated
+            break;
+    }
+}
+```
 
 ---
 
