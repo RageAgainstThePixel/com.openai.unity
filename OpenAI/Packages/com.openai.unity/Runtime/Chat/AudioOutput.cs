@@ -12,6 +12,20 @@ namespace OpenAI.Chat
     public sealed class AudioOutput
     {
         [Preserve]
+        [JsonConstructor]
+        internal AudioOutput(
+            [JsonProperty("id")] string id,
+            [JsonProperty("expires_at")] int expiresAtUnixSeconds,
+            [JsonProperty("data")] string data,
+            [JsonProperty("transcript")] string transcript)
+        {
+            Id = id;
+            ExpiresAtUnixSeconds = expiresAtUnixSeconds;
+            Data = data;
+            Transcript = transcript;
+        }
+
+        [Preserve]
         [JsonProperty("id")]
         public string Id { get; }
 
@@ -43,5 +57,8 @@ namespace OpenAI.Chat
         [Preserve]
         [JsonProperty("transcript")]
         public string Transcript { get; }
+
+        [Preserve]
+        public override string ToString() => Transcript ?? string.Empty;
     }
 }

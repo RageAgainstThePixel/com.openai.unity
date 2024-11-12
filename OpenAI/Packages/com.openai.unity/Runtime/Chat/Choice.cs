@@ -56,7 +56,7 @@ namespace OpenAI.Chat
         public LogProbs LogProbs { get; private set; }
 
         [Preserve]
-        public override string ToString() => Message?.Content?.ToString() ?? Delta?.Content ?? string.Empty;
+        public override string ToString() => Message?.ToString() ?? Delta?.Content ?? string.Empty;
 
         [Preserve]
         public static implicit operator string(Choice choice) => choice?.ToString();

@@ -7,7 +7,7 @@ namespace OpenAI.Chat
     public enum AudioFormat
     {
         [EnumMember(Value = "pcm16")]
-        Pcm16 = 0,
+        Pcm16 = 1,
         [EnumMember(Value = "opus")]
         Opus,
         [EnumMember(Value = "mp3")]

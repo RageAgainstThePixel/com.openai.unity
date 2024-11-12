@@ -9,7 +9,7 @@ namespace OpenAI
     public enum InputAudioFormat
     {
         [EnumMember(Value = "wav")]
-        Wav = 0,
+        Wav = 1,
         [EnumMember(Value = "mp3")]
         Mp3
     }

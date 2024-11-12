@@ -18,7 +18,7 @@ namespace OpenAI.Realtime
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
             [JsonProperty("model")] string model,
-            [JsonProperty("modalities")] Modality modalities,
+            [JsonProperty("modalities")][JsonConverter(typeof(ModalityConverter))] Modality modalities,
             [JsonProperty("voice")] string voice,
             [JsonProperty("instructions")] string instructions,
             [JsonProperty("input_audio_format")] RealtimeAudioFormat inputAudioFormat,
@@ -49,7 +49,7 @@ namespace OpenAI.Realtime
         [Preserve]
         public Options(
             Model model,
-            Modality modalities = Modality.Text & Modality.Audio,
+            Modality modalities = Modality.Text | Modality.Audio,
             Voice voice = null,
             string instructions = null,
             RealtimeAudioFormat inputAudioFormat = RealtimeAudioFormat.PCM16,

@@ -28,7 +28,7 @@ namespace OpenAI.Chat
         public string Voice { get; }
 
         [Preserve]
-        [JsonProperty("format", DefaultValueHandling = DefaultValueHandling.Include)]
+        [JsonProperty("format")]
         public AudioFormat Format { get; }
     }
 }

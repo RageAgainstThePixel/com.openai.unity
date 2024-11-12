@@ -33,12 +33,9 @@ namespace OpenAI.Tests
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             Assert.IsNotEmpty(response.Choices);
-
-            foreach (var choice in response.Choices)
-            {
-                Debug.Log($"[{choice.Index}] {choice.Message.Role}: {choice} | Finish Reason: {choice.FinishReason}");
-            }
-
+            Assert.AreEqual(1, response.Choices.Count);
+            Assert.IsNotNull(response.FirstChoice);
+            Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishReason}");
             response.GetUsage();
         }
 
@@ -86,6 +83,35 @@ namespace OpenAI.Tests
             Assert.IsTrue(choice.Message.Role == Role.Assistant);
             Assert.IsTrue(choice.Message.Content!.Equals(cumulativeDelta));
             Debug.Log(response.ToString());
+            response.GetUsage();
+        }
+
+        [Test]
+        public async Task Test_01_03_GetChatCompletion_Modalities()
+        {
+            Assert.IsNotNull(OpenAIClient.ChatEndpoint);
+
+            var messages = new List<Message>
+            {
+                new(Role.System, "You are a helpful assistant."),
+                new(Role.User, "Is a golden retriever a good family dog?"),
+            };
+
+            var chatRequest = new ChatRequest(messages, Model.GPT4oAudio);
+            Assert.IsNotNull(chatRequest);
+            Assert.IsNotNull(chatRequest.AudioSettings);
+            Assert.AreEqual(Model.GPT4oAudio.Id, chatRequest.Model);
+            Assert.AreEqual(Voice.Alloy.Id, chatRequest.AudioSettings.Voice);
+            Assert.AreEqual(AudioFormat.Pcm16, chatRequest.AudioSettings.Format);
+            Assert.AreEqual(Modality.Text | Modality.Audio, chatRequest.Modalities);
+            var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
+            Assert.IsNotNull(response);
+            Assert.IsNotNull(response.Choices);
+            Assert.IsNotEmpty(response.Choices);
+            Assert.AreEqual(1, response.Choices.Count);
+            Assert.IsNotNull(response.FirstChoice);
+            Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishReason}");
+            Assert.IsNotNull(response.FirstChoice.Message.AudioOutput.AudioClip);
             response.GetUsage();
         }
 
@@ -567,7 +593,6 @@ namespace OpenAI.Tests
             Debug.Log(response.ToString());
             response.GetUsage();
         }
-
 
         [Test]
         public async Task Test_05_01_GetChat_JsonSchema()

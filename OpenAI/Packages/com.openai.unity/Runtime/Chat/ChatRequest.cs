@@ -24,7 +24,7 @@ namespace OpenAI.Chat
             int? maxTokens = null,
             int? number = null,
             double? presencePenalty = null,
-            ChatResponseFormat responseFormat = ChatResponseFormat.Text,
+            ChatResponseFormat responseFormat = ChatResponseFormat.Auto,
             int? seed = null,
             string[] stops = null,
             double? temperature = null,
@@ -161,7 +161,7 @@ namespace OpenAI.Chat
             int? maxTokens = null,
             int? number = null,
             double? presencePenalty = null,
-            ChatResponseFormat responseFormat = ChatResponseFormat.Text,
+            ChatResponseFormat responseFormat = ChatResponseFormat.Auto,
             int? seed = null,
             string[] stops = null,
             double? temperature = null,
@@ -181,10 +181,15 @@ namespace OpenAI.Chat
 
             Model = string.IsNullOrWhiteSpace(model) ? Models.Model.GPT4o : model;
 
+            if (audioSettings != null && !Model.Contains("audio"))
+            {
+                throw new ArgumentException("Audio settings are only valid for models that support audio output", nameof(audioSettings));
+            }
+
             if (Model.Contains("audio"))
             {
-                AudioSettings = audioSettings ?? new(Voice.Alloy);
                 Modalities = Modality.Text | Modality.Audio;
+                AudioSettings = audioSettings ?? new(Voice.Alloy);
             }
             else
             {
@@ -203,7 +208,11 @@ namespace OpenAI.Chat
             }
             else
             {
-                ResponseFormatObject = responseFormat;
+                ResponseFormatObject = responseFormat switch
+                {
+                    ChatResponseFormat.Text or ChatResponseFormat.Json or ChatResponseFormat.JsonSchema => responseFormat,
+                    _ => null
+                };
             }
 
             Seed = seed;

@@ -22,7 +22,7 @@ namespace OpenAI.Realtime
         public int EventTimeout { get; set; } = 30;
 
         [Preserve]
-        public Options Options { get; private set; }
+        public Options Options { get; internal set; }
 
         #region Internal
 
@@ -282,7 +282,7 @@ namespace OpenAI.Realtime
                     switch (clientEvent)
                     {
                         case UpdateSessionRequest when serverEvent is SessionResponse sessionResponse:
-                            Options = sessionResponse.Session;
+                            Options = sessionResponse.Options;
                             Complete();
                             return;
                         case InputAudioBufferCommitRequest when serverEvent is InputAudioBufferCommittedResponse:

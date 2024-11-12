@@ -17,7 +17,7 @@ namespace OpenAI.Realtime
         {
             EventId = eventId;
             Type = type;
-            Session = session;
+            Options = session;
         }
 
         /// <inheritdoc />
@@ -31,10 +31,10 @@ namespace OpenAI.Realtime
         public override string Type { get; }
 
         /// <summary>
-        /// The session resource.
+        /// The session resource options.
         /// </summary>
         [Preserve]
         [JsonProperty("session")]
-        public Options Session { get; }
+        public Options Options { get; }
     }
 }

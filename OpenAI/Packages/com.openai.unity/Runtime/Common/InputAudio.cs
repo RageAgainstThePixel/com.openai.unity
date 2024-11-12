@@ -19,7 +19,7 @@ namespace OpenAI
 
         [Preserve]
         public InputAudio(byte[] data, InputAudioFormat format)
-            : this(Convert.ToBase64String(data), format)
+            : this($"data:audio/{format};base64,{Convert.ToBase64String(data)}", format)
         {
         }
 
@@ -37,5 +37,25 @@ namespace OpenAI
         [Preserve]
         [JsonProperty("format", DefaultValueHandling = DefaultValueHandling.Include)]
         public InputAudioFormat Format { get; private set; }
+
+        [Preserve]
+        public override string ToString() => Data;
+
+
+        [Preserve]
+        public void AppendFrom(InputAudio other)
+        {
+            if (other == null) { return; }
+
+            if (other.Format > 0)
+            {
+                Format = other.Format;
+            }
+
+            if (!string.IsNullOrWhiteSpace(other.Data))
+            {
+                Data += other.Data;
+            }
+        }
     }
 }

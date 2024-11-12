@@ -189,10 +189,18 @@ namespace OpenAI.Chat
         /// </summary>
         [Preserve]
         [JsonProperty("audio")]
-        public AudioOutput AudioOutput { get; }
+        public AudioOutput AudioOutput { get; private set; }
 
         [Preserve]
-        public override string ToString() => Content?.ToString() ?? string.Empty;
+        public override string ToString()
+        {
+            if (string.IsNullOrWhiteSpace(Content?.ToString()))
+            {
+                return AudioOutput?.ToString() ?? string.Empty;
+            }
+
+            return Content.ToString();
+        }
 
         [Preserve]
         public static implicit operator string(Message message) => message?.ToString();

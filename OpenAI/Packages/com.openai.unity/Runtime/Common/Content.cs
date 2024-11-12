@@ -130,15 +130,17 @@ namespace OpenAI
         [Preserve]
         public static implicit operator Content(ImageFile imageFile) => new(imageFile);
 
+        [Preserve]
         public override string ToString()
             => Type switch
             {
                 ContentType.Text => Text?.ToString(),
                 ContentType.ImageUrl => ImageUrl?.ToString(),
                 ContentType.ImageFile => ImageFile?.ToString(),
-                _ => throw new ArgumentOutOfRangeException(nameof(Type))
+                _ => string.Empty,
             } ?? string.Empty;
 
+        [Preserve]
         public void AppendFrom(Content other)
         {
             if (other == null) { return; }
@@ -193,6 +195,18 @@ namespace OpenAI
                 else
                 {
                     ImageFile.AppendFrom(other.ImageFile);
+                }
+            }
+
+            if (other.InputAudio != null)
+            {
+                if (InputAudio == null)
+                {
+                    InputAudio = other.InputAudio;
+                }
+                else
+                {
+                    InputAudio.AppendFrom(other.InputAudio);
                 }
             }
         }
