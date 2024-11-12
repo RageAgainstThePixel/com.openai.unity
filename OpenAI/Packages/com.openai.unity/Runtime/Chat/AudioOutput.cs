@@ -30,7 +30,7 @@ namespace OpenAI.Chat
         public string Id { get; }
 
         [Preserve]
-        [JsonProperty("expires_at")]
+        [JsonIgnore]
         public int ExpiresAtUnixSeconds { get; }
 
         [Preserve]
@@ -38,7 +38,7 @@ namespace OpenAI.Chat
         public DateTime ExpiresAt => DateTimeOffset.FromUnixTimeSeconds(ExpiresAtUnixSeconds).DateTime;
 
         [Preserve]
-        [JsonProperty("data")]
+        [JsonIgnore]
         public string Data { get; }
 
         [Preserve]
@@ -55,7 +55,7 @@ namespace OpenAI.Chat
         }
 
         [Preserve]
-        [JsonProperty("transcript")]
+        [JsonIgnore]
         public string Transcript { get; }
 
         [Preserve]

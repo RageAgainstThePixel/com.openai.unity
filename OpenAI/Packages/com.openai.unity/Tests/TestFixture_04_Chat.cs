@@ -97,14 +97,32 @@ namespace OpenAI.Tests
                 new(Role.User, "Is a golden retriever a good family dog?"),
             };
 
-            var chatRequest = new ChatRequest(messages, Model.GPT4oAudio);
+            var chatRequest = new ChatRequest(messages, Model.GPT4oAudio, audioConfig: Voice.Alloy);
             Assert.IsNotNull(chatRequest);
-            Assert.IsNotNull(chatRequest.AudioSettings);
+            Assert.IsNotNull(chatRequest.AudioConfig);
             Assert.AreEqual(Model.GPT4oAudio.Id, chatRequest.Model);
-            Assert.AreEqual(Voice.Alloy.Id, chatRequest.AudioSettings.Voice);
-            Assert.AreEqual(AudioFormat.Pcm16, chatRequest.AudioSettings.Format);
+            Assert.AreEqual(Voice.Alloy.Id, chatRequest.AudioConfig.Voice);
+            Assert.AreEqual(AudioFormat.Pcm16, chatRequest.AudioConfig.Format);
             Assert.AreEqual(Modality.Text | Modality.Audio, chatRequest.Modalities);
             var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
+            Assert.IsNotNull(response);
+            Assert.IsNotNull(response.Choices);
+            Assert.IsNotEmpty(response.Choices);
+            Assert.AreEqual(1, response.Choices.Count);
+            Assert.IsNotNull(response.FirstChoice);
+            Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishReason}");
+            Assert.IsNotNull(response.FirstChoice.Message.AudioOutput.AudioClip);
+            response.GetUsage();
+
+            messages.Add(response.FirstChoice.Message);
+            messages.Add(new(Role.User, "What are some other good family dog breeds?"));
+
+            chatRequest = new ChatRequest(messages, Model.GPT4oAudio, audioConfig: Voice.Alloy);
+            Assert.IsNotNull(chatRequest);
+            Assert.IsNotNull(messages[2]);
+            Assert.AreEqual(Role.Assistant, messages[2].Role);
+            Assert.IsNotNull(messages[2].AudioOutput);
+            response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             Assert.IsNotEmpty(response.Choices);

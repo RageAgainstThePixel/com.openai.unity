@@ -1,15 +1,16 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System.Data.Odbc;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Chat
 {
-    public sealed class AudioSettings
+    public sealed class AudioConfig
     {
         [Preserve]
         [JsonConstructor]
-        internal AudioSettings(
+        internal AudioConfig(
             [JsonProperty("voice")] string voice,
             [JsonProperty("format")] AudioFormat format)
         {
@@ -18,7 +19,7 @@ namespace OpenAI.Chat
         }
 
         [Preserve]
-        public AudioSettings(Voice voice, AudioFormat format = AudioFormat.Pcm16)
+        public AudioConfig(Voice voice, AudioFormat format = AudioFormat.Pcm16)
             : this(voice?.Id, format)
         {
         }
@@ -30,5 +31,8 @@ namespace OpenAI.Chat
         [Preserve]
         [JsonProperty("format")]
         public AudioFormat Format { get; }
+
+        [Preserve]
+        public static implicit operator AudioConfig(Voice voice) => new(voice);
     }
 }

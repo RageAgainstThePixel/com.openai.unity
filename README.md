@@ -118,6 +118,7 @@ The recommended installation method is though the unity package manager and [Ope
   - [Streaming](#chat-streaming)
   - [Tools](#chat-tools)
   - [Vision](#chat-vision)
+  - [Audio](#chat-audio) :new:
   - [Structured Outputs](#chat-structured-outputs)
   - [Json Mode](#chat-json-mode)
 - [Audio](#audio)
@@ -1551,6 +1552,20 @@ var messages = new List<Message>
 var chatRequest = new ChatRequest(messages, model: Model.GPT4o);
 var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
 Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice} | Finish Reason: {result.FirstChoice.FinishDetails}");
+```
+
+#### [Chat Audio](https://platform.openai.com/docs/guides/audio)
+
+```csharp
+var messages = new List<Message>
+{
+    new Message(Role.System, "You are a helpful assistant."),
+    new Message(Role.User, "Is a golden retriever a good family dog?")
+};
+var chatRequest = new ChatRequest(messages, Model.GPT4oAudio, audioConfig: Voice.Alloy);
+var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishDetails}");
+audioSource.PlayOneShot(response.FirstChoice.Message.AudioOutput.AudioClip);
 ```
 
 #### [Chat Structured Outputs](https://platform.openai.com/docs/guides/structured-outputs)

@@ -32,10 +32,10 @@ namespace OpenAI.Chat
             int? topLogProbs = null,
             bool? parallelToolCalls = null,
             JsonSchema jsonSchema = null,
-            AudioSettings audioSettings = null,
+            AudioConfig audioConfig = null,
             string user = null)
             : this(messages, model, frequencyPenalty, logitBias, maxTokens, number, presencePenalty,
-                responseFormat, seed, stops, temperature, topP, topLogProbs, parallelToolCalls, jsonSchema, audioSettings, user)
+                responseFormat, seed, stops, temperature, topP, topLogProbs, parallelToolCalls, jsonSchema, audioConfig, user)
         {
             var toolList = tools?.ToList();
 
@@ -146,8 +146,8 @@ namespace OpenAI.Chat
         /// <param name="parallelToolCalls">
         /// Whether to enable parallel function calling during tool use.
         /// </param>
-        /// <param name="audioSettings">
-        /// Parameters for audio output. <see cref="Chat.AudioSettings"/>.
+        /// <param name="audioConfig">
+        /// Parameters for audio output. <see cref="Chat.AudioConfig"/>.
         /// </param>
         /// <param name="user">
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
@@ -169,7 +169,7 @@ namespace OpenAI.Chat
             int? topLogProbs = null,
             bool? parallelToolCalls = null,
             JsonSchema jsonSchema = null,
-            AudioSettings audioSettings = null,
+            AudioConfig audioConfig = null,
             string user = null)
         {
             Messages = messages?.ToList();
@@ -181,15 +181,15 @@ namespace OpenAI.Chat
 
             Model = string.IsNullOrWhiteSpace(model) ? Models.Model.GPT4o : model;
 
-            if (audioSettings != null && !Model.Contains("audio"))
+            if (audioConfig != null && !Model.Contains("audio"))
             {
-                throw new ArgumentException("Audio settings are only valid for models that support audio output", nameof(audioSettings));
+                throw new ArgumentException("Audio settings are only valid for models that support audio output", nameof(audioConfig));
             }
 
             if (Model.Contains("audio"))
             {
                 Modalities = Modality.Text | Modality.Audio;
-                AudioSettings = audioSettings ?? new(Voice.Alloy);
+                AudioConfig = audioConfig ?? new(Voice.Alloy);
             }
             else
             {
@@ -341,7 +341,7 @@ namespace OpenAI.Chat
         /// </summary>
         [Preserve]
         [JsonProperty("audio")]
-        public AudioSettings AudioSettings { get; }
+        public AudioConfig AudioConfig { get; }
 
         /// <summary>
         /// Number between -2.0 and 2.0.
