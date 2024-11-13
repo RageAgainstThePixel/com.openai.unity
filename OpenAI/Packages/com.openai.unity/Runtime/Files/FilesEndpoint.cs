@@ -187,7 +187,7 @@ namespace OpenAI.Files
         public async Task<byte[]> DownloadFileBytesAsync(string fileId, IProgress<Progress> progress = null, CancellationToken cancellationToken = default)
         {
             var file = await GetFileInfoAsync(fileId, cancellationToken);
-            return await Rest.DownloadFileBytesAsync(GetUrl($"/{file.Id}/content"), file.FileName, new RestParameters(client.DefaultRequestHeaders, progress, debug: EnableDebug), cancellationToken);
+            return await Rest.DownloadBytesAsync(GetUrl($"/{file.Id}/content"), new RestParameters(client.DefaultRequestHeaders, progress, debug: EnableDebug), cancellationToken);
         }
     }
 }
