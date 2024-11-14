@@ -71,14 +71,16 @@ namespace OpenAI.Tests
                 var arrayTestValue = new { list = new List<int> { 1, 2, 3, 4, 5 } };
                 toolCall = new ToolCall("toolCall_3", toolWithArrayArgs.Function.Name, JToken.FromObject(arrayTestValue, OpenAIClient.JsonSerializer));
                 var resultWithArrayArgs = toolWithArrayArgs.InvokeFunction<string>(toolCall);
+                Assert.AreEqual("{\"list\":[1,2,3,4,5]}", resultWithArrayArgs);
                 Debug.Log(resultWithArrayArgs);
 
                 var toolSingleReturnArg = tools[4];
                 Assert.IsNotNull(toolSingleReturnArg);
-                toolCall = new ToolCall("toolCall_4", toolSingleReturnArg.Function.Name, JToken.FromObject(new Dictionary<string, string> { { "arg1", "arg1" } }, OpenAIClient.JsonSerializer));
+                var singleReturnArgTestValue = new Dictionary<string, string> { { "arg1", "arg1" } };
+                toolCall = new ToolCall("toolCall_4", toolSingleReturnArg.Function.Name, JToken.FromObject(singleReturnArgTestValue, OpenAIClient.JsonSerializer));
                 var resultSingleReturnArg = toolSingleReturnArg.InvokeFunction<string>(toolCall);
-                Debug.Log(resultSingleReturnArg);
                 Assert.AreEqual("arg1", resultSingleReturnArg);
+                Debug.Log(resultSingleReturnArg);
 
                 var toolNoSpecifiers = tools[5];
                 Assert.IsNotNull(toolNoSpecifiers);
@@ -86,6 +88,7 @@ namespace OpenAI.Tests
                 var resultNoSpecifiers = toolNoSpecifiers.InvokeFunction<string>(toolCall);
                 Debug.Log(resultNoSpecifiers);
                 Assert.AreEqual("arg1", resultNoSpecifiers);
+                Debug.Log(resultNoSpecifiers);
             }
             catch (Exception e)
             {

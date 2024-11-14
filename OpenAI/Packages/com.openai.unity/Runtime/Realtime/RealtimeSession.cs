@@ -106,8 +106,8 @@ namespace OpenAI.Realtime
         internal async Task ConnectAsync(CancellationToken cancellationToken = default)
         {
             var connectTcs = new TaskCompletionSource<State>();
-            websocketClient.OnOpen += OnWebsocketClientOnOnOpen;
-            websocketClient.OnError += OnWebsocketClientOnOnError;
+            websocketClient.OnOpen += OnWebsocketClientOnOpen;
+            websocketClient.OnError += OnWebsocketClientOnError;
 
             try
             {
@@ -115,23 +115,18 @@ namespace OpenAI.Realtime
                 // don't call async because it is blocking until connection is closed.
                 websocketClient.Connect();
                 await connectTcs.Task.WithCancellation(cancellationToken).ConfigureAwait(true);
-
-                if (websocketClient.State != State.Open)
-                {
-                    throw new Exception($"Failed to start new session! {websocketClient.State}");
-                }
             }
             finally
             {
-                websocketClient.OnOpen -= OnWebsocketClientOnOnOpen;
-                websocketClient.OnError -= OnWebsocketClientOnOnError;
+                websocketClient.OnOpen -= OnWebsocketClientOnOpen;
+                websocketClient.OnError -= OnWebsocketClientOnError;
             }
 
             return;
 
-            void OnWebsocketClientOnOnError(Exception e)
+            void OnWebsocketClientOnError(Exception e)
                 => connectTcs.TrySetException(e);
-            void OnWebsocketClientOnOnOpen()
+            void OnWebsocketClientOnOpen()
                 => connectTcs.TrySetResult(websocketClient.State);
         }
 

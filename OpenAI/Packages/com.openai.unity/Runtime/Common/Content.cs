@@ -131,6 +131,9 @@ namespace OpenAI
         public static implicit operator Content(ImageFile imageFile) => new(imageFile);
 
         [Preserve]
+        public static implicit operator Content(InputAudio inputAudio) => new(inputAudio);
+
+        [Preserve]
         public override string ToString()
             => Type switch
             {

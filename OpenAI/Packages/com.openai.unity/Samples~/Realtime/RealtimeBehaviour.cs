@@ -111,10 +111,12 @@ namespace OpenAI.Samples.Realtime
             {
                 switch (e)
                 {
-                    default:
-                        Debug.LogError(e);
+                    case TaskCanceledException:
+                    case OperationCanceledException:
                         break;
-
+                    default:
+                        Debug.LogException(e);
+                        break;
                 }
             }
             finally

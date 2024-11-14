@@ -3,6 +3,9 @@ using UnityEngine.Scripting;
 
 namespace OpenAI.Audio
 {
+    /// <summary>
+    /// Extracted word and their corresponding timestamps.
+    /// </summary>
     [Preserve]
     public sealed class TranscriptionWord
     {

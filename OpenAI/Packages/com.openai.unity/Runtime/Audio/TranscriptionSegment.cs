@@ -3,6 +3,9 @@ using UnityEngine.Scripting;
 
 namespace OpenAI.Audio
 {
+    /// <summary>
+    /// Segment of the transcribed text and their corresponding details.
+    /// </summary>
     [Preserve]
     public sealed class TranscriptionSegment
     {

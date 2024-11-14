@@ -137,6 +137,8 @@ namespace OpenAI
 
         internal static JsonSerializer JsonSerializer { get; } = JsonSerializer.Create(JsonSerializationOptions);
 
+        #region Endpoints
+
         /// <summary>
         /// List and describe the various models available in the API.
         /// You can refer to the Models documentation to understand which models are available for certain endpoints: <see href="https://platform.openai.com/docs/models/model-endpoint-compatibility"/>.<br/>
@@ -166,7 +168,7 @@ namespace OpenAI
         /// Transforms audio into text.<br/>
         /// <see href="https://platform.openai.com/docs/api-reference/audio"/>
         /// </summary>
-        public AudioEndpoint AudioEndpoint { get; set; }
+        public AudioEndpoint AudioEndpoint { get; }
 
         /// <summary>
         /// Files are used to upload documents that can be used with features like Assistants, Fine-tuning, and Batch API.<br/>
@@ -213,6 +215,8 @@ namespace OpenAI
         public VectorStoresEndpoint VectorStoresEndpoint { get; }
 
         public RealtimeEndpoint RealtimeEndpoint { get; }
+
+        #endregion Endpoints
 
         internal WebSocket CreateWebSocket(string url)
         {

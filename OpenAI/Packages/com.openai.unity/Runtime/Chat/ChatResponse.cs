@@ -24,6 +24,7 @@ namespace OpenAI.Chat
             [JsonProperty("object")] string @object,
             [JsonProperty("created")] int createdAt,
             [JsonProperty("model")] string model,
+            [JsonProperty("service_tier")] string serviceTier,
             [JsonProperty("system_fingerprint")] string systemFingerprint,
             [JsonProperty("usage")] Usage usage,
             [JsonProperty("choices")] IReadOnlyList<Choice> choices)
@@ -32,6 +33,7 @@ namespace OpenAI.Chat
             Object = @object;
             CreatedAtUnixTimeSeconds = createdAt;
             Model = model;
+            ServiceTier = serviceTier;
             SystemFingerprint = systemFingerprint;
             Usage = usage;
             this.choices = choices.ToList();
@@ -62,6 +64,10 @@ namespace OpenAI.Chat
         [Preserve]
         [JsonProperty("model")]
         public string Model { get; private set; }
+
+        [Preserve]
+        [JsonProperty("service_tier")]
+        public string ServiceTier { get; private set; }
 
         /// <summary>
         /// This fingerprint represents the backend configuration that the model runs with.
@@ -106,7 +112,7 @@ namespace OpenAI.Chat
         {
             if (other is null) { return; }
 
-            if (!string.IsNullOrWhiteSpace(Id))
+            if (!string.IsNullOrWhiteSpace(Id) && !string.IsNullOrWhiteSpace(other.Id))
             {
                 if (Id != other.Id)
                 {

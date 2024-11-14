@@ -315,6 +315,7 @@ namespace OpenAI
                 }
 
                 var result = InvokeInternal<object>(function, invokeArgs);
+
                 if (function.MethodInfo.ReturnType == typeof(void))
                 {
                     return "{\"result\": \"success\"}";
@@ -326,6 +327,10 @@ namespace OpenAI
             {
                 Debug.LogException(e);
                 return JsonConvert.SerializeObject(new { error = e.Message }, OpenAIClient.JsonSerializationOptions);
+            }
+            finally
+            {
+                Arguments = null;
             }
         }
 

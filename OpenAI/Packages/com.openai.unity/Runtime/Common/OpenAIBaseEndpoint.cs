@@ -25,6 +25,11 @@ namespace OpenAI
         /// </summary>
         protected virtual bool? IsWebSocketEndpoint => null;
 
+        /// <summary>
+        /// Gets the full formatted url for the API endpoint.
+        /// </summary>
+        /// <param name="endpoint">The endpoint url.</param>
+        /// <param name="queryParameters">Optional, parameters to add to the endpoint.</param>
         protected override string GetUrl(string endpoint = "", Dictionary<string, string> queryParameters = null)
         {
             string route;
@@ -41,7 +46,7 @@ namespace OpenAI
             var baseUrlFormat = IsWebSocketEndpoint == true
                 ? client.Settings.Info.BaseWebSocketUrlFormat
                 : client.Settings.Info.BaseRequestUrlFormat;
-            var result = string.Format(baseUrlFormat, route);
+            var url = string.Format(baseUrlFormat, route);
 
             foreach (var defaultQueryParameter in client.Settings.Info.DefaultQueryParameters)
             {
@@ -51,10 +56,10 @@ namespace OpenAI
 
             if (queryParameters is { Count: not 0 })
             {
-                result += $"?{string.Join('&', queryParameters.Select(parameter => $"{parameter.Key}={parameter.Value}"))}";
+                url += $"?{string.Join('&', queryParameters.Select(parameter => $"{parameter.Key}={parameter.Value}"))}";
             }
 
-            return result;
+            return url;
         }
     }
 }

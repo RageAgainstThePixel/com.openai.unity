@@ -3,6 +3,7 @@
 using OpenAI.Models;
 using System;
 using System.Collections.Generic;
+using System.Security.Authentication;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -59,9 +60,7 @@ namespace OpenAI.Realtime
             return session;
 
             void OnError(Exception e)
-            {
-                sessionCreatedTcs.SetException(e);
-            }
+                => sessionCreatedTcs.TrySetException(e);
 
             void OnEventReceived(IRealtimeEvent @event)
             {
@@ -74,15 +73,18 @@ namespace OpenAI.Realtime
                             {
                                 sessionCreatedTcs.TrySetResult(sessionResponse);
                             }
+
                             break;
                         case RealtimeEventError realtimeEventError:
-                            sessionCreatedTcs.TrySetException(new Exception(realtimeEventError.Error.Message));
+                            sessionCreatedTcs.TrySetException(realtimeEventError.Error.Code is "invalid_session_token" or "invalid_api_key"
+                                ? new AuthenticationException(realtimeEventError.Error.Message)
+                                : new Exception(realtimeEventError.Error.Message));
                             break;
                     }
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(e);
+                    Debug.LogException(e);
                     sessionCreatedTcs.TrySetException(e);
                 }
             }

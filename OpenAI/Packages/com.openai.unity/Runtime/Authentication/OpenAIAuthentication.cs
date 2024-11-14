@@ -178,8 +178,8 @@ namespace OpenAI
 
                     var lines = File.ReadAllLines(filePath);
                     string apiKey = null;
-                    string organizationId = null;
                     string projectId = null;
+                    string organizationId = null;
 
                     foreach (var line in lines)
                     {

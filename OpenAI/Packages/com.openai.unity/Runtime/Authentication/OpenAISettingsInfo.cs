@@ -54,16 +54,19 @@ namespace OpenAI
                 apiVersion = DefaultOpenAIApiVersion;
             }
 
-            ResourceName = domain.Contains(Http)
+            ResourceName = domain.StartsWith("http")
                 ? domain
                 : $"{Https}{domain}";
+            domain = domain.Replace(Http, string.Empty);
+            domain = domain.Replace(Https, string.Empty);
+
             ApiVersion = apiVersion;
             DeploymentId = string.Empty;
             BaseRequest = $"/{ApiVersion}/";
             BaseRequestUrlFormat = $"{ResourceName}{BaseRequest}{{0}}";
             BaseWebSocketUrlFormat = ResourceName.Contains(Https)
-                ? $"{WSS}{ResourceName}{BaseRequest}{{0}}"
-                : $"{WS}{ResourceName}{BaseRequest}{{0}}";
+                ? $"{WSS}{domain}{BaseRequest}{{0}}"
+                : $"{WS}{domain}{BaseRequest}{{0}}";
             UseOAuthAuthentication = true;
         }
 
