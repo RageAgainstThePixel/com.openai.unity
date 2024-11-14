@@ -257,7 +257,7 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_03_03_01_CreateRun_Streaming()
+        public async Task Test_03_02_01_CreateRun_Streaming()
         {
             Assert.NotNull(OpenAIClient.ThreadsEndpoint);
             var assistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(
@@ -348,7 +348,7 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_03_03_02_CreateRun_Streaming_ToolCalls()
+        public async Task Test_03_02_02_CreateRun_Streaming_ToolCalls()
         {
             Assert.NotNull(OpenAIClient.ThreadsEndpoint);
             var tools = new List<Tool>
