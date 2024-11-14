@@ -84,9 +84,8 @@ namespace OpenAI.Tests
 
                 var toolNoSpecifiers = tools[5];
                 Assert.IsNotNull(toolNoSpecifiers);
-                toolCall = new ToolCall("toolCall_5", toolNoSpecifiers.Function.Name, JToken.FromObject(new Dictionary<string, string> { { "arg1", "arg1" } }, OpenAIClient.JsonSerializer));
+                toolCall = new ToolCall("toolCall_5", toolNoSpecifiers.Function.Name, JToken.FromObject(singleReturnArgTestValue, OpenAIClient.JsonSerializer));
                 var resultNoSpecifiers = toolNoSpecifiers.InvokeFunction<string>(toolCall);
-                Debug.Log(resultNoSpecifiers);
                 Assert.AreEqual("arg1", resultNoSpecifiers);
                 Debug.Log(resultNoSpecifiers);
             }

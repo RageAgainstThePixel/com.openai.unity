@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace OpenAI.Tests.Weather
 {
-    internal class WeatherService
+    internal static class WeatherService
     {
         internal enum WeatherUnit
         {
@@ -13,7 +13,7 @@ namespace OpenAI.Tests.Weather
             Fahrenheit
         }
 
-        [Function("Get the current weather in a given location")]
+        [Function("Get the current weather in a given location.")]
         public static async Task<string> GetCurrentWeatherAsync(
            [FunctionParameter("The location the user is currently in.")] string location,
            [FunctionParameter("The units the user has requested temperature in. Typically this is based on the users location.")] WeatherUnit unit)
