@@ -16,11 +16,11 @@ namespace OpenAI.Realtime
             [JsonProperty("type")] string type,
             [JsonProperty("response_id")] string responseId,
             [JsonProperty("item_id")] string itemId,
-            [JsonProperty("output_index")] string outputIndex,
+            [JsonProperty("output_index")] int outputIndex,
             [JsonProperty("call_id")] string callId,
             [JsonProperty("delta")] string delta,
             [JsonProperty("name")] string name,
-            [JsonProperty("arguments")] string arguments)
+            [JsonProperty("arguments")] JToken arguments)
         {
             EventId = eventId;
             Type = type;
@@ -62,7 +62,7 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("output_index")]
-        public string OutputIndex { get; }
+        public int OutputIndex { get; }
 
         /// <summary>
         /// The ID of the function call.

@@ -28,5 +28,9 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonProperty("audio_tokens")]
         public int? Audio { get; }
+
+        [Preserve]
+        [JsonProperty("image_tokens")]
+        public int? Image { get; }
     }
 }

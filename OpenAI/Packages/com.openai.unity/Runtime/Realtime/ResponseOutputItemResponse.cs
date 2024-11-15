@@ -14,7 +14,7 @@ namespace OpenAI.Realtime
             [JsonProperty("event_id")] string eventId,
             [JsonProperty("type")] string type,
             [JsonProperty("response_id")] string responseId,
-            [JsonProperty("output_index")] string outputIndex,
+            [JsonProperty("output_index")] int outputIndex,
             [JsonProperty("item")] ConversationItem item)
         {
             EventId = eventId;
@@ -46,7 +46,7 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("output_index")]
-        public string OutputIndex { get; }
+        public int OutputIndex { get; }
 
         /// <summary>
         /// The item that was added.

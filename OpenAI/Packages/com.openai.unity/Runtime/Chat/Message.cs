@@ -202,7 +202,7 @@ namespace OpenAI.Chat
                 return AudioOutput?.ToString() ?? string.Empty;
             }
 
-            return Content.ToString();
+            return Content?.ToString() ?? string.Empty;
         }
 
         [Preserve]
@@ -224,12 +224,12 @@ namespace OpenAI.Chat
 
             if (!string.IsNullOrWhiteSpace(other?.Refusal))
             {
-                Refusal += other.Refusal;
+                Refusal += other?.Refusal;
             }
 
             if (!string.IsNullOrWhiteSpace(other?.Name))
             {
-                Name = other.Name;
+                Name = other?.Name;
             }
 
             if (other is { ToolCalls: not null })
