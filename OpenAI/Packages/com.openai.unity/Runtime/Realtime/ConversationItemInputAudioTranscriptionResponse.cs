@@ -69,6 +69,7 @@ namespace OpenAI.Realtime
         public bool IsCompleted => Type.Contains("completed");
 
         [Preserve]
+        [JsonIgnore]
         public bool IsFailed => Type.Contains("failed");
     }
 }

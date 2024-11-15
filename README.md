@@ -334,7 +334,7 @@ public partial class Program
     {
         public override async Task ValidateAuthenticationAsync(IHeaderDictionary request)
         {
-            await Task.CompletedTask; // remote resource call
+            await Task.CompletedTask; // remote resource call to verify token
 
             // You will need to implement your own class to properly test
             // custom issued tokens you've setup for your end users.
@@ -355,7 +355,7 @@ public partial class Program
 }
 ```
 
-Once you have set up your proxy server, your end users can now make authenticated requests to your proxy api instead of directly to the OpenAI API. The proxy server will handle authentication and forward requests to the OpenAI API, ensuring that your API keys and other sensitive information remain secure
+Once you have set up your proxy server, your end users can now make authenticated requests to your proxy api instead of directly to the OpenAI API. The proxy server will handle authentication and forward requests to the OpenAI API, ensuring that your API keys and other sensitive information remain secure.
 
 ---
 
@@ -440,7 +440,7 @@ using var session = await api.RealtimeEndpoint.CreateSessionAsync(options);
 var responseTask = await session.ReceiveUpdatesAsync<IServerEvent>(ServerEvents, cancellationTokenSource.Token);
 await session.SendAsync(new ConversationItemCreateRequest("Hello!"));
 await session.SendAsync(new CreateResponseRequest());
-await Task.Delay(5000);
+await session.SendAsync(new InputAudioBufferAppendRequest(new ReadOnlyMemory<byte>(new byte[1024 * 4])), cts.Token);
 await session.SendAsync(new ConversationItemCreateRequest("GoodBye!"));
 await session.SendAsync(new CreateResponseRequest());
 await responseTask;
@@ -482,7 +482,7 @@ The library implements `IClientEvent` interface for outgoing client sent events.
 
 You can send client events at any time to the server by calling the `RealtimeSession.SendAsync` method on the session object. The send call will return a `IServerEvent` handle that best represents the appropriate response from the server for that event. This is useful if you want to handle server responses in a more granular way.
 
-Ideally though, you may want to handle all server responses in the `RealtimeSession.ReceiveUpdatesAsync` callback.
+Ideally though, you may want to handle all server responses with [`RealtimeSession.ReceiveUpdatesAsync`](#receiving-server-events).
 
 > [!NOTE]
 > The server will not send a confirmation response to the `InputAudioBufferAppendRequest` event.
@@ -523,9 +523,7 @@ The library implements `IServerEvent` interface for incoming server sent events.
 
 ##### Receiving Server Events
 
-To receive server events, you will need to call the `RealtimeSession.ReceiveUpdatesAsync` method on the session object. This method will return a `Task` that will complete when the session is closed or when the cancellation token is triggered. Ideally this method should be called once and awaited for the duration of the session.
-
-This method will call the `StreamEventHandler` callback for each server event received.
+To receive server events, you will need to call the `RealtimeSession.ReceiveUpdatesAsync` method on the session object. This method will return a `Task` that will complete when the session is closed or when the cancellation token is triggered. Ideally this method should be called once and runs for the duration of the session.
 
 > [!NOTE]
 > You can also get sent `IClientEvent` callbacks as well by using the `IRealtimeEvent` interface instead of `IServerEvent`.
@@ -1557,6 +1555,7 @@ Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice} | Finish Rea
 #### [Chat Audio](https://platform.openai.com/docs/guides/audio)
 
 ```csharp
+var api = new OpenAIClient();
 var messages = new List<Message>
 {
     new Message(Role.System, "You are a helpful assistant."),

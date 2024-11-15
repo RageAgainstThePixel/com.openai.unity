@@ -15,12 +15,21 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class RealtimeSession : IDisposable
     {
+        /// <summary>
+        /// Enable or disable logging.
+        /// </summary>
         [Preserve]
         public bool EnableDebug { get; set; }
 
+        /// <summary>
+        /// The timeout in seconds to wait for a response from the server.
+        /// </summary>
         [Preserve]
         public int EventTimeout { get; set; } = 30;
 
+        /// <summary>
+        /// The options for the session.
+        /// </summary>
         [Preserve]
         public Options Options { get; internal set; }
 
@@ -44,6 +53,7 @@ namespace OpenAI.Realtime
             websocketClient.OnMessage += OnMessage;
         }
 
+        [Preserve]
         private void OnMessage(DataFrame dataFrame)
         {
             if (dataFrame.Type == OpCode.Text)
@@ -132,6 +142,13 @@ namespace OpenAI.Realtime
 
         #endregion Internal
 
+        /// <summary>
+        /// Receive updates from the server.
+        /// </summary>
+        /// <typeparam name="T"><see cref="IRealtimeEvent"/> to subscribe for updates to.</typeparam>
+        /// <param name="sessionEvent">The event to receive updates for.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="Task"/>.</returns>
         [Preserve]
         public async Task ReceiveUpdatesAsync<T>(Action<T> sessionEvent, CancellationToken cancellationToken) where T : IRealtimeEvent
         {
@@ -185,14 +202,35 @@ namespace OpenAI.Realtime
             }
         }
 
+        /// <summary>
+        /// Send a client event to the server.
+        /// </summary>
+        /// <typeparam name="T"><see cref="IClientEvent"/> to send to the server.</typeparam>
+        /// <param name="event">The event to send.</param>
         [Preserve]
         public async void Send<T>(T @event) where T : IClientEvent
             => await SendAsync(@event);
 
+        /// <summary>
+        /// Send a client event to the server.
+        /// </summary>
+        /// <typeparam name="T"><see cref="IClientEvent"/> to send to the server.</typeparam>
+        /// <param name="event">The event to send.</param>
+        /// <param name="sessionEvents">Optional, <see cref="Action{IServerEvent}"/>.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="Task{IServerEvent}"/>.</returns>
         [Preserve]
         public async Task<IServerEvent> SendAsync<T>(T @event, CancellationToken cancellationToken = default) where T : IClientEvent
             => await SendAsync(@event, null, cancellationToken);
 
+        /// <summary>
+        /// Send a client event to the server.
+        /// </summary>
+        /// <typeparam name="T"><see cref="IClientEvent"/> to send to the server.</typeparam>
+        /// <param name="event">The event to send.</param>
+        /// <param name="sessionEvents">Optional, <see cref="Action{IServerEvent}"/>.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="Task{IServerEvent}"/>.</returns>
         [Preserve]
         public async Task<IServerEvent> SendAsync<T>(T @event, Action<IServerEvent> sessionEvents, CancellationToken cancellationToken = default) where T : IClientEvent
         {
@@ -288,23 +326,23 @@ namespace OpenAI.Realtime
                             Complete();
                             return;
                         case CreateResponseRequest when serverEvent is RealtimeResponse serverResponse:
-                        {
-                            if (serverResponse.Response.Status == RealtimeResponseStatus.InProgress)
                             {
-                                return;
-                            }
+                                if (serverResponse.Response.Status == RealtimeResponseStatus.InProgress)
+                                {
+                                    return;
+                                }
 
-                            if (serverResponse.Response.Status != RealtimeResponseStatus.Completed)
-                            {
-                                tcs.TrySetException(new Exception(serverResponse.Response.StatusDetails.Error.ToString()));
-                            }
-                            else
-                            {
-                                Complete();
-                            }
+                                if (serverResponse.Response.Status != RealtimeResponseStatus.Completed)
+                                {
+                                    tcs.TrySetException(new Exception(serverResponse.Response.StatusDetails.Error.ToString()));
+                                }
+                                else
+                                {
+                                    Complete();
+                                }
 
-                            break;
-                        }
+                                break;
+                            }
                     }
                 }
                 catch (Exception e)

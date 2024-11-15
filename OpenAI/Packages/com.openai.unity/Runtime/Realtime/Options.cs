@@ -144,7 +144,7 @@ namespace OpenAI.Realtime
 
         [Preserve]
         [JsonProperty("expires_at")]
-        public int? ExpiresAtTimeUnixSeconds;
+        public int? ExpiresAtTimeUnixSeconds { get; private set; }
 
         [Preserve]
         [JsonIgnore]

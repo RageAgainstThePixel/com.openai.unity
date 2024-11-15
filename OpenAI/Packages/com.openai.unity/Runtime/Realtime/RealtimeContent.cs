@@ -49,6 +49,24 @@ namespace OpenAI.Realtime
         }
 
         [Preserve]
+        public RealtimeContent(ReadOnlyMemory<byte> audioData, RealtimeContentType type, string transcript = null)
+            : this(audioData.Span, type, transcript)
+        {
+        }
+
+        [Preserve]
+        public RealtimeContent(ReadOnlySpan<byte> audioData, RealtimeContentType type, string transcript = null)
+        {
+            Type = type;
+            Audio = type switch
+            {
+                RealtimeContentType.InputAudio or RealtimeContentType.Audio => Convert.ToBase64String(audioData),
+                _ => throw new ArgumentException($"Invalid content type {type} for audio content")
+            };
+            Transcript = transcript;
+        }
+
+        [Preserve]
         public RealtimeContent(byte[] audioData, RealtimeContentType type, string transcript = null)
         {
             Type = type;
