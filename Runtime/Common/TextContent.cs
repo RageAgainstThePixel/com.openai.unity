@@ -12,16 +12,6 @@ namespace OpenAI
     public sealed class TextContent : IAppendable<TextContent>
     {
         [Preserve]
-        public TextContent(string value) => Value = value;
-
-        [Preserve]
-        public TextContent(string value, IEnumerable<Annotation> annotations = null)
-        {
-            Value = value;
-            this.annotations = annotations?.ToList();
-        }
-
-        [Preserve]
         [JsonConstructor]
         internal TextContent(
             [JsonProperty("index")] int? index,
@@ -29,6 +19,13 @@ namespace OpenAI
             [JsonProperty("annotations")] IEnumerable<Annotation> annotations)
         {
             Index = index;
+            Value = value;
+            this.annotations = annotations?.ToList();
+        }
+
+        [Preserve]
+        public TextContent(string value, IEnumerable<Annotation> annotations = null)
+        {
             Value = value;
             this.annotations = annotations?.ToList();
         }

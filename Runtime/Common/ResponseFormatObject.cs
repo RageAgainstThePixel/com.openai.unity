@@ -9,7 +9,7 @@ namespace OpenAI
     public sealed class ResponseFormatObject
     {
         [Preserve]
-        public ResponseFormatObject() => Type = ChatResponseFormat.Text;
+        public ResponseFormatObject() { }
 
         [Preserve]
         public ResponseFormatObject(ChatResponseFormat type)

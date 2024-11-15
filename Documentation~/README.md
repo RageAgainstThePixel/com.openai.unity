@@ -42,7 +42,6 @@ The recommended installation method is though the unity package manager and [Ope
   - [com.utilities.rest](https://github.com/RageAgainstThePixel/com.utilities.rest)
   - [com.utilities.audio](https://github.com/RageAgainstThePixel/com.utilities.audio)
   - [com.utilities.encoder.wav](https://github.com/RageAgainstThePixel/com.utilities.encoder.wav)
-  - [com.utilities.encoder.ogg](https://github.com/RageAgainstThePixel/com.utilities.encoder.ogg)
 
 ---
 
@@ -62,6 +61,12 @@ The recommended installation method is though the unity package manager and [Ope
   - [List Models](#list-models)
   - [Retrieve Models](#retrieve-model)
   - [Delete Fine Tuned Model](#delete-fine-tuned-model)
+- [Realtime](#realtime) :new:
+  - [Create Realtime Session](#create-realtime-session) :new:
+  - [Client Events](#client-events) :new:
+    - [Sending Client Events](#sending-client-events) :new:
+  - [Server Events](#server-events) :new:
+    - [Receiving Server Events](#receiving-server-events) :new:
 - [Assistants](#assistants)
   - [List Assistants](#list-assistants)
   - [Create Assistant](#create-assistant)
@@ -113,6 +118,7 @@ The recommended installation method is though the unity package manager and [Ope
   - [Streaming](#chat-streaming)
   - [Tools](#chat-tools)
   - [Vision](#chat-vision)
+  - [Audio](#chat-audio) :new:
   - [Structured Outputs](#chat-structured-outputs)
   - [Json Mode](#chat-json-mode)
 - [Audio](#audio)
@@ -239,6 +245,8 @@ Use your system's environment variables specify an api key and organization to u
 var api = new OpenAIClient(new OpenAIAuthentication().LoadFromEnvironment());
 ```
 
+---
+
 ### [Azure OpenAI](https://learn.microsoft.com/en-us/azure/cognitive-services/openai)
 
 You can also choose to use Microsoft's Azure OpenAI deployments as well.
@@ -274,6 +282,8 @@ var auth = new OpenAIAuthentication(accessToken);
 var settings = new OpenAISettings(resourceName: "your-resource", deploymentId: "deployment-id", apiVersion: "api-version", useActiveDirectoryAuthentication: true);
 var api = new OpenAIClient(auth, settings);
 ```
+
+---
 
 ### [OpenAI API Proxy](https://github.com/RageAgainstThePixel/OpenAI-DotNet/blob/main/OpenAI-DotNet-Proxy/Readme.md)
 
@@ -324,7 +334,7 @@ public partial class Program
     {
         public override async Task ValidateAuthenticationAsync(IHeaderDictionary request)
         {
-            await Task.CompletedTask; // remote resource call
+            await Task.CompletedTask; // remote resource call to verify token
 
             // You will need to implement your own class to properly test
             // custom issued tokens you've setup for your end users.
@@ -346,6 +356,8 @@ public partial class Program
 ```
 
 Once you have set up your proxy server, your end users can now make authenticated requests to your proxy api instead of directly to the OpenAI API. The proxy server will handle authentication and forward requests to the OpenAI API, ensuring that your API keys and other sensitive information remain secure.
+
+---
 
 ### [Models](https://platform.openai.com/docs/api-reference/models)
 
@@ -394,6 +406,194 @@ var api = new OpenAIClient();
 var isDeleted = await api.ModelsEndpoint.DeleteFineTuneModelAsync("your-fine-tuned-model");
 Assert.IsTrue(isDeleted);
 ```
+
+---
+
+### [Realtime](https://platform.openai.com/docs/api-reference/realtime)
+
+> [!WARNING]
+> Beta Feature. API subject to breaking changes.
+
+- [Realtime Guide](https://platform.openai.com/docs/guides/realtime)
+
+The Realtime API enables you to build low-latency, multi-modal conversational experiences. It currently supports text and audio as both input and output, as well as function calling.
+
+The Assistants API is accessed via `OpenAIClient.RealtimeEndpoint`
+
+#### Create Realtime Session
+
+Here is a simple example of how to create a realtime session and to send and receive messages from the model.
+
+```csharp
+var api = new OpenAIClient();
+var cancellationTokenSource = new CancellationTokenSource();
+var tools = new List<Tool>
+{
+    Tool.FromFunc("goodbye", () =>
+    {
+        cancellationTokenSource.Cancel();
+        return "Goodbye!";
+    })
+};
+var options = new Options(Model.GPT4oRealtime, tools: tools);
+using var session = await api.RealtimeEndpoint.CreateSessionAsync(options);
+var responseTask = await session.ReceiveUpdatesAsync<IServerEvent>(ServerEvents, cancellationTokenSource.Token);
+await session.SendAsync(new ConversationItemCreateRequest("Hello!"));
+await session.SendAsync(new CreateResponseRequest());
+await session.SendAsync(new InputAudioBufferAppendRequest(new ReadOnlyMemory<byte>(new byte[1024 * 4])), cts.Token);
+await session.SendAsync(new ConversationItemCreateRequest("GoodBye!"));
+await session.SendAsync(new CreateResponseRequest());
+await responseTask;
+
+void ServerEvents(IServerEvent @event)
+{
+    switch (@event)
+    {
+        case ResponseAudioTranscriptResponse transcriptResponse:
+            Debug.Log(transcriptResponse.ToString());
+            break;
+        case ResponseFunctionCallArgumentsResponse functionCallResponse:
+            if (functionCallResponse.IsDone)
+            {
+                ToolCall toolCall = functionCallResponse;
+                toolCall.InvokeFunction();
+            }
+
+            break;
+    }
+}
+```
+
+#### Client Events
+
+The library implements `IClientEvent` interface for outgoing client sent events.
+
+- [`UpdateSessionRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/session/update): Update the session with new session options.
+- [`InputAudioBufferAppendRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/input-audio-buffer/append): Append audio to the input audio buffer. (Unlike made other client events, the server will not send a confirmation response to this event).
+- [`InputAudioBufferCommitRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/input-audio-buffer/commit): Commit the input audio buffer. (When in Server VAD mode, the client does not need to send this event).
+- [`InputAudioBufferClearRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/input-audio-buffer/clear): Clear the input audio buffer.
+- [`ConversationItemCreateRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/conversation/item/create): Create a new conversation item. This is the main way to send user content to the model.
+- [`ConversationItemTruncateRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/conversation/item/truncate): Send this event to truncate a previous assistant message’s audio.
+- [`ConversationItemDeleteRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/conversation/item/delete): Delete a conversation item. This is useful when you want to remove a message from the conversation history.
+- [`CreateResponseRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/response/create): Create a response from the model. Send this event after creating new conversation items or invoking tool calls. This will trigger the model to generate a response.
+- [`ResponseCancelRequest`](https://platform.openai.com/docs/api-reference/realtime-client-events/response/cancel) -Send this event to cancel an in-progress response.
+
+##### Sending Client Events
+
+You can send client events at any time to the server by calling the `RealtimeSession.SendAsync` method on the session object. The send call will return a `IServerEvent` handle that best represents the appropriate response from the server for that event. This is useful if you want to handle server responses in a more granular way.
+
+Ideally though, you may want to handle all server responses with [`RealtimeSession.ReceiveUpdatesAsync`](#receiving-server-events).
+
+> [!NOTE]
+> The server will not send a confirmation response to the `InputAudioBufferAppendRequest` event.
+
+> [!IMPORTANT]
+> You will also need to send `CreateResponseRequest` to trigger the model to generate a response.
+
+```csharp
+var serverEvent = await session.SendAsync(new ConversationItemCreateRequest("Hello!"));
+Debug.Log(serverEvent.ToJsonString());
+serverEvent = await session.SendAsync(new CreateResponseRequest());
+Debug.Log(serverEvent.ToJsonString());
+```
+
+#### Server Events
+
+The library implements `IServerEvent` interface for incoming server sent events.
+
+- [`RealtimeEventError`](https://platform.openai.com/docs/api-reference/realtime-server-events/error): Returned when an error occurs, which could be a client problem or a server problem.
+- [`SessionResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/session): Returned for both a `session.created` and `session.updated` event.
+- [`RealtimeConversationResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/created): Returned when a new conversation item is created.
+- [`ConversationItemCreatedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/item/created): Returned when a new conversation item is created.
+- [`ConversationItemInputAudioTranscriptionResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation): Returned when the input audio transcription is completed or failed.
+- [`ConversationItemTruncatedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/item/truncated): Returned when a conversation item is truncated.
+- [`ConversationItemDeletedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/item/deleted): Returned when a conversation item is deleted.
+- [`InputAudioBufferCommittedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/input_audio_buffer/committed): Returned when an input audio buffer is committed, either by the client or automatically in server VAD mode.
+- [`InputAudioBufferClearedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/input_audio_buffer/cleared): Returned when an input audio buffer is cleared.
+- [`InputAudioBufferStartedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/input_audio_buffer/speech_started): Sent by the server when in server_vad mode to indicate that speech has been detected in the audio buffer. This can happen any time audio is added to the buffer (unless speech is already detected). The client may want to use this event to interrupt audio playback or provide visual feedback to the user.
+- [`InputAudioBufferStoppedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/input_audio_buffer/speech_stopped): Returned in server_vad mode when the server detects the end of speech in the audio buffer.
+- [`RealtimeResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response): Returned when a response is created or done.
+- [`ResponseOutputItemResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/output_item): Returned when a response output item is added or done.
+- [`ResponseContentPartResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/content_part): Returned when a response content part is added or done.
+- [`ResponseTextResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/text): Returned when a response text is updated or done.
+- [`ResponseAudioTranscriptResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/audio_transcript): Returned when a response audio transcript is updated or done.
+- [`ResponseAudioResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/audio): Returned when a response audio is updated or done.
+- [`ResponseFunctionCallArgumentsResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/function_call_arguments): Returned when a response function call arguments are updated or done.
+- [`RateLimitsResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/rate_limits): Returned when rate limits are updated.
+
+##### Receiving Server Events
+
+To receive server events, you will need to call the `RealtimeSession.ReceiveUpdatesAsync` method on the session object. This method will return a `Task` that will complete when the session is closed or when the cancellation token is triggered. Ideally this method should be called once and runs for the duration of the session.
+
+> [!NOTE]
+> You can also get sent `IClientEvent` callbacks as well by using the `IRealtimeEvent` interface instead of `IServerEvent`.
+
+```csharp
+await session.ReceiveUpdatesAsync<IServerEvent>(ServerEvents, cancellationTokenSource.Token);
+
+void ServerEvents(IServerEvent @event)
+{
+    switch (@event)
+    {
+        case RealtimeEventError error:
+            // raised anytime an error occurs
+            break;
+        case SessionResponse sessionResponse:
+            // raised when a session is created or updated
+            break;
+        case RealtimeConversationResponse conversationResponse:
+            // raised when a new conversation is created
+            break;
+        case ConversationItemCreatedResponse conversationItemCreated:
+            // raised when a new conversation item is created
+            break;
+        case ConversationItemInputAudioTranscriptionResponse conversationItemTranscription:
+            // raised when the input audio transcription is completed or failed
+            break;
+        case ConversationItemTruncatedResponse conversationItemTruncated:
+            // raised when a conversation item is truncated
+            break;
+        case ConversationItemDeletedResponse conversationItemDeleted:
+            // raised when a conversation item is deleted
+            break;
+        case InputAudioBufferCommittedResponse committedResponse:
+            // raised when an input audio buffer is committed
+            break;
+        case InputAudioBufferClearedResponse clearedResponse:
+            // raised when an input audio buffer is cleared
+            break;
+        case InputAudioBufferStartedResponse startedResponse:
+            // raised when speech is detected in the audio buffer
+            break;
+        case InputAudioBufferStoppedResponse stoppedResponse:
+            // raised when speech stops in the audio buffer
+            break;
+        case RealtimeResponse realtimeResponse:
+            // raised when a response is created or done
+            break;
+        case ResponseOutputItemResponse outputItemResponse:
+            // raised when a response output item is added or done
+            break;
+        case ResponseContentPartResponse contentPartResponse:
+            // raised when a response content part is added or done
+            break;
+        case ResponseTextResponse textResponse:
+            // raised when a response text is updated or done
+            break;
+        case ResponseAudioTranscriptResponse transcriptResponse:
+            // raised when a response audio transcript is updated or done
+            break;
+        case ResponseFunctionCallArgumentsResponse functionCallResponse:
+            // raised when a response function call arguments are updated or done
+            break;
+        case RateLimitsResponse rateLimitsResponse:
+            // raised when rate limits are updated
+            break;
+    }
+}
+```
+
+---
 
 ### [Assistants](https://platform.openai.com/docs/api-reference/assistants)
 
@@ -1192,6 +1392,8 @@ var api = new OpenAIClient();
 var isCancelled = await api.VectorStoresEndpoint.CancelVectorStoreFileBatchAsync("vector-store-id", "vector-store-file-batch-id");
 ```
 
+---
+
 ### [Chat](https://platform.openai.com/docs/api-reference/chat)
 
 Given a chat conversation, the model will return a chat completion response.
@@ -1350,6 +1552,20 @@ var result = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
 Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice} | Finish Reason: {result.FirstChoice.FinishDetails}");
 ```
 
+#### [Chat Audio](https://platform.openai.com/docs/guides/audio)
+
+```csharp
+var messages = new List<Message>
+{
+    new Message(Role.System, "You are a helpful assistant."),
+    new Message(Role.User, "Is a golden retriever a good family dog?")
+};
+var chatRequest = new ChatRequest(messages, Model.GPT4oAudio, audioConfig: Voice.Alloy);
+var response = await api.ChatEndpoint.GetCompletionAsync(chatRequest);
+Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishDetails}");
+audioSource.PlayOneShot(response.FirstChoice.Message.AudioOutput.AudioClip);
+```
+
 #### [Chat Structured Outputs](https://platform.openai.com/docs/guides/structured-outputs)
 
 The evolution of  [Json Mode](#chat-json-mode). While both ensure valid JSON is produced, only Structured Outputs ensure schema adherence.
@@ -1365,23 +1581,19 @@ These are the objects you'll deserialize to, so be sure to use standard Json obj
 ```csharp
 public class MathResponse
 {
-    [JsonInclude]
-    [JsonPropertyName("steps")]
+    [JsonProperty("steps")]
     public IReadOnlyList<MathStep> Steps { get; private set; }
 
-    [JsonInclude]
-    [JsonPropertyName("final_answer")]
+    [JsonProperty("final_answer")]
     public string FinalAnswer { get; private set; }
 }
 
 public class MathStep
 {
-    [JsonInclude]
-    [JsonPropertyName("explanation")]
+    [JsonProperty("explanation")]
     public string Explanation { get; private set; }
 
-    [JsonInclude]
-    [JsonPropertyName("output")]
+    [JsonProperty("output")]
     public string Output { get; private set; }
 }
 ```
@@ -1396,7 +1608,7 @@ var messages = new List<Message>
     new(Role.User, "how can I solve 8x + 7 = -23")
 };
 
-var chatRequest = new ChatRequest<MathResponse>(messages, model: new("gpt-4o-2024-08-06"));
+var chatRequest = new ChatRequest(messages, model: "gpt-4o-2024-08-06");
 var (mathResponse, chatResponse) = await api.ChatEndpoint.GetCompletionAsync<MathResponse>(chatRequest);
 
 for (var i = 0; i < mathResponse.Steps.Count; i++)
@@ -1434,6 +1646,8 @@ foreach (var choice in response.Choices)
 
 response.GetUsage();
 ```
+
+---
 
 ### [Audio](https://platform.openai.com/docs/api-reference/audio)
 
@@ -1498,6 +1712,8 @@ var request = new AudioTranslationRequest(audioClip);
 var result = await api.AudioEndpoint.CreateTranslationAsync(request);
 Debug.Log(result);
 ```
+
+---
 
 ### [Images](https://platform.openai.com/docs/api-reference/images)
 
@@ -1567,6 +1783,8 @@ foreach (var result in imageResults)
 }
 ```
 
+---
+
 ### [Files](https://platform.openai.com/docs/api-reference/files)
 
 Files are used to upload documents that can be used with features like [Fine-tuning](#fine-tuning).
@@ -1629,6 +1847,8 @@ var downloadedFilePath = await api.FilesEndpoint.DownloadFileAsync(fileId);
 Debug.Log(downloadedFilePath);
 Assert.IsTrue(File.Exists(downloadedFilePath));
 ```
+
+---
 
 ### [Fine Tuning](https://platform.openai.com/docs/api-reference/fine-tuning)
 
@@ -1701,6 +1921,8 @@ foreach (var @event in eventList.Items.OrderByDescending(@event => @event.Create
 }
 ```
 
+---
+
 ### [Batches](https://platform.openai.com/docs/api-reference/batch)
 
 Create large batches of API requests for asynchronous processing. The Batch API returns completions within 24 hours for a 50% discount.
@@ -1755,6 +1977,8 @@ var isCancelled = await api.BatchEndpoint.CancelBatchAsync(batch);
 Assert.IsTrue(isCancelled);
 ```
 
+---
+
 ### [Embeddings](https://platform.openai.com/docs/api-reference/embeddings)
 
 Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.
@@ -1772,6 +1996,8 @@ var api = new OpenAIClient();
 var response = await api.EmbeddingsEndpoint.CreateEmbeddingAsync("The food was delicious and the waiter...", Models.Embedding_Ada_002);
 Debug.Log(response);
 ```
+
+---
 
 ### [Moderations](https://platform.openai.com/docs/api-reference/moderations)
 

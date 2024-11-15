@@ -138,53 +138,7 @@ namespace OpenAI.Threads
 
         #endregion Messages
 
-        #region Files (Obsolete)
-
-        /// <summary>
-        /// Returns a list of message files.
-        /// </summary>
-        /// <param name="thread"><see cref="ThreadResponse"/>.</param>
-        /// <param name="messageId">The id of the message that the files belongs to.</param>
-        /// <param name="query"><see cref="ListQuery"/>.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="ListResponse{ThreadMessageFile}"/>.</returns>
-        [Obsolete("MessageFiles removed from Threads. Files now belong to ToolResources.")]
-        public static async Task<ListResponse<MessageFileResponse>> ListFilesAsync(this ThreadResponse thread, string messageId, ListQuery query = null, CancellationToken cancellationToken = default)
-            => await thread.Client.ThreadsEndpoint.ListFilesAsync(thread.Id, messageId, query, cancellationToken);
-
-        /// <summary>
-        /// Returns a list of message files.
-        /// </summary>
-        /// <param name="message"><see cref="MessageFileResponse"/>.</param>
-        /// <param name="query"><see cref="ListQuery"/>.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="ListResponse{ThreadMessageFile}"/>.</returns>
-        [Obsolete("MessageFiles removed from Threads. Files now belong to ToolResources.")]
-        public static async Task<ListResponse<MessageFileResponse>> ListFilesAsync(this MessageResponse message, ListQuery query = null, CancellationToken cancellationToken = default)
-            => await message.Client.ThreadsEndpoint.ListFilesAsync(message.ThreadId, message.Id, query, cancellationToken);
-
-        /// <summary>
-        /// Retrieve message file.
-        /// </summary>
-        /// <param name="message"><see cref="MessageResponse"/>.</param>
-        /// <param name="fileId">The id of the file being retrieved.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="MessageFileResponse"/>.</returns>
-        [Obsolete("MessageFiles removed from Threads. Files now belong to ToolResources.")]
-        public static async Task<MessageFileResponse> RetrieveFileAsync(this MessageResponse message, string fileId, CancellationToken cancellationToken = default)
-            => await message.Client.ThreadsEndpoint.RetrieveFileAsync(message.ThreadId, message.Id, fileId, cancellationToken);
-
-        #endregion Files (Obsolete)
-
         #region Runs
-
-        [Obsolete("use new overload with Func<IServerSentEvent, Task> instead.")]
-        public static async Task<RunResponse> CreateRunAsync(this ThreadResponse thread, CreateRunRequest request, Action<IServerSentEvent> streamEventHandler, CancellationToken cancellationToken = default)
-            => await thread.CreateRunAsync(request, async streamEvent =>
-            {
-                streamEventHandler?.Invoke(streamEvent);
-                await Task.CompletedTask;
-            }, cancellationToken);
 
         /// <summary>
         /// Create a run.
@@ -196,14 +150,6 @@ namespace OpenAI.Threads
         /// <returns><see cref="RunResponse"/>.</returns>
         public static async Task<RunResponse> CreateRunAsync(this ThreadResponse thread, CreateRunRequest request = null, Func<IServerSentEvent, Task> streamEventHandler = null, CancellationToken cancellationToken = default)
             => await thread.Client.ThreadsEndpoint.CreateRunAsync(thread, request, streamEventHandler, cancellationToken);
-
-        [Obsolete("use new overload with Func<IServerSentEvent, Task> instead.")]
-        public static async Task<RunResponse> CreateRunAsync(this ThreadResponse thread, AssistantResponse assistant, Action<IServerSentEvent> streamEventHandler, CancellationToken cancellationToken = default)
-            => await thread.CreateRunAsync(assistant, async streamEvent =>
-            {
-                streamEventHandler?.Invoke(streamEvent);
-                await Task.CompletedTask;
-            }, cancellationToken);
 
         /// <summary>
         /// Create a run.
@@ -298,18 +244,10 @@ namespace OpenAI.Threads
             {
                 await Task.Delay(pollingInterval ?? 500, chainedCts.Token).ConfigureAwait(true);
                 cancellationToken.ThrowIfCancellationRequested();
-                result = await run.UpdateAsync(cancellationToken: chainedCts.Token);
+                result = await run.UpdateAsync(cancellationToken: chainedCts.Token).ConfigureAwait(true);
             } while (result.Status is RunStatus.Queued or RunStatus.InProgress or RunStatus.Cancelling);
             return result;
         }
-
-        [Obsolete("use new overload with Func<IServerSentEvent, Task> instead.")]
-        public static async Task<RunResponse> SubmitToolOutputsAsync(this RunResponse run, SubmitToolOutputsRequest request, Action<IServerSentEvent> streamEventHandler, CancellationToken cancellationToken = default)
-            => await run.SubmitToolOutputsAsync(request, async streamEvent =>
-            {
-                streamEventHandler?.Invoke(streamEvent);
-                await Task.CompletedTask;
-            }, cancellationToken);
 
         /// <summary>
         /// When a run has the status: "requires_action" and required_action.type is submit_tool_outputs,
@@ -323,14 +261,6 @@ namespace OpenAI.Threads
         /// <returns><see cref="RunResponse"/>.</returns>
         public static async Task<RunResponse> SubmitToolOutputsAsync(this RunResponse run, SubmitToolOutputsRequest request, Func<IServerSentEvent, Task> streamEventHandler = null, CancellationToken cancellationToken = default)
             => await run.Client.ThreadsEndpoint.SubmitToolOutputsAsync(run.ThreadId, run.Id, request, streamEventHandler, cancellationToken);
-
-        [Obsolete("use new overload with Func<IServerSentEvent, Task> instead.")]
-        public static async Task<RunResponse> SubmitToolOutputsAsync(this RunResponse run, IEnumerable<ToolOutput> outputs, Action<IServerSentEvent> streamEventHandler, CancellationToken cancellationToken = default)
-            => await run.SubmitToolOutputsAsync(new SubmitToolOutputsRequest(outputs), async streamEvent =>
-            {
-                streamEventHandler?.Invoke(streamEvent);
-                await Task.CompletedTask;
-            }, cancellationToken);
 
         /// <summary>
         /// When a run has the status: "requires_action" and required_action.type is submit_tool_outputs,

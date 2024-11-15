@@ -27,7 +27,8 @@ namespace OpenAI
         public string Organization { get; internal set; }
 
         /// <summary>
-        /// The request id of this API call, as reported in the response headers.  This may be useful for troubleshooting or when contacting OpenAI support in reference to a specific request.
+        /// The request id of this API call, as reported in the response headers.
+        /// This may be useful for troubleshooting or when contacting OpenAI support in reference to a specific request.
         /// </summary>
         [JsonIgnore]
         public string RequestId { get; internal set; }

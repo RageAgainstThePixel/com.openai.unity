@@ -47,6 +47,12 @@ namespace OpenAI
             ImageFile = imageFile;
         }
 
+        public Content(InputAudio inputAudio)
+        {
+            Type = ContentType.InputAudio;
+            InputAudio = inputAudio;
+        }
+
         [Preserve]
         public Content(ContentType type, string input)
         {
@@ -62,6 +68,8 @@ namespace OpenAI
                     break;
                 case ContentType.ImageFile:
                     throw new ArgumentException("Use the ImageFile constructor for ImageFile content.");
+                case ContentType.InputAudio:
+                    throw new ArgumentException("Use the InputAudio constructor for InputAudio content.");
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type));
             }
@@ -74,17 +82,19 @@ namespace OpenAI
             [JsonProperty("type")] ContentType type,
             [JsonProperty("text")] object text,
             [JsonProperty("image_url")] ImageUrl imageUrl,
-            [JsonProperty("image_file")] ImageFile imageFile)
+            [JsonProperty("image_file")] ImageFile imageFile,
+            [JsonProperty("input_audio")] InputAudio inputAudio)
         {
             Index = index;
             Type = type;
             Text = text;
             ImageUrl = imageUrl;
             ImageFile = imageFile;
+            InputAudio = inputAudio;
         }
 
         [Preserve]
-        [JsonProperty("index", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonProperty("index")]
         public int? Index { get; private set; }
 
         [Preserve]
@@ -92,17 +102,21 @@ namespace OpenAI
         public ContentType Type { get; private set; }
 
         [Preserve]
-        [JsonProperty("text", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonProperty("text")]
         [JsonConverter(typeof(StringOrObjectConverter<TextContent>))]
         public object Text { get; private set; }
 
         [Preserve]
-        [JsonProperty("image_url", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonProperty("image_url")]
         public ImageUrl ImageUrl { get; private set; }
 
         [Preserve]
-        [JsonProperty("image_file", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonProperty("image_file")]
         public ImageFile ImageFile { get; private set; }
+
+        [Preserve]
+        [JsonProperty("input_audio")]
+        public InputAudio InputAudio { get; private set; }
 
         [Preserve]
         public static implicit operator Content(string input) => new(ContentType.Text, input);
@@ -116,15 +130,20 @@ namespace OpenAI
         [Preserve]
         public static implicit operator Content(ImageFile imageFile) => new(imageFile);
 
+        [Preserve]
+        public static implicit operator Content(InputAudio inputAudio) => new(inputAudio);
+
+        [Preserve]
         public override string ToString()
             => Type switch
             {
                 ContentType.Text => Text?.ToString(),
                 ContentType.ImageUrl => ImageUrl?.ToString(),
                 ContentType.ImageFile => ImageFile?.ToString(),
-                _ => throw new ArgumentOutOfRangeException(nameof(Type))
+                _ => string.Empty,
             } ?? string.Empty;
 
+        [Preserve]
         public void AppendFrom(Content other)
         {
             if (other == null) { return; }
@@ -179,6 +198,18 @@ namespace OpenAI
                 else
                 {
                     ImageFile.AppendFrom(other.ImageFile);
+                }
+            }
+
+            if (other.InputAudio != null)
+            {
+                if (InputAudio == null)
+                {
+                    InputAudio = other.InputAudio;
+                }
+                else
+                {
+                    InputAudio.AppendFrom(other.InputAudio);
                 }
             }
         }

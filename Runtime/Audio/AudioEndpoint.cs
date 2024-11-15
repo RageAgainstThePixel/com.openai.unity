@@ -118,10 +118,6 @@ namespace OpenAI.Audio
             return new Tuple<string, AudioClip>(cachedPath, clip);
         }
 
-        [Obsolete("Use CreateTranscriptionTextAsync or CreateTranscriptionJsonAsync instead.")]
-        public async Task<string> CreateTranscriptionAsync(AudioTranscriptionRequest request, CancellationToken cancellationToken = default)
-            => await CreateTranscriptionTextAsync(request, cancellationToken);
-
         /// <summary>
         /// Transcribes audio into the input language.
         /// </summary>
@@ -200,10 +196,6 @@ namespace OpenAI.Audio
             response.Validate(EnableDebug);
             return response.Body;
         }
-
-        [Obsolete("Use CreateTranslationTextAsync or CreateTranslationJsonAsync instead.")]
-        public async Task<string> CreateTranslationAsync(AudioTranslationRequest request, CancellationToken cancellationToken = default)
-            => await CreateTranslationTextAsync(request, cancellationToken);
 
         /// <summary>
         /// Translates audio into English.

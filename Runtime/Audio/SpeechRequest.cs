@@ -19,11 +19,11 @@ namespace OpenAI.Audio
         /// <param name="responseFormat">The format to audio in. Supported formats are mp3, opus, aac, flac, wav and pcm.</param>
         /// <param name="speed">The speed of the generated audio. Select a value from 0.25 to 4.0. 1.0 is the default.</param>
         [Preserve]
-        public SpeechRequest(string input, Model model = null, SpeechVoice voice = SpeechVoice.Alloy, SpeechResponseFormat responseFormat = SpeechResponseFormat.MP3, float? speed = null)
+        public SpeechRequest(string input, Model model = null, Voice voice = null, SpeechResponseFormat responseFormat = SpeechResponseFormat.MP3, float? speed = null)
         {
             Input = !string.IsNullOrWhiteSpace(input) ? input : throw new ArgumentException("Input cannot be null or empty.", nameof(input));
             Model = string.IsNullOrWhiteSpace(model?.Id) ? Models.Model.TTS_1 : model;
-            Voice = voice;
+            Voice = string.IsNullOrWhiteSpace(voice?.Id) ? OpenAI.Voice.Alloy : voice;
             ResponseFormat = responseFormat;
             Speed = speed;
         }
@@ -49,8 +49,8 @@ namespace OpenAI.Audio
         /// </summary>
         [Preserve]
         [JsonProperty("voice", DefaultValueHandling = DefaultValueHandling.Include)]
-        [FunctionProperty("The voice to use when generating the audio.", true)]
-        public SpeechVoice Voice { get; }
+        [FunctionProperty("The voice to use when generating the audio.", true, "alloy", "echo", "fable", "onyx", "nova", "shimmer")]
+        public string Voice { get; }
 
         /// <summary>
         /// The format to audio in. Supported formats are mp3, opus, aac, flac, wav and pcm.

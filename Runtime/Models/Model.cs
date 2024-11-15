@@ -97,6 +97,12 @@ namespace OpenAI.Models
         [JsonProperty("parent")]
         public string Parent { get; }
 
+        public static Model O1 { get; } = new("o1-preview", "openai");
+
+        public static Model O1Mini { get; } = new("o1-mini", "openai");
+
+        public static Model GPT4oRealtime { get; } = new("gpt-4o-realtime-preview", "openai");
+
         /// <summary>
         /// GPT-4o (“o” for “omni”) is our most advanced model.
         /// It is multimodal (accepting text or image inputs and outputting text),
@@ -108,6 +114,10 @@ namespace OpenAI.Models
         /// Context Window: 128,000 tokens
         /// </remarks>
         public static Model GPT4o { get; } = new("gpt-4o", "openai");
+
+        public static Model GPT4oMini { get; } = new("gpt-4o-mini", "openai");
+
+        public static Model GPT4oAudio { get; } = new("gpt-4o-audio-preview", "openai");
 
         /// <summary>
         /// More capable than any GPT-3.5 model, able to do more complex tasks, and optimized for chat.
