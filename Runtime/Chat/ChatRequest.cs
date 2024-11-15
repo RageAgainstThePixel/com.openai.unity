@@ -193,7 +193,7 @@ namespace OpenAI.Chat
             }
             else
             {
-                Modalities = Modality.Text;
+                Modalities = Modality.Text & Modality.Audio;
             }
 
             FrequencyPenalty = frequencyPenalty;
@@ -302,8 +302,7 @@ namespace OpenAI.Chat
         /// The maximum number of tokens allowed for the generated answer.
         /// By default, the number of tokens the model can return will be (4096 - prompt tokens).
         /// </summary>
-        [Preserve]
-        [JsonProperty("max_tokens")]
+        [JsonIgnore]
         [Obsolete("Use MaxCompletionTokens instead")]
         public int? MaxTokens { get; }
 
