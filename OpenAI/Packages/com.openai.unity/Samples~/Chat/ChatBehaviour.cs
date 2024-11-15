@@ -46,6 +46,7 @@ namespace OpenAI.Samples.Chat
         [SerializeField]
         private AudioSource audioSource;
 
+        [Obsolete]
         [SerializeField]
         private SpeechVoice voice;
 
@@ -61,6 +62,7 @@ namespace OpenAI.Samples.Chat
 
 #if !UNITY_2022_3_OR_NEWER
         private readonly CancellationTokenSource lifetimeCts = new();
+        // ReSharper disable once InconsistentNaming
         private CancellationToken destroyCancellationToken => lifetimeCts.Token;
 #endif
 
@@ -86,7 +88,6 @@ namespace OpenAI.Samples.Chat
             submitButton.onClick.AddListener(SubmitChat);
             recordButton.onClick.AddListener(ToggleRecording);
         }
-
 
 #if !UNITY_2022_3_OR_NEWER
         private void OnDestroy()
@@ -179,7 +180,7 @@ namespace OpenAI.Samples.Chat
 
                         try
                         {
-                            var imageResults = await toolCall.InvokeFunctionAsync<IReadOnlyList<ImageResult>>().ConfigureAwait(true);
+                            var imageResults = await toolCall.InvokeFunctionAsync<IReadOnlyList<ImageResult>>(destroyCancellationToken).ConfigureAwait(true);
 
                             foreach (var imageResult in imageResults)
                             {
@@ -204,7 +205,7 @@ namespace OpenAI.Samples.Chat
                 try
                 {
                     var toolCallRequest = new ChatRequest(conversation.Messages, tools: assistantTools);
-                    toolCallResponse = await openAI.ChatEndpoint.GetCompletionAsync(toolCallRequest);
+                    toolCallResponse = await openAI.ChatEndpoint.GetCompletionAsync(toolCallRequest, destroyCancellationToken);
                     conversation.AppendMessage(toolCallResponse.FirstChoice.Message);
                 }
                 catch (RestException restEx)
@@ -217,7 +218,7 @@ namespace OpenAI.Samples.Chat
                     }
 
                     var toolCallRequest = new ChatRequest(conversation.Messages, tools: assistantTools);
-                    toolCallResponse = await openAI.ChatEndpoint.GetCompletionAsync(toolCallRequest);
+                    toolCallResponse = await openAI.ChatEndpoint.GetCompletionAsync(toolCallRequest, destroyCancellationToken);
                     conversation.AppendMessage(toolCallResponse.FirstChoice.Message);
                 }
 
@@ -234,7 +235,9 @@ namespace OpenAI.Samples.Chat
         {
             text = text.Replace("![Image](output.jpg)", string.Empty);
             if (string.IsNullOrWhiteSpace(text)) { return; }
+#pragma warning disable CS0612 // Type or member is obsolete
             var request = new SpeechRequest(text, Model.TTS_1, voice, SpeechResponseFormat.PCM);
+#pragma warning restore CS0612 // Type or member is obsolete
             var streamClipQueue = new Queue<AudioClip>();
             var streamTcs = new TaskCompletionSource<bool>();
             var audioPlaybackTask = PlayStreamQueueAsync(streamTcs.Task);
@@ -253,7 +256,11 @@ namespace OpenAI.Samples.Chat
             {
                 try
                 {
-                    await new WaitUntil(() => streamClipQueue.Count > 0);
+                    bool IsStreamTaskDone()
+                        => streamTask.IsCompleted || destroyCancellationToken.IsCancellationRequested;
+
+                    await new WaitUntil(() => streamClipQueue.Count > 0 || IsStreamTaskDone());
+                    if (IsStreamTaskDone()) { return; }
                     var endOfFrame = new WaitForEndOfFrame();
 
                     do
@@ -335,6 +342,7 @@ namespace OpenAI.Samples.Chat
             else
             {
                 inputField.interactable = false;
+                // ReSharper disable once MethodSupportsCancellation
                 RecordingManager.StartRecording<WavEncoder>(callback: ProcessRecording);
             }
         }

@@ -124,15 +124,6 @@ namespace OpenAI.Assistants
         public ToolResources ToolResources { get; }
 
         /// <summary>
-        /// A list of file IDs attached to this assistant.
-        /// There can be a maximum of 20 files attached to the assistant.
-        /// Files are ordered by their creation date in ascending order.
-        /// </summary>
-        [JsonIgnore]
-        [Obsolete("Files removed from Assistants. Files now belong to ToolResources.")]
-        public IReadOnlyList<string> FileIds => null;
-
-        /// <summary>
         /// Set of 16 key-value pairs that can be attached to an object.
         /// This can be useful for storing additional information about the object in a structured format.
         /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
@@ -161,7 +152,7 @@ namespace OpenAI.Assistants
 
         /// <summary>
         /// Specifies the format that the model must output.
-        /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
+        /// Setting to <see cref="ChatResponseFormat.Json"/> or <see cref="ChatResponseFormat.JsonSchema"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.
         /// </summary>
         /// <remarks>
@@ -172,10 +163,11 @@ namespace OpenAI.Assistants
         /// which indicates the generation exceeded max_tokens or the conversation exceeded the max context length.
         /// </remarks>
         [Preserve]
-        [JsonProperty("response_format")]
         [JsonConverter(typeof(ResponseFormatConverter))]
+        [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public ResponseFormatObject ResponseFormatObject { get; }
 
+        [Preserve]
         [JsonIgnore]
         public ChatResponseFormat ResponseFormat => ResponseFormatObject ?? ChatResponseFormat.Auto;
 

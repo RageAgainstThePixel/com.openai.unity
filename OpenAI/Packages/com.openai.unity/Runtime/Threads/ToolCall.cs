@@ -2,7 +2,6 @@
 
 using Newtonsoft.Json;
 using OpenAI.Extensions;
-using System;
 using System.Collections.Generic;
 using UnityEngine.Scripting;
 
@@ -75,17 +74,11 @@ namespace OpenAI.Threads
         [JsonProperty("file_search", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyDictionary<string, object> FileSearch { get; private set; }
 
-        /// <summary>
-        /// For now, this is always going to be an empty object.
-        /// </summary>
-        [JsonIgnore]
-        [Obsolete("Removed")]
-        public object Retrieval { get; private set; }
-
         [Preserve]
         [JsonIgnore]
         public bool IsFunction => Type == "function";
 
+        [Preserve]
         public void AppendFrom(ToolCall other)
         {
             if (other == null)
@@ -132,5 +125,9 @@ namespace OpenAI.Threads
                 FileSearch = other.FileSearch;
             }
         }
+
+        [Preserve]
+        public static implicit operator OpenAI.ToolCall(ToolCall toolCall)
+            => new(toolCall.Id, toolCall.FunctionCall.Name, toolCall.FunctionCall.Arguments);
     }
 }

@@ -1,9 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Schema;
 using OpenAI.Extensions;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Scripting;
@@ -99,19 +97,6 @@ namespace OpenAI.Assistants
             topP ?? assistant.TopP,
             jsonSchema ?? assistant.ResponseFormatObject?.JsonSchema,
             responseFormat ?? assistant.ResponseFormat)
-        {
-        }
-
-        [Obsolete("use new .ctr")]
-        public CreateAssistantRequest(
-            AssistantResponse assistant,
-            string model,
-            string name,
-            string description,
-            string instructions,
-            IEnumerable<Tool> tools,
-            IEnumerable<string> files,
-            IReadOnlyDictionary<string, string> metadata)
         {
         }
 
@@ -279,7 +264,7 @@ namespace OpenAI.Assistants
 
         /// <summary>
         /// Specifies the format that the model must output.
-        /// Setting to <see cref="ChatResponseFormat.Json"/> enables JSON mode,
+        /// Setting to <see cref="ChatResponseFormat.Json"/> or <see cref="ChatResponseFormat.JsonSchema"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.
         /// </summary>
         /// <remarks>
@@ -294,6 +279,7 @@ namespace OpenAI.Assistants
         [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public ResponseFormatObject ResponseFormatObject { get; internal set; }
 
+        [Preserve]
         [JsonIgnore]
         public ChatResponseFormat ResponseFormat => ResponseFormatObject ?? ChatResponseFormat.Auto;
 
@@ -302,6 +288,7 @@ namespace OpenAI.Assistants
         /// This can be useful for storing additional information about the object in a structured format.
         /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
         /// </summary>
+        [Preserve]
         [JsonProperty("metadata")]
         public IReadOnlyDictionary<string, string> Metadata { get; }
     }

@@ -18,14 +18,14 @@ namespace OpenAI.Files
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
             [JsonProperty("bytes")] int? size,
-            [JsonProperty("created_at")] int createdUnixTimeSeconds,
+            [JsonProperty("created_at")] int createdAtUnixTimeSeconds,
             [JsonProperty("filename")] string fileName,
             [JsonProperty("purpose")] string purpose)
         {
             Id = id;
             Object = @object;
             Size = size;
-            CreatedUnixTimeSeconds = createdUnixTimeSeconds;
+            CreatedAtUnixTimeSeconds = createdAtUnixTimeSeconds;
             FileName = fileName;
             Purpose = purpose;
         }
@@ -53,11 +53,15 @@ namespace OpenAI.Files
         /// </summary>
         [Preserve]
         [JsonProperty("created_at")]
-        public int CreatedUnixTimeSeconds { get; }
+        public int CreatedAtUnixTimeSeconds { get; }
+
+        [JsonIgnore]
+        [Obsolete("Use CreatedAtUnixTimeSeconds instead.")]
+        public int CreatedUnixTimeSeconds => CreatedAtUnixTimeSeconds;
 
         [Preserve]
         [JsonIgnore]
-        public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedUnixTimeSeconds).DateTime;
+        public DateTime CreatedAt => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnixTimeSeconds).DateTime;
 
         /// <summary>
         /// The name of the file.
