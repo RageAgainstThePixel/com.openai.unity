@@ -51,7 +51,7 @@ namespace OpenAI
         {
             if (!Regex.IsMatch(name, NameRegex))
             {
-                throw new ArgumentException($"The name of the function does not conform to naming standards: {NameRegex}");
+                throw new ArgumentException($"The name of the function does not conform to naming standards: {NameRegex} \"{name}\"");
             }
 
             Name = name;
@@ -84,7 +84,7 @@ namespace OpenAI
         {
             if (!Regex.IsMatch(name, NameRegex))
             {
-                throw new ArgumentException($"The name of the function does not conform to naming standards: {NameRegex}");
+                throw new ArgumentException($"The name of the function does not conform to naming standards: {NameRegex} \"{name}\"");
             }
 
             Name = name;
@@ -106,7 +106,7 @@ namespace OpenAI
         {
             if (!Regex.IsMatch(name, NameRegex))
             {
-                throw new ArgumentException($"The name of the function does not conform to naming standards: {NameRegex}");
+                throw new ArgumentException($"The name of the function does not conform to naming standards: {NameRegex} \"{name}\"");
             }
 
             if (functionCache.ContainsKey(name))
