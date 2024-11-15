@@ -193,7 +193,7 @@ namespace OpenAI.Chat
             }
             else
             {
-                Modalities = Modality.Text;
+                Modalities = Modality.Text & Modality.Audio;
             }
 
             FrequencyPenalty = frequencyPenalty;
