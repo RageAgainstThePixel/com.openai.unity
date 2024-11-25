@@ -2,7 +2,6 @@
 
 using NUnit.Framework;
 using OpenAI.Audio;
-using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading.Tasks;
@@ -94,9 +93,10 @@ namespace OpenAI.Tests
         {
             Assert.IsNotNull(OpenAIClient.AudioEndpoint);
             var request = new SpeechRequest("Hello world!");
-            var (path, clip) = await OpenAIClient.AudioEndpoint.CreateSpeechAsync(request);
-            Debug.Log(path);
-            Assert.IsNotNull(clip);
+            var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request);
+            Debug.Log(speechClip.CachePath);
+            Assert.IsNotEmpty(speechClip.AudioSamples);
+            Assert.IsNotNull(speechClip.AudioClip);
         }
 
         [Test]
@@ -104,11 +104,12 @@ namespace OpenAI.Tests
         {
             Assert.IsNotNull(OpenAIClient.AudioEndpoint);
             var request = new SpeechRequest("Hello world!", responseFormat: SpeechResponseFormat.PCM);
-            var clipQueue = new ConcurrentQueue<AudioClip>();
-            var (path, clip) = await OpenAIClient.AudioEndpoint.CreateSpeechStreamAsync(request, partialClip => clipQueue.Enqueue(partialClip));
-            Debug.Log(path);
-            Assert.IsNotNull(clip);
-            Assert.IsTrue(clipQueue.Count > 0);
+            var clipQueue = new ConcurrentQueue<SpeechClip>();
+            var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request, partialClip => clipQueue.Enqueue(partialClip));
+            Debug.Log(speechClip.CachePath);
+            Assert.IsNotEmpty(speechClip.AudioSamples);
+            Assert.IsNotNull(speechClip.AudioClip);
+            Assert.IsFalse(clipQueue.IsEmpty);
         }
     }
 }

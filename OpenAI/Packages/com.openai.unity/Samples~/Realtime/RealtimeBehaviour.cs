@@ -22,6 +22,7 @@ using Utilities.Extensions;
 
 namespace OpenAI.Samples.Realtime
 {
+    [RequireComponent(typeof(AudioSource))]
     public class RealtimeBehaviour : MonoBehaviour
     {
         [SerializeField]
@@ -67,7 +68,7 @@ namespace OpenAI.Samples.Realtime
 #endif
 
         private readonly Dictionary<string, TextMeshProUGUI> responseList = new();
-        private readonly ConcurrentQueue<AudioClip> streamClipQueue = new();
+        private readonly ConcurrentQueue<float> sampleQueue = new();
 
         private void OnValidate()
         {
@@ -76,7 +77,11 @@ namespace OpenAI.Samples.Realtime
             inputField.Validate();
             placeholder.Validate();
             contentArea.Validate();
-            audioSource.Validate();
+
+            if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>();
+            }
         }
 
         private async void Awake()
@@ -104,7 +109,6 @@ namespace OpenAI.Samples.Realtime
                 inputField.interactable = isMuted;
                 submitButton.interactable = isMuted;
                 RecordInputAudio(destroyCancellationToken);
-                PlayStreamQueue(destroyCancellationToken);
                 await session.ReceiveUpdatesAsync<IServerEvent>(ServerResponseEvent, destroyCancellationToken);
             }
             catch (Exception e)
@@ -126,6 +130,22 @@ namespace OpenAI.Samples.Realtime
                 if (enableDebug)
                 {
                     Debug.Log("Session disposed");
+                }
+            }
+        }
+
+        private void OnAudioFilterRead(float[] data, int channels)
+        {
+            if (sampleQueue.Count <= 0) { return; }
+
+            for (var i = 0; i < data.Length; i += channels)
+            {
+                if (sampleQueue.TryDequeue(out var sample))
+                {
+                    for (var j = 0; j < channels; j++)
+                    {
+                        data[i + j] = sample;
+                    }
                 }
             }
         }
@@ -283,40 +303,6 @@ namespace OpenAI.Samples.Realtime
             }
         }
 
-        private async void PlayStreamQueue(CancellationToken cancellationToken)
-        {
-            try
-            {
-                do
-                {
-                    if (!audioSource.isPlaying &&
-                        streamClipQueue.TryDequeue(out var clip))
-                    {
-                        Log($"playing partial clip: {clip.name} | ({streamClipQueue.Count} remaining)");
-                        audioSource.PlayOneShot(clip);
-                        // ReSharper disable once MethodSupportsCancellation
-                        await Task.Delay(TimeSpan.FromSeconds(clip.length)).ConfigureAwait(true);
-                    }
-                    else
-                    {
-                        await Task.Yield();
-                    }
-                } while (!cancellationToken.IsCancellationRequested);
-            }
-            catch (Exception e)
-            {
-                switch (e)
-                {
-                    case TaskCanceledException:
-                    case OperationCanceledException:
-                        break;
-                    default:
-                        Debug.LogError(e);
-                        break;
-                }
-            }
-        }
-
         private void ServerResponseEvent(IServerEvent serverEvent)
         {
             switch (serverEvent)
@@ -324,7 +310,10 @@ namespace OpenAI.Samples.Realtime
                 case ResponseAudioResponse audioResponse:
                     if (audioResponse.IsDelta)
                     {
-                        streamClipQueue.Enqueue(audioResponse);
+                        foreach (var sample in audioResponse.AudioSamples)
+                        {
+                            sampleQueue.Enqueue(sample);
+                        }
                     }
                     break;
                 case ResponseAudioTranscriptResponse transcriptResponse:
