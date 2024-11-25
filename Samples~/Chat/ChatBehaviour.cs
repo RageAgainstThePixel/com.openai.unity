@@ -5,6 +5,7 @@ using OpenAI.Chat;
 using OpenAI.Images;
 using OpenAI.Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ using Utilities.WebRequestRest;
 
 namespace OpenAI.Samples.Chat
 {
+    [RequireComponent(typeof(AudioSource))]
     public class ChatBehaviour : MonoBehaviour
     {
         [SerializeField]
@@ -59,6 +61,7 @@ namespace OpenAI.Samples.Chat
         private readonly Conversation conversation = new();
 
         private readonly List<Tool> assistantTools = new();
+        private readonly ConcurrentQueue<float> sampleQueue = new();
 
 #if !UNITY_2022_3_OR_NEWER
         private readonly CancellationTokenSource lifetimeCts = new();
@@ -72,7 +75,11 @@ namespace OpenAI.Samples.Chat
             contentArea.Validate();
             submitButton.Validate();
             recordButton.Validate();
-            audioSource.Validate();
+
+            if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>();
+            }
         }
 
         private void Awake()
@@ -87,6 +94,22 @@ namespace OpenAI.Samples.Chat
             inputField.onSubmit.AddListener(SubmitChat);
             submitButton.onClick.AddListener(SubmitChat);
             recordButton.onClick.AddListener(ToggleRecording);
+        }
+
+        private void OnAudioFilterRead(float[] data, int channels)
+        {
+            if (sampleQueue.Count <= 0) { return; }
+
+            for (var i = 0; i < data.Length; i += channels)
+            {
+                if (sampleQueue.TryDequeue(out var sample))
+                {
+                    for (var j = 0; j < channels; j++)
+                    {
+                        data[i + j] = sample;
+                    }
+                }
+            }
         }
 
 #if !UNITY_2022_3_OR_NEWER
@@ -238,69 +261,21 @@ namespace OpenAI.Samples.Chat
 #pragma warning disable CS0612 // Type or member is obsolete
             var request = new SpeechRequest(text, Model.TTS_1, voice, SpeechResponseFormat.PCM);
 #pragma warning restore CS0612 // Type or member is obsolete
-            var streamClipQueue = new Queue<AudioClip>();
-            var streamTcs = new TaskCompletionSource<bool>();
-            var audioPlaybackTask = PlayStreamQueueAsync(streamTcs.Task);
-            var (clipPath, fullClip) = await openAI.AudioEndpoint.CreateSpeechStreamAsync(request, clip => streamClipQueue.Enqueue(clip), destroyCancellationToken);
-            streamTcs.SetResult(true);
+            var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialCLip =>
+            {
+                foreach (var sample in partialCLip.AudioSamples)
+                {
+                    sampleQueue.Enqueue(sample);
+                }
+            }, destroyCancellationToken);
 
             if (enableDebug)
             {
-                Debug.Log(clipPath);
+                Debug.Log(speechClip.CachePath);
             }
 
-            await audioPlaybackTask;
-            audioSource.clip = fullClip;
-
-            async Task PlayStreamQueueAsync(Task streamTask)
-            {
-                try
-                {
-                    bool IsStreamTaskDone()
-                        => streamTask.IsCompleted || destroyCancellationToken.IsCancellationRequested;
-
-                    await new WaitUntil(() => streamClipQueue.Count > 0 || IsStreamTaskDone());
-                    if (IsStreamTaskDone()) { return; }
-                    var endOfFrame = new WaitForEndOfFrame();
-
-                    do
-                    {
-                        if (!audioSource.isPlaying &&
-                            streamClipQueue.TryDequeue(out var clip))
-                        {
-                            if (enableDebug)
-                            {
-                                Debug.Log($"playing partial clip: {clip.name} | ({streamClipQueue.Count} remaining)");
-                            }
-
-                            audioSource.PlayOneShot(clip);
-                            // ReSharper disable once MethodSupportsCancellation
-                            await Task.Delay(TimeSpan.FromSeconds(clip.length)).ConfigureAwait(true);
-                        }
-                        else
-                        {
-                            await endOfFrame;
-                        }
-
-                        if (streamTask.IsCompleted && !audioSource.isPlaying && streamClipQueue.Count == 0)
-                        {
-                            return;
-                        }
-                    } while (!cancellationToken.IsCancellationRequested);
-                }
-                catch (Exception e)
-                {
-                    switch (e)
-                    {
-                        case TaskCanceledException:
-                        case OperationCanceledException:
-                            break;
-                        default:
-                            Debug.LogError(e);
-                            break;
-                    }
-                }
-            }
+            await new WaitUntil(() => sampleQueue.IsEmpty || cancellationToken.IsCancellationRequested);
+            audioSource.clip = speechClip.AudioClip;
         }
 
         private TextMeshProUGUI AddNewTextMessageContent(Role role)
