@@ -1663,7 +1663,7 @@ Generates audio from the input text.
 ```csharp
 var api = new OpenAIClient();
 var request = new SpeechRequest("Hello world!");
-var speechClip = await api.AudioEndpoint.CreateSpeechAsync(request);
+var speechClip = await api.AudioEndpoint.GetSpeechAsync(request);
 audioSource.PlayOneShot(speechClip);
 Debug.Log(speechClip);
 ```
@@ -1675,7 +1675,7 @@ Generate streamed audio from the input text.
 ```csharp
 var api = new OpenAIClient();
 var request = new SpeechRequest("Hello world!", responseFormat: SpeechResponseFormat.PCM);
-var speechClip = await api.AudioEndpoint.CreateSpeechStreamAsync(request, partialClip =>
+var speechClip = await api.AudioEndpoint.GetSpeechAsync(request, partialClip =>
 {
     audioSource.PlayOneShot(partialClip);
 });
