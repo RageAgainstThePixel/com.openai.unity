@@ -61,12 +61,12 @@ The recommended installation method is though the unity package manager and [Ope
   - [List Models](#list-models)
   - [Retrieve Models](#retrieve-model)
   - [Delete Fine Tuned Model](#delete-fine-tuned-model)
-- [Realtime](#realtime) :new:
-  - [Create Realtime Session](#create-realtime-session) :new:
-  - [Client Events](#client-events) :new:
-    - [Sending Client Events](#sending-client-events) :new:
-  - [Server Events](#server-events) :new:
-    - [Receiving Server Events](#receiving-server-events) :new:
+- [Realtime](#realtime)
+  - [Create Realtime Session](#create-realtime-session)
+  - [Client Events](#client-events)
+    - [Sending Client Events](#sending-client-events)
+  - [Server Events](#server-events)
+    - [Receiving Server Events](#receiving-server-events)
 - [Assistants](#assistants)
   - [List Assistants](#list-assistants)
   - [Create Assistant](#create-assistant)
@@ -118,7 +118,7 @@ The recommended installation method is though the unity package manager and [Ope
   - [Streaming](#chat-streaming)
   - [Tools](#chat-tools)
   - [Vision](#chat-vision)
-  - [Audio](#chat-audio) :new:
+  - [Audio](#chat-audio)
   - [Structured Outputs](#chat-structured-outputs)
   - [Json Mode](#chat-json-mode)
 - [Audio](#audio)
@@ -1555,6 +1555,7 @@ Debug.Log($"{result.FirstChoice.Message.Role}: {result.FirstChoice} | Finish Rea
 #### [Chat Audio](https://platform.openai.com/docs/guides/audio)
 
 ```csharp
+var api = new OpenAIClient();
 var messages = new List<Message>
 {
     new Message(Role.System, "You are a helpful assistant."),
@@ -1662,9 +1663,9 @@ Generates audio from the input text.
 ```csharp
 var api = new OpenAIClient();
 var request = new SpeechRequest("Hello world!");
-var (path, clip) = await api.AudioEndpoint.CreateSpeechAsync(request);
-audioSource.PlayOneShot(clip);
-Debug.Log(path);
+var speechClip = await api.AudioEndpoint.CreateSpeechAsync(request);
+audioSource.PlayOneShot(speechClip);
+Debug.Log(speechClip);
 ```
 
 ##### [Stream Speech]
@@ -1673,10 +1674,16 @@ Generate streamed audio from the input text.
 
 ```csharp
 var api = new OpenAIClient();
-var request = new SpeechRequest("Hello world!");
-var (path, clip) = await api.AudioEndpoint.CreateSpeechStreamAsync(request, partialClip => audioSource.PlayOneShot(partialClip));
-Debug.Log(path);
+var request = new SpeechRequest("Hello world!", responseFormat: SpeechResponseFormat.PCM);
+var speechClip = await api.AudioEndpoint.CreateSpeechStreamAsync(request, partialClip =>
+{
+    audioSource.PlayOneShot(partialClip);
+});
+Debug.Log(speechClip);
 ```
+
+> [!NOTE]
+> Checkout any of the demo scenes for best practices on how to handle playback with `OnAudioFilterRead`.
 
 #### [Create Transcription](https://platform.openai.com/docs/api-reference/audio/createTranscription)
 

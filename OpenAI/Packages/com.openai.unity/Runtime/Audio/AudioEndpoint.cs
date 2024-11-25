@@ -7,7 +7,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Networking;
 using Utilities.WebRequestRest;
 
 namespace OpenAI.Audio
@@ -27,25 +26,29 @@ namespace OpenAI.Audio
 
         private static readonly object mutex = new();
 
+        [Obsolete("use GetSpeechAsync")]
+        public async Task<Tuple<string, AudioClip>> CreateSpeechAsync(SpeechRequest request, CancellationToken cancellationToken = default)
+            => await CreateSpeechStreamAsync(request, null, cancellationToken);
+
+        [Obsolete("use GetSpeechAsync")]
+        public async Task<Tuple<string, AudioClip>> CreateSpeechStreamAsync(SpeechRequest request, Action<AudioClip> partialClipCallback, CancellationToken cancellationToken = default)
+        {
+            var result = await GetSpeechAsync(request, speechClip =>
+            {
+                partialClipCallback.Invoke(speechClip.AudioClip);
+            }, cancellationToken);
+            return Tuple.Create(result.CachePath, result.AudioClip);
+        }
+
         /// <summary>
         /// Generates audio from the input text.
         /// </summary>
         /// <param name="request"><see cref="SpeechRequest"/>.</param>
+        /// <param name="partialClipCallback">Optional, partial <see cref="SpeechClip"/> callback used to stream audio.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="AudioClip"/> and the cached path.</returns>
+        /// <returns><see cref="SpeechClip"/></returns>
         [Function("Generates audio from the input text.")]
-        public async Task<Tuple<string, AudioClip>> CreateSpeechAsync(SpeechRequest request, CancellationToken cancellationToken = default)
-            => await CreateSpeechStreamAsync(request, null, cancellationToken);
-
-        /// <summary>
-        /// Generates streaming audio from the input text.
-        /// </summary>
-        /// <param name="request"><see cref="SpeechRequest"/>.</param>
-        /// <param name="partialClipCallback">Optional, partial <see cref="AudioClip"/> callback used to stream audio.</param>
-        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="AudioClip"/> and the cached path.</returns>
-        [Function("Generates streaming audio from the input text.")]
-        public async Task<Tuple<string, AudioClip>> CreateSpeechStreamAsync(SpeechRequest request, Action<AudioClip> partialClipCallback, CancellationToken cancellationToken = default)
+        public async Task<SpeechClip> GetSpeechAsync(SpeechRequest request, Action<SpeechClip> partialClipCallback = null, CancellationToken cancellationToken = default)
         {
             if (partialClipCallback != null && request.ResponseFormat != SpeechResponseFormat.PCM)
             {
@@ -70,52 +73,16 @@ namespace OpenAI.Audio
 
             Rest.TryGetDownloadCacheItem(clipName, out var cachedPath);
 
-            if (request.ResponseFormat == SpeechResponseFormat.PCM)
+            var part = 0;
+            var pcmResponse = await Rest.PostAsync(GetUrl("/speech"), payload, StreamCallback, 8192, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            pcmResponse.Validate(EnableDebug);
+            await File.WriteAllBytesAsync(cachedPath, pcmResponse.Data, cancellationToken).ConfigureAwait(true);
+            return new SpeechClip(clipName, cachedPath, new ReadOnlyMemory<byte>(pcmResponse.Data));
+
+            void StreamCallback(Response partialResponse)
             {
-                var part = 0;
-                var response = await Rest.PostAsync(
-                    GetUrl("/speech"),
-                    payload,
-                    StreamCallback,
-                    eventChunkSize: 8192,
-                    new RestParameters(client.DefaultRequestHeaders),
-                    cancellationToken);
-                response.Validate(EnableDebug);
-                var samples = Utilities.Audio.PCMEncoder.Decode(response.Data);
-                await File.WriteAllBytesAsync(cachedPath, response.Data, cancellationToken).ConfigureAwait(true);
-                return new Tuple<string, AudioClip>(cachedPath, AudioClip.Create(clipName, samples.Length, 1, 24000, false));
-
-                void StreamCallback(Response partialResponse)
-                {
-                    var chunk = Utilities.Audio.PCMEncoder.Decode(partialResponse.Data);
-                    var partialClip = AudioClip.Create($"{clipName}_{++part}", chunk.Length, 1, 24000, false);
-
-                    if (!partialClip.SetData(chunk, 0))
-                    {
-                        Debug.LogError("Failed to set pcm data to partial clip.");
-                        return;
-                    }
-
-                    partialClipCallback?.Invoke(partialClip);
-                }
+                partialClipCallback?.Invoke(new SpeechClip($"{clipName}_{++part}", null, partialResponse.Data));
             }
-
-            var audioFormat = request.ResponseFormat switch
-            {
-                SpeechResponseFormat.MP3 => AudioType.MPEG,
-                SpeechResponseFormat.WAV => AudioType.WAV,
-                _ => throw new NotSupportedException(request.ResponseFormat.ToString())
-            };
-
-            var clip = await Rest.DownloadAudioClipAsync(
-                GetUrl("/speech"),
-                audioFormat,
-                UnityWebRequest.kHttpVerbPOST,
-                clipName,
-                payload,
-                parameters: new RestParameters(client.DefaultRequestHeaders, debug: EnableDebug),
-                cancellationToken: cancellationToken);
-            return new Tuple<string, AudioClip>(cachedPath, clip);
         }
 
         /// <summary>
