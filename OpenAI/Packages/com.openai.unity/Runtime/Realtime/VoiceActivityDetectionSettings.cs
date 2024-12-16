@@ -23,6 +23,9 @@ namespace OpenAI.Realtime
                     PrefixPadding = prefixPadding;
                     SilenceDuration = silenceDuration;
                     break;
+                case TurnDetectionType.Disabled:
+                    Type = TurnDetectionType.Disabled;
+                    break;
             }
         }
 
