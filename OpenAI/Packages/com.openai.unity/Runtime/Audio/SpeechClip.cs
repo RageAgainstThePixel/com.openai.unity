@@ -30,7 +30,7 @@ namespace OpenAI.Audio
 
         [Preserve]
         public float[] AudioSamples
-            => PCMEncoder.Resample(PCMEncoder.Decode(AudioData.ToArray()), SampleRate, 44100);
+            => PCMEncoder.Decode(AudioData.ToArray(), inputSampleRate: SampleRate, outputSampleRate: 44100);
 
         [Preserve]
         public int SampleRate { get; }
@@ -41,7 +41,7 @@ namespace OpenAI.Audio
             get
             {
                 var samples = AudioSamples;
-                var clip = AudioClip.Create(Name, samples.Length, 1, 44100, false);
+                var clip = AudioClip.Create(Name, samples.Length, 1, SampleRate, false);
                 clip.SetData(samples, 0);
                 return clip;
             }

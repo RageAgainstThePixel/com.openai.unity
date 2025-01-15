@@ -4,7 +4,10 @@
     "com.unity.ide.visualstudio": "2.0.22",
     "com.unity.textmeshpro": "3.0.9",
     "com.unity.ugui": "1.0.0",
-    "com.utilities.buildpipeline": "1.5.7"
+    "com.utilities.audio": "https://github.com/RageAgainstThePixel/com.utilities.audio.git?path=Utilities.Audio/Packages/com.utilities.audio#5d80a50bdd1cf8b9cf47ac14616e31a9a6725055",
+    "com.utilities.buildpipeline": "1.5.7",
+    "com.utilities.encoder.ogg": "https://github.com/RageAgainstThePixel/com.utilities.encoder.ogg.git?path=com.utilities.encoder.ogg/Packages/com.com.utilities.encoder.ogg#ee79a6e21cf566adacf6f0001cb8daa231712d8e",
+    "com.utilities.encoder.wav": "https://github.com/RageAgainstThePixel/com.utilities.encoder.wav.git?path=Utilities.Encoder.Wav/Packages/com.utilities.encoder.wav#b953ba7c2423bc0ee2ae8e3a699bf8399d389d92"
   },
   "scopedRegistries": [
     {
@@ -15,5 +18,9 @@
         "com.utilities"
       ]
     }
+  ],
+  "testables": [
+    "com.utilities.audio",
+    "com.utilities.encoder.wav"
   ]
 }

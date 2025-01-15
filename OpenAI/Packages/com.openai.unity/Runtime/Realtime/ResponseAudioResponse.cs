@@ -76,7 +76,7 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonIgnore]
         public float[] AudioSamples
-            => PCMEncoder.Resample(PCMEncoder.Decode(Convert.FromBase64String(Delta)), 24000, 44100);
+            => PCMEncoder.Resample(PCMEncoder.Decode(Convert.FromBase64String(Delta)), null, 24000, 44100);
 
         [Preserve]
         [JsonIgnore]
