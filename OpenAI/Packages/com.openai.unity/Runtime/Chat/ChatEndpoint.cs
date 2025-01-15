@@ -56,7 +56,7 @@ namespace OpenAI.Chat
         /// Created a completion for the chat message and stream the results to the <paramref name="resultHandler"/> as they come in.
         /// </summary>
         /// <param name="chatRequest">The chat request which contains the message content.</param>
-        /// <param name="resultHandler">An <see cref="Action{ChatResponse}"/> to be invoked as each new result arrives.</param>
+        /// <param name="resultHandler">A <see cref="Action{ChatResponse}"/> to be invoked as each new result arrives.</param>
         /// <param name="streamUsage">
         /// Optional, If set, an additional chunk will be streamed before the 'data: [DONE]' message.
         /// The 'usage' field on this chunk shows the token usage statistics for the entire request,
@@ -77,7 +77,7 @@ namespace OpenAI.Chat
         /// </summary>
         /// <typeparam name="T"><see cref="JsonSchema"/> to use for structured outputs.</typeparam>
         /// <param name="chatRequest">The chat request which contains the message content.</param>
-        /// <param name="resultHandler">An <see cref="Action{ChatResponse}"/> to be invoked as each new result arrives.</param>
+        /// <param name="resultHandler">A <see cref="Action{ChatResponse}"/> to be invoked as each new result arrives.</param>
         /// <param name="streamUsage">
         /// Optional, If set, an additional chunk will be streamed before the 'data: [DONE]' message.
         /// The 'usage' field on this chunk shows the token usage statistics for the entire request,
