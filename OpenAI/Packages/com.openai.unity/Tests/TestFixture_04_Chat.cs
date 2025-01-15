@@ -5,6 +5,7 @@ using OpenAI.Chat;
 using OpenAI.Models;
 using OpenAI.Tests.StructuredOutput;
 using OpenAI.Tests.Weather;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -120,6 +121,50 @@ namespace OpenAI.Tests
             Debug.Log($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishReason}");
             Assert.IsNotNull(response.FirstChoice.Message.AudioOutput.AudioClip);
             response.GetUsage();
+        }
+
+
+        [Test]
+        public async Task Test_01_03_01_GetChatCompletion_Modalities_Streaming()
+        {
+            Assert.IsNotNull(OpenAIClient.ChatEndpoint);
+            var messages = new List<Message>
+            {
+                new(Role.System, "You are a helpful assistant."),
+                new(Role.User, "Is a golden retriever a good family dog?"),
+            };
+            var chatRequest = new ChatRequest(messages, Model.GPT4oAudio, audioConfig: Voice.Alloy);
+            Assert.IsNotNull(chatRequest);
+            Assert.IsNotNull(chatRequest.AudioConfig);
+            Assert.AreEqual(Model.GPT4oAudio.Id, chatRequest.Model);
+            Assert.AreEqual(Voice.Alloy.Id, chatRequest.AudioConfig.Voice);
+            Assert.AreEqual(AudioFormat.Pcm16, chatRequest.AudioConfig.Format);
+            Assert.AreEqual(Modality.Text | Modality.Audio, chatRequest.Modalities);
+            var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, Assert.IsNotNull, true);
+            Assert.IsNotNull(response);
+            Assert.IsNotNull(response.Choices);
+            Assert.IsNotEmpty(response.Choices);
+            Assert.AreEqual(1, response.Choices.Count);
+            Assert.IsNotNull(response.FirstChoice);
+            Console.WriteLine($"{response.FirstChoice.Message.Role}: {response.FirstChoice} | Finish Reason: {response.FirstChoice.FinishReason}");
+            Assert.IsNotEmpty(response.FirstChoice.Message.AudioOutput.Transcript);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(response.FirstChoice.Message.AudioOutput.Data));
+            response.GetUsage();
+            messages.Add(response.FirstChoice.Message);
+            messages.Add(new(Role.User, "What are some other good family dog breeds?"));
+            chatRequest = new ChatRequest(messages, Model.GPT4oAudio, audioConfig: Voice.Alloy);
+            Assert.IsNotNull(chatRequest);
+            Assert.IsNotNull(messages[2]);
+            Assert.AreEqual(Role.Assistant, messages[2].Role);
+            Assert.IsNotNull(messages[2].AudioOutput);
+            response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, Assert.IsNotNull, true);
+            Assert.IsNotNull(response);
+            Assert.IsNotNull(response.Choices);
+            Assert.IsNotEmpty(response.Choices);
+            Assert.AreEqual(1, response.Choices.Count);
+            Assert.IsNotEmpty(response.FirstChoice.Message.AudioOutput.Transcript);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(response.FirstChoice.Message.AudioOutput.Data));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(response.FirstChoice));
         }
 
         [Test]
