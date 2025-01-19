@@ -17,14 +17,13 @@ namespace OpenAI.Realtime
     /// for example streaming smaller chunks from the client may allow the VAD to be more responsive.
     /// Unlike made other client events, the server will not send a confirmation response to this event.
     /// </summary>
+    /// <remarks>Sample rate must be 24000</remarks>
     [Preserve]
     public sealed class InputAudioBufferAppendRequest : BaseRealtimeEvent, IClientEvent
     {
         [Preserve]
         public InputAudioBufferAppendRequest(AudioClip audioClip)
-        {
-            Audio = Convert.ToBase64String(audioClip.EncodeToPCM());
-        }
+            => Audio = Convert.ToBase64String(audioClip.EncodeToPCM(outputSampleRate: 24000));
 
         [Preserve]
         public InputAudioBufferAppendRequest(ReadOnlyMemory<byte> audioData)

@@ -27,19 +27,39 @@ namespace OpenAI.Chat
 
         [Preserve]
         [JsonProperty("id")]
-        public string Id { get; }
+        public string Id { get; private set; }
 
         [Preserve]
         [JsonIgnore]
-        public int ExpiresAtUnixSeconds { get; }
+        public int? ExpiresAtUnixSeconds { get; private set; }
 
         [Preserve]
         [JsonIgnore]
-        public DateTime ExpiresAt => DateTimeOffset.FromUnixTimeSeconds(ExpiresAtUnixSeconds).DateTime;
+        public DateTime? ExpiresAt => ExpiresAtUnixSeconds.HasValue
+            ? DateTimeOffset.FromUnixTimeSeconds(ExpiresAtUnixSeconds.Value).DateTime
+            : null;
+
+        private Memory<byte> audioData;
 
         [Preserve]
         [JsonIgnore]
-        public string Data { get; }
+        public ReadOnlyMemory<byte> AudioData
+        {
+            get
+            {
+                audioData = Convert.FromBase64String(Data);
+                return audioData;
+            }
+        }
+
+        [Preserve]
+        [JsonIgnore]
+        public string Data { get; private set; }
+
+        [Preserve]
+        [JsonIgnore]
+        public float[] AudioSamples
+            => PCMEncoder.Decode(AudioData.ToArray(), inputSampleRate: 24000, outputSampleRate: AudioSettings.outputSampleRate);
 
         [Preserve]
         [JsonIgnore]
@@ -47,18 +67,42 @@ namespace OpenAI.Chat
         {
             get
             {
-                var samples = PCMEncoder.Decode(Convert.FromBase64String(Data));
-                var audioClip = AudioClip.Create(Id, samples.Length, 1, 24000, false);
-                audioClip.SetData(samples, 0);
+                var audioClip = AudioClip.Create(Id, AudioSamples.Length, 1, AudioSettings.outputSampleRate, false);
+                audioClip.SetData(AudioSamples, 0);
                 return audioClip;
             }
         }
 
         [Preserve]
         [JsonIgnore]
-        public string Transcript { get; }
+        public string Transcript { get; private set; }
 
         [Preserve]
         public override string ToString() => Transcript ?? string.Empty;
+
+        internal void AppendFrom(AudioOutput other)
+        {
+            if (other == null) { return; }
+
+            if (!string.IsNullOrWhiteSpace(other.Id))
+            {
+                Id = other.Id;
+            }
+
+            if (other.ExpiresAtUnixSeconds.HasValue)
+            {
+                ExpiresAtUnixSeconds = other.ExpiresAtUnixSeconds;
+            }
+
+            if (!string.IsNullOrWhiteSpace(other.Transcript))
+            {
+                Transcript += other.Transcript;
+            }
+
+            if (!string.IsNullOrWhiteSpace(other.Data))
+            {
+                Data += other.Data;
+            }
+        }
     }
 }

@@ -92,6 +92,8 @@ namespace OpenAI.Samples.Realtime
                 EnableDebug = enableDebug
             };
 
+            RecordingManager.EnableDebug = enableDebug;
+
             try
             {
                 var tools = new List<Tool>
@@ -147,6 +149,13 @@ namespace OpenAI.Samples.Realtime
                         data[i + j] = sample;
                     }
                 }
+                //else
+                //{
+                //    for (var j = 0; j < channels; j++)
+                //    {
+                //        data[i + j] = 0f;
+                //    }
+                //}
             }
         }
 
@@ -216,9 +225,10 @@ namespace OpenAI.Samples.Realtime
 
             try
             {
-                // we don't await this so we can implement buffer copy and send response to realtime api
+                // we don't await this so that we can implement buffer copy and send response to realtime api
                 // ReSharper disable once MethodHasAsyncOverload
-                RecordingManager.StartRecordingStream<WavEncoder>(BufferCallback, cancellationToken);
+                RecordingManager.StartRecordingStream<WavEncoder>(BufferCallback, 24000, cancellationToken);
+
                 async Task BufferCallback(ReadOnlyMemory<byte> bufferCallback)
                 {
                     if (!isMuted)
@@ -274,7 +284,6 @@ namespace OpenAI.Samples.Realtime
                                 break;
                             default:
                                 Debug.LogError(e);
-
                                 break;
                         }
                     }
