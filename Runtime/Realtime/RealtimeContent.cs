@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using System;
 using UnityEngine;
 using UnityEngine.Scripting;
-using Utilities.Audio;
+using Utilities.Encoding.Wav;
 
 namespace OpenAI.Realtime
 {
@@ -42,7 +42,7 @@ namespace OpenAI.Realtime
             Type = type;
             Audio = type switch
             {
-                RealtimeContentType.InputAudio or RealtimeContentType.Audio => Convert.ToBase64String(audioClip.EncodeToPCM()),
+                RealtimeContentType.InputAudio or RealtimeContentType.Audio => $"data:audio/wav;base64,{Convert.ToBase64String(audioClip.EncodeToWav())}",
                 _ => throw new ArgumentException($"Invalid content type {type} for audio content")
             };
             Transcript = transcript;

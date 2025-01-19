@@ -175,6 +175,13 @@ namespace OpenAI.Samples.Assistant
                         data[i + j] = sample;
                     }
                 }
+                //else
+                //{
+                //    for (var j = 0; j < channels; j++)
+                //    {
+                //        data[i + j] = 0f;
+                //    }
+                //}
             }
         }
 
@@ -182,7 +189,6 @@ namespace OpenAI.Samples.Assistant
         {
 #if !UNITY_2022_3_OR_NEWER
             lifetimeCts.Cancel();
-            lifetimeCts.Dispose();
 #endif
         }
 

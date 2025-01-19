@@ -36,7 +36,7 @@ namespace OpenAI.Chat
             ServiceTier = serviceTier;
             SystemFingerprint = systemFingerprint;
             Usage = usage;
-            this.choices = choices.ToList();
+            this.choices = choices?.ToList();
         }
 
         /// <summary>
