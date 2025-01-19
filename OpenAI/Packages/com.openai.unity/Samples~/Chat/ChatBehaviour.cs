@@ -123,7 +123,6 @@ namespace OpenAI.Samples.Chat
         private void OnDestroy()
         {
             lifetimeCts.Cancel();
-            lifetimeCts.Dispose();
         }
 #endif
 

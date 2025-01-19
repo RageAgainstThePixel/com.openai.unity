@@ -189,7 +189,6 @@ namespace OpenAI.Samples.Assistant
         {
 #if !UNITY_2022_3_OR_NEWER
             lifetimeCts.Cancel();
-            lifetimeCts.Dispose();
 #endif
         }
 
