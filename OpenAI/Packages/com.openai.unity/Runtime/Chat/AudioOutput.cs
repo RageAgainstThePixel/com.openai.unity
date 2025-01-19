@@ -2,7 +2,6 @@
 
 using Newtonsoft.Json;
 using System;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Scripting;
 using Utilities.Audio;
@@ -40,9 +39,27 @@ namespace OpenAI.Chat
             ? DateTimeOffset.FromUnixTimeSeconds(ExpiresAtUnixSeconds.Value).DateTime
             : null;
 
+        private Memory<byte> audioData;
+
+        [Preserve]
+        [JsonIgnore]
+        public ReadOnlyMemory<byte> AudioData
+        {
+            get
+            {
+                audioData = Convert.FromBase64String(Data);
+                return audioData;
+            }
+        }
+
         [Preserve]
         [JsonIgnore]
         public string Data { get; private set; }
+
+        [Preserve]
+        [JsonIgnore]
+        public float[] AudioSamples
+            => PCMEncoder.Decode(AudioData.ToArray(), inputSampleRate: 24000, outputSampleRate: AudioSettings.outputSampleRate);
 
         [Preserve]
         [JsonIgnore]
@@ -50,9 +67,8 @@ namespace OpenAI.Chat
         {
             get
             {
-                var samples = PCMEncoder.Decode(Convert.FromBase64String(Data));
-                var audioClip = AudioClip.Create(Id, samples.Length, 1, 24000, false);
-                audioClip.SetData(samples, 0);
+                var audioClip = AudioClip.Create(Id, AudioSamples.Length, 1, AudioSettings.outputSampleRate, false);
+                audioClip.SetData(AudioSamples, 0);
                 return audioClip;
             }
         }

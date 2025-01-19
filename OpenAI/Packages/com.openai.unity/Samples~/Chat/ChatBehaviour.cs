@@ -109,6 +109,13 @@ namespace OpenAI.Samples.Chat
                         data[i + j] = sample;
                     }
                 }
+                //else
+                //{
+                //    for (var j = 0; j < channels; j++)
+                //    {
+                //        data[i + j] = 0f;
+                //    }
+                //}
             }
         }
 

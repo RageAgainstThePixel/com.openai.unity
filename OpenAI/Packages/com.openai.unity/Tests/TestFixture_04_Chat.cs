@@ -77,7 +77,7 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_01_03_GetChatCompletion_Modalities()
+        public async Task Test_01_03_01_GetChatCompletion_Modalities()
         {
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
 
@@ -123,9 +123,8 @@ namespace OpenAI.Tests
             response.GetUsage();
         }
 
-
         [Test]
-        public async Task Test_01_03_01_GetChatCompletion_Modalities_Streaming()
+        public async Task Test_01_03_02_GetChatCompletion_Modalities_Streaming()
         {
             Assert.IsNotNull(OpenAIClient.ChatEndpoint);
             var messages = new List<Message>
