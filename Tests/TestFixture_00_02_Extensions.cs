@@ -3,6 +3,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
+using OpenAI.Audio;
 using OpenAI.Images;
 using OpenAI.Tests.StructuredOutput;
 using OpenAI.Tests.Weather;
@@ -23,7 +24,15 @@ namespace OpenAI.Tests
             Assert.IsNotNull(tools);
             Assert.IsNotEmpty(tools);
             tools.Add(Tool.GetOrCreateTool(OpenAIClient.ImagesEndPoint, nameof(ImagesEndpoint.GenerateImageAsync)));
+            tools.Add(Tool.GetOrCreateTool(OpenAIClient.AudioEndpoint, nameof(AudioEndpoint.GetSpeechAsync)));
             tools.Add(Tool.FromFunc<GameObject, Vector2, Vector3, Quaternion, string>("complex_objects", (gameObject, vector2, vector3, quaternion) => "success"));
+
+
+            foreach (var tool in tools)
+            {
+                Debug.Log(tool.Function?.Name ?? tool.Type);
+            }
+
             var json = JsonConvert.SerializeObject(tools, Formatting.Indented, OpenAIClient.JsonSerializationOptions);
             Debug.Log(json);
         }
