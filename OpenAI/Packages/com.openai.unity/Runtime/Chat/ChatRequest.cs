@@ -263,9 +263,16 @@ namespace OpenAI.Chat
         [JsonProperty("store")]
         public bool? Store { get; set; }
 
+        /// <summary>
+        /// Constrains the effort of reasoning for <see href="https://platform.openai.com/docs/guides/reasoning">Reasoning Models</see>.<br/>
+        /// Currently supported values are: Low, Medium, High. Reducing reasoning effort can result in faster responses and fewer tokens used on reasoning response.
+        /// </summary>
+        /// <remarks>
+        /// <b>o1 models only!</b>
+        /// </remarks>
         [Preserve]
         [JsonProperty("reasoning_effort", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public ReasoningEffort ReasoningEffort { get; }
+        public ReasoningEffort? ReasoningEffort { get; }
 
         /// <summary>
         /// Developer-defined tags and values used for filtering completions in the dashboard.
