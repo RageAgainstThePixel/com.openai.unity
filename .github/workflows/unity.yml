@@ -7,7 +7,7 @@ on:
       - 'main'
   pull_request:
     branches:
-      - '*'
+      - '**'
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -15,21 +15,54 @@ concurrency:
 jobs:
   build:
     name: ${{ matrix.os}} ${{ matrix.build-target }} ${{ matrix.unity-version }}
-    permissions:
-      checks: write
-      pull-requests: write
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        unity-version: [2022.x, 6000.x]
-        include:
+        include: # for each os specify the build targets
           - os: ubuntu-latest
+            unity-version: 2022.x
+            build-target: Android
+          - os: ubuntu-latest
+            unity-version: 6000.x
+            build-target: Android
+          - os: ubuntu-latest
+            unity-version: 2022.x
             build-target: StandaloneLinux64
+          - os: ubuntu-latest
+            unity-version: 6000.x
+            build-target: StandaloneLinux64
+          - os: ubuntu-latest
+            unity-version: 2022.x
+            build-target: WebGL
+          - os: ubuntu-latest
+            unity-version: 6000.x
+            build-target: WebGL
           - os: windows-latest
+            unity-version: 2022.x
             build-target: StandaloneWindows64
+          - os: windows-latest
+            unity-version: 6000.x
+            build-target: StandaloneWindows64
+          - os: windows-latest
+            unity-version: 2022.x
+            build-target: WSAPlayer
+          - os: windows-latest
+            unity-version: 6000.x
+            build-target: WSAPlayer
           - os: macos-latest
+            unity-version: 2022.x
+            build-target: iOS
+          - os: macos-latest
+            unity-version: 6000.x
+            build-target: iOS
+          - os: macos-latest
+            unity-version: 2022.x
+            build-target: StandaloneOSX
+          - os: macos-latest
+            unity-version: 6000.x
             build-target: StandaloneOSX
     steps:
       - uses: actions/checkout@v4
