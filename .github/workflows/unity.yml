@@ -7,34 +7,68 @@ on:
       - 'main'
   pull_request:
     branches:
-      - '*'
+      - '**'
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ (github.event_name == 'pull_request' || github.event.action == 'synchronize') }}
+  cancel-in-progress: ${{(github.event_name == 'pull_request' || github.event.action == 'synchronize')}}
 jobs:
   build:
-    permissions:
-      checks: write
-      pull-requests: write
+    name: ${{ matrix.os }} ${{ matrix.unity-version }} ${{ matrix.build-target }}
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-15]
-        unity-versions: [2021.x, 2022.x, 6000.x]
-        include:
+        include: # for each os specify the build targets
           - os: ubuntu-latest
+            unity-version: 2022.x
+            build-target: Android
+          - os: ubuntu-latest
+            unity-version: 6000.x
+            build-target: Android
+          - os: ubuntu-latest
+            unity-version: 2022.x
             build-target: StandaloneLinux64
+          - os: ubuntu-latest
+            unity-version: 6000.x
+            build-target: StandaloneLinux64
+          - os: ubuntu-latest
+            unity-version: 2022.x
+            build-target: WebGL
+          - os: ubuntu-latest
+            unity-version: 6000.x
+            build-target: WebGL
           - os: windows-latest
+            unity-version: 2022.x
             build-target: StandaloneWindows64
-          - os: macos-15
+          - os: windows-latest
+            unity-version: 6000.x
+            build-target: StandaloneWindows64
+          - os: windows-latest
+            unity-version: 2022.x
+            build-target: WSAPlayer
+          - os: windows-latest
+            unity-version: 6000.x
+            build-target: WSAPlayer
+          - os: macos-latest
+            unity-version: 2022.x
+            build-target: iOS
+          - os: macos-latest
+            unity-version: 6000.x
+            build-target: iOS
+          - os: macos-latest
+            unity-version: 2022.x
+            build-target: StandaloneOSX
+          - os: macos-latest
+            unity-version: 6000.x
             build-target: StandaloneOSX
     steps:
       - uses: actions/checkout@v4
       - uses: RageAgainstThePixel/unity-setup@v1
         with:
-          unity-version: ${{ matrix.unity-versions }}
+          unity-version: ${{ matrix.unity-version }}
           build-targets: ${{ matrix.build-target }}
       - uses: RageAgainstThePixel/activate-unity-license@v1
         with:
