@@ -11,9 +11,10 @@ on:
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ (github.event_name == 'pull_request' || github.event.action == 'synchronize') }}
+  cancel-in-progress: ${{(github.event_name == 'pull_request' || github.event.action == 'synchronize')}}
 jobs:
   build:
+    name: ${{ matrix.os}} ${{ matrix.build-target }} ${{ matrix.unity-version }}
     permissions:
       checks: write
       pull-requests: write
@@ -21,20 +22,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-15]
-        unity-versions: [2021.x, 2022.x, 6000.x]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        unity-version: [2022.x, 6000.x]
         include:
           - os: ubuntu-latest
             build-target: StandaloneLinux64
           - os: windows-latest
             build-target: StandaloneWindows64
-          - os: macos-15
+          - os: macos-latest
             build-target: StandaloneOSX
     steps:
       - uses: actions/checkout@v4
       - uses: RageAgainstThePixel/unity-setup@v1
         with:
-          unity-version: ${{ matrix.unity-versions }}
+          unity-version: ${{ matrix.unity-version }}
           build-targets: ${{ matrix.build-target }}
       - uses: RageAgainstThePixel/activate-unity-license@v1
         with:
