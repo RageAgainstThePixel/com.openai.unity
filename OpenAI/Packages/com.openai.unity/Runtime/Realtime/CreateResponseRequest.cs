@@ -25,9 +25,9 @@ namespace OpenAI.Realtime
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="options">Inference configuration <see cref="Realtime.Options"/> to override the <see cref="RealtimeSession.Options"/> for this response only.</param>
+        /// <param name="options">Inference configuration <see cref="Realtime.CreateResponseOptions"/> to override the <see cref="RealtimeSession.CreateResponseOptions"/> for this response only.</param>
         [Preserve]
-        public CreateResponseRequest(Options options)
+        public CreateResponseRequest(CreateResponseOptions options)
         {
             Options = options;
         }
@@ -44,6 +44,6 @@ namespace OpenAI.Realtime
 
         [Preserve]
         [JsonProperty("response")]
-        public Options Options { get; }
+        public CreateResponseOptions Options { get; }
     }
 }
