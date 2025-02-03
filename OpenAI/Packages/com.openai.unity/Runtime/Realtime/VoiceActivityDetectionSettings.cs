@@ -13,7 +13,8 @@ namespace OpenAI.Realtime
             [JsonProperty("type")] TurnDetectionType type = TurnDetectionType.Server_VAD,
             [JsonProperty("threshold")] float? detectionThreshold = null,
             [JsonProperty("prefix_padding_ms")] int? prefixPadding = null,
-            [JsonProperty("silence_duration_ms")] int? silenceDuration = null)
+            [JsonProperty("silence_duration_ms")] int? silenceDuration = null,
+            [JsonProperty("create_response")] bool? createResponse = null)
         {
             switch (type)
             {
@@ -22,6 +23,7 @@ namespace OpenAI.Realtime
                     DetectionThreshold = detectionThreshold;
                     PrefixPadding = prefixPadding;
                     SilenceDuration = silenceDuration;
+                    CreateResponse = createResponse;
                     break;
             }
         }
@@ -41,6 +43,10 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonProperty("silence_duration_ms")]
         public int? SilenceDuration { get; private set; }
+
+        [Preserve]
+        [JsonProperty("create_response")]
+        public bool? CreateResponse { get; private set; }
 
         [Preserve]
         public static VoiceActivityDetectionSettings Disabled() => new(TurnDetectionType.Disabled);
