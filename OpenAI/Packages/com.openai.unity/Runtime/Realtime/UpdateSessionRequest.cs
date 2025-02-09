@@ -36,6 +36,6 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("session")]
-        public Options Session { get; }
+        public SessionConfiguration Session { get; }
     }
 }
