@@ -16,6 +16,7 @@ jobs:
   build:
     name: ${{ matrix.os }} ${{ matrix.unity-version }} ${{ matrix.build-target }}
     runs-on: ${{ matrix.os }}
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     permissions:
       contents: read
     strategy:
