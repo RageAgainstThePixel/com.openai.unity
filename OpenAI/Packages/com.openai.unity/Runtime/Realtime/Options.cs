@@ -28,6 +28,17 @@ namespace OpenAI.Realtime
                 options.Temperature,
                 options.MaxResponseOutputTokens);
 
+        public static implicit operator RealtimeResponseCreateParams(Options options)
+            => new(
+                options.Modalities,
+                options.Instructions,
+                options.Voice,
+                options.OutputAudioFormat,
+                options.Tools,
+                options.ToolChoice,
+                options.Temperature,
+                options.MaxResponseOutputTokens);
+
         [Preserve]
         [JsonConstructor]
         internal Options(

@@ -51,6 +51,6 @@ namespace OpenAI.Realtime
 
         [Preserve]
         [JsonProperty("response")]
-        public Options Options { get; }
+        public RealtimeResponseCreateParams Options { get; }
     }
 }

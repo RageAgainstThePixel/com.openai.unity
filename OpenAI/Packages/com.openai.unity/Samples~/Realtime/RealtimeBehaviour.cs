@@ -100,11 +100,8 @@ namespace OpenAI.Samples.Realtime
                 {
                     Tool.GetOrCreateTool(openAI.ImagesEndPoint, nameof(ImagesEndpoint.GenerateImageAsync))
                 };
-                var options = new Options(
-                    model: Model.GPT4oRealtime,
-                    instructions: systemPrompt,
-                    tools: tools);
-                session = await openAI.RealtimeEndpoint.CreateSessionAsync(options, destroyCancellationToken);
+                var sessionConfiguration = new SessionConfiguration(model: Model.GPT4oRealtime, instructions: systemPrompt, tools: tools);
+                session = await openAI.RealtimeEndpoint.CreateSessionAsync(sessionConfiguration, destroyCancellationToken);
                 inputField.onSubmit.AddListener(SubmitChat);
                 submitButton.onClick.AddListener(SubmitChat);
                 recordButton.onClick.AddListener(ToggleRecording);
