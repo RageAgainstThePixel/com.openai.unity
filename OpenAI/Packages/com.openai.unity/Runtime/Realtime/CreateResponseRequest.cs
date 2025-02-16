@@ -27,7 +27,7 @@ namespace OpenAI.Realtime
         /// Constructor.
         /// </summary>
         /// <param name="options">Inference configuration <see cref="Realtime.Options"/> to override the <see cref="RealtimeSession.Options"/> for this response only.</param>
-        [Obsolete]
+        [Obsolete("Use the constructor that takes RealtimeResponseCreateParams.")]
         [Preserve]
         public CreateResponseRequest(Options options)
         {
