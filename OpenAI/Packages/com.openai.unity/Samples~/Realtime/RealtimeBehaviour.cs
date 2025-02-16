@@ -13,7 +13,6 @@ using OpenAI.Images;
 using OpenAI.Models;
 using OpenAI.Realtime;
 using TMPro;
-using UnityEditor.Profiling.Memory.Experimental;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
