@@ -114,7 +114,7 @@ namespace OpenAI.Realtime
         /// Current voice options are `alloy`, `ash`, `ballad`, `coral`, `echo` `sage`, `shimmer` and `verse`.
         /// </summary>
         [Preserve]
-        [JsonProperty("usage")]
+        [JsonProperty("voice")]
         public string Voice { get; }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace OpenAI.Realtime
         /// could be responding in either text or audio.
         /// </summary>
         [Preserve]
-        [JsonProperty("usage")]
+        [JsonProperty("modalities")]
         [JsonConverter(typeof(ModalityConverter))]
         public Modality Modalities { get; }
 
