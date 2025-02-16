@@ -17,14 +17,28 @@ namespace OpenAI.Realtime
             [JsonProperty("status")] RealtimeResponseStatus status,
             [JsonProperty("status_details")] StatusDetails statusDetails,
             [JsonProperty("output")] IReadOnlyList<ConversationItem> output,
-            [JsonProperty("usage")] Usage usage)
+            [JsonProperty("metadata")] IReadOnlyDictionary<string, object> metadata,
+            [JsonProperty("usage")] Usage usage,
+            [JsonProperty("conversation_id")] string conversationId,
+            [JsonProperty("voice")] string voice,
+            [JsonProperty("modalities")] Modality modalities,
+            [JsonProperty("output_audio_format")] RealtimeAudioFormat outputAudioFormat,
+            [JsonProperty("temperature")] float temperature,
+            [JsonProperty("max_output_tokens")] object maxOutputTokens)
         {
             Id = id;
             Object = @object;
             Status = status;
             StatusDetails = statusDetails;
             Output = output;
+            Metadata = metadata;
             Usage = usage;
+            ConversationId = conversationId;
+            Voice = voice;
+            Modalities = modalities;
+            OutputAudioFormat = outputAudioFormat;
+            Temperature = temperature;
+            MaxOutputTokens = maxOutputTokens;
         }
 
         /// <summary>
@@ -63,6 +77,17 @@ namespace OpenAI.Realtime
         public IReadOnlyList<ConversationItem> Output { get; }
 
         /// <summary>
+        /// Set of 16 key-value pairs that can be attached to an object.
+        /// This can be useful for storing additional information about the object in a structured format,
+        /// and querying for objects via API or the dashboard.
+        /// Keys are strings with a maximum length of 64 characters.
+        /// Values are strings with a maximum length of 512 characters.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("metadata")]
+        public IReadOnlyDictionary<string, object> Metadata { get; }
+
+        /// <summary>
         /// Usage statistics for the Response, this will correspond to billing.
         /// A Realtime API session will maintain a conversation context and append new Items to the Conversation,
         /// thus output from previous turns (text and audio tokens) will become the input for later turns.
@@ -70,5 +95,57 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonProperty("usage")]
         public Usage Usage { get; }
+
+        /// <summary>
+        /// Which conversation the response is added to, determined by the `conversation`
+        /// field in the `response.create` event. If `auto`, the response will be added to
+        /// the default conversation and the value of `conversation_id` will be an id like
+        /// `conv_1234`. If `none`, the response will not be added to any conversation and
+        /// the value of `conversation_id` will be `null`. If responses are being triggered
+        /// by server VAD, the response will be added to the default conversation, thus
+        /// the `conversation_id` will be an id like `conv_1234`.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("usage")]
+        public string ConversationId { get; }
+
+        /// <summary>
+        /// The voice the model used to respond.
+        /// Current voice options are `alloy`, `ash`, `ballad`, `coral`, `echo` `sage`, `shimmer` and `verse`.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("usage")]
+        public string Voice { get; }
+
+        /// <summary>
+        /// The set of modalities the model used to respond. If there are multiple modalities,
+        /// the model will pick one, for example if `modalities` is `["text", "audio"]`, the model
+        /// could be responding in either text or audio.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("usage")]
+        [JsonConverter(typeof(ModalityConverter))]
+        public Modality Modalities { get; }
+
+        /// <summary>
+        /// The format of output audio. Options are `pcm16`, `g711_ulaw`, or `g711_alaw`.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("output_audio_format")]
+        public RealtimeAudioFormat OutputAudioFormat { get; }
+
+        /// <summary>
+        /// Sampling temperature for the model, limited to [0.6, 1.2]. Defaults to 0.8.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("temperature")]
+        public float Temperature { get; }
+
+        /// <summary>
+        ///  Maximum number of output tokens for a single assistant response, inclusive of tool calls, that was used in this response.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("max_output_tokens")]
+        public object MaxOutputTokens { get; }
     }
 }

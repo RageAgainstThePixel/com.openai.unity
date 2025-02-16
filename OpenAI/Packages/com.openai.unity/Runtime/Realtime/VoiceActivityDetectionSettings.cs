@@ -41,19 +41,19 @@ namespace OpenAI.Realtime
         public TurnDetectionType Type { get; private set; }
 
         [Preserve]
-        [JsonProperty("threshold")]
+        [JsonProperty("threshold", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public float? DetectionThreshold { get; private set; }
 
         [Preserve]
-        [JsonProperty("prefix_padding_ms")]
+        [JsonProperty("prefix_padding_ms", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? PrefixPadding { get; private set; }
 
         [Preserve]
-        [JsonProperty("silence_duration_ms")]
+        [JsonProperty("silence_duration_ms", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? SilenceDuration { get; private set; }
 
         [Preserve]
-        [JsonProperty("create_response")]
+        [JsonProperty("create_response", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool CreateResponse { get; private set; }
 
         [Preserve]

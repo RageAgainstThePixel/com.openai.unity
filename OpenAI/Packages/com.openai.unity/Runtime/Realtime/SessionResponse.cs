@@ -39,7 +39,7 @@ namespace OpenAI.Realtime
         public SessionConfiguration SessionConfiguration { get; }
 
         [JsonIgnore]
-        [Obsolete("use SessionConfiguration")]
+        [Obsolete("use SessionResponse.SessionConfiguration")]
         public SessionConfiguration Options => SessionConfiguration;
     }
 }
