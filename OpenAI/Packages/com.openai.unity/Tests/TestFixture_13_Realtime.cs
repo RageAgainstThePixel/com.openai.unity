@@ -35,16 +35,16 @@ namespace OpenAI.Tests
                 var configuration = new SessionConfiguration(Model.GPT4oRealtime, tools: tools);
                 session = await OpenAIClient.RealtimeEndpoint.CreateSessionAsync(configuration, cts.Token);
                 Assert.IsNotNull(session);
-                Assert.IsNotNull(session.Options);
+                Assert.IsNotNull(session.Configuration);
                 Assert.AreEqual(Model.GPT4oRealtime.Id, configuration.Model);
-                Assert.AreEqual(configuration.Model, session.Options.Model);
+                Assert.AreEqual(configuration.Model, session.Configuration.Model);
                 Assert.IsNotNull(configuration.Tools);
                 Assert.IsNotEmpty(configuration.Tools);
                 Assert.AreEqual(1, configuration.Tools.Count);
-                Assert.AreEqual(configuration.Tools.Count, session.Options.Tools.Count);
-                Assert.AreEqual(configuration.Tools[0].Name, session.Options.Tools[0].Name);
+                Assert.AreEqual(configuration.Tools.Count, session.Configuration.Tools.Count);
+                Assert.AreEqual(configuration.Tools[0].Name, session.Configuration.Tools[0].Name);
                 Assert.AreEqual(Modality.Audio | Modality.Text, configuration.Modalities);
-                Assert.AreEqual(Modality.Audio | Modality.Text, session.Options.Modalities);
+                Assert.AreEqual(Modality.Audio | Modality.Text, session.Configuration.Modalities);
                 var responseTask = session.ReceiveUpdatesAsync<IServerEvent>(SessionEvents, cts.Token);
 
                 await session.SendAsync(new ConversationItemCreateRequest("Hello!"), cts.Token);

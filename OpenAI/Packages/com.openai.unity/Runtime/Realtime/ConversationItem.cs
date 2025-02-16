@@ -109,7 +109,7 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Include)]
-        public ConversationItemType Type { get; private set; }
+        public ConversationItemType Type { get; internal set; }
 
         /// <summary>
         /// The status of the item ("completed", "in_progress", "incomplete").
