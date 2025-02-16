@@ -1,9 +1,5 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using Newtonsoft.Json;
-using OpenAI.Images;
-using OpenAI.Models;
-using OpenAI.Realtime;
 using System;
 using System.Buffers;
 using System.Collections.Concurrent;
@@ -12,7 +8,12 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using OpenAI.Images;
+using OpenAI.Models;
+using OpenAI.Realtime;
 using TMPro;
+using UnityEditor.Profiling.Memory.Experimental;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -60,15 +61,15 @@ namespace OpenAI.Samples.Realtime
         private OpenAIClient openAI;
         private RealtimeSession session;
 
+        private readonly ConcurrentQueue<float> sampleQueue = new();
+        private readonly Dictionary<string, TextMeshProUGUI> responseList = new();
+
 #if !UNITY_2022_3_OR_NEWER
         private readonly CancellationTokenSource lifetimeCts = new();
 
         // ReSharper disable once InconsistentNaming
         private CancellationToken destroyCancellationToken => lifetimeCts.Token;
 #endif
-
-        private readonly Dictionary<string, TextMeshProUGUI> responseList = new();
-        private readonly ConcurrentQueue<float> sampleQueue = new();
 
         private void OnValidate()
         {
@@ -150,13 +151,6 @@ namespace OpenAI.Samples.Realtime
                         data[i + j] = sample;
                     }
                 }
-                //else
-                //{
-                //    for (var j = 0; j < channels; j++)
-                //    {
-                //        data[i + j] = 0f;
-                //    }
-                //}
             }
         }
 
@@ -232,7 +226,7 @@ namespace OpenAI.Samples.Realtime
 
                 async Task BufferCallback(ReadOnlyMemory<byte> bufferCallback)
                 {
-                    if (!isMuted)
+                    if (!isMuted || sampleQueue.IsEmpty)
                     {
                         try
                         {
