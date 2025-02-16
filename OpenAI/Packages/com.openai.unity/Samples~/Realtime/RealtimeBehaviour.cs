@@ -225,7 +225,7 @@ namespace OpenAI.Samples.Realtime
 
                 async Task BufferCallback(ReadOnlyMemory<byte> bufferCallback)
                 {
-                    if (!isMuted || sampleQueue.IsEmpty)
+                    if (!isMuted && !audioSource.isPlaying)
                     {
                         try
                         {
