@@ -1,6 +1,7 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Realtime
@@ -17,7 +18,7 @@ namespace OpenAI.Realtime
         {
             EventId = eventId;
             Type = type;
-            Options = session;
+            SessionConfiguration = session;
         }
 
         /// <inheritdoc />
@@ -31,10 +32,14 @@ namespace OpenAI.Realtime
         public override string Type { get; }
 
         /// <summary>
-        /// The session resource options.
+        /// The session resource configuration.
         /// </summary>
         [Preserve]
         [JsonProperty("session")]
-        public SessionConfiguration Options { get; }
+        public SessionConfiguration SessionConfiguration { get; }
+
+        [JsonIgnore]
+        [Obsolete("use SessionConfiguration")]
+        public SessionConfiguration Options => SessionConfiguration;
     }
 }
