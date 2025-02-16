@@ -49,7 +49,81 @@ namespace OpenAI.Tests
 
                 await session.SendAsync(new ConversationItemCreateRequest("Hello!"), cts.Token);
                 await session.SendAsync(new CreateResponseRequest(), cts.Token);
-                await Task.Delay(5000, cts.Token).ConfigureAwait(true);
+                await session.SendAsync(new InputAudioBufferAppendRequest(new ReadOnlyMemory<byte>(new byte[1024 * 4])), cts.Token);
+                await session.SendAsync(new ConversationItemCreateRequest("Goodbye!"), cts.Token);
+                await session.SendAsync(new CreateResponseRequest(), cts.Token);
+
+                void SessionEvents(IServerEvent @event)
+                {
+                    switch (@event)
+                    {
+                        case ResponseAudioTranscriptResponse transcriptResponse:
+                            Debug.Log(transcriptResponse.ToString());
+                            break;
+                        case ResponseFunctionCallArgumentsResponse functionCallResponse:
+                            if (functionCallResponse.IsDone)
+                            {
+                                ToolCall toolCall = functionCallResponse;
+                                toolCall.InvokeFunction();
+                            }
+
+                            break;
+                    }
+                }
+
+                await responseTask.ConfigureAwait(true);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw;
+            }
+            finally
+            {
+                session?.Dispose();
+            }
+        }
+
+        [Test]
+        public async Task Test_02_RealtimeSession_VAD_Disabled()
+        {
+            RealtimeSession session = null;
+
+            try
+            {
+                Assert.IsNotNull(OpenAIClient.RealtimeEndpoint);
+                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+
+                var tools = new List<Tool>
+                {
+                    Tool.FromFunc("goodbye", () =>
+                    {
+                        cts.Cancel();
+                        return "Goodbye!";
+                    })
+                };
+
+                var configuration = new SessionConfiguration(
+                    model: Model.GPT4oRealtime,
+                    tools: tools,
+                    turnDetectionSettings: VoiceActivityDetectionSettings.Disabled());
+                session = await OpenAIClient.RealtimeEndpoint.CreateSessionAsync(configuration, cts.Token);
+                Assert.IsNotNull(session);
+                Assert.IsNotNull(session.Configuration);
+                Assert.AreEqual(Model.GPT4oRealtime.Id, configuration.Model);
+                Assert.AreEqual(configuration.Model, session.Configuration.Model);
+                Assert.IsNotNull(configuration.Tools);
+                Assert.IsNotEmpty(configuration.Tools);
+                Assert.AreEqual(1, configuration.Tools.Count);
+                Assert.AreEqual(configuration.Tools.Count, session.Configuration.Tools.Count);
+                Assert.AreEqual(configuration.Tools[0].Name, session.Configuration.Tools[0].Name);
+                Assert.AreEqual(Modality.Audio | Modality.Text, configuration.Modalities);
+                Assert.AreEqual(Modality.Audio | Modality.Text, session.Configuration.Modalities);
+                var responseTask = session.ReceiveUpdatesAsync<IServerEvent>(SessionEvents, cts.Token);
+
+                await session.SendAsync(new ConversationItemCreateRequest("Hello!"), cts.Token);
+                await session.SendAsync(new CreateResponseRequest(), cts.Token);
+                await session.SendAsync(new InputAudioBufferAppendRequest(new ReadOnlyMemory<byte>(new byte[1024 * 8])), cts.Token);
                 await session.SendAsync(new ConversationItemCreateRequest("Goodbye!"), cts.Token);
                 await session.SendAsync(new CreateResponseRequest(), cts.Token);
 
