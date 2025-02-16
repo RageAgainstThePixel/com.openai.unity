@@ -34,10 +34,11 @@ The recommended installation method is though the unity package manager and [Ope
 
 ### Via Unity Package Manager and Git url
 
+> [!WARNING]
+> This repo has dependencies on other repositories! You are responsible for adding these on your own.
+
 - Open your Unity Package Manager
 - Add package from git url: `https://github.com/RageAgainstThePixel/com.openai.unity.git#upm`
-    > [!NOTE]
-    > This repo has dependencies on other repositories! You are responsible for adding these on your own.
   - [com.utilities.async](https://github.com/RageAgainstThePixel/com.utilities.async)
   - [com.utilities.websockets](https://github.com/RageAgainstThePixel/com.utilities.websockets)
   - [com.utilities.extensions](https://github.com/RageAgainstThePixel/com.utilities.extensions)
