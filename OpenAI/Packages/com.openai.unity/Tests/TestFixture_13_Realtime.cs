@@ -1,12 +1,12 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using NUnit.Framework;
-using OpenAI.Models;
-using OpenAI.Realtime;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using NUnit.Framework;
+using OpenAI.Models;
+using OpenAI.Realtime;
 using UnityEngine;
 
 namespace OpenAI.Tests
@@ -21,12 +21,13 @@ namespace OpenAI.Tests
             try
             {
                 Assert.IsNotNull(OpenAIClient.RealtimeEndpoint);
-                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-
+                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                var wasGoodbyeCalled = false;
                 var tools = new List<Tool>
                 {
                     Tool.FromFunc("goodbye", () =>
                     {
+                        wasGoodbyeCalled = true;
                         cts.Cancel();
                         return "Goodbye!";
                     })
@@ -72,6 +73,7 @@ namespace OpenAI.Tests
                 }
 
                 await responseTask.ConfigureAwait(true);
+                Assert.IsTrue(wasGoodbyeCalled);
             }
             catch (Exception e)
             {
@@ -92,12 +94,13 @@ namespace OpenAI.Tests
             try
             {
                 Assert.IsNotNull(OpenAIClient.RealtimeEndpoint);
-                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-
+                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                var wasGoodbyeCalled = false;
                 var tools = new List<Tool>
                 {
                     Tool.FromFunc("goodbye", () =>
                     {
+                        wasGoodbyeCalled = true;
                         cts.Cancel();
                         return "Goodbye!";
                     })
@@ -146,6 +149,7 @@ namespace OpenAI.Tests
                 }
 
                 await responseTask.ConfigureAwait(true);
+                Assert.IsTrue(wasGoodbyeCalled);
             }
             catch (Exception e)
             {
