@@ -36,8 +36,10 @@ The recommended installation method is though the unity package manager and [Ope
 
 - Open your Unity Package Manager
 - Add package from git url: `https://github.com/RageAgainstThePixel/com.openai.unity.git#upm`
-  > Note: this repo has dependencies on other repositories! You are responsible for adding these on your own.
+    > [!NOTE]
+    > This repo has dependencies on other repositories! You are responsible for adding these on your own.
   - [com.utilities.async](https://github.com/RageAgainstThePixel/com.utilities.async)
+  - [com.utilities.websockets](https://github.com/RageAgainstThePixel/com.utilities.websockets)
   - [com.utilities.extensions](https://github.com/RageAgainstThePixel/com.utilities.extensions)
   - [com.utilities.rest](https://github.com/RageAgainstThePixel/com.utilities.rest)
   - [com.utilities.audio](https://github.com/RageAgainstThePixel/com.utilities.audio)
@@ -435,8 +437,8 @@ var tools = new List<Tool>
         return "Goodbye!";
     })
 };
-var options = new Options(Model.GPT4oRealtime, tools: tools);
-using var session = await api.RealtimeEndpoint.CreateSessionAsync(options);
+var configuration = new SessionConfiguration(Model.GPT4oRealtime, tools: tools);
+using var session = await api.RealtimeEndpoint.CreateSessionAsync(configuration);
 var responseTask = session.ReceiveUpdatesAsync<IServerEvent>(ServerEvents, cancellationTokenSource.Token);
 await session.SendAsync(new ConversationItemCreateRequest("Hello!"));
 await session.SendAsync(new CreateResponseRequest());
