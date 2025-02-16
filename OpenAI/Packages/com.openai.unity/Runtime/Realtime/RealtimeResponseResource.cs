@@ -106,7 +106,7 @@ namespace OpenAI.Realtime
         /// the `conversation_id` will be an id like `conv_1234`.
         /// </summary>
         [Preserve]
-        [JsonProperty("usage")]
+        [JsonProperty("conversation_id")]
         public string ConversationId { get; }
 
         /// <summary>
