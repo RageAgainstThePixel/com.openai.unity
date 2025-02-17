@@ -251,6 +251,10 @@ namespace OpenAI.Realtime
                 {
                     Debug.Log(payload);
                 }
+                else
+                {
+                    Debug.Log($"{nameof(InputAudioBufferAppendRequest)}");
+                }
             }
 
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(EventTimeout));
