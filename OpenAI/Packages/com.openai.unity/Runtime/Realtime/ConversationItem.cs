@@ -16,8 +16,8 @@ namespace OpenAI.Realtime
         [JsonConstructor]
         internal ConversationItem(
             [JsonProperty("id")] string id,
-            [JsonProperty("object")] string @object,
             [JsonProperty("type")] ConversationItemType type,
+            [JsonProperty("object")] string @object,
             [JsonProperty("status")] RealtimeResponseStatus status,
             [JsonProperty("role")] Role role,
             [JsonProperty("content")] IReadOnlyList<RealtimeContent> content,
@@ -37,6 +37,7 @@ namespace OpenAI.Realtime
             FunctionArguments = functionArguments;
             FunctionOutput = functionOutput;
         }
+
         [Preserve]
         public ConversationItem(Role role, IEnumerable<RealtimeContent> content)
         {
@@ -98,18 +99,18 @@ namespace OpenAI.Realtime
         public string Id { get; private set; }
 
         /// <summary>
+        /// The type of the item ("message", "function_call", "function_call_output").
+        /// </summary>
+        [Preserve]
+        [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Include)]
+        public ConversationItemType Type { get; internal set; }
+
+        /// <summary>
         /// The object type, must be "realtime.item".
         /// </summary>
         [Preserve]
         [JsonProperty("object")]
         public string Object { get; private set; }
-
-        /// <summary>
-        /// The type of the item ("message", "function_call", "function_call_output").
-        /// </summary>
-        [Preserve]
-        [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Include)]
-        public ConversationItemType Type { get; private set; }
 
         /// <summary>
         /// The status of the item ("completed", "in_progress", "incomplete").

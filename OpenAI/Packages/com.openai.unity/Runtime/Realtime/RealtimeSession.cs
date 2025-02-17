@@ -27,11 +27,14 @@ namespace OpenAI.Realtime
         [Preserve]
         public int EventTimeout { get; set; } = 30;
 
+        [Obsolete("Use RealtimeSession.Configuration")]
+        public SessionConfiguration Options => Configuration;
+
         /// <summary>
-        /// The options for the session.
+        /// The configuration options for the session.
         /// </summary>
         [Preserve]
-        public Options Options { get; internal set; }
+        public SessionConfiguration Configuration { get; internal set; }
 
         #region Internal
 
@@ -86,7 +89,8 @@ namespace OpenAI.Realtime
         }
 
         [Preserve]
-        ~RealtimeSession() => Dispose(false);
+        ~RealtimeSession()
+            => Dispose(false);
 
         #region IDisposable
 
@@ -216,7 +220,6 @@ namespace OpenAI.Realtime
         /// </summary>
         /// <typeparam name="T"><see cref="IClientEvent"/> to send to the server.</typeparam>
         /// <param name="event">The event to send.</param>
-        /// <param name="sessionEvents">Optional, <see cref="Action{IServerEvent}"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="Task{IServerEvent}"/>.</returns>
         [Preserve]
@@ -315,7 +318,7 @@ namespace OpenAI.Realtime
                     switch (clientEvent)
                     {
                         case UpdateSessionRequest when serverEvent is SessionResponse sessionResponse:
-                            Options = sessionResponse.Options;
+                            Configuration = sessionResponse.SessionConfiguration;
                             Complete();
                             return;
                         case InputAudioBufferCommitRequest when serverEvent is InputAudioBufferCommittedResponse:
@@ -326,23 +329,23 @@ namespace OpenAI.Realtime
                             Complete();
                             return;
                         case CreateResponseRequest when serverEvent is RealtimeResponse serverResponse:
+                        {
+                            if (serverResponse.Response.Status == RealtimeResponseStatus.InProgress)
                             {
-                                if (serverResponse.Response.Status == RealtimeResponseStatus.InProgress)
-                                {
-                                    return;
-                                }
-
-                                if (serverResponse.Response.Status != RealtimeResponseStatus.Completed)
-                                {
-                                    tcs.TrySetException(new Exception(serverResponse.Response.StatusDetails.Error.ToString()));
-                                }
-                                else
-                                {
-                                    Complete();
-                                }
-
-                                break;
+                                return;
                             }
+
+                            if (serverResponse.Response.Status != RealtimeResponseStatus.Completed)
+                            {
+                                tcs.TrySetException(new Exception(serverResponse.Response.StatusDetails.Error.ToString()));
+                            }
+                            else
+                            {
+                                Complete();
+                            }
+
+                            break;
+                        }
                     }
                 }
                 catch (Exception e)

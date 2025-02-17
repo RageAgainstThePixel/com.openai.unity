@@ -5,7 +5,6 @@ using OpenAI.Chat;
 using OpenAI.Models;
 using OpenAI.Tests.StructuredOutput;
 using OpenAI.Tests.Weather;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;

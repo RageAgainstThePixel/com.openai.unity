@@ -1,6 +1,7 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Realtime
@@ -26,8 +27,14 @@ namespace OpenAI.Realtime
         /// Constructor.
         /// </summary>
         /// <param name="options">Inference configuration <see cref="Realtime.Options"/> to override the <see cref="RealtimeSession.Options"/> for this response only.</param>
+        [Obsolete("Use the constructor that takes RealtimeResponseCreateParams.")]
         [Preserve]
         public CreateResponseRequest(Options options)
+        {
+            Options = options;
+        }
+
+        public CreateResponseRequest(RealtimeResponseCreateParams options)
         {
             Options = options;
         }
@@ -44,6 +51,6 @@ namespace OpenAI.Realtime
 
         [Preserve]
         [JsonProperty("response")]
-        public Options Options { get; }
+        public RealtimeResponseCreateParams Options { get; }
     }
 }

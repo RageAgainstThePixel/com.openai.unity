@@ -69,6 +69,14 @@ obj/
 _ReSharper.Caches
 
 # ===================== #
+# MacOS #
+# ===================== #
+*/.DS_Store
+.DS_Store?
+.DS_Store
+xcuserdata/
+
+# ===================== #
 # Project Specific List #
 # ===================== #
 artifacts/

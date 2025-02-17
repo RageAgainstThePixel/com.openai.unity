@@ -1,13 +1,13 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using Newtonsoft.Json;
-using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using OpenAI.Extensions;
 using UnityEngine;
 using Utilities.Async;
 using Utilities.WebRequestRest;
@@ -147,6 +147,7 @@ namespace OpenAI.Images
                     if (!Rest.TryGetDownloadCacheItem(result.B64_Json, out var localFilePath))
                     {
                         await File.WriteAllBytesAsync(localFilePath, imageData, cancellationToken).ConfigureAwait(true);
+                        localFilePath = $"file://{localFilePath}";
                     }
 
                     result.Texture = await Rest.DownloadTextureAsync(localFilePath, parameters: new RestParameters(debug: EnableDebug), cancellationToken: cancellationToken);

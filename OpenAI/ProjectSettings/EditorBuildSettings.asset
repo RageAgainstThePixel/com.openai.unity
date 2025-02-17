@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Samples/Realtime/OpenAIRealtimeSample.unity
+    guid: ac74ae02686dd8f448cdaf6cff0cd971
+  - enabled: 1
     path: Assets/Samples/Chat/OpenAIChatSample.unity
     guid: fe475a467de017e4983b082da4aa0dbb
+  - enabled: 1
+    path: Assets/Samples/Assistant/OpenAIAssistantSample.unity
+    guid: cdcc67134a32e1f40a96530fa0e2f1e9
   m_configObjects: {}

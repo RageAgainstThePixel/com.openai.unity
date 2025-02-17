@@ -14,11 +14,13 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonConstructor]
         internal RealtimeContent(
+            [JsonProperty("id")] string id,
             [JsonProperty("type")] RealtimeContentType type,
             [JsonProperty("text")] string text,
             [JsonProperty("audio")] string audio,
             [JsonProperty("transcript")] string transcript)
         {
+            Id = id;
             Type = type;
             Text = text;
             Audio = audio;
@@ -29,11 +31,20 @@ namespace OpenAI.Realtime
         public RealtimeContent(string text, RealtimeContentType type)
         {
             Type = type;
-            Text = type switch
+            switch (type)
             {
-                RealtimeContentType.InputText or RealtimeContentType.Text => text,
-                _ => throw new ArgumentException($"Invalid content type {type} for text content")
-            };
+                case RealtimeContentType.InputText or RealtimeContentType.Text:
+                    Text = text;
+                    break;
+                case RealtimeContentType.InputAudio or RealtimeContentType.Audio:
+                    Audio = text;
+                    break;
+                case RealtimeContentType.ItemReference:
+                    Id = text;
+                    break;
+                default:
+                    throw new ArgumentException($"Invalid content type {type} for text content");
+            }
         }
 
         [Preserve]
@@ -79,6 +90,14 @@ namespace OpenAI.Realtime
         }
 
         /// <summary>
+        /// ID of a previous conversation item to reference (for `item_reference` content types in `response.create` events).
+        /// These can reference both client and server created items.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("id")]
+        public string Id { get; }
+
+        /// <summary>
         /// The content type ("text", "audio", "input_text", "input_audio").
         /// </summary>
         [Preserve]
@@ -86,21 +105,21 @@ namespace OpenAI.Realtime
         public RealtimeContentType Type { get; }
 
         /// <summary>
-        /// The text content.
+        /// The text content, used for `input_text` and `text` content types.
         /// </summary>
         [Preserve]
         [JsonProperty("text")]
         public string Text { get; }
 
         /// <summary>
-        /// Base64-encoded audio data.
+        /// Base64-encoded audio bytes, used for `input_audio` content type.
         /// </summary>
         [Preserve]
         [JsonProperty("audio")]
         public string Audio { get; }
 
         /// <summary>
-        /// The transcript of the audio.
+        /// The transcript of the audio, used for `input_audio` content type.
         /// </summary>
         [Preserve]
         [JsonProperty("transcript")]

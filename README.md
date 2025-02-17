@@ -18,6 +18,14 @@ The recommended installation method is though the unity package manager and [Ope
 
 ### Via Unity Package Manager and OpenUPM
 
+#### Terminal
+
+```bash
+openupm add com.openai.unity
+```
+
+#### Manual
+
 - Open your Unity project settings
 - Add the OpenUPM package registry:
   - Name: `OpenUPM`
@@ -34,10 +42,13 @@ The recommended installation method is though the unity package manager and [Ope
 
 ### Via Unity Package Manager and Git url
 
+> [!WARNING]
+> This repo has dependencies on other repositories! You are responsible for adding these on your own.
+
 - Open your Unity Package Manager
 - Add package from git url: `https://github.com/RageAgainstThePixel/com.openai.unity.git#upm`
-  > Note: this repo has dependencies on other repositories! You are responsible for adding these on your own.
   - [com.utilities.async](https://github.com/RageAgainstThePixel/com.utilities.async)
+  - [com.utilities.websockets](https://github.com/RageAgainstThePixel/com.utilities.websockets)
   - [com.utilities.extensions](https://github.com/RageAgainstThePixel/com.utilities.extensions)
   - [com.utilities.rest](https://github.com/RageAgainstThePixel/com.utilities.rest)
   - [com.utilities.audio](https://github.com/RageAgainstThePixel/com.utilities.audio)
@@ -435,8 +446,8 @@ var tools = new List<Tool>
         return "Goodbye!";
     })
 };
-var options = new Options(Model.GPT4oRealtime, tools: tools);
-using var session = await api.RealtimeEndpoint.CreateSessionAsync(options);
+var configuration = new SessionConfiguration(Model.GPT4oRealtime, tools: tools);
+using var session = await api.RealtimeEndpoint.CreateSessionAsync(configuration);
 var responseTask = session.ReceiveUpdatesAsync<IServerEvent>(ServerEvents, cancellationTokenSource.Token);
 await session.SendAsync(new ConversationItemCreateRequest("Hello!"));
 await session.SendAsync(new CreateResponseRequest());
@@ -771,7 +782,8 @@ Debug.Log($"Retrieve thread {thread.Id} -> {thread.CreatedAt}");
 
 Modifies a thread.
 
-> Note: Only the metadata can be modified.
+> [!NOTE]
+> Only the metadata can be modified.
 
 ```csharp
 var api = new OpenAIClient();
@@ -849,7 +861,8 @@ Debug.Log($"{message.Id}: {message.Role}: {message.PrintContent()}");
 
 Modify a message.
 
-> Note: Only the message metadata can be modified.
+> [!NOTE]
+> Only the message metadata can be modified.
 
 ```csharp
 var api = new OpenAIClient();
@@ -944,7 +957,8 @@ Debug.Log($"[{run.Id}] {run.Status} | {run.CreatedAt}");
 
 Modifies a run.
 
-> Note: Only the metadata can be modified.
+> [!NOTE]
+> Only the metadata can be modified.
 
 ```csharp
 var api = new OpenAIClient();

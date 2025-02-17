@@ -12,7 +12,7 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; }
+        public RealtimeResponseStatus Type { get; }
 
         /// <summary>
         /// The reason the Response did not complete.
