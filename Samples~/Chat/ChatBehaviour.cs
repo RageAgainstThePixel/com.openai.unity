@@ -59,7 +59,6 @@ namespace OpenAI.Samples.Chat
         private OpenAIClient openAI;
 
         private readonly Conversation conversation = new();
-
         private readonly List<Tool> assistantTools = new();
         private readonly ConcurrentQueue<float> sampleQueue = new();
 
@@ -109,13 +108,6 @@ namespace OpenAI.Samples.Chat
                         data[i + j] = sample;
                     }
                 }
-                //else
-                //{
-                //    for (var j = 0; j < channels; j++)
-                //    {
-                //        data[i + j] = 0f;
-                //    }
-                //}
             }
         }
 

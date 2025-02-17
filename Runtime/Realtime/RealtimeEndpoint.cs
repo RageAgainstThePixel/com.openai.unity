@@ -20,14 +20,14 @@ namespace OpenAI.Realtime
         protected override bool? IsWebSocketEndpoint => true;
 
         /// <summary>
-        /// Creates a new realtime session with the provided <see cref="Options"/> options.
+        /// Creates a new realtime session with the provided <see cref="SessionConfiguration"/> options.
         /// </summary>
-        /// <param name="options"><see cref="Options"/>.</param>
+        /// <param name="configuration"><see cref="SessionConfiguration"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="RealtimeSession"/>.</returns>
-        public async Task<RealtimeSession> CreateSessionAsync(Options options = null, CancellationToken cancellationToken = default)
+        public async Task<RealtimeSession> CreateSessionAsync(SessionConfiguration configuration = null, CancellationToken cancellationToken = default)
         {
-            string model = string.IsNullOrWhiteSpace(options?.Model) ? Model.GPT4oRealtime : options!.Model;
+            string model = string.IsNullOrWhiteSpace(configuration?.Model) ? Model.GPT4oRealtime : configuration!.Model;
             var queryParameters = new Dictionary<string, string>();
 
             if (client.Settings.Info.IsAzureOpenAI)
@@ -48,8 +48,8 @@ namespace OpenAI.Realtime
                 session.OnError += OnError;
                 await session.ConnectAsync(cancellationToken).ConfigureAwait(true);
                 var sessionResponse = await sessionCreatedTcs.Task.WithCancellation(cancellationToken).ConfigureAwait(true);
-                session.Options = sessionResponse.Options;
-                await session.SendAsync(new UpdateSessionRequest(options), cancellationToken: cancellationToken).ConfigureAwait(true);
+                session.Configuration = sessionResponse.SessionConfiguration;
+                await session.SendAsync(new UpdateSessionRequest(configuration), cancellationToken: cancellationToken).ConfigureAwait(true);
             }
             finally
             {

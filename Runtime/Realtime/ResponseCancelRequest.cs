@@ -12,6 +12,22 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class ResponseCancelRequest : BaseRealtimeEvent, IClientEvent
     {
+        /// <summary>
+        /// Default Constructor.
+        /// </summary>
+        public ResponseCancelRequest() { }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="responseId">
+        /// A specific response ID to cancel - if not provided, will cancel an in-progress response in the default conversation.
+        /// </param>
+        public ResponseCancelRequest(string responseId)
+        {
+            ResponseId = responseId;
+        }
+
         /// <inheritdoc />
         [Preserve]
         [JsonProperty("event_id")]
@@ -21,5 +37,12 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonProperty("type")]
         public override string Type { get; } = "response.cancel";
+
+        /// <summary>
+        /// A specific response ID to cancel - if not provided, will cancel an in-progress response in the default conversation.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("response_id")]
+        public string ResponseId { get; }
     }
 }
