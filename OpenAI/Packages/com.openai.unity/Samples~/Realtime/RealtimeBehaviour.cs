@@ -141,7 +141,6 @@ namespace OpenAI.Samples.Realtime
 
         private void Update()
         {
-            Debug.Log($"AudioSource.isPlaying:{audioSource.isPlaying}");
             inputField.interactable = !CanRecord;
             placeholder.text = !CanRecord ? "Speak your mind..." : "Type a message...";
             submitButton.interactable = !CanRecord;
