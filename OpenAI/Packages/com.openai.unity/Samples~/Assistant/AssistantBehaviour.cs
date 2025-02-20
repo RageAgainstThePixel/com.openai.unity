@@ -59,9 +59,14 @@ namespace OpenAI.Samples.Assistant
         private string systemPrompt = "You are a helpful assistant.\n- If an image is requested then use \"![Image](output.jpg)\" to display it.\n- When performing function calls, use the defaults unless explicitly told to use a specific value.\n- Images should always be generated in base64.";
 
         private OpenAIClient openAI;
-        private AssistantResponse assistant;
         private ThreadResponse thread;
-        private readonly ConcurrentQueue<float> sampleQueue = new();
+        private AssistantResponse assistant;
+
+#if PLATFORM_WEBGL
+        private readonly ConcurrentQueue<AudioClip> audioQueue = new();
+#else
+        private readonly ConcurrentQueue<float> audioQueue = new();
+#endif
 
 #if !UNITY_2022_3_OR_NEWER
         private readonly CancellationTokenSource lifetimeCts = new();
@@ -90,6 +95,10 @@ namespace OpenAI.Samples.Assistant
             {
                 EnableDebug = enableDebug
             };
+            //RecordingManager.EnableDebug = enableDebug;
+#if PLATFORM_WEBGL
+            AudioPlaybackLoop();
+#endif // PLATFORM_WEBGL
 
             try
             {
@@ -162,13 +171,45 @@ namespace OpenAI.Samples.Assistant
             }
         }
 
+#if PLATFORM_WEBGL
+        private async void AudioPlaybackLoop()
+        {
+            try
+            {
+                do
+                {
+                    if (!audioSource.isPlaying &&
+                        audioQueue.TryDequeue(out var clip))
+                    {
+                        if (enableDebug)
+                        {
+                            Debug.Log($"playing partial clip: {clip.name} | ({audioQueue.Count} remaining)");
+                        }
+                        audioSource.PlayOneShot(clip);
+                        // ReSharper disable once MethodSupportsCancellation
+                        await Task.Delay(TimeSpan.FromSeconds(clip.length)).ConfigureAwait(true);
+                    }
+                    else
+                    {
+                        await Task.Yield();
+                    }
+                } while (!destroyCancellationToken.IsCancellationRequested);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                // restart playback loop
+                AudioPlaybackLoop();
+            }
+        }
+#else
         private void OnAudioFilterRead(float[] data, int channels)
         {
-            if (sampleQueue.IsEmpty) { return; }
+            if (audioQueue.IsEmpty) { return; }
 
             for (var i = 0; i < data.Length; i += channels)
             {
-                if (sampleQueue.TryDequeue(out var sample))
+                if (audioQueue.TryDequeue(out var sample))
                 {
                     for (var j = 0; j < channels; j++)
                     {
@@ -177,6 +218,7 @@ namespace OpenAI.Samples.Assistant
                 }
             }
         }
+#endif // PLATFORM_WEBGL
 
         private void OnDestroy()
         {
@@ -332,10 +374,14 @@ namespace OpenAI.Samples.Assistant
 #pragma warning restore CS0612 // Type or member is obsolete
                 var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
                 {
+#if PLATFORM_WEBGL
+                    audioQueue.Enqueue(partialClip);
+#else
                     foreach (var sample in partialClip.AudioSamples)
                     {
-                        sampleQueue.Enqueue(sample);
+                        audioQueue.Enqueue(sample);
                     }
+#endif // PLATFORM_WEBGL
                 }, cancellationToken);
 
                 if (enableDebug)
@@ -343,7 +389,7 @@ namespace OpenAI.Samples.Assistant
                     Debug.Log(speechClip.CachePath);
                 }
 
-                await new WaitUntil(() => sampleQueue.IsEmpty || cancellationToken.IsCancellationRequested);
+                await new WaitUntil(() => audioQueue.IsEmpty || cancellationToken.IsCancellationRequested);
                 audioSource.clip = speechClip.AudioClip;
             }
             finally
