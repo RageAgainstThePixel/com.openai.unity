@@ -6,7 +6,6 @@ using OpenAI.Images;
 using OpenAI.Models;
 using OpenAI.Threads;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -23,7 +22,7 @@ using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI.Samples.Assistant
 {
-    [RequireComponent(typeof(AudioSource))]
+    [RequireComponent(typeof(StreamAudioSource))]
     public class AssistantBehaviour : MonoBehaviour
     {
         [SerializeField]
@@ -48,7 +47,7 @@ namespace OpenAI.Samples.Assistant
         private ScrollRect scrollView;
 
         [SerializeField]
-        private AudioSource audioSource;
+        private StreamAudioSource streamAudioSource;
 
         [SerializeField]
         [Obsolete]
@@ -61,12 +60,6 @@ namespace OpenAI.Samples.Assistant
         private OpenAIClient openAI;
         private ThreadResponse thread;
         private AssistantResponse assistant;
-
-#if PLATFORM_WEBGL
-        private readonly ConcurrentQueue<AudioClip> audioQueue = new();
-#else
-        private readonly ConcurrentQueue<float> audioQueue = new();
-#endif
 
 #if !UNITY_2022_3_OR_NEWER
         private readonly CancellationTokenSource lifetimeCts = new();
@@ -82,9 +75,9 @@ namespace OpenAI.Samples.Assistant
             submitButton.Validate();
             recordButton.Validate();
 
-            if (audioSource == null)
+            if (streamAudioSource == null)
             {
-                audioSource = GetComponent<AudioSource>();
+                streamAudioSource = GetComponent<StreamAudioSource>();
             }
         }
 
@@ -95,10 +88,7 @@ namespace OpenAI.Samples.Assistant
             {
                 EnableDebug = enableDebug
             };
-            //RecordingManager.EnableDebug = enableDebug;
-#if PLATFORM_WEBGL
-            AudioPlaybackLoop();
-#endif // PLATFORM_WEBGL
+            RecordingManager.EnableDebug = enableDebug;
 
             try
             {
@@ -170,55 +160,6 @@ namespace OpenAI.Samples.Assistant
                 }
             }
         }
-
-#if PLATFORM_WEBGL
-        private async void AudioPlaybackLoop()
-        {
-            try
-            {
-                do
-                {
-                    if (!audioSource.isPlaying &&
-                        audioQueue.TryDequeue(out var clip))
-                    {
-                        if (enableDebug)
-                        {
-                            Debug.Log($"playing partial clip: {clip.name} | ({audioQueue.Count} remaining)");
-                        }
-                        audioSource.PlayOneShot(clip);
-                        // ReSharper disable once MethodSupportsCancellation
-                        await Task.Delay(TimeSpan.FromSeconds(clip.length)).ConfigureAwait(true);
-                    }
-                    else
-                    {
-                        await Task.Yield();
-                    }
-                } while (!destroyCancellationToken.IsCancellationRequested);
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                // restart playback loop
-                AudioPlaybackLoop();
-            }
-        }
-#else
-        private void OnAudioFilterRead(float[] data, int channels)
-        {
-            if (audioQueue.IsEmpty) { return; }
-
-            for (var i = 0; i < data.Length; i += channels)
-            {
-                if (audioQueue.TryDequeue(out var sample))
-                {
-                    for (var j = 0; j < channels; j++)
-                    {
-                        data[i + j] = sample;
-                    }
-                }
-            }
-        }
-#endif // PLATFORM_WEBGL
 
         private void OnDestroy()
         {
@@ -374,14 +315,7 @@ namespace OpenAI.Samples.Assistant
 #pragma warning restore CS0612 // Type or member is obsolete
                 var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
                 {
-#if PLATFORM_WEBGL
-                    audioQueue.Enqueue(partialClip);
-#else
-                    foreach (var sample in partialClip.AudioSamples)
-                    {
-                        audioQueue.Enqueue(sample);
-                    }
-#endif // PLATFORM_WEBGL
+                    streamAudioSource.BufferCallback(partialClip.AudioSamples);
                 }, cancellationToken);
 
                 if (enableDebug)
@@ -389,8 +323,8 @@ namespace OpenAI.Samples.Assistant
                     Debug.Log(speechClip.CachePath);
                 }
 
-                await new WaitUntil(() => audioQueue.IsEmpty || cancellationToken.IsCancellationRequested);
-                audioSource.clip = speechClip.AudioClip;
+                await new WaitUntil(() => streamAudioSource.IsEmpty || cancellationToken.IsCancellationRequested);
+                ((AudioSource)streamAudioSource).clip = speechClip.AudioClip;
             }
             finally
             {

@@ -588,6 +588,7 @@ GameObject:
   m_Component:
   - component: {fileID: 445122399}
   - component: {fileID: 445122398}
+  - component: {fileID: 445122400}
   - component: {fileID: 445122397}
   m_Layer: 0
   m_Name: AssistantBehaviour
@@ -615,7 +616,7 @@ MonoBehaviour:
   inputField: {fileID: 1377121433}
   contentArea: {fileID: 250955499}
   scrollView: {fileID: 1974642466}
-  audioSource: {fileID: 445122398}
+  streamAudioSource: {fileID: 445122400}
   voice: 0
   systemPrompt: 'You are a helpful assistant.
 
@@ -738,6 +739,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &445122400
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 445122396}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b2317b29e6eb934f9f1cd50d682e019, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioSource: {fileID: 445122398}
 --- !u!1 &530667792
 GameObject:
   m_ObjectHideFlags: 0
@@ -1647,7 +1661,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 475.67877, y: 0}
+  m_AnchoredPosition: {x: 447.4204, y: 0}
   m_SizeDelta: {x: 64, y: 64}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1143678155
