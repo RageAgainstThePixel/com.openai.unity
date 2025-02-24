@@ -6,7 +6,6 @@ using OpenAI.Images;
 using OpenAI.Models;
 using OpenAI.Threads;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -23,7 +22,7 @@ using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI.Samples.Assistant
 {
-    [RequireComponent(typeof(AudioSource))]
+    [RequireComponent(typeof(StreamAudioSource))]
     public class AssistantBehaviour : MonoBehaviour
     {
         [SerializeField]
@@ -48,7 +47,7 @@ namespace OpenAI.Samples.Assistant
         private ScrollRect scrollView;
 
         [SerializeField]
-        private AudioSource audioSource;
+        private StreamAudioSource streamAudioSource;
 
         [SerializeField]
         [Obsolete]
@@ -59,9 +58,8 @@ namespace OpenAI.Samples.Assistant
         private string systemPrompt = "You are a helpful assistant.\n- If an image is requested then use \"![Image](output.jpg)\" to display it.\n- When performing function calls, use the defaults unless explicitly told to use a specific value.\n- Images should always be generated in base64.";
 
         private OpenAIClient openAI;
-        private AssistantResponse assistant;
         private ThreadResponse thread;
-        private readonly ConcurrentQueue<float> sampleQueue = new();
+        private AssistantResponse assistant;
 
 #if !UNITY_2022_3_OR_NEWER
         private readonly CancellationTokenSource lifetimeCts = new();
@@ -77,9 +75,9 @@ namespace OpenAI.Samples.Assistant
             submitButton.Validate();
             recordButton.Validate();
 
-            if (audioSource == null)
+            if (streamAudioSource == null)
             {
-                audioSource = GetComponent<AudioSource>();
+                streamAudioSource = GetComponent<StreamAudioSource>();
             }
         }
 
@@ -90,6 +88,7 @@ namespace OpenAI.Samples.Assistant
             {
                 EnableDebug = enableDebug
             };
+            RecordingManager.EnableDebug = enableDebug;
 
             try
             {
@@ -158,22 +157,6 @@ namespace OpenAI.Samples.Assistant
                 catch (Exception e)
                 {
                     Debug.LogError(e);
-                }
-            }
-        }
-
-        private void OnAudioFilterRead(float[] data, int channels)
-        {
-            if (sampleQueue.IsEmpty) { return; }
-
-            for (var i = 0; i < data.Length; i += channels)
-            {
-                if (sampleQueue.TryDequeue(out var sample))
-                {
-                    for (var j = 0; j < channels; j++)
-                    {
-                        data[i + j] = sample;
-                    }
                 }
             }
         }
@@ -332,10 +315,7 @@ namespace OpenAI.Samples.Assistant
 #pragma warning restore CS0612 // Type or member is obsolete
                 var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
                 {
-                    foreach (var sample in partialClip.AudioSamples)
-                    {
-                        sampleQueue.Enqueue(sample);
-                    }
+                    streamAudioSource.BufferCallback(partialClip.AudioSamples);
                 }, cancellationToken);
 
                 if (enableDebug)
@@ -343,8 +323,8 @@ namespace OpenAI.Samples.Assistant
                     Debug.Log(speechClip.CachePath);
                 }
 
-                await new WaitUntil(() => sampleQueue.IsEmpty || cancellationToken.IsCancellationRequested);
-                audioSource.clip = speechClip.AudioClip;
+                await new WaitUntil(() => streamAudioSource.IsEmpty || cancellationToken.IsCancellationRequested);
+                ((AudioSource)streamAudioSource).clip = speechClip.AudioClip;
             }
             finally
             {

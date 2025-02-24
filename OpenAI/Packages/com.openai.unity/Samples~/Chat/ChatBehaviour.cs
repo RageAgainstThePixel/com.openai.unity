@@ -5,7 +5,6 @@ using OpenAI.Chat;
 using OpenAI.Images;
 using OpenAI.Models;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,7 +20,7 @@ using Utilities.WebRequestRest;
 
 namespace OpenAI.Samples.Chat
 {
-    [RequireComponent(typeof(AudioSource))]
+    [RequireComponent(typeof(StreamAudioSource))]
     public class ChatBehaviour : MonoBehaviour
     {
         [SerializeField]
@@ -46,7 +45,7 @@ namespace OpenAI.Samples.Chat
         private ScrollRect scrollView;
 
         [SerializeField]
-        private AudioSource audioSource;
+        private StreamAudioSource streamAudioSource;
 
         [Obsolete]
         [SerializeField]
@@ -60,7 +59,6 @@ namespace OpenAI.Samples.Chat
 
         private readonly Conversation conversation = new();
         private readonly List<Tool> assistantTools = new();
-        private readonly ConcurrentQueue<float> sampleQueue = new();
 
 #if !UNITY_2022_3_OR_NEWER
         private readonly CancellationTokenSource lifetimeCts = new();
@@ -75,9 +73,9 @@ namespace OpenAI.Samples.Chat
             submitButton.Validate();
             recordButton.Validate();
 
-            if (audioSource == null)
+            if (streamAudioSource == null)
             {
-                audioSource = GetComponent<AudioSource>();
+                streamAudioSource = GetComponent<StreamAudioSource>();
             }
         }
 
@@ -88,27 +86,13 @@ namespace OpenAI.Samples.Chat
             {
                 EnableDebug = enableDebug
             };
+            RecordingManager.EnableDebug = enableDebug;
+
             assistantTools.Add(Tool.GetOrCreateTool(openAI.ImagesEndPoint, nameof(ImagesEndpoint.GenerateImageAsync)));
             conversation.AppendMessage(new Message(Role.System, systemPrompt));
             inputField.onSubmit.AddListener(SubmitChat);
             submitButton.onClick.AddListener(SubmitChat);
             recordButton.onClick.AddListener(ToggleRecording);
-        }
-
-        private void OnAudioFilterRead(float[] data, int channels)
-        {
-            if (sampleQueue.Count <= 0) { return; }
-
-            for (var i = 0; i < data.Length; i += channels)
-            {
-                if (sampleQueue.TryDequeue(out var sample))
-                {
-                    for (var j = 0; j < channels; j++)
-                    {
-                        data[i + j] = sample;
-                    }
-                }
-            }
         }
 
 #if !UNITY_2022_3_OR_NEWER
@@ -259,12 +243,9 @@ namespace OpenAI.Samples.Chat
 #pragma warning disable CS0612 // Type or member is obsolete
             var request = new SpeechRequest(text, Model.TTS_1, voice, SpeechResponseFormat.PCM);
 #pragma warning restore CS0612 // Type or member is obsolete
-            var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialCLip =>
+            var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
             {
-                foreach (var sample in partialCLip.AudioSamples)
-                {
-                    sampleQueue.Enqueue(sample);
-                }
+                streamAudioSource.BufferCallback(partialClip.AudioSamples);
             }, destroyCancellationToken);
 
             if (enableDebug)
@@ -272,8 +253,8 @@ namespace OpenAI.Samples.Chat
                 Debug.Log(speechClip.CachePath);
             }
 
-            await new WaitUntil(() => sampleQueue.IsEmpty || cancellationToken.IsCancellationRequested);
-            audioSource.clip = speechClip.AudioClip;
+            await new WaitUntil(() => streamAudioSource.IsEmpty || cancellationToken.IsCancellationRequested);
+            ((AudioSource)streamAudioSource).clip = speechClip.AudioClip;
         }
 
         private TextMeshProUGUI AddNewTextMessageContent(Role role)
