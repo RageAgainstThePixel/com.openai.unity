@@ -899,7 +899,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 422726884}
   m_HandleRect: {fileID: 422726883}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -1487,7 +1487,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 460.10986, y: 0}
+  m_AnchoredPosition: {x: 447.4204, y: 0}
   m_SizeDelta: {x: 64, y: 64}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1143678155
@@ -2039,6 +2039,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1411251223}
   - component: {fileID: 1411251222}
+  - component: {fileID: 1411251224}
   - component: {fileID: 1411251221}
   m_Layer: 0
   m_Name: ChatBehaviour
@@ -2066,7 +2067,7 @@ MonoBehaviour:
   inputField: {fileID: 1377121433}
   contentArea: {fileID: 250955499}
   scrollView: {fileID: 1974642466}
-  audioSource: {fileID: 1411251222}
+  streamAudioSource: {fileID: 1411251224}
   voice: 0
   systemPrompt: 'You are a helpful assistant.
 
@@ -2189,6 +2190,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1411251224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1411251220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b2317b29e6eb934f9f1cd50d682e019, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioSource: {fileID: 1411251222}
 --- !u!1 &1466169038
 GameObject:
   m_ObjectHideFlags: 0
@@ -2411,7 +2425,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 800336258}
   m_HandleRect: {fileID: 800336257}
   m_Direction: 0
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:

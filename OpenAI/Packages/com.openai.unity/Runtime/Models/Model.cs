@@ -1,8 +1,8 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Models
@@ -96,6 +96,8 @@ namespace OpenAI.Models
         [Preserve]
         [JsonProperty("parent")]
         public string Parent { get; }
+
+        public static Model GPT4_5 { get; } = new("gpt-4.5-preview", "openai");
 
         public static Model O1 { get; } = new("o1-preview", "openai");
 
@@ -193,11 +195,12 @@ namespace OpenAI.Models
         /// </remarks>
         public static Model Embedding_3_Large { get; } = new("text-embedding-3-large", "openai");
 
-        /// <summary>
-        /// The default model for <see cref="Moderations.ModerationsEndpoint"/>.
-        /// </summary>
+        public static Model OmniModerationLatest { get; } = new("omni-moderation-latest", "openai");
+
+        [Obsolete("use OmniModerationLatest")]
         public static Model Moderation_Latest { get; } = new("text-moderation-latest", "openai");
 
+        [Obsolete("Removed")]
         public static Model Moderation_Stable { get; } = new("text-moderation-stable", "openai");
 
         /// <summary>
