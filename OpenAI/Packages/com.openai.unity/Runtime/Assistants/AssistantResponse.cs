@@ -110,7 +110,7 @@ namespace OpenAI.Assistants
         /// Tools can be of types 'code_interpreter', 'retrieval', or 'function'.
         /// </summary>
         [Preserve]
-        [JsonProperty("tools")]
+        [JsonProperty("tools", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyList<Tool> Tools { get; }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace OpenAI.Assistants
         /// while the file_search tool requires a list of vector store IDs.
         /// </summary>
         [Preserve]
-        [JsonProperty("tool_resources")]
+        [JsonProperty("tool_resources", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public ToolResources ToolResources { get; }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace OpenAI.Assistants
         /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
         /// </summary>
         [Preserve]
-        [JsonProperty("metadata")]
+        [JsonProperty("metadata", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyDictionary<string, string> Metadata { get; }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace OpenAI.Assistants
         /// while lower values like 0.2 will make it more focused and deterministic.
         /// </summary>
         [Preserve]
-        [JsonProperty("temperature")]
+        [JsonProperty("temperature", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double Temperature { get; }
 
         /// <summary>
@@ -147,8 +147,17 @@ namespace OpenAI.Assistants
         /// So 0.1 means only the tokens comprising the top 10% probability mass are considered.
         /// </summary>
         [Preserve]
-        [JsonProperty("top_p")]
+        [JsonProperty("top_p", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double TopP { get; }
+
+        /// <summary>
+        /// Constrains effort on reasoning for reasoning models.
+        /// Currently supported values are low, medium, and high.
+        /// Reducing reasoning effort can result in faster responses and fewer tokens used on reasoning in a response.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("reasoning_effort", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public ReasoningEffort ReasoningEffort { get; private set; }
 
         /// <summary>
         /// Specifies the format that the model must output.
