@@ -157,7 +157,7 @@ namespace OpenAI.Assistants
         /// </summary>
         [Preserve]
         [JsonProperty("reasoning_effort", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public ReasoningEffort ReasoningEffort { get; private set; }
+        public ReasoningEffort ReasoningEffort { get; }
 
         /// <summary>
         /// Specifies the format that the model must output.
