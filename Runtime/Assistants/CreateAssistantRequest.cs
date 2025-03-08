@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using OpenAI.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Scripting;
@@ -11,6 +12,36 @@ namespace OpenAI.Assistants
     [Preserve]
     public sealed class CreateAssistantRequest
     {
+        [Obsolete("use new .ctr")]
+        public CreateAssistantRequest(
+            AssistantResponse assistant,
+            string model,
+            string name,
+            string description,
+            string instructions,
+            IEnumerable<Tool> tools,
+            ToolResources toolResources,
+            IReadOnlyDictionary<string, string> metadata,
+            double? temperature,
+            double? topP,
+            JsonSchema jsonSchema,
+            ChatResponseFormat? responseFormat = null)
+            : this(
+                string.IsNullOrWhiteSpace(model) ? assistant.Model : model,
+                string.IsNullOrWhiteSpace(name) ? assistant.Name : name,
+                string.IsNullOrWhiteSpace(description) ? assistant.Description : description,
+                string.IsNullOrWhiteSpace(instructions) ? assistant.Instructions : instructions,
+                tools ?? assistant.Tools,
+                toolResources ?? assistant.ToolResources,
+                metadata ?? assistant.Metadata,
+                temperature ?? (assistant.ReasoningEffort > 0 ? null : assistant.Temperature),
+                topP ?? assistant.TopP,
+                0,
+                jsonSchema ?? assistant.ResponseFormatObject?.JsonSchema,
+                responseFormat ?? assistant.ResponseFormat)
+        {
+        }
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -57,6 +88,11 @@ namespace OpenAI.Assistants
         /// So 0.1 means only the tokens comprising the top 10% probability mass are considered.
         /// We generally recommend altering this or temperature but not both.
         /// </param>
+        /// <param name="reasoningEffort">
+        /// Constrains effort on reasoning for reasoning models.
+        /// Currently supported values are low, medium, and high.
+        /// Reducing reasoning effort can result in faster responses and fewer tokens used on reasoning in a response.
+        /// </param>
         /// <param name="jsonSchema">
         /// The <see cref="JsonSchema"/> to use for structured JSON outputs.<br/>
         /// <see href="https://platform.openai.com/docs/guides/structured-outputs"/><br/>
@@ -83,6 +119,7 @@ namespace OpenAI.Assistants
             IReadOnlyDictionary<string, string> metadata = null,
             double? temperature = null,
             double? topP = null,
+            ReasoningEffort reasoningEffort = 0,
             JsonSchema jsonSchema = null,
             ChatResponseFormat? responseFormat = null)
         : this(
@@ -93,8 +130,9 @@ namespace OpenAI.Assistants
             tools ?? assistant.Tools,
             toolResources ?? assistant.ToolResources,
             metadata ?? assistant.Metadata,
-            temperature ?? assistant.Temperature,
-            topP ?? assistant.TopP,
+            temperature ?? (assistant.ReasoningEffort > 0 ? null : assistant.Temperature),
+            topP ?? (assistant.ReasoningEffort > 0 ? null : assistant.TopP),
+            reasoningEffort,
             jsonSchema ?? assistant.ResponseFormatObject?.JsonSchema,
             responseFormat ?? assistant.ResponseFormat)
         {
@@ -145,6 +183,11 @@ namespace OpenAI.Assistants
         /// So 0.1 means only the tokens comprising the top 10% probability mass are considered.
         /// We generally recommend altering this or temperature but not both.
         /// </param>
+        /// <param name="reasoningEffort">
+        /// Constrains effort on reasoning for reasoning models.
+        /// Currently supported values are low, medium, and high.
+        /// Reducing reasoning effort can result in faster responses and fewer tokens used on reasoning in a response.
+        /// </param>
         /// <param name="jsonSchema">
         /// The <see cref="JsonSchema"/> to use for structured JSON outputs.<br/>
         /// <see href="https://platform.openai.com/docs/guides/structured-outputs"/><br/>
@@ -170,6 +213,7 @@ namespace OpenAI.Assistants
             IReadOnlyDictionary<string, string> metadata = null,
             double? temperature = null,
             double? topP = null,
+            ReasoningEffort reasoningEffort = 0,
             JsonSchema jsonSchema = null,
             ChatResponseFormat responseFormat = ChatResponseFormat.Text)
         {
@@ -180,8 +224,9 @@ namespace OpenAI.Assistants
             Tools = tools?.ToList();
             ToolResources = toolResources;
             Metadata = metadata;
-            Temperature = temperature;
-            TopP = topP;
+            Temperature = reasoningEffort > 0 ? null : temperature;
+            TopP = reasoningEffort > 0 ? null : topP;
+            ReasoningEffort = reasoningEffort;
 
             if (jsonSchema != null)
             {
@@ -232,7 +277,7 @@ namespace OpenAI.Assistants
         /// Tools can be of types 'code_interpreter', 'retrieval', or 'function'.
         /// </summary>
         [Preserve]
-        [JsonProperty("tools")]
+        [JsonProperty("tools", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyList<Tool> Tools { get; }
 
         /// <summary>
@@ -241,7 +286,7 @@ namespace OpenAI.Assistants
         /// While the <see cref="Tool.FileSearch"/> requires a list vector store ids.
         /// </summary>
         [Preserve]
-        [JsonProperty("tool_resources")]
+        [JsonProperty("tool_resources", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public ToolResources ToolResources { get; }
 
         /// <summary>
@@ -250,7 +295,7 @@ namespace OpenAI.Assistants
         /// while lower values like 0.2 will make it more focused and deterministic.
         /// </summary>
         [Preserve]
-        [JsonProperty("temperature")]
+        [JsonProperty("temperature", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double? Temperature { get; }
 
         /// <summary>
@@ -259,8 +304,17 @@ namespace OpenAI.Assistants
         /// So 0.1 means only the tokens comprising the top 10% probability mass are considered.
         /// </summary>
         [Preserve]
-        [JsonProperty("top_p")]
+        [JsonProperty("top_p", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double? TopP { get; }
+
+        /// <summary>
+        /// Constrains effort on reasoning for reasoning models.
+        /// Currently supported values are low, medium, and high.
+        /// Reducing reasoning effort can result in faster responses and fewer tokens used on reasoning in a response.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("reasoning_effort", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public ReasoningEffort ReasoningEffort { get; }
 
         /// <summary>
         /// Specifies the format that the model must output.
@@ -289,7 +343,7 @@ namespace OpenAI.Assistants
         /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
         /// </summary>
         [Preserve]
-        [JsonProperty("metadata")]
+        [JsonProperty("metadata", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyDictionary<string, string> Metadata { get; }
     }
 }

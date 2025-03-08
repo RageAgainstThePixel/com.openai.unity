@@ -6,6 +6,7 @@ using OpenAI.Images;
 using OpenAI.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
@@ -17,6 +18,7 @@ using Utilities.Audio;
 using Utilities.Encoding.Wav;
 using Utilities.Extensions;
 using Utilities.WebRequestRest;
+using Debug = UnityEngine.Debug;
 
 namespace OpenAI.Samples.Chat
 {
@@ -243,17 +245,19 @@ namespace OpenAI.Samples.Chat
 #pragma warning disable CS0612 // Type or member is obsolete
             var request = new SpeechRequest(text, Model.TTS_1, voice, SpeechResponseFormat.PCM);
 #pragma warning restore CS0612 // Type or member is obsolete
+            var stopwatch = Stopwatch.StartNew();
             var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
             {
                 streamAudioSource.BufferCallback(partialClip.AudioSamples);
-            }, destroyCancellationToken);
+            }, cancellationToken);
+            var playbackTime = speechClip.AudioClip.length - (float)stopwatch.Elapsed.TotalSeconds + 0.1f;
 
             if (enableDebug)
             {
                 Debug.Log(speechClip.CachePath);
             }
 
-            await new WaitUntil(() => streamAudioSource.IsEmpty || cancellationToken.IsCancellationRequested);
+            await Awaiters.DelayAsync(TimeSpan.FromSeconds(playbackTime), cancellationToken).ConfigureAwait(true);
             ((AudioSource)streamAudioSource).clip = speechClip.AudioClip;
         }
 

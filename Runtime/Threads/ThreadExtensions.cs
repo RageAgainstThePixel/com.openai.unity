@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Utilities.Async;
 using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI.Threads
@@ -242,8 +243,7 @@ namespace OpenAI.Threads
             RunResponse result;
             do
             {
-                await Task.Delay(pollingInterval ?? 500, chainedCts.Token).ConfigureAwait(true);
-                cancellationToken.ThrowIfCancellationRequested();
+                await Awaiters.DelayAsync(pollingInterval ?? 500, chainedCts.Token).ConfigureAwait(true);
                 result = await run.UpdateAsync(cancellationToken: chainedCts.Token).ConfigureAwait(true);
             } while (result.Status is RunStatus.Queued or RunStatus.InProgress or RunStatus.Cancelling);
             return result;

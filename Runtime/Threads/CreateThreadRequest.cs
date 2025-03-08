@@ -58,7 +58,7 @@ namespace OpenAI.Threads
         /// while the file_search tool requires a list of vector store IDs.
         /// </summary>
         [Preserve]
-        [JsonProperty("tool_resources")]
+        [JsonProperty("tool_resources", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public ToolResources ToolResources { get; }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace OpenAI.Threads
         /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
         /// </summary>
         [Preserve]
-        [JsonProperty("metadata")]
+        [JsonProperty("metadata", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyDictionary<string, string> Metadata { get; }
 
         [Preserve]

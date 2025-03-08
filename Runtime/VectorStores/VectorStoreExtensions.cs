@@ -3,6 +3,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Utilities.Async;
 
 namespace OpenAI.VectorStores
 {
@@ -34,8 +35,7 @@ namespace OpenAI.VectorStores
             VectorStoreFileBatchResponse result;
             do
             {
-                await Task.Delay(pollingInterval ?? 500, chainedCts.Token).ConfigureAwait(true);
-                cancellationToken.ThrowIfCancellationRequested();
+                await Awaiters.DelayAsync(pollingInterval ?? 500, chainedCts.Token).ConfigureAwait(true);
                 result = await vectorStoreFileBatchResponse.UpdateAsync(cancellationToken: chainedCts.Token);
             } while (result.Status is VectorStoreFileStatus.NotStarted or VectorStoreFileStatus.InProgress or VectorStoreFileStatus.Cancelling);
             return result;

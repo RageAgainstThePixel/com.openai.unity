@@ -40,11 +40,20 @@ namespace OpenAI.Audio
         {
             get
             {
-                var clip = AudioClip.Create(Name, AudioSamples.Length, 1, AudioSettings.outputSampleRate, false);
-                clip.SetData(AudioSamples, 0);
-                return clip;
+                if (audioClip == null)
+                {
+                    audioClip = AudioClip.Create(Name, AudioSamples.Length, 1, AudioSettings.outputSampleRate, false);
+                    audioClip.SetData(AudioSamples, 0);
+                }
+
+                return audioClip;
             }
         }
+
+        private AudioClip audioClip;
+
+        [Preserve]
+        public float Length => AudioSamples.Length / (float)AudioSettings.outputSampleRate;
 
         [Preserve]
         public static implicit operator AudioClip(SpeechClip clip) => clip?.AudioClip;

@@ -1,7 +1,7 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using System;
 using Newtonsoft.Json;
+using System;
 using UnityEngine;
 using UnityEngine.Scripting;
 using Utilities.Audio;
@@ -76,7 +76,29 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonIgnore]
         public float[] AudioSamples
-            => PCMEncoder.Resample(PCMEncoder.Decode(Convert.FromBase64String(Delta)), null, 24000, AudioSettings.outputSampleRate);
+            => audioSamples ??= PCMEncoder.Decode(Convert.FromBase64String(Delta), inputSampleRate: 24000, outputSampleRate: AudioSettings.outputSampleRate);
+        private float[] audioSamples;
+
+        [Preserve]
+        [JsonIgnore]
+        public float Length => AudioSamples.Length / (float)AudioSettings.outputSampleRate;
+
+        [Preserve]
+        [JsonIgnore]
+        public AudioClip AudioClip
+        {
+            get
+            {
+                if (audioClip == null)
+                {
+                    audioClip = AudioClip.Create($"{ItemId}_{OutputIndex}_delta", AudioSamples.Length, 1, AudioSettings.outputSampleRate, false);
+                    audioClip.SetData(AudioSamples, 0);
+                }
+
+                return audioClip;
+            }
+        }
+        private AudioClip audioClip;
 
         [Preserve]
         [JsonIgnore]
@@ -87,12 +109,6 @@ namespace OpenAI.Realtime
         public bool IsDone => Type.EndsWith("done");
 
         [Preserve]
-        public static implicit operator AudioClip(ResponseAudioResponse response)
-        {
-            var audioSamples = response.AudioSamples;
-            var audioClip = AudioClip.Create($"{response.ItemId}_{response.OutputIndex}_delta", audioSamples.Length, 1, AudioSettings.outputSampleRate, false);
-            audioClip.SetData(audioSamples, 0);
-            return audioClip;
-        }
+        public static implicit operator AudioClip(ResponseAudioResponse response) => response?.AudioClip;
     }
 }

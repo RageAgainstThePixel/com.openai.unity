@@ -325,15 +325,18 @@ namespace OpenAI.Chat
         /// The maximum number of tokens allowed for the generated answer.
         /// By default, the number of tokens the model can return will be (4096 - prompt tokens).
         /// </summary>
-        [JsonIgnore]
+        /// <remarks>
+        /// Still used for older models that support it.
+        /// </remarks>
+        [JsonProperty("max_tokens", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [Obsolete("Use MaxCompletionTokens instead")]
-        public int? MaxTokens => MaxCompletionTokens;
+        public int? MaxTokens { get; set; }
 
         /// <summary>
         /// An upper bound for the number of tokens that can be generated for a completion, including visible output tokens and reasoning tokens.
         /// </summary>
         [Preserve]
-        [JsonProperty("max_completion_tokens")]
+        [JsonProperty("max_completion_tokens", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? MaxCompletionTokens { get; }
 
         /// <summary>
@@ -341,7 +344,7 @@ namespace OpenAI.Chat
         /// Defaults to 1
         /// </summary>
         [Preserve]
-        [JsonProperty("n")]
+        [JsonProperty("n", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? Number { get; }
 
         [Preserve]
@@ -354,7 +357,7 @@ namespace OpenAI.Chat
         /// This is most common when you are regenerating a file with only minor changes to most of the content.
         /// </summary>
         [Preserve]
-        [JsonProperty("prediction")]
+        [JsonProperty("prediction", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public object Prediction { get; set; }
 
         /// <summary>
@@ -362,7 +365,7 @@ namespace OpenAI.Chat
         /// Required when audio output is requested with modalities: ["audio"].
         /// </summary>
         [Preserve]
-        [JsonProperty("audio")]
+        [JsonProperty("audio", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public AudioConfig AudioConfig { get; }
 
         /// <summary>
@@ -372,7 +375,7 @@ namespace OpenAI.Chat
         /// Defaults to 0
         /// </summary>
         [Preserve]
-        [JsonProperty("presence_penalty")]
+        [JsonProperty("presence_penalty", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double? PresencePenalty { get; }
 
         /// <summary>
@@ -413,7 +416,7 @@ namespace OpenAI.Chat
         /// monitor changes in the backend.
         /// </summary>
         [Preserve]
-        [JsonProperty("seed")]
+        [JsonProperty("seed", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? Seed { get; }
 
         /// <summary>
@@ -425,14 +428,14 @@ namespace OpenAI.Chat
         /// When this parameter is set, the response body will include the service_tier utilized.
         /// </summary>
         [Preserve]
-        [JsonProperty("service_tier")]
+        [JsonProperty("service_tier", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string ServiceTier { get; set; }
 
         /// <summary>
         /// Up to 4 sequences where the API will stop generating further tokens.
         /// </summary>
         [Preserve]
-        [JsonProperty("stop")]
+        [JsonProperty("stop", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string[] Stops { get; }
 
         /// <summary>
@@ -445,7 +448,7 @@ namespace OpenAI.Chat
         public bool Stream { get; internal set; }
 
         [Preserve]
-        [JsonProperty("stream_options")]
+        [JsonProperty("stream_options", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public StreamOptions StreamOptions { get; internal set; }
 
         /// <summary>
@@ -456,7 +459,7 @@ namespace OpenAI.Chat
         /// Defaults to 1
         /// </summary>
         [Preserve]
-        [JsonProperty("temperature")]
+        [JsonProperty("temperature", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double? Temperature { get; }
 
         /// <summary>
@@ -467,7 +470,7 @@ namespace OpenAI.Chat
         /// Defaults to 1
         /// </summary>
         [Preserve]
-        [JsonProperty("top_p")]
+        [JsonProperty("top_p", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double? TopP { get; }
 
         /// <summary>
@@ -475,7 +478,7 @@ namespace OpenAI.Chat
         /// Use this to provide a list of functions the model may generate JSON inputs for.
         /// </summary>
         [Preserve]
-        [JsonProperty("tools")]
+        [JsonProperty("tools", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyList<Tool> Tools { get; }
 
         /// <summary>
@@ -488,14 +491,14 @@ namespace OpenAI.Chat
         /// 'auto' is the default if functions are present.<br/>
         /// </summary>
         [Preserve]
-        [JsonProperty("tool_choice")]
+        [JsonProperty("tool_choice", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public object ToolChoice { get; }
 
         /// <summary>
         /// Whether to enable parallel function calling during tool use.
         /// </summary>
         [Preserve]
-        [JsonProperty("parallel_tool_calls")]
+        [JsonProperty("parallel_tool_calls", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool? ParallelToolCalls { get; }
 
         /// <summary>
