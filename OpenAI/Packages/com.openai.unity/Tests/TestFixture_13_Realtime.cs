@@ -54,7 +54,7 @@ namespace OpenAI.Tests
                 await session.SendAsync(new ConversationItemCreateRequest("Goodbye!"), cts.Token);
                 await session.SendAsync(new CreateResponseRequest(), cts.Token);
 
-                void SessionEvents(IServerEvent @event)
+                async void SessionEvents(IServerEvent @event)
                 {
                     switch (@event)
                     {
@@ -64,8 +64,9 @@ namespace OpenAI.Tests
                         case ResponseFunctionCallArgumentsResponse functionCallResponse:
                             if (functionCallResponse.IsDone)
                             {
-                                ToolCall toolCall = functionCallResponse;
-                                toolCall.InvokeFunction();
+                                var toolCall = (ToolCall)functionCallResponse;
+                                Debug.Log($"tool_call: {toolCall.Function.Name}");
+                                await toolCall.InvokeFunctionAsync(cts.Token);
                             }
 
                             break;
@@ -130,7 +131,7 @@ namespace OpenAI.Tests
                 await session.SendAsync(new ConversationItemCreateRequest("Goodbye!"), cts.Token);
                 await session.SendAsync(new CreateResponseRequest(), cts.Token);
 
-                void SessionEvents(IServerEvent @event)
+                async void SessionEvents(IServerEvent @event)
                 {
                     switch (@event)
                     {
@@ -140,8 +141,9 @@ namespace OpenAI.Tests
                         case ResponseFunctionCallArgumentsResponse functionCallResponse:
                             if (functionCallResponse.IsDone)
                             {
-                                ToolCall toolCall = functionCallResponse;
-                                toolCall.InvokeFunction();
+                                var toolCall = (ToolCall)functionCallResponse;
+                                Debug.Log($"tool_call: {toolCall.Function.Name}");
+                                await toolCall.InvokeFunctionAsync(cts.Token);
                             }
 
                             break;

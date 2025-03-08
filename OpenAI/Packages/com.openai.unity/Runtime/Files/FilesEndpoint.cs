@@ -141,7 +141,7 @@ namespace OpenAI.Files
                         response.Body.Contains(fileProcessing))
                     {
                         // back off requests on each attempt
-                        await Task.Delay(1000 * attempt++, cancellationToken).ConfigureAwait(true);
+                        await Awaiters.DelayAsync(1000 * attempt++, cancellationToken).ConfigureAwait(true);
                         return await InternalDeleteFileAsync(attempt);
                     }
                 }

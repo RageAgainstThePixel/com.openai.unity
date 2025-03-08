@@ -3,6 +3,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Utilities.Async;
 
 namespace OpenAI.Batch
 {
@@ -34,8 +35,7 @@ namespace OpenAI.Batch
             BatchResponse result;
             do
             {
-                await Task.Delay(pollingInterval ?? 500, chainedCts.Token).ConfigureAwait(true);
-                cancellationToken.ThrowIfCancellationRequested();
+                await Awaiters.DelayAsync(pollingInterval ?? 500, chainedCts.Token).ConfigureAwait(true);
                 result = await batchResponse.UpdateAsync(cancellationToken: chainedCts.Token);
             } while (result.Status is BatchStatus.NotStarted or BatchStatus.InProgress or BatchStatus.Cancelling);
             return result;
