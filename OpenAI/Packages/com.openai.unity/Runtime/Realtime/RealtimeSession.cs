@@ -290,7 +290,7 @@ namespace OpenAI.Realtime
             if (@event is InputAudioBufferAppendRequest)
             {
                 // no response for this client event
-                return default;
+                return null;
             }
 
             var response = await tcs.Task.WithCancellation(eventCts.Token);
@@ -337,7 +337,9 @@ namespace OpenAI.Realtime
 
                             if (serverResponse.Response.Status != RealtimeResponseStatus.Completed)
                             {
-                                tcs.TrySetException(new Exception(serverResponse.Response.StatusDetails.Error.ToString()));
+                                var message = serverResponse.Response.StatusDetails?.Error?.ToString() ??
+                                              $"ServerResponse {serverResponse.Response.Status}!";
+                                tcs.TrySetException(new Exception(message));
                             }
                             else
                             {
