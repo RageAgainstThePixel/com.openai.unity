@@ -59,10 +59,10 @@ namespace OpenAI.Samples.Realtime
         private RealtimeSession session;
 
         private bool isMuted;
-        private float? playbackTimeRemaining;
+        private float playbackTimeRemaining;
         private bool isAudioResponseInProgress;
 
-        private bool CanRecord => !isMuted && !isAudioResponseInProgress && playbackTimeRemaining is null or 0f;
+        private bool CanRecord => !isMuted && !isAudioResponseInProgress && playbackTimeRemaining == 0f;
 
         private readonly Dictionary<string, TextMeshProUGUI> responseList = new();
 
