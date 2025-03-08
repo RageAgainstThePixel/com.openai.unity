@@ -59,10 +59,10 @@ namespace OpenAI.Samples.Realtime
         private RealtimeSession session;
 
         private bool isMuted;
-        private float playbackTimeRemaining;
+        private float? playbackTimeRemaining;
         private bool isAudioResponseInProgress;
 
-        private bool CanRecord => !isMuted && !isAudioResponseInProgress && playbackTimeRemaining == 0f;
+        private bool CanRecord => !isMuted && !isAudioResponseInProgress && playbackTimeRemaining is null or 0f;
 
         private readonly Dictionary<string, TextMeshProUGUI> responseList = new();
 
@@ -148,7 +148,7 @@ namespace OpenAI.Samples.Realtime
 
             if (playbackTimeRemaining > 0f)
             {
-                playbackTimeRemaining -= Time.time;
+                playbackTimeRemaining -= Time.deltaTime;
             }
 
             if (playbackTimeRemaining <= 0f)
@@ -226,10 +226,7 @@ namespace OpenAI.Samples.Realtime
 
                 async Task BufferCallback(ReadOnlyMemory<byte> bufferCallback)
                 {
-                    if (!CanRecord)
-                    {
-                        return;
-                    }
+                    if (!CanRecord) { return; }
 
                     try
                     {
@@ -318,7 +315,7 @@ namespace OpenAI.Samples.Realtime
                     {
                         isAudioResponseInProgress = true;
                         streamAudioSource.BufferCallback(audioResponse.AudioSamples);
-                        playbackTimeRemaining += audioResponse.AudioSamples.Length / (float)AudioSettings.outputSampleRate;
+                        playbackTimeRemaining += audioResponse.Length;
                     }
                     else if (audioResponse.IsDone)
                     {

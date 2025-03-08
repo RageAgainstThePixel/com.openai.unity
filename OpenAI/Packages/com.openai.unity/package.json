@@ -17,10 +17,9 @@
     "url": "https://github.com/StephenHodgson"
   },
   "dependencies": {
-    "com.utilities.rest": "3.3.1",
-    "com.utilities.websockets": "1.0.2",
-    "com.utilities.audio": "2.2.1",
-    "com.utilities.encoder.wav": "2.2.0"
+    "com.utilities.rest": "3.3.2",
+    "com.utilities.websockets": "1.0.3",
+    "com.utilities.encoder.wav": "2.2.1"
   },
   "samples": [
     {

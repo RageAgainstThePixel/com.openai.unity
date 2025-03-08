@@ -39,18 +39,21 @@ namespace OpenAI.Chat
             ? DateTimeOffset.FromUnixTimeSeconds(ExpiresAtUnixSeconds.Value).DateTime
             : null;
 
-        private Memory<byte> audioData;
-
         [Preserve]
         [JsonIgnore]
         public ReadOnlyMemory<byte> AudioData
         {
             get
             {
-                audioData = Convert.FromBase64String(Data);
+                if (audioData.Length == 0)
+                {
+                    audioData = Convert.FromBase64String(Data);
+                }
+
                 return audioData;
             }
         }
+        private Memory<byte> audioData;
 
         [Preserve]
         [JsonIgnore]
@@ -59,7 +62,12 @@ namespace OpenAI.Chat
         [Preserve]
         [JsonIgnore]
         public float[] AudioSamples
-            => PCMEncoder.Decode(AudioData.ToArray(), inputSampleRate: 24000, outputSampleRate: AudioSettings.outputSampleRate);
+            => audioSamples ??= PCMEncoder.Decode(AudioData.ToArray(), inputSampleRate: 24000, outputSampleRate: AudioSettings.outputSampleRate);
+        private float[] audioSamples;
+
+        [Preserve]
+        [JsonIgnore]
+        public float Length => AudioSamples.Length / (float)AudioSettings.outputSampleRate;
 
         [Preserve]
         [JsonIgnore]
@@ -67,11 +75,16 @@ namespace OpenAI.Chat
         {
             get
             {
-                var audioClip = AudioClip.Create(Id, AudioSamples.Length, 1, AudioSettings.outputSampleRate, false);
-                audioClip.SetData(AudioSamples, 0);
+                if (audioClip == null)
+                {
+                    audioClip = AudioClip.Create(Id, AudioSamples.Length, 1, AudioSettings.outputSampleRate, false);
+                    audioClip.SetData(AudioSamples, 0);
+                }
+
                 return audioClip;
             }
         }
+        private AudioClip audioClip;
 
         [Preserve]
         [JsonIgnore]
@@ -80,6 +93,10 @@ namespace OpenAI.Chat
         [Preserve]
         public override string ToString() => Transcript ?? string.Empty;
 
+        [Preserve]
+        public static implicit operator AudioClip(AudioOutput audioOutput) => audioOutput?.AudioClip;
+
+        [Preserve]
         internal void AppendFrom(AudioOutput other)
         {
             if (other == null) { return; }
