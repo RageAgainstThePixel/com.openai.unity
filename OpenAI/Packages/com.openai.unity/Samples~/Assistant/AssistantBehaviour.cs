@@ -198,7 +198,6 @@ namespace OpenAI.Samples.Assistant
             try
             {
                 await thread.CreateMessageAsync(userMessage, destroyCancellationToken);
-                var responseBlock = string.Empty;
 
                 async Task StreamEventHandler(IServerSentEvent @event)
                 {
