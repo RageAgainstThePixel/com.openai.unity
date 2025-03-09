@@ -3,6 +3,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Globalization;
+using UnityEngine;
 using Utilities.WebRequestRest;
 
 namespace OpenAI.Extensions
@@ -99,9 +100,17 @@ namespace OpenAI.Extensions
 
         internal static T Deserialize<T>(this Response response, OpenAIClient client) where T : BaseResponse
         {
-            var result = JsonConvert.DeserializeObject<T>(response.Body, OpenAIClient.JsonSerializationOptions);
-            result.SetResponseData(response, client);
-            return result;
+            try
+            {
+                var result = JsonConvert.DeserializeObject<T>(response.Body, OpenAIClient.JsonSerializationOptions);
+                result.SetResponseData(response, client);
+                return result;
+            }
+            catch (Exception)
+            {
+                Debug.LogError($"Failed to deserialize:\n{response.Body}");
+                throw;
+            }
         }
     }
 }

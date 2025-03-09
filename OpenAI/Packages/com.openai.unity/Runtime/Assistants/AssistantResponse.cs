@@ -27,8 +27,9 @@ namespace OpenAI.Assistants
             [JsonProperty("tools")] IReadOnlyList<Tool> tools,
             [JsonProperty("tool_resources")] ToolResources toolResources,
             [JsonProperty("metadata")] Dictionary<string, string> metadata,
-            [JsonProperty("temperature")] double temperature,
-            [JsonProperty("top_p")] double topP,
+            [JsonProperty("temperature")] float? temperature,
+            [JsonProperty("top_p")] float? topP,
+            [JsonProperty("reasoning_effort")] ReasoningEffort? reasoningEffort,
             [JsonProperty("response_format")][JsonConverter(typeof(ResponseFormatConverter))] ResponseFormatObject responseFormat)
         {
             Id = id;
@@ -43,6 +44,7 @@ namespace OpenAI.Assistants
             Metadata = metadata;
             Temperature = temperature;
             TopP = topP;
+            ReasoningEffort = reasoningEffort;
             ResponseFormatObject = responseFormat;
         }
 
@@ -139,7 +141,7 @@ namespace OpenAI.Assistants
         /// </summary>
         [Preserve]
         [JsonProperty("temperature", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public double Temperature { get; }
+        public float? Temperature { get; }
 
         /// <summary>
         /// An alternative to sampling with temperature, called nucleus sampling,
@@ -148,7 +150,7 @@ namespace OpenAI.Assistants
         /// </summary>
         [Preserve]
         [JsonProperty("top_p", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public double TopP { get; }
+        public float? TopP { get; }
 
         /// <summary>
         /// Constrains effort on reasoning for reasoning models.
@@ -157,7 +159,7 @@ namespace OpenAI.Assistants
         /// </summary>
         [Preserve]
         [JsonProperty("reasoning_effort", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public ReasoningEffort ReasoningEffort { get; }
+        public ReasoningEffort? ReasoningEffort { get; }
 
         /// <summary>
         /// Specifies the format that the model must output.

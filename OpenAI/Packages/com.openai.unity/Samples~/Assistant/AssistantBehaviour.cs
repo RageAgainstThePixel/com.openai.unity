@@ -7,7 +7,6 @@ using OpenAI.Models;
 using OpenAI.Threads;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -104,12 +103,8 @@ namespace OpenAI.Samples.Assistant
                         {
                             Tool.GetOrCreateTool(openAI.ImagesEndPoint, nameof(ImagesEndpoint.GenerateImageAsync))
                         }),
-                    destroyCancellationToken);
-
-                thread = await openAI.ThreadsEndpoint.CreateThreadAsync(
-                    new CreateThreadRequest(assistant),
-                    destroyCancellationToken);
-
+                        destroyCancellationToken);
+                thread = await openAI.ThreadsEndpoint.CreateThreadAsync(new(assistant), destroyCancellationToken);
                 inputField.onSubmit.AddListener(SubmitChat);
                 submitButton.onClick.AddListener(SubmitChat);
                 recordButton.onClick.AddListener(ToggleRecording);
@@ -123,6 +118,8 @@ namespace OpenAI.Samples.Assistant
             {
                 switch (e)
                 {
+                    case TaskCanceledException:
+                    case OperationCanceledException:
                     case ObjectDisposedException:
                         // ignored
                         break;
@@ -158,7 +155,15 @@ namespace OpenAI.Samples.Assistant
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError(e);
+                    switch (e)
+                    {
+                        case TaskCanceledException:
+                        case OperationCanceledException:
+                            break;
+                        default:
+                            Debug.LogError(e);
+                            break;
+                    }
                 }
             }
         }
@@ -182,6 +187,7 @@ namespace OpenAI.Samples.Assistant
             inputField.ReleaseSelection();
             inputField.interactable = false;
             submitButton.interactable = false;
+            recordButton.interactable = false;
             var userMessage = new Message(inputField.text);
             var userMessageContent = AddNewTextMessageContent(Role.User);
             userMessageContent.text = $"User: {inputField.text}";
@@ -192,6 +198,57 @@ namespace OpenAI.Samples.Assistant
             try
             {
                 await thread.CreateMessageAsync(userMessage, destroyCancellationToken);
+
+                async Task StreamEventHandler(IServerSentEvent @event)
+                {
+                    try
+                    {
+                        switch (@event)
+                        {
+                            case MessageResponse message:
+                                switch (message.Status)
+                                {
+                                    case MessageStatus.InProgress:
+                                        if (message.Role == Role.Assistant)
+                                        {
+                                            assistantMessageContent.text += message.PrintContent();
+                                            scrollView.verticalNormalizedPosition = 0f;
+                                        }
+                                        break;
+                                    case MessageStatus.Completed:
+                                        if (message.Role == Role.Assistant)
+                                        {
+                                            await GenerateSpeechAsync(message.PrintContent(), destroyCancellationToken);
+                                            scrollView.verticalNormalizedPosition = 0f;
+                                        }
+                                        break;
+                                }
+                                break;
+                            case RunResponse run:
+                                if (run.Status == RunStatus.RequiresAction)
+                                {
+                                    await ProcessToolCalls(run);
+                                }
+
+                                break;
+                            case Error errorResponse:
+                                throw errorResponse.Exception ?? new Exception(errorResponse.Message);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        switch (e)
+                        {
+                            case TaskCanceledException:
+                            case OperationCanceledException:
+                                break;
+                            default:
+                                Debug.LogError(e);
+                                break;
+                        }
+                    }
+                }
+
                 var run = await thread.CreateRunAsync(assistant, StreamEventHandler, destroyCancellationToken);
                 await run.WaitForStatusChangeAsync(timeout: 60, cancellationToken: destroyCancellationToken);
             }
@@ -212,53 +269,12 @@ namespace OpenAI.Samples.Assistant
                 if (destroyCancellationToken is { IsCancellationRequested: false })
                 {
                     inputField.interactable = true;
-                    EventSystem.current.SetSelectedGameObject(inputField.gameObject);
                     submitButton.interactable = true;
+                    recordButton.interactable = true;
+                    EventSystem.current.SetSelectedGameObject(inputField.gameObject);
                 }
 
                 isChatPending = false;
-            }
-
-            async Task StreamEventHandler(IServerSentEvent @event)
-            {
-                try
-                {
-                    switch (@event)
-                    {
-                        case MessageResponse message:
-                            switch (message.Status)
-                            {
-                                case MessageStatus.InProgress:
-                                    if (message.Role == Role.Assistant)
-                                    {
-                                        assistantMessageContent.text += message.PrintContent();
-                                        scrollView.verticalNormalizedPosition = 0f;
-                                    }
-                                    break;
-                                case MessageStatus.Completed:
-                                    if (message.Role == Role.Assistant)
-                                    {
-                                        await GenerateSpeechAsync(message.PrintContent(), destroyCancellationToken);
-                                    }
-                                    break;
-                            }
-                            break;
-                        case RunResponse run:
-                            switch (run.Status)
-                            {
-                                case RunStatus.RequiresAction:
-                                    await ProcessToolCalls(run);
-                                    break;
-                            }
-                            break;
-                        case Error errorResponse:
-                            throw errorResponse.Exception ?? new Exception(errorResponse.Message);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e);
-                }
             }
 
             async Task ProcessToolCalls(RunResponse run)
@@ -315,20 +331,17 @@ namespace OpenAI.Samples.Assistant
 #pragma warning disable CS0612 // Type or member is obsolete
                 var request = new SpeechRequest(text, Model.TTS_1, voice, SpeechResponseFormat.PCM);
 #pragma warning restore CS0612 // Type or member is obsolete
-                var stopwatch = Stopwatch.StartNew();
                 var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
                 {
                     streamAudioSource.BufferCallback(partialClip.AudioSamples);
                 }, cancellationToken);
-                var playbackTime = speechClip.AudioClip.length - (float)stopwatch.Elapsed.TotalSeconds + 0.1f;
+                await Awaiters.DelayAsync(TimeSpan.FromSeconds(speechClip.Length), cancellationToken).ConfigureAwait(true);
+                ((AudioSource)streamAudioSource).clip = speechClip.AudioClip;
 
                 if (enableDebug)
                 {
                     Debug.Log(speechClip.CachePath);
                 }
-
-                await Awaiters.DelayAsync(TimeSpan.FromSeconds(playbackTime), cancellationToken).ConfigureAwait(true);
-                ((AudioSource)streamAudioSource).clip = speechClip.AudioClip;
             }
             finally
             {
@@ -391,7 +404,9 @@ namespace OpenAI.Samples.Assistant
 
             try
             {
+                inputField.interactable = false;
                 recordButton.interactable = false;
+                submitButton.interactable = false;
                 var request = new AudioTranscriptionRequest(clip, temperature: 0.1f, language: "en");
                 var userInput = await openAI.AudioEndpoint.CreateTranscriptionTextAsync(request, destroyCancellationToken);
 
@@ -405,12 +420,22 @@ namespace OpenAI.Samples.Assistant
             }
             catch (Exception e)
             {
-                Debug.LogError(e);
-                inputField.interactable = true;
-            }
-            finally
-            {
-                recordButton.interactable = true;
+                if (!isChatPending)
+                {
+                    inputField.interactable = true;
+                    recordButton.interactable = true;
+                    submitButton.interactable = true;
+                }
+
+                switch (e)
+                {
+                    case TaskCanceledException:
+                    case OperationCanceledException:
+                        break;
+                    default:
+                        Debug.LogError(e);
+                        break;
+                }
             }
         }
     }
