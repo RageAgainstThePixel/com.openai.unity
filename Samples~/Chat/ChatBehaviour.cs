@@ -250,15 +250,15 @@ namespace OpenAI.Samples.Chat
             {
                 streamAudioSource.BufferCallback(partialClip.AudioSamples);
             }, cancellationToken);
-            var playbackTime = speechClip.AudioClip.length - (float)stopwatch.Elapsed.TotalSeconds + 0.1f;
+            var playbackTime = speechClip.Length - (float)stopwatch.Elapsed.TotalSeconds + 0.1f;
+
+            await Awaiters.DelayAsync(TimeSpan.FromSeconds(playbackTime), cancellationToken).ConfigureAwait(true);
+            ((AudioSource)streamAudioSource).clip = speechClip.AudioClip;
 
             if (enableDebug)
             {
                 Debug.Log(speechClip.CachePath);
             }
-
-            await Awaiters.DelayAsync(TimeSpan.FromSeconds(playbackTime), cancellationToken).ConfigureAwait(true);
-            ((AudioSource)streamAudioSource).clip = speechClip.AudioClip;
         }
 
         private TextMeshProUGUI AddNewTextMessageContent(Role role)
