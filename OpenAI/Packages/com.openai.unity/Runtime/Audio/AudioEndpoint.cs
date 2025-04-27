@@ -185,6 +185,7 @@ namespace OpenAI.Audio
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The translated text.</returns>
+        [Function("Translates audio into English. Returns translated text.")]
         public async Task<string> CreateTranslationTextAsync(AudioTranslationRequest request, CancellationToken cancellationToken = default)
         {
             var responseAsString = await Internal_CreateTranslationAsync(request, cancellationToken);
@@ -200,6 +201,7 @@ namespace OpenAI.Audio
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
+        [Function("Translates audio into English. Returns Json parsed AudioResponse.")]
         public async Task<AudioResponse> CreateTranslationJsonAsync(AudioTranslationRequest request, CancellationToken cancellationToken = default)
         {
             if (request.ResponseFormat is not (AudioResponseFormat.Json or AudioResponseFormat.Verbose_Json))

@@ -110,7 +110,7 @@ namespace OpenAI.Tests
                 var configuration = new SessionConfiguration(
                     model: Model.GPT4oRealtime,
                     tools: tools,
-                    turnDetectionSettings: VoiceActivityDetectionSettings.Disabled());
+                    turnDetectionSettings: new DisabledVAD());
                 session = await OpenAIClient.RealtimeEndpoint.CreateSessionAsync(configuration, cts.Token);
                 Assert.IsNotNull(session);
                 Assert.IsNotNull(session.Configuration);

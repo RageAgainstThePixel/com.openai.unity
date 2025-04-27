@@ -21,7 +21,7 @@ namespace OpenAI.Realtime
             RealtimeAudioFormat inputAudioFormat = RealtimeAudioFormat.PCM16,
             RealtimeAudioFormat outputAudioFormat = RealtimeAudioFormat.PCM16,
             Model transcriptionModel = null,
-            VoiceActivityDetectionSettings turnDetectionSettings = null,
+            IVoiceActivityDetectionSettings turnDetectionSettings = null,
             IEnumerable<Tool> tools = null,
             string toolChoice = null,
             float? temperature = null,
@@ -45,7 +45,7 @@ namespace OpenAI.Realtime
             InputAudioTranscriptionSettings = new(string.IsNullOrWhiteSpace(transcriptionModel)
                 ? "whisper-1"
                 : transcriptionModel);
-            VoiceActivityDetectionSettings = turnDetectionSettings ?? new(TurnDetectionType.Server_VAD);
+            VoiceActivityDetectionSettings = turnDetectionSettings ?? new ServerVAD();
 
             var toolList = tools?.ToList();
 
@@ -104,7 +104,7 @@ namespace OpenAI.Realtime
             RealtimeAudioFormat inputAudioFormat,
             RealtimeAudioFormat outputAudioFormat,
             InputAudioTranscriptionSettings inputAudioTranscriptionSettings,
-            VoiceActivityDetectionSettings voiceActivityDetectionSettings,
+            IVoiceActivityDetectionSettings voiceActivityDetectionSettings,
             IReadOnlyList<Function> tools,
             object toolChoice,
             float? temperature,
@@ -156,7 +156,7 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonProperty("turn_detection")]
         [JsonConverter(typeof(VoiceActivityDetectionSettingsConverter))]
-        public VoiceActivityDetectionSettings VoiceActivityDetectionSettings { get; private set; }
+        public IVoiceActivityDetectionSettings VoiceActivityDetectionSettings { get; private set; }
 
         [Preserve]
         [JsonProperty("tools")]
