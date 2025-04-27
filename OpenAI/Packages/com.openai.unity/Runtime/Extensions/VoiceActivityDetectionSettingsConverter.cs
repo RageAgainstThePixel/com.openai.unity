@@ -21,7 +21,7 @@ namespace OpenAI
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var jObject = JObject.Load(reader);
-            var type = jObject["type"]!.Value<string>();
+            var type = jObject["type"]?.Value<string>() ?? "disabled";
 
             return type switch
             {

@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using System;
+using System.Runtime.Serialization;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Realtime
@@ -18,27 +19,24 @@ namespace OpenAI.Realtime
     public sealed class DisabledVAD : IVoiceActivityDetectionSettings
     {
         [Preserve]
-        [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public TurnDetectionType Type { get; } = TurnDetectionType.Disabled;
+        public TurnDetectionType Type => TurnDetectionType.Disabled;
 
-        [JsonProperty("create_response", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool CreateResponse { get; }
+        public bool CreateResponse => false;
 
-        [JsonProperty("interrupt_response", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool InterruptResponse { get; }
+        public bool InterruptResponse => false;
     }
 
     [Preserve]
     public enum VAD_Eagerness
     {
-        [JsonProperty("auto")]
+        [EnumMember(Value = "auto")]
         Auto = 0,
-        [JsonProperty("low")]
+        [EnumMember(Value = "low")]
         Low,
-        [JsonProperty("medium")]
+        [EnumMember(Value = "medium")]
         Medium,
-        [JsonProperty("high")]
-        High,
+        [EnumMember(Value = "high")]
+        High
     }
 
     [Preserve]
