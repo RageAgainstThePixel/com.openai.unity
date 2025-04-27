@@ -131,7 +131,7 @@ namespace OpenAI
             {
                 new RealtimeClientEventConverter(),
                 new RealtimeServerEventConverter(),
-                new StringEnumConverter(new SnakeCaseNamingStrategy()),
+                new StringEnumConverter(new SnakeCaseNamingStrategy())
             }
         };
 
