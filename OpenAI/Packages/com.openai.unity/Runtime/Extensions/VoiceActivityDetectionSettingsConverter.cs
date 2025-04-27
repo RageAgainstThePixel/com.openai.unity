@@ -15,7 +15,7 @@ namespace OpenAI
         public override bool CanWrite => true;
 
         [Preserve]
-        public override bool CanConvert(Type objectType) => typeof(IVoiceActivityDetectionSettings) == objectType;
+        public override bool CanConvert(Type objectType) => typeof(IVoiceActivityDetectionSettings).IsAssignableFrom(objectType);
 
         [Preserve]
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
