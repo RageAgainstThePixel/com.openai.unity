@@ -73,15 +73,28 @@ namespace OpenAI.Audio
 
             Rest.TryGetDownloadCacheItem(clipName, out var cachedPath);
 
-            var part = 0;
-            var pcmResponse = await Rest.PostAsync(GetUrl("/speech"), payload, StreamCallback, 8192, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            pcmResponse.Validate(EnableDebug);
-            await File.WriteAllBytesAsync(cachedPath, pcmResponse.Data, cancellationToken).ConfigureAwait(true);
-            return new SpeechClip(clipName, cachedPath, new ReadOnlyMemory<byte>(pcmResponse.Data));
-
-            void StreamCallback(Response partialResponse)
+            switch (request.ResponseFormat)
             {
-                partialClipCallback?.Invoke(new SpeechClip($"{clipName}_{++part}", null, partialResponse.Data));
+                case SpeechResponseFormat.PCM:
+                {
+                    var part = 0;
+                    var pcmResponse = await Rest.PostAsync(GetUrl("/speech"), payload, partialResponse =>
+                    {
+                        partialClipCallback?.Invoke(new SpeechClip($"{clipName}_{++part}", null, partialResponse.Data));
+                    }, 8192, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+                    pcmResponse.Validate(EnableDebug);
+                    await File.WriteAllBytesAsync(cachedPath, pcmResponse.Data, cancellationToken).ConfigureAwait(true);
+                    return new SpeechClip(clipName, cachedPath, new ReadOnlyMemory<byte>(pcmResponse.Data));
+                }
+                default:
+                {
+                    var audioResponse = await Rest.PostAsync(GetUrl("/speech"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+                    audioResponse.Validate(EnableDebug);
+                    await File.WriteAllBytesAsync(cachedPath, audioResponse.Data, cancellationToken).ConfigureAwait(true);
+                    var audioType = request.ResponseFormat == SpeechResponseFormat.MP3 ? AudioType.MPEG : AudioType.WAV;
+                    var finalClip = await Rest.DownloadAudioClipAsync(cachedPath, audioType, fileName: clipName, cancellationToken: cancellationToken);
+                    return new SpeechClip(clipName, cachedPath, finalClip);
+                }
             }
         }
 
@@ -91,6 +104,7 @@ namespace OpenAI.Audio
         /// <param name="request"><see cref="AudioTranscriptionRequest"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>The transcribed text.</returns>
+        [Function("Transcribes audio into the input language. Returns transcribed text.")]
         public async Task<string> CreateTranscriptionTextAsync(AudioTranscriptionRequest request, CancellationToken cancellationToken = default)
         {
             var response = await Internal_CreateTranscriptionAsync(request, cancellationToken);
@@ -106,6 +120,7 @@ namespace OpenAI.Audio
         /// <param name="request"><see cref="AudioTranscriptionRequest"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="AudioResponse"/>.</returns>
+        [Function("Transcribes audio into the input language. Returns Json parsed AudioResponse.")]
         public async Task<AudioResponse> CreateTranscriptionJsonAsync(AudioTranscriptionRequest request, CancellationToken cancellationToken = default)
         {
             if (request.ResponseFormat is not (AudioResponseFormat.Json or AudioResponseFormat.Verbose_Json))
@@ -170,6 +185,7 @@ namespace OpenAI.Audio
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The translated text.</returns>
+        [Function("Translates audio into English. Returns translated text.")]
         public async Task<string> CreateTranslationTextAsync(AudioTranslationRequest request, CancellationToken cancellationToken = default)
         {
             var responseAsString = await Internal_CreateTranslationAsync(request, cancellationToken);
@@ -185,6 +201,7 @@ namespace OpenAI.Audio
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
+        [Function("Translates audio into English. Returns Json parsed AudioResponse.")]
         public async Task<AudioResponse> CreateTranslationJsonAsync(AudioTranslationRequest request, CancellationToken cancellationToken = default)
         {
             if (request.ResponseFormat is not (AudioResponseFormat.Json or AudioResponseFormat.Verbose_Json))

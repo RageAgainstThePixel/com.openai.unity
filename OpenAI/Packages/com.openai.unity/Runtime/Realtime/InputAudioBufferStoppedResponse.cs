@@ -5,6 +5,10 @@ using UnityEngine.Scripting;
 
 namespace OpenAI.Realtime
 {
+    /// <summary>
+    /// Returned in server_vad mode when the server detects the end of speech in the audio buffer.
+    /// The server will also send an conversation.item.created event with the user message item that is created from the audio buffer.
+    /// </summary>
     [Preserve]
     public sealed class InputAudioBufferStoppedResponse : BaseRealtimeEvent, IServerEvent
     {

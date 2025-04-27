@@ -11,6 +11,18 @@ namespace OpenAI.Audio
     public sealed class SpeechClip
     {
         [Preserve]
+        internal SpeechClip(string name, string cachePath, AudioClip audioClip)
+        {
+            Name = name;
+            CachePath = cachePath;
+            this.audioClip = audioClip;
+            SampleRate = audioClip.frequency;
+            var samples = new float[audioClip.samples];
+            audioClip.GetData(samples, 0);
+            AudioData = PCMEncoder.Encode(samples);
+        }
+
+        [Preserve]
         internal SpeechClip(string name, string cachePath, ReadOnlyMemory<byte> audioData, int sampleRate = 24000)
         {
             Name = name;
