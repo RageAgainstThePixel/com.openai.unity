@@ -329,7 +329,7 @@ namespace OpenAI.Samples.Assistant
                 text = text.Replace("![Image](output.jpg)", string.Empty);
                 if (string.IsNullOrWhiteSpace(text)) { return; }
 #pragma warning disable CS0612 // Type or member is obsolete
-                var request = new SpeechRequest(text, Model.TTS_1, voice, SpeechResponseFormat.PCM);
+                var request = new SpeechRequest(input: text, model: Model.TTS_1, voice: voice, responseFormat: SpeechResponseFormat.PCM);
 #pragma warning restore CS0612 // Type or member is obsolete
                 var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
                 {
