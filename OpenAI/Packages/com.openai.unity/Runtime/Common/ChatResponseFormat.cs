@@ -4,6 +4,9 @@ using System.Runtime.Serialization;
 
 namespace OpenAI
 {
+    /// <summary>
+    /// TODO rename to TextResponseFormat
+    /// </summary>
     public enum ChatResponseFormat
     {
         Auto = 0,

@@ -390,9 +390,9 @@ namespace OpenAI.Chat
         /// which indicates the generation exceeded max_tokens or the conversation exceeded the max context length.
         /// </remarks>
         [Preserve]
-        [JsonConverter(typeof(ResponseFormatConverter))]
+        [JsonConverter(typeof(TextResponseFormatConverter))]
         [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public ResponseFormatObject ResponseFormatObject { get; internal set; }
+        public TextResponseFormatConfiguration ResponseFormatObject { get; internal set; }
 
         /// <summary>
         /// An object specifying the format that the model must output.

@@ -7,24 +7,23 @@ using UnityEngine.Scripting;
 namespace OpenAI
 {
     [Preserve]
-    [Obsolete("use TextResponseFormatConfiguration instead")]
-    public sealed class ResponseFormatObject
+    public sealed class TextResponseFormatConfiguration
     {
         [Preserve]
-        public ResponseFormatObject() { }
+        public TextResponseFormatConfiguration() { }
 
         [Preserve]
-        public ResponseFormatObject(ChatResponseFormat type)
+        public TextResponseFormatConfiguration(ChatResponseFormat type)
         {
             if (type == ChatResponseFormat.JsonSchema)
             {
-                throw new System.ArgumentException("Use the constructor overload that accepts a JsonSchema object for ChatResponseFormat.JsonSchema.", nameof(type));
+                throw new ArgumentException("Use the constructor overload that accepts a JsonSchema object for ChatResponseFormat.JsonSchema.", nameof(type));
             }
             Type = type;
         }
 
         [Preserve]
-        public ResponseFormatObject(JsonSchema schema)
+        public TextResponseFormatConfiguration(JsonSchema schema)
         {
             Type = ChatResponseFormat.JsonSchema;
             JsonSchema = schema;
@@ -32,7 +31,7 @@ namespace OpenAI
 
         [Preserve]
         [JsonConstructor]
-        internal ResponseFormatObject(
+        internal TextResponseFormatConfiguration(
             [JsonProperty("type")] ChatResponseFormat type,
             [JsonProperty("json_schema")] JsonSchema schema)
         {
@@ -48,14 +47,9 @@ namespace OpenAI
         [JsonProperty("json_schema", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public JsonSchema JsonSchema { get; private set; }
 
-        [Preserve]
-        public static implicit operator ResponseFormatObject(ChatResponseFormat type) => new(type);
+        public static implicit operator TextResponseFormatConfiguration(ChatResponseFormat type) => new(type);
 
         [Preserve]
-        public static implicit operator ChatResponseFormat(ResponseFormatObject format) => format.Type;
-
-        [Preserve]
-        public static implicit operator TextResponseFormatConfiguration(ResponseFormatObject responseFormatObject)
-            => new(responseFormatObject.Type);
+        public static implicit operator ChatResponseFormat(TextResponseFormatConfiguration format) => format.Type;
     }
 }

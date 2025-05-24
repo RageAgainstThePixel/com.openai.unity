@@ -30,7 +30,7 @@ namespace OpenAI.Assistants
             [JsonProperty("temperature")] float? temperature,
             [JsonProperty("top_p")] float? topP,
             [JsonProperty("reasoning_effort")] ReasoningEffort? reasoningEffort,
-            [JsonProperty("response_format")][JsonConverter(typeof(ResponseFormatConverter))] ResponseFormatObject responseFormat)
+            [JsonProperty("response_format")][JsonConverter(typeof(TextResponseFormatConverter))] TextResponseFormatConfiguration responseFormat)
         {
             Id = id;
             Object = @object;
@@ -174,9 +174,9 @@ namespace OpenAI.Assistants
         /// which indicates the generation exceeded max_tokens or the conversation exceeded the max context length.
         /// </remarks>
         [Preserve]
-        [JsonConverter(typeof(ResponseFormatConverter))]
+        [JsonConverter(typeof(TextResponseFormatConverter))]
         [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public ResponseFormatObject ResponseFormatObject { get; }
+        public TextResponseFormatConfiguration ResponseFormatObject { get; }
 
         [Preserve]
         [JsonIgnore]

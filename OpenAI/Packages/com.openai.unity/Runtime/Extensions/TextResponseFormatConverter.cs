@@ -7,10 +7,10 @@ using UnityEngine.Scripting;
 namespace OpenAI.Extensions
 {
     [Preserve]
-    internal sealed class ResponseFormatConverter : JsonConverter<ResponseFormatObject>
+    internal sealed class TextResponseFormatConverter : JsonConverter<TextResponseFormatConfiguration>
     {
         [Preserve]
-        public override ResponseFormatObject ReadJson(JsonReader reader, Type objectType, ResponseFormatObject existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override TextResponseFormatConfiguration ReadJson(JsonReader reader, Type objectType, TextResponseFormatConfiguration existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             try
             {
@@ -19,7 +19,7 @@ namespace OpenAI.Extensions
                     return ChatResponseFormat.Auto;
                 }
 
-                return serializer.Deserialize<ResponseFormatObject>(reader);
+                return serializer.Deserialize<TextResponseFormatConfiguration>(reader);
             }
             catch (Exception e)
             {
@@ -28,7 +28,7 @@ namespace OpenAI.Extensions
         }
 
         [Preserve]
-        public override void WriteJson(JsonWriter writer, ResponseFormatObject value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, TextResponseFormatConfiguration value, JsonSerializer serializer)
         {
             serializer.Serialize(writer, value);
         }
