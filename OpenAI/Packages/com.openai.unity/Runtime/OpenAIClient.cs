@@ -131,9 +131,11 @@ namespace OpenAI
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             Converters = new List<JsonConverter>
             {
+                new StringEnumConverter(new SnakeCaseNamingStrategy()),
                 new RealtimeClientEventConverter(),
                 new RealtimeServerEventConverter(),
-                new StringEnumConverter(new SnakeCaseNamingStrategy())
+                new ResponseItemConverter(),
+                new ResponseContentConverter(),
             }
         };
 

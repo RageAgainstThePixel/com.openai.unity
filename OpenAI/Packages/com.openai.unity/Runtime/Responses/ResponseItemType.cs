@@ -30,10 +30,10 @@ namespace OpenAI.Responses
         Reasoning,
         [EnumMember(Value = "mcp_call")]
         McpCall,
-        [EnumMember(Value = "mcp_approval_response")]
-        McpApprovalResponse,
         [EnumMember(Value = "mcp_approval_request")]
         McpApprovalRequest,
+        [EnumMember(Value = "mcp_approval_response")]
+        McpApprovalResponse,
         [EnumMember(Value = "mcp_list_tools")]
         McpListTools,
         [EnumMember(Value = "item_reference")]
