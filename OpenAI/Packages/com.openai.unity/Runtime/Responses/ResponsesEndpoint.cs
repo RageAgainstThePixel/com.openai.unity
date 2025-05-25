@@ -100,11 +100,11 @@ namespace OpenAI.Responses
         /// <param name="query"><see cref="ListQuery"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="ListResponse{BaseResponse}"/>.</returns>
-        public async Task<ListResponse<BaseResponse>> ListInputItemsAsync(string responseId, ListQuery query = null, CancellationToken cancellationToken = default)
+        public async Task<ListResponse<IResponseItem>> ListInputItemsAsync(string responseId, ListQuery query = null, CancellationToken cancellationToken = default)
         {
             var response = await Rest.GetAsync(GetUrl($"/{responseId}/input_items", query), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<ListResponse<BaseResponse>>(client);
+            return response.Deserialize<ListResponse<IResponseItem>>(client);
         }
     }
 }
