@@ -23,7 +23,7 @@ namespace OpenAI.Responses
             [JsonProperty("output")] IReadOnlyList<IResponseItem> output,
             [JsonProperty("output_text")] string outputText,
             [JsonProperty("usage")] ResponseUsage usage,
-            [JsonProperty("parallel_tool_calls")] bool parallelToolCalls,
+            [JsonProperty("parallel_tool_calls")] bool? parallelToolCalls,
             [JsonProperty("instructions")] string instructions,
             [JsonProperty("max_output_tokens")] int? maxOutputTokens,
             [JsonProperty("metadata")] IReadOnlyDictionary<string, string> metadata,
@@ -127,7 +127,7 @@ namespace OpenAI.Responses
         /// </summary>
         [Preserve]
         [JsonProperty("parallel_tool_calls", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool ParallelToolCalls { get; }
+        public bool? ParallelToolCalls { get; }
 
         /// <summary>
         /// Inserts a system (or developer) message as the first item in the model's context.
