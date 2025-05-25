@@ -111,7 +111,7 @@ namespace OpenAI.Responses
         public IncompleteDetails IncompleteDetails { get; }
 
         [Preserve]
-        [JsonProperty("output")]
+        [JsonProperty("output", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyList<IResponseItem> Output { get; }
 
         [Preserve]
