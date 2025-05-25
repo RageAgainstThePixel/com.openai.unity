@@ -15,6 +15,8 @@ namespace OpenAI.Responses
         Failed,
         [EnumMember(Value = "in_progress")]
         InProgress,
+        [EnumMember(Value = "searching")]
+        Searching,
         [EnumMember(Value = "cancelled")]
         Cancelled,
         [EnumMember(Value = "queued")]

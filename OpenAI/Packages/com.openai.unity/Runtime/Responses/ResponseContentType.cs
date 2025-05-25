@@ -12,6 +12,8 @@ namespace OpenAI.Responses
         InputText,
         [EnumMember(Value = "output_text")]
         OutputText,
+        [EnumMember(Value = "input_audio")]
+        InputAudio,
         [EnumMember(Value = "input_image")]
         InputImage,
         [EnumMember(Value = "input_file")]
