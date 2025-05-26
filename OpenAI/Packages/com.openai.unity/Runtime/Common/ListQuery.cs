@@ -38,7 +38,7 @@ namespace OpenAI
         /// <param name="order">
         /// Sort order by the 'created_at' timestamp of the objects.
         /// </param>
-        public ListQuery(string after = null, string before = null, string[] include = null, int? limit = null, SortOrder order = SortOrder.Descending)
+        public ListQuery(string after = null, string before = null, IEnumerable<string> include = null, int? limit = null, SortOrder order = SortOrder.Descending)
         {
             After = after;
             Before = before;
@@ -60,7 +60,7 @@ namespace OpenAI
         /// <summary>
         /// Additional fields to include in the response.
         /// </summary>
-        public List<string> Include { get; set; }
+        public IEnumerable<string> Include { get; set; }
 
         /// <summary>
         /// A limit on the number of objects to be returned. Limit can range between 1 and 100, and the default is 20.
@@ -88,9 +88,11 @@ namespace OpenAI
                 parameters.Add("before", query.Before);
             }
 
-            if (query.Include is { Count: > 0 })
+            var includes = query.Include?.ToList() ?? new List<string>();
+
+            if (includes is { Count: > 0 })
             {
-                parameters.Add("include", string.Join(",", query.Include));
+                parameters.Add("include", string.Join(",", includes));
             }
 
             if (query.Limit.HasValue)
