@@ -32,7 +32,7 @@ namespace OpenAI.Threads
             string toolChoice = null,
             bool? parallelToolCalls = null,
             JsonSchema jsonSchema = null,
-            ChatResponseFormat responseFormat = ChatResponseFormat.Auto)
+            TextResponseFormat responseFormat = TextResponseFormat.Auto)
             : this(assistantId, model, instructions, additionalInstructions, additionalMessages, tools, metadata, temperature, topP, 0, maxPromptTokens, maxCompletionTokens, truncationStrategy, toolChoice, parallelToolCalls, jsonSchema, responseFormat)
         {
         }
@@ -114,7 +114,7 @@ namespace OpenAI.Threads
         /// </param>
         /// <param name="responseFormat">
         /// An object specifying the format that the model must output.
-        /// Setting to <see cref="ChatResponseFormat.Json"/> or <see cref="ChatResponseFormat.JsonSchema"/> enables JSON mode,
+        /// Setting to <see cref="TextResponseFormat.Json"/> or <see cref="TextResponseFormat.JsonSchema"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.<br/>
         /// Important: When using JSON mode, you must also instruct the model to produce JSON yourself via a system or user message.
         /// Without this, the model may generate an unending stream of whitespace until the generation reaches the token limit,
@@ -139,7 +139,7 @@ namespace OpenAI.Threads
             string toolChoice = null,
             bool? parallelToolCalls = null,
             JsonSchema jsonSchema = null,
-            ChatResponseFormat responseFormat = ChatResponseFormat.Text)
+            TextResponseFormat responseFormat = TextResponseFormat.Text)
         {
             AssistantId = assistantId;
             Model = model;
@@ -338,7 +338,7 @@ namespace OpenAI.Threads
 
         /// <summary>
         /// An object specifying the format that the model must output.
-        /// Setting to <see cref="ChatResponseFormat.Json"/> or <see cref="ChatResponseFormat.JsonSchema"/> enables JSON mode,
+        /// Setting to <see cref="TextResponseFormat.Json"/> or <see cref="TextResponseFormat.JsonSchema"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.
         /// </summary>
         /// <remarks>
@@ -355,6 +355,6 @@ namespace OpenAI.Threads
 
         [Preserve]
         [JsonIgnore]
-        public ChatResponseFormat ResponseFormat => ResponseFormatObject ?? ChatResponseFormat.Auto;
+        public TextResponseFormat ResponseFormat => ResponseFormatObject ?? TextResponseFormat.Auto;
     }
 }

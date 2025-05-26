@@ -225,7 +225,7 @@ namespace OpenAI.Responses
 
         [Preserve]
         [JsonIgnore]
-        public ChatResponseFormat TextResponseFormat => TextResponseFormatConfiguration ?? ChatResponseFormat.Auto;
+        public TextResponseFormat TextResponseFormat => TextResponseFormatConfiguration ?? TextResponseFormat.Auto;
 
         /// <summary>
         /// How the model should select which tool (or tools) to use when generating a response.

@@ -16,21 +16,19 @@ namespace OpenAI.Extensions
             {
                 if (reader.TokenType is JsonToken.Null or JsonToken.String)
                 {
-                    return ChatResponseFormat.Auto;
+                    return TextResponseFormat.Auto;
                 }
 
                 return serializer.Deserialize<TextResponseFormatConfiguration>(reader);
             }
             catch (Exception e)
             {
-                throw new JsonSerializationException($"Error reading {nameof(ChatResponseFormat)} from JSON", e);
+                throw new JsonSerializationException($"Error reading {nameof(TextResponseFormat)} from JSON", e);
             }
         }
 
         [Preserve]
         public override void WriteJson(JsonWriter writer, TextResponseFormatConfiguration value, JsonSerializer serializer)
-        {
-            serializer.Serialize(writer, value);
-        }
+            => serializer.Serialize(writer, value);
     }
 }

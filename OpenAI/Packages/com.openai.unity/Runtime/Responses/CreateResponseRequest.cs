@@ -2,7 +2,10 @@
 
 using Newtonsoft.Json;
 using OpenAI.Extensions;
+using OpenAI.Models;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Responses
@@ -10,12 +13,151 @@ namespace OpenAI.Responses
     [Preserve]
     public sealed class CreateResponseRequest
     {
+        [Preserve]
+        public static implicit operator CreateResponseRequest(string textInput) =>
+            new(new List<IResponseItem> { new MessageItem(Role.User, new TextContent(textInput)) });
+
+        [Preserve]
+        public CreateResponseRequest(
+            string textInput,
+            Model model = null,
+            bool? background = null,
+            IEnumerable<string> include = null,
+            string instructions = null,
+            int? maxOutputTokens = null,
+            IReadOnlyDictionary<string, string> metadata = null,
+            bool? parallelToolCalls = null,
+            string previousResponseId = null,
+            Reasoning reasoning = null,
+            string serviceTier = null,
+            bool? store = null,
+            double? temperature = null,
+            TextResponseFormat responseFormat = TextResponseFormat.Auto,
+            JsonSchema jsonSchema = null,
+            string toolChoice = null,
+            IEnumerable<Tool> tools = null,
+            double? topP = null,
+            Truncation truncation = Truncation.Auto,
+            string user = null)
+        : this(
+            input: new List<IResponseItem> { new MessageItem(Role.User, new TextContent(textInput)) },
+            model: model,
+            background: background,
+            include: include,
+            instructions: instructions,
+            maxOutputTokens: maxOutputTokens,
+            metadata: metadata,
+            parallelToolCalls: parallelToolCalls,
+            previousResponseId: previousResponseId,
+            reasoning: reasoning,
+            serviceTier: serviceTier,
+            store: store,
+            temperature: temperature,
+            responseFormat: responseFormat,
+            jsonSchema: jsonSchema,
+            toolChoice: toolChoice,
+            tools: tools,
+            topP: topP,
+            truncation: truncation,
+            user: user)
+        {
+        }
+
+        [Preserve]
+        public CreateResponseRequest(
+            IEnumerable<IResponseItem> input,
+            Model model = null,
+            bool? background = null,
+            IEnumerable<string> include = null,
+            string instructions = null,
+            int? maxOutputTokens = null,
+            IReadOnlyDictionary<string, string> metadata = null,
+            bool? parallelToolCalls = null,
+            string previousResponseId = null,
+            Reasoning reasoning = null,
+            string serviceTier = null,
+            bool? store = null,
+            double? temperature = null,
+            TextResponseFormat responseFormat = TextResponseFormat.Auto,
+            JsonSchema jsonSchema = null,
+            string toolChoice = null,
+            IEnumerable<Tool> tools = null,
+            double? topP = null,
+            Truncation truncation = Truncation.Auto,
+            string user = null)
+        {
+            Input = input?.ToArray() ?? throw new ArgumentNullException(nameof(input));
+            Model = string.IsNullOrWhiteSpace(model) ? Models.Model.ChatGPT4o : model;
+            Background = background;
+            Include = include?.ToList();
+            Instructions = instructions;
+            MaxOutputTokens = maxOutputTokens;
+            Metadata = metadata;
+            ParallelToolCalls = parallelToolCalls;
+            PreviousResponseId = previousResponseId;
+            Reasoning = reasoning;
+            ServiceTier = serviceTier;
+            Store = store;
+            Temperature = temperature;
+            TextResponseFormatConfiguration = responseFormat;
+
+            if (jsonSchema != null)
+            {
+                TextResponseFormatConfiguration = jsonSchema;
+            }
+            else
+            {
+                TextResponseFormatConfiguration = responseFormat switch
+                {
+                    TextResponseFormat.Auto => null,
+                    _ => responseFormat
+                };
+            }
+
+            if (string.IsNullOrWhiteSpace(toolChoice))
+            {
+                ToolChoice = "auto";
+            }
+
+            var toolList = tools?.ToList();
+
+            if (toolList is { Count: > 0 })
+            {
+                if (!toolChoice.Equals("none") &&
+                    !toolChoice.Equals("required") &&
+                    !toolChoice.Equals("auto"))
+                {
+                    var tool = toolList.FirstOrDefault(t => t.Function.Name.Contains(toolChoice)) ??
+                               throw new ArgumentException($"The specified tool choice '{toolChoice}' was not found in the list of tools");
+                    ToolChoice = new { type = "function", function = new { name = tool.Function.Name } };
+                }
+                else
+                {
+                    ToolChoice = toolChoice;
+                }
+
+                foreach (var tool in toolList)
+                {
+                    if (tool?.Function?.Arguments != null)
+                    {
+                        // just in case clear any lingering func args.
+                        tool.Function.Arguments = null;
+                    }
+                }
+            }
+
+            Tools = toolList?.ToList();
+            TopP = topP;
+            Truncation = truncation;
+            User = user;
+        }
+
         /// <summary>
         /// Text, image, or file inputs to the model, used to generate a response.
         /// </summary>
         [Preserve]
         [JsonProperty("input")]
-        public object Input { get; }
+        public IReadOnlyList<IResponseItem> Input { get; }
 
         /// <summary>
         /// Model ID used to generate the response, like gpt-4o or o3.
@@ -46,7 +188,7 @@ namespace OpenAI.Responses
 
         /// <summary>
         /// Inserts a system (or developer) message as the first item in the model's context.
-        /// When using along with `previous_response_id`,
+        /// When using along with <see cref="PreviousResponseId"/>,
         /// the instructions from a previous response will not be carried over to the next response.
         /// This makes it simple to swap out system (or developer) messages in new responses.
         /// </summary>
@@ -108,7 +250,7 @@ namespace OpenAI.Responses
         /// </summary>
         [Preserve]
         [JsonProperty("service_tier", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string ServiceTier { get; set; }
+        public string ServiceTier { get; }
 
         /// <summary>
         /// Whether to store the generated model response for later retrieval via API.
@@ -122,7 +264,7 @@ namespace OpenAI.Responses
         /// </summary>
         [Preserve]
         [JsonProperty("stream", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool Stream { get; }
+        public bool? Stream { get; }
 
         /// <summary>
         /// What sampling temperature to use, between 0 and 2.
@@ -145,7 +287,7 @@ namespace OpenAI.Responses
 
         [Preserve]
         [JsonIgnore]
-        public ChatResponseFormat TextResponseFormat => TextResponseFormatConfiguration ?? ChatResponseFormat.Auto;
+        public TextResponseFormat TextResponseFormat => TextResponseFormatConfiguration ?? TextResponseFormat.Auto;
 
         /// <summary>
         /// How the model should select which tool (or tools) to use when generating a response.

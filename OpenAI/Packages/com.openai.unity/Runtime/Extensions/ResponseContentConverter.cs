@@ -24,6 +24,7 @@ namespace OpenAI.Responses
             {
                 "input_text" => jObject.ToObject<TextContent>(serializer),
                 "output_text" => jObject.ToObject<TextContent>(serializer),
+                "input_audio" => jObject.ToObject<AudioContent>(serializer),
                 "input_image" => jObject.ToObject<ImageContent>(serializer),
                 "input_file" => jObject.ToObject<FileContent>(serializer),
                 "refusal" => jObject.ToObject<RefusalContent>(serializer),

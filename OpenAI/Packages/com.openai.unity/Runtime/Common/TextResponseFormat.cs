@@ -5,8 +5,7 @@ using System.Runtime.Serialization;
 
 namespace OpenAI
 {
-    [Obsolete("use TextResponseFormat instead")]
-    public enum ChatResponseFormat
+    public enum TextResponseFormat
     {
         Auto = 0,
         /// <summary>
@@ -24,6 +23,7 @@ namespace OpenAI
         /// <remarks>
         /// Not recommended for gpt-4o and newer models!
         /// </remarks>
+        [Obsolete("use JsonSchema instead")]
         [EnumMember(Value = "json_object")]
         Json,
         /// <summary>
