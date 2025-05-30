@@ -181,7 +181,7 @@ namespace OpenAI.Tests
                 new(Role.System, "You are a helpful assistant designed to output JSON."),
                 new(Role.User, "Who won the world series in 2020?"),
             };
-            var chatRequest = new ChatRequest(messages, Model.GPT4o, responseFormat: ChatResponseFormat.Json);
+            var chatRequest = new ChatRequest(messages, Model.GPT4o, responseFormat: TextResponseFormat.JsonSchema);
             var response = await OpenAIClient.ChatEndpoint.GetCompletionAsync(chatRequest);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);

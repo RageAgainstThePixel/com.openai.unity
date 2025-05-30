@@ -24,7 +24,7 @@ namespace OpenAI.Chat
             int? maxTokens = null,
             int? number = null,
             double? presencePenalty = null,
-            ChatResponseFormat responseFormat = ChatResponseFormat.Auto,
+            TextResponseFormat responseFormat = TextResponseFormat.Auto,
             int? seed = null,
             string[] stops = null,
             double? temperature = null,
@@ -38,28 +38,26 @@ namespace OpenAI.Chat
             : this(messages, model, frequencyPenalty, logitBias, maxTokens, number, presencePenalty,
                 responseFormat, seed, stops, temperature, topP, topLogProbs, parallelToolCalls, jsonSchema, audioConfig, reasoningEffort, user)
         {
+            if (string.IsNullOrWhiteSpace(toolChoice))
+            {
+                ToolChoice = "auto";
+            }
+
             var toolList = tools?.ToList();
 
             if (toolList is { Count: > 0 })
             {
-                if (string.IsNullOrWhiteSpace(toolChoice))
+                if (!toolChoice.Equals("none") &&
+                    !toolChoice.Equals("required") &&
+                    !toolChoice.Equals("auto"))
                 {
-                    ToolChoice = "auto";
+                    var tool = toolList.FirstOrDefault(t => t.Function.Name.Contains(toolChoice)) ??
+                        throw new ArgumentException($"The specified tool choice '{toolChoice}' was not found in the list of tools");
+                    ToolChoice = new { type = "function", function = new { name = tool.Function.Name } };
                 }
                 else
                 {
-                    if (!toolChoice.Equals("none") &&
-                        !toolChoice.Equals("required") &&
-                        !toolChoice.Equals("auto"))
-                    {
-                        var tool = toolList.FirstOrDefault(t => t.Function.Name.Contains(toolChoice)) ??
-                            throw new ArgumentException($"The specified tool choice '{toolChoice}' was not found in the list of tools");
-                        ToolChoice = new { type = "function", function = new { name = tool.Function.Name } };
-                    }
-                    else
-                    {
-                        ToolChoice = toolChoice;
-                    }
+                    ToolChoice = toolChoice;
                 }
 
                 foreach (var tool in toolList)
@@ -117,7 +115,7 @@ namespace OpenAI.Chat
         /// </param>
         /// <param name="responseFormat">
         /// An object specifying the format that the model must output.
-        /// Setting to <see cref="ChatResponseFormat.Json"/> or <see cref="ChatResponseFormat.JsonSchema"/> enables JSON mode,
+        /// Setting to <see cref="TextResponseFormat.Json"/> or <see cref="TextResponseFormat.JsonSchema"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.
         /// </param>
         /// <param name="frequencyPenalty">
@@ -167,7 +165,7 @@ namespace OpenAI.Chat
             int? maxTokens = null,
             int? number = null,
             double? presencePenalty = null,
-            ChatResponseFormat responseFormat = ChatResponseFormat.Auto,
+            TextResponseFormat responseFormat = TextResponseFormat.Auto,
             int? seed = null,
             string[] stops = null,
             double? temperature = null,
@@ -222,8 +220,8 @@ namespace OpenAI.Chat
             {
                 ResponseFormatObject = responseFormat switch
                 {
-                    ChatResponseFormat.Text or ChatResponseFormat.Json or ChatResponseFormat.JsonSchema => responseFormat,
-                    _ => null
+                    TextResponseFormat.Auto => null,
+                    _ => responseFormat
                 };
             }
 
@@ -380,7 +378,7 @@ namespace OpenAI.Chat
 
         /// <summary>
         /// An object specifying the format that the model must output.
-        /// Setting to <see cref="ChatResponseFormat.Json"/> or <see cref="ChatResponseFormat.JsonSchema"/> enables JSON mode,
+        /// Setting to <see cref="TextResponseFormat.Json"/> or <see cref="TextResponseFormat.JsonSchema"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.
         /// </summary>
         /// <remarks>
@@ -390,13 +388,13 @@ namespace OpenAI.Chat
         /// which indicates the generation exceeded max_tokens or the conversation exceeded the max context length.
         /// </remarks>
         [Preserve]
-        [JsonConverter(typeof(ResponseFormatConverter))]
+        [JsonConverter(typeof(TextResponseFormatConverter))]
         [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public ResponseFormatObject ResponseFormatObject { get; internal set; }
+        public TextResponseFormatConfiguration ResponseFormatObject { get; internal set; }
 
         /// <summary>
         /// An object specifying the format that the model must output.
-        /// Setting to <see cref="ChatResponseFormat.Json"/> or <see cref="ChatResponseFormat.JsonSchema"/> enables JSON mode,
+        /// Setting to <see cref="TextResponseFormat.Json"/> or <see cref="TextResponseFormat.JsonSchema"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.
         /// </summary>
         /// <remarks>
@@ -407,7 +405,7 @@ namespace OpenAI.Chat
         /// </remarks>
         [Preserve]
         [JsonIgnore]
-        public ChatResponseFormat ResponseFormat => ResponseFormatObject ?? ChatResponseFormat.Auto;
+        public TextResponseFormat ResponseFormat => ResponseFormatObject ?? TextResponseFormat.Auto;
 
         /// <summary>
         /// This feature is in Beta. If specified, our system will make a best effort to sample deterministically,

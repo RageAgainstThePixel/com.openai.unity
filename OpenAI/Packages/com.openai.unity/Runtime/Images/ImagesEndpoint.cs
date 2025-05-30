@@ -139,24 +139,9 @@ namespace OpenAI.Images
 
                 if (string.IsNullOrWhiteSpace(result.Url))
                 {
-                    var imageData = Convert.FromBase64String(result.B64_Json);
-#if PLATFORM_WEBGL
-                    result.Texture = new Texture2D(2, 2);
-                    result.Texture.LoadImage(imageData);
-#else
-                    if (!Rest.TryGetDownloadCacheItem(result.B64_Json, out var localFilePath))
-                    {
-                        await File.WriteAllBytesAsync(localFilePath, imageData, cancellationToken).ConfigureAwait(true);
-                        localFilePath = $"file://{localFilePath}";
-                    }
-
-                    result.Texture = await Rest.DownloadTextureAsync(localFilePath, parameters: new RestParameters(debug: EnableDebug), cancellationToken: cancellationToken);
-
-                    if (Rest.TryGetDownloadCacheItem(result.B64_Json, out var cachedPath))
-                    {
-                        result.CachedPath = cachedPath;
-                    }
-#endif
+                    var (texture, cachePath) = await TextureExtensions.ConvertFromBase64Async(result.B64_Json, EnableDebug, cancellationToken);
+                    result.Texture = texture;
+                    result.CachedPath = cachePath;
                 }
                 else
                 {
