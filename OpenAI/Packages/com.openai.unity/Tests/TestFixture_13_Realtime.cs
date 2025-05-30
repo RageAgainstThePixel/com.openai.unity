@@ -22,12 +22,17 @@ namespace OpenAI.Tests
             {
                 Assert.IsNotNull(OpenAIClient.RealtimeEndpoint);
                 var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                var mutex = new object();
                 var wasGoodbyeCalled = false;
                 var tools = new List<Tool>
                 {
                     Tool.FromFunc("goodbye", () =>
                     {
-                        wasGoodbyeCalled = true;
+                        lock (mutex)
+                        {
+                           wasGoodbyeCalled = true;
+                        }
+                        Debug.Log("Hanging up...");
                         cts.Cancel();
                         return "Goodbye!";
                     })
@@ -76,7 +81,11 @@ namespace OpenAI.Tests
                 }
 
                 await responseTask.ConfigureAwait(true);
-                Assert.IsTrue(wasGoodbyeCalled);
+
+                lock (mutex)
+                {
+                    Assert.IsTrue(wasGoodbyeCalled);
+                }
             }
             catch (Exception e)
             {
@@ -98,12 +107,17 @@ namespace OpenAI.Tests
             {
                 Assert.IsNotNull(OpenAIClient.RealtimeEndpoint);
                 var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+                var mutex = new object();
                 var wasGoodbyeCalled = false;
                 var tools = new List<Tool>
                 {
                     Tool.FromFunc("goodbye", () =>
                     {
-                        wasGoodbyeCalled = true;
+                        lock (mutex)
+                        {
+                            wasGoodbyeCalled = true;
+                        }
+                        Debug.Log("Hanging up...");
                         cts.Cancel();
                         return "Goodbye!";
                     })
@@ -155,7 +169,11 @@ namespace OpenAI.Tests
                 }
 
                 await responseTask.ConfigureAwait(true);
-                Assert.IsTrue(wasGoodbyeCalled);
+
+                lock (mutex)
+                {
+                    Assert.IsTrue(wasGoodbyeCalled);
+                }
             }
             catch (Exception e)
             {
@@ -178,11 +196,16 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(OpenAIClient.RealtimeEndpoint);
                 var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
                 var wasGoodbyeCalled = false;
+                var mutex = new object();
                 var tools = new List<Tool>
                 {
                     Tool.FromFunc("goodbye", () =>
                     {
-                        wasGoodbyeCalled = true;
+                        lock (mutex)
+                        {
+                            wasGoodbyeCalled = true;
+                        }
+                        Debug.Log("Hanging up...");
                         cts.Cancel();
                         return "Goodbye!";
                     })
@@ -234,7 +257,11 @@ namespace OpenAI.Tests
                 }
 
                 await responseTask.ConfigureAwait(true);
-                Assert.IsTrue(wasGoodbyeCalled);
+
+                lock (mutex)
+                {
+                    Assert.IsTrue(wasGoodbyeCalled);
+                }
             }
             catch (Exception e)
             {
