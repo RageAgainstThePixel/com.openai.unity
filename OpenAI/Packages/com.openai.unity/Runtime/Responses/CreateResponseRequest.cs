@@ -114,39 +114,9 @@ namespace OpenAI.Responses
                 };
             }
 
-            if (string.IsNullOrWhiteSpace(toolChoice))
-            {
-                ToolChoice = "auto";
-            }
-
-            var toolList = tools?.ToList();
-
-            if (toolList is { Count: > 0 })
-            {
-                if (!toolChoice.Equals("none") &&
-                    !toolChoice.Equals("required") &&
-                    !toolChoice.Equals("auto"))
-                {
-                    var tool = toolList.FirstOrDefault(t => t.Function.Name.Contains(toolChoice)) ??
-                               throw new ArgumentException($"The specified tool choice '{toolChoice}' was not found in the list of tools");
-                    ToolChoice = new { type = "function", function = new { name = tool.Function.Name } };
-                }
-                else
-                {
-                    ToolChoice = toolChoice;
-                }
-
-                foreach (var tool in toolList)
-                {
-                    if (tool?.Function?.Arguments != null)
-                    {
-                        // just in case clear any lingering func args.
-                        tool.Function.Arguments = null;
-                    }
-                }
-            }
-
-            Tools = toolList?.ToList();
+            tools.ProcessTools(toolChoice, out var toolList, out var activeTool);
+            Tools = toolList;
+            ToolChoice = activeTool;
             TopP = topP;
             Truncation = truncation;
             User = user;

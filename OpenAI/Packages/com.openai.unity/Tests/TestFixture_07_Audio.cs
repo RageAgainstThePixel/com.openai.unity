@@ -2,7 +2,6 @@
 
 using NUnit.Framework;
 using OpenAI.Audio;
-using OpenAI.Chat;
 using OpenAI.Models;
 using System.Collections.Concurrent;
 using System.IO;
