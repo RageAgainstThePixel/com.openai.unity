@@ -218,7 +218,6 @@ namespace OpenAI
         /// </summary>
         public VectorStoresEndpoint VectorStoresEndpoint { get; }
 
-
         /// <summary>
         /// Communicate with a GPT-4o class model in real time using WebSockets.
         /// Supports text and audio inputs and outputs, along with audio transcriptions.

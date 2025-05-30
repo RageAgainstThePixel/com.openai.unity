@@ -34,7 +34,7 @@ namespace OpenAI
         {
             if (type == TextResponseFormat.JsonSchema)
             {
-                throw new ArgumentException("Use the constructor overload that accepts a JsonSchema object for ChatResponseFormat.JsonSchema.", nameof(type));
+                throw new ArgumentException("Use the constructor overload that accepts a JsonSchema object for TextResponseFormat.JsonSchema.", nameof(type));
             }
 
             Type = type;
@@ -65,6 +65,12 @@ namespace OpenAI
         [JsonProperty("json_schema", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public JsonSchema JsonSchema { get; private set; }
 
+        [Preserve]
+        public static implicit operator TextResponseFormatConfiguration(TextResponseFormat type) => new(type);
+
+        [Preserve]
+        public static implicit operator TextResponseFormat(TextResponseFormatConfiguration format) => format.Type;
+
 #pragma warning disable CS0618 // Type or member is obsolete
         [Preserve]
         [Obsolete("Use new overload with TextResponseFormat instead")]
@@ -83,11 +89,5 @@ namespace OpenAI
             };
         }
 #pragma warning restore CS0618 // Type or member is obsolete
-
-        [Preserve]
-        public static implicit operator TextResponseFormatConfiguration(TextResponseFormat type) => new(type);
-
-        [Preserve]
-        public static implicit operator TextResponseFormat(TextResponseFormatConfiguration format) => format.Type;
     }
 }

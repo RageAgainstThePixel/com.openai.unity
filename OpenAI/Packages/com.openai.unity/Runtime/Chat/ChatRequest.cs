@@ -38,26 +38,29 @@ namespace OpenAI.Chat
             : this(messages, model, frequencyPenalty, logitBias, maxTokens, number, presencePenalty,
                 responseFormat, seed, stops, temperature, topP, topLogProbs, parallelToolCalls, jsonSchema, audioConfig, reasoningEffort, user)
         {
-            if (string.IsNullOrWhiteSpace(toolChoice))
-            {
-                ToolChoice = "auto";
-            }
-
             var toolList = tools?.ToList();
 
             if (toolList is { Count: > 0 })
             {
-                if (!toolChoice.Equals("none") &&
-                    !toolChoice.Equals("required") &&
-                    !toolChoice.Equals("auto"))
+                if (string.IsNullOrWhiteSpace(toolChoice))
                 {
-                    var tool = toolList.FirstOrDefault(t => t.Function.Name.Contains(toolChoice)) ??
-                        throw new ArgumentException($"The specified tool choice '{toolChoice}' was not found in the list of tools");
-                    ToolChoice = new { type = "function", function = new { name = tool.Function.Name } };
+                    ToolChoice = "auto";
                 }
                 else
                 {
-                    ToolChoice = toolChoice;
+
+                    if (!toolChoice.Equals("none") &&
+                        !toolChoice.Equals("required") &&
+                        !toolChoice.Equals("auto"))
+                    {
+                        var tool = toolList.FirstOrDefault(t => t.Function.Name.Contains(toolChoice)) ??
+                            throw new ArgumentException($"The specified tool choice '{toolChoice}' was not found in the list of tools");
+                        ToolChoice = new { type = "function", function = new { name = tool.Function.Name } };
+                    }
+                    else
+                    {
+                        ToolChoice = toolChoice;
+                    }
                 }
 
                 foreach (var tool in toolList)
@@ -68,6 +71,10 @@ namespace OpenAI.Chat
                         tool.Function.Arguments = null;
                     }
                 }
+            }
+            else
+            {
+                ToolChoice = "auto";
             }
 
             Tools = toolList?.ToList();
