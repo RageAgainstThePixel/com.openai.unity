@@ -31,22 +31,22 @@ namespace OpenAI
 
             if (configuration != null)
             {
-                if (configuration.UseAzureOpenAI)
-                {
-                    Info = new OpenAISettingsInfo(configuration.ResourceName, configuration.DeploymentId, configuration.ApiVersion, configuration.UseAzureActiveDirectory);
-                    cachedDefault = this;
-                }
-                else
-                {
-                    Info = new OpenAISettingsInfo(domain: configuration.ProxyDomain, apiVersion: configuration.ApiVersion);
-                    cachedDefault = this;
-                }
+                Info = configuration.UseAzureOpenAI
+                    ? new OpenAISettingsInfo(
+                        resourceName: configuration.ResourceName,
+                        deploymentId: configuration.DeploymentId,
+                        apiVersion: configuration.ApiVersion,
+                        useActiveDirectoryAuthentication: configuration.UseAzureActiveDirectory)
+                    : new OpenAISettingsInfo(
+                        domain: configuration.ProxyDomain,
+                        apiVersion: configuration.ApiVersion);
             }
             else
             {
                 Info = new OpenAISettingsInfo();
-                cachedDefault = this;
             }
+
+            cachedDefault = this;
         }
 
         /// <summary>
