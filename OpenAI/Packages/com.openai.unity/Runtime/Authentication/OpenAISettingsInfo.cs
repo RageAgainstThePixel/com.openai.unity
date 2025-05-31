@@ -94,7 +94,15 @@ namespace OpenAI
         /// <param name="useActiveDirectoryAuthentication">
         /// Optional, set to true if you want to use Azure Active Directory for Authentication.
         /// </param>
-        public OpenAISettingsInfo(string resourceName, string deploymentId, string apiVersion = DefaultAzureApiVersion, bool useActiveDirectoryAuthentication = false)
+        /// Optional, override the azure domain, if you need to use a different one (e.g., for Azure Government or other regions).
+        /// <param name="azureDomain">
+        /// </param>
+        public OpenAISettingsInfo(
+            string resourceName,
+            string deploymentId,
+            string apiVersion = DefaultAzureApiVersion,
+            bool useActiveDirectoryAuthentication = false,
+            string azureDomain = AzureOpenAIDomain)
         {
             if (string.IsNullOrWhiteSpace(resourceName))
             {
@@ -112,12 +120,18 @@ namespace OpenAI
                 apiVersion = DefaultAzureApiVersion;
             }
 
+            if (string.IsNullOrWhiteSpace(azureDomain))
+            {
+                azureDomain = AzureOpenAIDomain;
+            }
+
+            IsAzureOpenAI = true;
             ResourceName = resourceName;
             DeploymentId = deploymentId;
             ApiVersion = apiVersion;
             BaseRequest = "/openai/";
-            BaseRequestUrlFormat = $"{Https}{ResourceName}.{AzureOpenAIDomain}{BaseRequest}{{0}}";
-            BaseWebSocketUrlFormat = $"{WSS}{ResourceName}.{AzureOpenAIDomain}{BaseRequest}{{0}}";
+            BaseRequestUrlFormat = $"{Https}{ResourceName}.{azureDomain}{BaseRequest}{{0}}";
+            BaseWebSocketUrlFormat = $"{WSS}{ResourceName}.{azureDomain}{BaseRequest}{{0}}";
             defaultQueryParameters.Add("api-version", ApiVersion);
             UseOAuthAuthentication = useActiveDirectoryAuthentication;
         }
@@ -136,7 +150,7 @@ namespace OpenAI
 
         internal bool UseOAuthAuthentication { get; }
 
-        public bool IsAzureOpenAI => BaseRequestUrlFormat.Contains(AzureOpenAIDomain);
+        public bool IsAzureOpenAI { get; }
 
         private readonly Dictionary<string, string> defaultQueryParameters = new();
 
