@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using UnityEngine;
 using UnityEngine.Scripting;
@@ -9,7 +10,7 @@ using Utilities.Encoding.Wav;
 namespace OpenAI.Responses
 {
     [Preserve]
-    public sealed class AudioContent : IResponseContent
+    public sealed class AudioContent : IResponseContent, IAppendable<AudioContent>
     {
         [Preserve]
         public AudioContent(AudioClip audioClip)
@@ -34,14 +35,20 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonConstructor]
         internal AudioContent(
+            [JsonProperty("index")] int? index,
             [JsonProperty("type")] ResponseContentType type,
             [JsonProperty("data")] string data,
             [JsonProperty("format")] InputAudioFormat format)
         {
+            Index = index;
             Type = type;
             Data = data;
             Format = format;
         }
+
+        [Preserve]
+        [JsonProperty("index", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? Index { get; }
 
         [Preserve]
         [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Include)]
@@ -59,7 +66,7 @@ namespace OpenAI.Responses
         public override string ToString() => Data;
 
         [Preserve]
-        public void AppendFrom(InputAudio other)
+        public void AppendFrom(AudioContent other)
         {
             if (other == null) { return; }
 

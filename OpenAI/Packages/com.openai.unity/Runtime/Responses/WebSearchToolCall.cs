@@ -11,6 +11,20 @@ namespace OpenAI.Responses
     [Preserve]
     public sealed class WebSearchToolCall : IResponseItem
     {
+        [Preserve]
+        [JsonConstructor]
+        internal WebSearchToolCall(
+            [JsonProperty("id")] string id,
+            [JsonProperty("type")] ResponseItemType type,
+            [JsonProperty("object")] string @object,
+            [JsonProperty("status")] ResponseStatus status)
+        {
+            Id = id;
+            Type = type;
+            Object = @object;
+            Status = status;
+        }
+
         /// <inheritdoc />
         [Preserve]
         [JsonProperty("id", DefaultValueHandling = DefaultValueHandling.Ignore)]

@@ -61,28 +61,28 @@ namespace OpenAI.Responses
         /// The label of the MCP server running the tool.
         /// </summary>
         [Preserve]
-        [JsonProperty("server_label")]
+        [JsonProperty("server_label", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string ServerLabel { get; }
 
         /// <summary>
         /// A JSON string of the arguments to pass to the function.
         /// </summary>
         [Preserve]
-        [JsonProperty("arguments")]
+        [JsonProperty("arguments", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Arguments { get; }
 
         /// <summary>
         /// The output from the tool call.
         /// </summary>
         [Preserve]
-        [JsonProperty("output")]
+        [JsonProperty("output", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Output { get; }
 
         /// <summary>
         /// The error from the tool call, if any.
         /// </summary>
         [Preserve]
-        [JsonProperty("error")]
+        [JsonProperty("error", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Error { get; }
     }
 }

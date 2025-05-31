@@ -172,6 +172,7 @@ namespace OpenAI.Responses
         /// The unique ID of the previous response to the model.
         /// Use this to create multi-turn conversations.
         /// </summary>
+        [Preserve]
         [JsonProperty("previous_response_id", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string PreviousResponseId { get; }
 

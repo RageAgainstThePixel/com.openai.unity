@@ -17,6 +17,7 @@ namespace OpenAI.Responses
         {
             ReasoningTokens = reasoningTokens;
         }
+
         /// <summary>
         /// The number of reasoning tokens.
         /// </summary>

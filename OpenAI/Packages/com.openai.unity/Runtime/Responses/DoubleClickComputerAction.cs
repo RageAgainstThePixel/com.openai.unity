@@ -1,7 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using UnityEngine;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Responses
@@ -9,6 +8,7 @@ namespace OpenAI.Responses
     /// <summary>
     /// A double click action.
     /// </summary>
+    [Preserve]
     public sealed class DoubleClickComputerAction : IComputerAction
     {
         [Preserve]
@@ -24,11 +24,11 @@ namespace OpenAI.Responses
         }
 
         [Preserve]
-        public DoubleClickComputerAction(Vector2Int position)
+        public DoubleClickComputerAction(Coordinate position)
         {
             Type = ComputerActionType.DoubleClick;
-            X = position.x;
-            Y = position.y;
+            X = position.X;
+            Y = position.Y;
         }
 
         /// <summary>
@@ -42,14 +42,14 @@ namespace OpenAI.Responses
         /// The x-coordinate where the double click occurred.
         /// </summary>
         [Preserve]
-        [JsonProperty("x")]
+        [JsonProperty("x", DefaultValueHandling = DefaultValueHandling.Include)]
         public int X { get; }
 
         /// <summary>
         /// The y-coordinate where the double click occurred.
         /// </summary>
         [Preserve]
-        [JsonProperty("y")]
+        [JsonProperty("y", DefaultValueHandling = DefaultValueHandling.Include)]
         public int Y { get; }
     }
 }

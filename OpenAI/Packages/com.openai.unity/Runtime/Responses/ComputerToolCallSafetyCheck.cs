@@ -41,7 +41,7 @@ namespace OpenAI.Responses
         /// Details about the pending safety check.
         /// </summary>
         [Preserve]
-        [JsonProperty("message")]
+        [JsonProperty("message", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Message { get; }
     }
 }

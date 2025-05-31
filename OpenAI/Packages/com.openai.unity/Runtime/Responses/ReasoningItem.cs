@@ -12,6 +12,22 @@ namespace OpenAI.Responses
     [Preserve]
     public sealed class ReasoningItem : IResponseItem
     {
+        [Preserve]
+        [JsonConstructor]
+        internal ReasoningItem(
+            [JsonProperty("id")] string id,
+            [JsonProperty("type")] ResponseItemType type,
+            [JsonProperty("object")] string @object,
+            [JsonProperty("status")] ResponseStatus status,
+            [JsonProperty("summary")] IReadOnlyList<ReasoningSummary> summary)
+        {
+            Id = id;
+            Type = type;
+            Object = @object;
+            Status = status;
+            Summary = summary;
+        }
+
         /// <inheritdoc />
         [Preserve]
         [JsonProperty("id", DefaultValueHandling = DefaultValueHandling.Ignore)]

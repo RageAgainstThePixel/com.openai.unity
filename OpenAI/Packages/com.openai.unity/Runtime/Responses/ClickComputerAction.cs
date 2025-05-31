@@ -8,6 +8,7 @@ namespace OpenAI.Responses
     /// <summary>
     /// A click action.
     /// </summary>
+    [Preserve]
     public sealed class ClickComputerAction : IComputerAction
     {
         [Preserve]

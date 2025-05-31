@@ -42,14 +42,14 @@ namespace OpenAI.Responses
         /// The x-coordinate to move to.
         /// </summary>
         [Preserve]
-        [JsonProperty("x")]
+        [JsonProperty("x", DefaultValueHandling = DefaultValueHandling.Include)]
         public int X { get; }
 
         /// <summary>
         /// The y-coordinate to move to.
         /// </summary>
         [Preserve]
-        [JsonProperty("y")]
+        [JsonProperty("y", DefaultValueHandling = DefaultValueHandling.Include)]
         public int Y { get; }
     }
 }

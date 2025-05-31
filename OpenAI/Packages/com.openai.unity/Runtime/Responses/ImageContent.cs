@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using UnityEngine;
 using UnityEngine.Scripting;
 
@@ -34,10 +35,16 @@ namespace OpenAI.Responses
 
         [Preserve]
         public ImageContent(Texture2D image, ImageDetail detail = ImageDetail.Auto)
+            : this(image.EncodeToPNG(), detail)
+        {
+        }
+
+        [Preserve]
+        public ImageContent(byte[] imageData, ImageDetail detail = ImageDetail.Auto)
         {
             Type = ResponseContentType.InputImage;
             Detail = detail;
-            ImageUrl = $"data:image/png;base64,{System.Convert.ToBase64String(image.EncodeToPNG())}";
+            ImageUrl = $"data:image/png;base64,{Convert.ToBase64String(imageData)}";
         }
 
         [Preserve]
@@ -53,13 +60,10 @@ namespace OpenAI.Responses
         public string FileId { get; }
 
         [Preserve]
-        [JsonProperty("image_url")]
+        [JsonProperty("image_url", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string ImageUrl { get; }
 
         [Preserve]
         public static implicit operator ImageContent(Texture2D image) => new(image);
-
-        [Preserve]
-        public static implicit operator ImageContent(string imageUrl) => new(imageUrl);
     }
 }

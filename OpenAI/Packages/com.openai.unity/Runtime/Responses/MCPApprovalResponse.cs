@@ -53,7 +53,7 @@ namespace OpenAI.Responses
         public string ApprovalRequestId { get; }
 
         [Preserve]
-        [JsonProperty("approve")]
+        [JsonProperty("approve", DefaultValueHandling = DefaultValueHandling.Include)]
         public bool Approve { get; }
 
         /// <summary>

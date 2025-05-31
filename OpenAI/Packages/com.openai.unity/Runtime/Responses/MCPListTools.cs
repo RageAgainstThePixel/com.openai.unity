@@ -53,14 +53,14 @@ namespace OpenAI.Responses
         /// The label of the MCP server running the tool.
         /// </summary>
         [Preserve]
-        [JsonProperty("server_label")]
+        [JsonProperty("server_label", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string ServerLabel { get; }
 
         /// <summary>
         /// The error from the tool call, if any.
         /// </summary>
         [Preserve]
-        [JsonProperty("error")]
+        [JsonProperty("error", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Error { get; }
 
         /// <summary>

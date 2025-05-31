@@ -16,6 +16,10 @@ namespace OpenAI.Responses
             [JsonProperty("input_schema")] string inputSchema,
             [JsonProperty("annotations")] object annotations)
         {
+            Name = name;
+            Description = description;
+            InputSchema = inputSchema;
+            Annotations = annotations;
         }
 
         [Preserve]

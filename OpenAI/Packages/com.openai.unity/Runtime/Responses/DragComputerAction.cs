@@ -3,6 +3,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Responses
@@ -24,10 +25,10 @@ namespace OpenAI.Responses
         }
 
         [Preserve]
-        public DragComputerAction(IReadOnlyList<Coordinate> path)
+        public DragComputerAction(IEnumerable<Coordinate> path)
         {
             Type = ComputerActionType.Drag;
-            Path = path ?? throw new ArgumentNullException(nameof(path), "Path cannot be null.");
+            Path = path?.ToList() ?? throw new ArgumentNullException(nameof(path), "Path cannot be null.");
         }
 
         /// <summary>

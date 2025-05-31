@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Scripting;
@@ -27,7 +28,7 @@ namespace OpenAI.Responses
         public KeyPressComputerAction(IEnumerable<string> keys)
         {
             Type = ComputerActionType.KeyPress;
-            Keys = keys?.ToList();
+            Keys = keys?.ToList() ?? throw new ArgumentNullException(nameof(keys), "Keys cannot be null.");
         }
 
         /// <summary>

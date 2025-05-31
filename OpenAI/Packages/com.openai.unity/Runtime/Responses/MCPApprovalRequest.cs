@@ -28,6 +28,14 @@ namespace OpenAI.Responses
             Arguments = arguments;
         }
 
+        [Preserve]
+        public MCPApprovalRequest(string name, string arguments = null, string serverLabel = null)
+        {
+            Name = name;
+            Arguments = arguments;
+            ServerLabel = serverLabel;
+        }
+
         /// <inheritdoc />
         [Preserve]
         [JsonProperty("id", DefaultValueHandling = DefaultValueHandling.Ignore)]
@@ -59,14 +67,14 @@ namespace OpenAI.Responses
         /// A JSON string of arguments for the tool.
         /// </summary>
         [Preserve]
-        [JsonProperty("arguments")]
+        [JsonProperty("arguments", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Arguments { get; }
 
         /// <summary>
         /// The label of the MCP server making the request.
         /// </summary>
         [Preserve]
-        [JsonProperty("server_label")]
+        [JsonProperty("server_label", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string ServerLabel { get; }
     }
 }

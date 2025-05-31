@@ -48,28 +48,28 @@ namespace OpenAI.Responses
         /// The x-coordinate where the scroll occurred.
         /// </summary>
         [Preserve]
-        [JsonProperty("x")]
+        [JsonProperty("x", DefaultValueHandling = DefaultValueHandling.Include)]
         public int X { get; }
 
         /// <summary>
         /// The y-coordinate where the scroll occurred.
         /// </summary>
         [Preserve]
-        [JsonProperty("y")]
+        [JsonProperty("y", DefaultValueHandling = DefaultValueHandling.Include)]
         public int Y { get; }
 
         /// <summary>
         /// The horizontal scroll distance.
         /// </summary>
         [Preserve]
-        [JsonProperty("scroll_x")]
+        [JsonProperty("scroll_x", DefaultValueHandling = DefaultValueHandling.Include)]
         public int ScrollX { get; }
 
         /// <summary>
         /// The vertical scroll distance.
         /// </summary>
         [Preserve]
-        [JsonProperty("scroll_y")]
+        [JsonProperty("scroll_y", DefaultValueHandling = DefaultValueHandling.Include)]
         public int ScrollY { get; }
     }
 }
