@@ -1,6 +1,8 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Responses;
+using UnityEngine.Scripting;
 
 namespace OpenAI
 {
@@ -8,8 +10,28 @@ namespace OpenAI
     /// **o-series models only**
     /// Configuration options for reasoning models.
     /// </summary>
-    public sealed class Reasoning
+    public sealed class Reasoning : IResponseItem
     {
+        /// <inheritdoc />
+        [Preserve]
+        [JsonProperty("id", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Id { get; }
+
+        /// <inheritdoc />
+        [Preserve]
+        [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Include)]
+        public ResponseItemType Type { get; }
+
+        /// <inheritdoc />
+        [Preserve]
+        [JsonProperty("object", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Object { get; }
+
+        /// <inheritdoc />
+        [Preserve]
+        [JsonProperty("status", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public ResponseStatus Status { get; }
+
         /// <summary>
         /// Constrains effort on reasoning for reasoning models.
         /// Currently supported values are: Low, Medium, High.
