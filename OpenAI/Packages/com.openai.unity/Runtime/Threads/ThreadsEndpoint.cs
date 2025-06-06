@@ -498,7 +498,7 @@ namespace OpenAI.Threads
                 // ReSharper disable AccessToModifiedClosure
                 try
                 {
-                    switch (ssEvent.Value.Value<string>())
+                    switch (@event)
                     {
                         case "thread.created":
                             serverSentEvent = sseResponse.Deserialize<ThreadResponse>(client);

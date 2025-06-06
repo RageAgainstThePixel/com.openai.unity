@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Responses
 {
     [Preserve]
-    public sealed class LocalShellCallOutput : IResponseItem
+    public sealed class LocalShellCallOutput : BaseResponse, IResponseItem
     {
         [Preserve]
         [JsonConstructor]

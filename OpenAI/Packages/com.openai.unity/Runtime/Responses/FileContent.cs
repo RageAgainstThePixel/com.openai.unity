@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Responses
 {
     [Preserve]
-    public sealed class FileContent : IResponseContent
+    public sealed class FileContent : BaseResponse, IResponseContent
     {
         [Preserve]
         [JsonConstructor]
@@ -60,5 +60,8 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonProperty("file_name", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string FileName { get; }
+
+        [JsonIgnore]
+        public string Object => Type.ToString();
     }
 }

@@ -234,7 +234,7 @@ namespace OpenAI.Responses
         /// </summary>
         [Preserve]
         [JsonProperty("stream", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool? Stream { get; }
+        public bool Stream { get; internal set; }
 
         /// <summary>
         /// What sampling temperature to use, between 0 and 2.

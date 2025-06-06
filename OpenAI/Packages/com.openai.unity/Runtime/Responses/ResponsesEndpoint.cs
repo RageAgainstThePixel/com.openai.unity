@@ -1,11 +1,15 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OpenAI.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 using Utilities.WebRequestRest;
+using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI.Responses
 {
@@ -28,14 +32,220 @@ namespace OpenAI.Responses
         /// Have the model call your own custom code or use built-in tools like web search or file search to use your own data as input for the model's response.
         /// </summary>
         /// <param name="request"><see cref="CreateResponseRequest"/>.</param>
+        /// <param name="streamEventHandler"></param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="Response"/>.</returns>
-        public async Task<Response> CreateModelResponseAsync(CreateResponseRequest request, CancellationToken cancellationToken = default)
+        public async Task<Response> CreateModelResponseAsync(CreateResponseRequest request, Func<string, IServerSentEvent, Task> streamEventHandler = null, CancellationToken cancellationToken = default)
         {
+            var endpoint = GetUrl();
+            request.Stream = streamEventHandler != null;
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+
+            if (request.Stream)
+            {
+                return await StreamResponseAsync(endpoint, payload, streamEventHandler, cancellationToken);
+            }
+
+            var response = await Rest.PostAsync(endpoint, payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<Response>(client);
+        }
+
+        private async Task<Response> StreamResponseAsync(string endpoint, string payload, Func<string, IServerSentEvent, Task> streamEventHandler, CancellationToken cancellationToken)
+        {
+            Response response = null;
+
+            var streamResponse = await Rest.PostAsync(endpoint, payload, async (sseResponse, ssEvent) =>
+            {
+                IServerSentEvent serverSentEvent = null;
+                var @event = ssEvent.Value.Value<string>();
+                var @object = ssEvent.Data ?? ssEvent.Value;
+
+                // ReSharper disable once AccessToModifiedClosure
+                try
+                {
+                    switch (@event)
+                    {
+                        case "response.created":
+                        case "response.in_progress":
+                        case "response.completed":
+                        case "response.failed":
+                        case "response.incomplete":
+                            var partialResponse = sseResponse.Deserialize<Response>(@object["response"], client);
+
+                            if (response == null)
+                            {
+                                response = partialResponse;
+                            }
+                            else
+                            {
+                                if (response.Id == partialResponse.Id)
+                                {
+                                    response = partialResponse;
+                                }
+                                else
+                                {
+                                    throw new InvalidOperationException($"Response ID mismatch! Expected: {response.Id}, got: {partialResponse.Id}");
+                                }
+                            }
+
+                            serverSentEvent = response;
+                            break;
+                        case "response.code_interpreter_call.code.delta":
+                        case "response.code_interpreter_call.code.done":
+                        case "response.code_interpreter_call.completed":
+                        case "response.code_interpreter_call.in_progress":
+                        case "response.code_interpreter_call.interpreting":
+                            break;
+                        case "response.content_part.added":
+                        case "response.content_part.done":
+                            var outputIndex = @object["output_index"]!.Value<int>();
+                            var contentIndex = @object["content_index"]!.Value<int>();
+                            var itemId = @object["item_id"]!.Value<string>();
+                            var part = sseResponse.Deserialize<TextContent>(@object["part"], client);
+                            var messageItem = (MessageItem)response!.Output[outputIndex];
+                            if (messageItem.Id != itemId)
+                            {
+                                throw new InvalidOperationException($"MessageItem ID mismatch! Expected: {messageItem.Id}, got: {itemId}");
+                            }
+                            messageItem.AddContentItem(part, contentIndex);
+                            serverSentEvent = messageItem;
+                            break;
+                        case "response.file_search_call.completed":
+                        case "response.file_search_call.in_progress":
+                        case "response.file_search_call.searching":
+                            break;
+                        case "response.output_item.added":
+                        case "response.output_item.done":
+                            outputIndex = @object["output_index"]!.Value<int>();
+                            var item = sseResponse.Deserialize<IResponseItem>(@object["item"], client);
+                            response!.InsertOutputItem(item, outputIndex);
+                            serverSentEvent = item;
+                            break;
+                        case "response.audio.delta":
+                        case "response.audio.done":
+                        case "response.audio.transcript.delta":
+                        case "response.audio.transcript.done":
+                        case "response.function_call_arguments.delta":
+                        case "response.function_call_arguments.done":
+                        case "response.output_text.annotation.added":
+                        case "response.output_text.delta":
+                        case "response.output_text.done":
+                        case "response.refusal.delta":
+                        case "response.refusal.done":
+                            outputIndex = @object["output_index"]!.Value<int>();
+                            contentIndex = @object["content_index"]!.Value<int>();
+                            itemId = @object["item_id"]!.Value<string>();
+                            var delta = @object["delta"]?.Value<string>();
+                            messageItem = (MessageItem)response!.Output[outputIndex];
+                            if (messageItem.Id != itemId)
+                            {
+                                throw new InvalidOperationException($"MessageItem ID mismatch! Expected: {messageItem.Id}, got: {itemId}");
+                            }
+                            var contentItem = messageItem.Content[contentIndex];
+
+                            switch (contentItem)
+                            {
+                                case AudioContent audioContent:
+                                    AudioContent partialContent;
+                                    switch (@event)
+                                    {
+                                        case "response.audio.delta":
+                                            partialContent = new AudioContent(audioContent.Type, base64Data: delta);
+                                            audioContent.AppendFrom(partialContent);
+                                            serverSentEvent = partialContent;
+                                            break;
+                                        case "response.audio.transcript.delta":
+                                            partialContent = new AudioContent(audioContent.Type, transcript: delta);
+                                            audioContent.AppendFrom(partialContent);
+                                            serverSentEvent = partialContent;
+                                            break;
+                                        case "response.audio.done":
+                                        case "response.audio.transcript.done":
+                                            serverSentEvent = audioContent;
+                                            break;
+                                        default:
+                                            throw new InvalidOperationException($"Unexpected event type: {@event} for AudioContent.");
+                                    }
+                                    break;
+                                case TextContent textContent:
+                                    var text = @object["text"]?.Value<string>();
+
+                                    if (!string.IsNullOrWhiteSpace(text))
+                                    {
+                                        textContent.Text = text;
+                                    }
+
+                                    if (!string.IsNullOrWhiteSpace(delta))
+                                    {
+                                        textContent.Delta = delta;
+                                    }
+
+                                    var annotationIndex = @object["annotation_index"]?.Value<int>();
+
+                                    if (annotationIndex.HasValue)
+                                    {
+                                        var annotation = sseResponse.Deserialize<Annotation>(@object["annotation"], client);
+                                        textContent.InsertAnnotation(annotation, annotationIndex.Value);
+                                    }
+
+                                    serverSentEvent = textContent;
+                                    break;
+                                case RefusalContent refusalContent:
+                                    var refusal = @object["refusal"]?.Value<string>();
+
+                                    if (!string.IsNullOrWhiteSpace(refusal))
+                                    {
+                                        refusalContent.Refusal = refusal;
+                                    }
+
+                                    if (!string.IsNullOrWhiteSpace(delta))
+                                    {
+                                        refusalContent.Delta = delta;
+                                    }
+
+                                    serverSentEvent = refusalContent;
+                                    break;
+                            }
+                            break;
+                        case "response.reasoning_summary_part.added":
+                        case "response.reasoning_summary_part.done":
+                            break;
+                        case "response.reasoning_summary_text.delta":
+                        case "response.reasoning_summary_text.done":
+                            break;
+                        case "response.web_search_call.completed":
+                        case "response.web_search_call.in_progress":
+                        case "response.web_search_call.searching":
+                            break;
+                        case "error":
+                            serverSentEvent = sseResponse.Deserialize<Error>(client);
+                            break;
+                        default:
+                            // if not properly handled raise it up to caller to deal with it themselves.
+                            serverSentEvent = ssEvent;
+                            break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    @event = "error";
+                    serverSentEvent = new Error(e);
+                }
+                finally
+                {
+                    serverSentEvent ??= ssEvent;
+                    await streamEventHandler.Invoke(@event, serverSentEvent);
+                }
+            }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            // ReSharper restore AccessToModifiedClosure
+            streamResponse.Validate(EnableDebug);
+
+            if (response == null) { return null; }
+
+            response = await response.WaitForStatusChangeAsync(timeout: -1, cancellationToken: cancellationToken);
+            response.SetResponseData(streamResponse, client);
+            return response;
         }
 
         /// <summary>

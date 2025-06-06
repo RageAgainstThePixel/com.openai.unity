@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Responses
 {
     [Preserve]
-    public sealed class MCPApprovalResponse : IResponseItem
+    public sealed class MCPApprovalResponse : BaseResponse, IResponseItem
     {
         [Preserve]
         [JsonConstructor]

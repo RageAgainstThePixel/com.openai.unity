@@ -1,6 +1,7 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Globalization;
 using UnityEngine;
@@ -101,12 +102,17 @@ namespace OpenAI.Extensions
             }
         }
 
-        internal static T Deserialize<T>(this Response response, OpenAIClient client) where T : BaseResponse
+        internal static T Deserialize<T>(this Response response, OpenAIClient client)
         {
             try
             {
                 var result = JsonConvert.DeserializeObject<T>(response.Body, OpenAIClient.JsonSerializationOptions);
-                result.SetResponseData(response, client);
+
+                if (result is BaseResponse baseResponse)
+                {
+                    baseResponse.SetResponseData(response, client);
+                }
+
                 return result;
             }
             catch (Exception)
@@ -114,6 +120,31 @@ namespace OpenAI.Extensions
                 Debug.LogError($"Failed to deserialize:\n{response.Body}");
                 throw;
             }
+        }
+
+        internal static T Deserialize<T>(this Response response, ServerSentEvent ssEvent, OpenAIClient client)
+            => Deserialize<T>(response, ssEvent.Data ?? ssEvent.Value, client);
+
+        internal static T Deserialize<T>(this Response response, JToken jToken, OpenAIClient client)
+        {
+            T result;
+
+            try
+            {
+                result = jToken.ToObject<T>(OpenAIClient.JsonSerializer);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Failed to parse {typeof(T).Name} -> {jToken.ToString(Formatting.Indented)}\n{e}");
+                throw;
+            }
+
+            if (result is BaseResponse baseResponse)
+            {
+                baseResponse.SetResponseData(response, client);
+            }
+
+            return result;
         }
     }
 }

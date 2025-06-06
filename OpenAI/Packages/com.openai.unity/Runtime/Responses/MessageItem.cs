@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Scripting;
@@ -8,7 +9,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Responses
 {
     [Preserve]
-    public sealed class MessageItem : IResponseItem
+    public sealed class MessageItem : BaseResponse, IResponseItem
     {
         [Preserve]
         [JsonConstructor]
@@ -66,8 +67,32 @@ namespace OpenAI.Responses
         [JsonProperty("role", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public Role Role { get; }
 
+        private List<IResponseContent> content;
+
         [Preserve]
         [JsonProperty("content", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public IReadOnlyList<IResponseContent> Content { get; }
+        public IReadOnlyList<IResponseContent> Content
+        {
+            get => content;
+            private set => content = value?.ToList() ?? new();
+        }
+
+        internal void AddContentItem(IResponseContent item, int index)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            if (index > content.Count)
+            {
+                for (var i = content.Count; i < index; i++)
+                {
+                    content.Add(null);
+                }
+            }
+
+            content.Insert(index, item);
+        }
     }
 }

@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Responses
 {
     [Preserve]
-    public sealed class ItemReference : IResponseItem
+    public sealed class ItemReference : BaseResponse, IResponseItem
     {
         [Preserve]
         [JsonConstructor]

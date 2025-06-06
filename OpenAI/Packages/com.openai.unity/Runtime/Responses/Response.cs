@@ -4,12 +4,14 @@ using Newtonsoft.Json;
 using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
+using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI.Responses
 {
     [Preserve]
-    public sealed class Response : BaseResponse
+    public sealed class Response : BaseResponse, IServerSentEvent
     {
         [Preserve]
         [JsonConstructor]
@@ -110,9 +112,15 @@ namespace OpenAI.Responses
         [JsonProperty("incomplete_details", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IncompleteDetails IncompleteDetails { get; }
 
+        private List<IResponseItem> output;
+
         [Preserve]
         [JsonProperty("output", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public IReadOnlyList<IResponseItem> Output { get; }
+        public IReadOnlyList<IResponseItem> Output
+        {
+            get => output;
+            private set => output = value?.ToList() ?? new();
+        }
 
         [Preserve]
         [JsonProperty("output_text", DefaultValueHandling = DefaultValueHandling.Ignore)]
@@ -271,5 +279,22 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonProperty("user", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string User { get; }
+        internal void InsertOutputItem(IResponseItem item, int index)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            if (index > output.Count)
+            {
+                for (var i = output.Count; i < index; i++)
+                {
+                    output.Add(null);
+                }
+            }
+
+            output.Insert(index, item);
+        }
     }
 }

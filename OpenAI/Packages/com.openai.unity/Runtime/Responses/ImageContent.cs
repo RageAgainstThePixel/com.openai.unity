@@ -8,7 +8,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Responses
 {
     [Preserve]
-    public sealed class ImageContent : IResponseContent
+    public sealed class ImageContent : BaseResponse, IResponseContent
     {
         [Preserve]
         [JsonConstructor]
@@ -65,5 +65,8 @@ namespace OpenAI.Responses
 
         [Preserve]
         public static implicit operator ImageContent(Texture2D image) => new(image);
+
+        [JsonIgnore]
+        public string Object => Type.ToString();
     }
 }

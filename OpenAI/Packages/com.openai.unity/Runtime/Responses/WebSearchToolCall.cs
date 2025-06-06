@@ -9,7 +9,7 @@ namespace OpenAI.Responses
     ///  The results of a web search tool call.
     /// </summary>
     [Preserve]
-    public sealed class WebSearchToolCall : IResponseItem
+    public sealed class WebSearchToolCall : BaseResponse, IResponseItem
     {
         [Preserve]
         [JsonConstructor]

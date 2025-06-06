@@ -10,7 +10,7 @@ namespace OpenAI.Responses
     /// A tool call to a computer use tool.
     /// </summary>
     [Preserve]
-    public sealed class ComputerToolCall : IResponseItem
+    public sealed class ComputerToolCall : BaseResponse, IResponseItem
     {
         [Preserve]
         [JsonConstructor]

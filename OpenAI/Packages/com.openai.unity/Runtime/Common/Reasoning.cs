@@ -10,7 +10,7 @@ namespace OpenAI
     /// **o-series models only**
     /// Configuration options for reasoning models.
     /// </summary>
-    public sealed class Reasoning : IResponseItem
+    public sealed class Reasoning : BaseResponse, IResponseItem
     {
         /// <inheritdoc />
         [Preserve]

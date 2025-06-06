@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Responses
 {
     [Preserve]
-    public sealed class RefusalContent : IResponseContent
+    public sealed class RefusalContent : BaseResponse, IResponseContent
     {
         [Preserve]
         [JsonConstructor]
@@ -30,6 +30,12 @@ namespace OpenAI.Responses
         /// </summary>
         [Preserve]
         [JsonProperty("refusal")]
-        public string Refusal { get; }
+        public string Refusal { get; internal set; }
+
+        [JsonIgnore]
+        public string Delta { get; internal set; }
+
+        [JsonIgnore]
+        public string Object => Type.ToString();
     }
 }

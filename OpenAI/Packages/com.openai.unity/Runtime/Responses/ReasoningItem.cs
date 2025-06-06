@@ -10,7 +10,7 @@ namespace OpenAI.Responses
     /// A description of the chain of thought used by a reasoning model while generating a response.
     /// </summary>
     [Preserve]
-    public sealed class ReasoningItem : IResponseItem
+    public sealed class ReasoningItem : BaseResponse, IResponseItem
     {
         [Preserve]
         [JsonConstructor]

@@ -10,7 +10,7 @@ namespace OpenAI.Responses
     /// An image generation request made by the model.
     /// </summary>
     [Preserve]
-    public sealed class ImageGenerationCall : IResponseItem
+    public sealed class ImageGenerationCall : BaseResponse, IResponseItem
     {
         [Preserve]
         [JsonConstructor]

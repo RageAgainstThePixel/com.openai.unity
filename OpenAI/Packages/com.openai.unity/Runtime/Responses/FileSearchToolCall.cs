@@ -10,7 +10,7 @@ namespace OpenAI.Responses
     /// The results of a file search tool call.
     /// </summary>
     [Preserve]
-    public sealed class FileSearchToolCall : IResponseItem
+    public sealed class FileSearchToolCall : BaseResponse, IResponseItem
     {
         [Preserve]
         [JsonConstructor]

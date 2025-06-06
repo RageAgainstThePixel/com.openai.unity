@@ -11,7 +11,7 @@ namespace OpenAI.Responses
     /// A tool call to run code.
     /// </summary>
     [Preserve]
-    public sealed class CodeInterpreterToolCall : IResponseItem
+    public sealed class CodeInterpreterToolCall : BaseResponse, IResponseItem
     {
         [Preserve]
         [JsonConstructor]
