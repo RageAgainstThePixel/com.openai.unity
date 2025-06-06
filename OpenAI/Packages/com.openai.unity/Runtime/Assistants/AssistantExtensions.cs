@@ -19,8 +19,8 @@ namespace OpenAI.Assistants
         /// <param name="request"><see cref="CreateAssistantRequest"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="AssistantResponse"/>.</returns>
-        public static async Task<AssistantResponse> ModifyAsync(this AssistantResponse assistant, CreateAssistantRequest request, CancellationToken cancellationToken = default)
-            => await assistant.Client.AssistantsEndpoint.ModifyAssistantAsync(
+        public static Task<AssistantResponse> ModifyAsync(this AssistantResponse assistant, CreateAssistantRequest request, CancellationToken cancellationToken = default)
+            => assistant.Client.AssistantsEndpoint.ModifyAssistantAsync(
                 assistantId: assistant.Id,
                 request: request ?? new CreateAssistantRequest(assistant),
                 cancellationToken: cancellationToken);
@@ -31,8 +31,8 @@ namespace OpenAI.Assistants
         /// <param name="assistant"><see cref="AssistantResponse"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="AssistantResponse"/>.</returns>
-        public static async Task<AssistantResponse> UpdateAsync(this AssistantResponse assistant, CancellationToken cancellationToken = default)
-            => await assistant.Client.AssistantsEndpoint.RetrieveAssistantAsync(assistant, cancellationToken);
+        public static Task<AssistantResponse> UpdateAsync(this AssistantResponse assistant, CancellationToken cancellationToken = default)
+            => assistant.Client.AssistantsEndpoint.RetrieveAssistantAsync(assistant, cancellationToken);
 
         /// <summary>
         /// Delete the assistant.
@@ -70,7 +70,7 @@ namespace OpenAI.Assistants
         /// <param name="streamEventHandler">Optional, <see cref="Func{IServerSentEvent, Task}"/> stream callback handler.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="RunResponse"/>.</returns>
-        public static async Task<RunResponse> CreateThreadAndRunAsync(this AssistantResponse assistant, CreateThreadRequest request = null, Func<IServerSentEvent, Task> streamEventHandler = null, CancellationToken cancellationToken = default)
+        public static Task<RunResponse> CreateThreadAndRunAsync(this AssistantResponse assistant, CreateThreadRequest request = null, Func<IServerSentEvent, Task> streamEventHandler = null, CancellationToken cancellationToken = default)
         {
             var threadRunRequest = new CreateThreadAndRunRequest(
                 assistant.Id,
@@ -84,7 +84,7 @@ namespace OpenAI.Assistants
                 jsonSchema: assistant.ResponseFormatObject?.JsonSchema,
                 responseFormat: assistant.ResponseFormat,
                 createThreadRequest: request);
-            return await assistant.Client.ThreadsEndpoint.CreateThreadAndRunAsync(threadRunRequest, streamEventHandler, cancellationToken);
+            return assistant.Client.ThreadsEndpoint.CreateThreadAndRunAsync(threadRunRequest, streamEventHandler, cancellationToken);
         }
 
         #region Tools
@@ -155,7 +155,7 @@ namespace OpenAI.Assistants
         /// <param name="toolCall"><see cref="ToolCall"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>Tool output result as <see cref="string"/>.</returns>
-        public static async Task<T> InvokeToolCallAsync<T>(this AssistantResponse assistant, ToolCall toolCall, CancellationToken cancellationToken = default)
+        public static Task<T> InvokeToolCallAsync<T>(this AssistantResponse assistant, ToolCall toolCall, CancellationToken cancellationToken = default)
         {
             if (!toolCall.IsFunction)
             {
@@ -164,7 +164,7 @@ namespace OpenAI.Assistants
 
             var tool = assistant.Tools.FirstOrDefault(tool => tool.Type == "function" && tool.Function.Name == toolCall.Function.Name) ??
                        throw new InvalidOperationException($"Failed to find a valid tool for [{toolCall.Id}] {toolCall.Function.Name}");
-            return await tool.InvokeFunctionAsync<T>(toolCall, cancellationToken);
+            return tool.InvokeFunctionAsync<T>(toolCall, cancellationToken);
         }
 
         /// <summary>
@@ -217,8 +217,8 @@ namespace OpenAI.Assistants
         /// <param name="run">The <see cref="RunResponse"/> to complete the tool calls for.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A collection of <see cref="ToolOutput"/>s.</returns>
-        public static async Task<IReadOnlyList<ToolOutput>> GetToolOutputsAsync(this AssistantResponse assistant, RunResponse run, CancellationToken cancellationToken = default)
-            => await GetToolOutputsAsync(assistant, run.RequiredAction.SubmitToolOutputs.ToolCalls, cancellationToken);
+        public static Task<IReadOnlyList<ToolOutput>> GetToolOutputsAsync(this AssistantResponse assistant, RunResponse run, CancellationToken cancellationToken = default)
+            => GetToolOutputsAsync(assistant, run.RequiredAction.SubmitToolOutputs.ToolCalls, cancellationToken);
 
         #endregion Tools
     }

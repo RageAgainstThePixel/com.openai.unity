@@ -34,7 +34,7 @@ namespace OpenAI.Assistants
         /// <param name="request"><see cref="CreateAssistantRequest"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="AssistantResponse"/>.</returns>
-        public async Task<AssistantResponse> CreateAssistantAsync<T>(CreateAssistantRequest request = null, CancellationToken cancellationToken = default)
+        public Task<AssistantResponse> CreateAssistantAsync<T>(CreateAssistantRequest request = null, CancellationToken cancellationToken = default)
         {
             if (request == null)
             {
@@ -45,7 +45,7 @@ namespace OpenAI.Assistants
                 request.ResponseFormatObject = new TextResponseFormatConfiguration(typeof(T));
             }
 
-            return await CreateAssistantAsync(request, cancellationToken);
+            return CreateAssistantAsync(request, cancellationToken);
         }
 
         /// <summary>
@@ -101,7 +101,8 @@ namespace OpenAI.Assistants
         {
             var response = await Rest.DeleteAsync(GetUrl($"/{assistantId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<DeletedResponse>(client)?.Deleted ?? false;
+            var result = response.Deserialize<DeletedResponse>(client);
+            return result?.Deleted ?? false;
         }
     }
 }

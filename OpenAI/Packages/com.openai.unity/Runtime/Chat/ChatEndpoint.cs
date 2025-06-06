@@ -65,8 +65,8 @@ namespace OpenAI.Chat
         /// </param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="ChatResponse"/>.</returns>
-        public async Task<ChatResponse> StreamCompletionAsync(ChatRequest chatRequest, Action<ChatResponse> resultHandler, bool streamUsage = false, CancellationToken cancellationToken = default)
-            => await StreamCompletionAsync(chatRequest, response =>
+        public Task<ChatResponse> StreamCompletionAsync(ChatRequest chatRequest, Action<ChatResponse> resultHandler, bool streamUsage = false, CancellationToken cancellationToken = default)
+            => StreamCompletionAsync(chatRequest, response =>
             {
                 resultHandler.Invoke(response);
                 return Task.CompletedTask;
@@ -86,11 +86,11 @@ namespace OpenAI.Chat
         /// </param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="ChatResponse"/>.</returns>
-        public async Task<(T, ChatResponse)> StreamCompletionAsync<T>(ChatRequest chatRequest, Action<ChatResponse> resultHandler, bool streamUsage = false, CancellationToken cancellationToken = default)
-            => await StreamCompletionAsync<T>(chatRequest, async response =>
+        public Task<(T, ChatResponse)> StreamCompletionAsync<T>(ChatRequest chatRequest, Action<ChatResponse> resultHandler, bool streamUsage = false, CancellationToken cancellationToken = default)
+            => StreamCompletionAsync<T>(chatRequest, response =>
             {
                 resultHandler.Invoke(response);
-                await Task.CompletedTask;
+                return Task.CompletedTask;
             }, streamUsage, cancellationToken);
 
         /// <summary>
