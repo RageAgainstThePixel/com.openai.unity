@@ -2,7 +2,7 @@
 
 using NUnit.Framework;
 using OpenAI.Images;
-using OpenAI.Models;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEditor;
@@ -12,29 +12,24 @@ namespace OpenAI.Tests
 {
     internal class TestFixture_05_Images : AbstractTestFixture
     {
-        [Test]
-        public async Task Test_01_01_GenerateImages()
+        private string testDirectory;
+
+        [OneTimeSetUp]
+        public void Setup()
         {
-            Assert.IsNotNull(OpenAIClient.ImagesEndPoint);
-            var request = new ImageGenerationRequest("A house riding a velociraptor", Model.DallE_3);
-            var imageResults = await OpenAIClient.ImagesEndPoint.GenerateImageAsync(request);
+            testDirectory = Path.GetFullPath($"{Application.dataPath}/Assets/Tests/{nameof(TestFixture_05_Images)}");
 
-            Assert.IsNotNull(imageResults);
-            Assert.NotZero(imageResults.Count);
-
-            foreach (var image in imageResults)
+            if (!Directory.Exists(testDirectory))
             {
-                Assert.IsNotNull(image.Texture);
-                Debug.Log(image.ToString());
+                Directory.CreateDirectory(testDirectory);
             }
         }
 
         [Test]
-        public async Task Test_01_02_GenerateImages_B64_Json()
+        public async Task Test_01_01_GenerateImages()
         {
             Assert.IsNotNull(OpenAIClient.ImagesEndPoint);
-
-            var request = new ImageGenerationRequest("A house riding a velociraptor", Model.DallE_2, responseFormat: ImageResponseFormat.B64_Json);
+            var request = new ImageGenerationRequest("A house riding a velociraptor", outputFormat: "jpeg");
             var imageResults = await OpenAIClient.ImagesEndPoint.GenerateImageAsync(request);
 
             Assert.IsNotNull(imageResults);
@@ -43,7 +38,12 @@ namespace OpenAI.Tests
             foreach (var image in imageResults)
             {
                 Assert.IsNotNull(image);
-                Debug.Log(image);
+                Assert.IsFalse(string.IsNullOrWhiteSpace(image.B64_Json));
+                var imageBytes = Convert.FromBase64String(image.B64_Json);
+                Assert.IsNotNull(imageBytes);
+                var path = Path.Combine(testDirectory, $"{nameof(Test_01_01_GenerateImages)}-{DateTime.UtcNow:yyyyMMddHHmmss}.jpeg");
+                await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
+                await fileStream.WriteAsync(imageBytes, 0, imageBytes.Length);
             }
         }
 
@@ -53,7 +53,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ImagesEndPoint);
             var imageAssetPath = AssetDatabase.GUIDToAssetPath("230fd778637d3d84d81355c8c13b1999");
             var maskAssetPath = AssetDatabase.GUIDToAssetPath("0be6be2fad590cc47930495d2ca37dd6");
-            var request = new ImageEditRequest(Path.GetFullPath(imageAssetPath), Path.GetFullPath(maskAssetPath), "A sunlit indoor lounge area with a pool containing a flamingo", size: ImageSize.Small);
+            var request = new ImageEditRequest(
+                prompt: "A sunlit indoor lounge area with a pool containing a flamingo",
+                imagePath: Path.GetFullPath(imageAssetPath),
+                maskPath: Path.GetFullPath(maskAssetPath));
             var imageResults = await OpenAIClient.ImagesEndPoint.CreateImageEditAsync(request);
 
             Assert.IsNotNull(imageResults);
@@ -74,28 +77,10 @@ namespace OpenAI.Tests
             var image = AssetDatabase.LoadAssetAtPath<Texture2D>(imageAssetPath);
             var maskAssetPath = AssetDatabase.GUIDToAssetPath("0be6be2fad590cc47930495d2ca37dd6");
             var mask = AssetDatabase.LoadAssetAtPath<Texture2D>(maskAssetPath);
-            var request = new ImageEditRequest(image, mask, "A sunlit indoor lounge area with a pool containing a flamingo", size: ImageSize.Small);
-            var imageResults = await OpenAIClient.ImagesEndPoint.CreateImageEditAsync(request);
-
-            Assert.IsNotNull(imageResults);
-            Assert.NotZero(imageResults.Count);
-
-            foreach (var result in imageResults)
-            {
-                Assert.IsNotNull(result.Texture);
-                Debug.Log(result.ToString());
-            }
-        }
-
-        [Test]
-        public async Task Test_02_04_CreateImageEdit_Texture_B64_Json()
-        {
-            Assert.IsNotNull(OpenAIClient.ImagesEndPoint);
-            var imageAssetPath = AssetDatabase.GUIDToAssetPath("230fd778637d3d84d81355c8c13b1999");
-            var image = AssetDatabase.LoadAssetAtPath<Texture2D>(imageAssetPath);
-            var maskAssetPath = AssetDatabase.GUIDToAssetPath("0be6be2fad590cc47930495d2ca37dd6");
-            var mask = AssetDatabase.LoadAssetAtPath<Texture2D>(maskAssetPath);
-            var request = new ImageEditRequest(image, mask, "A sunlit indoor lounge area with a pool containing a flamingo", size: ImageSize.Small, responseFormat: ImageResponseFormat.B64_Json);
+            var request = new ImageEditRequest(
+                prompt: "A sunlit indoor lounge area with a pool containing a flamingo",
+                texture: image,
+                mask: mask);
             var imageResults = await OpenAIClient.ImagesEndPoint.CreateImageEditAsync(request);
 
             Assert.IsNotNull(imageResults);
@@ -114,7 +99,9 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ImagesEndPoint);
             var maskAssetPath = AssetDatabase.GUIDToAssetPath("0be6be2fad590cc47930495d2ca37dd6");
             var mask = AssetDatabase.LoadAssetAtPath<Texture2D>(maskAssetPath);
-            var request = new ImageEditRequest(mask, null, "A sunlit indoor lounge area with a pool containing a flamingo", size: ImageSize.Small);
+            var request = new ImageEditRequest(
+                prompt: "A sunlit indoor lounge area with a pool containing a flamingo",
+                texture: mask);
             var imageResults = await OpenAIClient.ImagesEndPoint.CreateImageEditAsync(request);
 
             Assert.IsNotNull(imageResults);
@@ -151,7 +138,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ImagesEndPoint);
             var imageAssetPath = AssetDatabase.GUIDToAssetPath("230fd778637d3d84d81355c8c13b1999");
             var image = AssetDatabase.LoadAssetAtPath<Texture2D>(imageAssetPath);
-            var request = new ImageVariationRequest(image, size: ImageSize.Small);
+            var request = new ImageVariationRequest(image, size: "256x256");
             var imageResults = await OpenAIClient.ImagesEndPoint.CreateImageVariationAsync(request);
 
             Assert.IsNotNull(imageResults);
@@ -170,7 +157,7 @@ namespace OpenAI.Tests
             Assert.IsNotNull(OpenAIClient.ImagesEndPoint);
             var imageAssetPath = AssetDatabase.GUIDToAssetPath("230fd778637d3d84d81355c8c13b1999");
             var image = AssetDatabase.LoadAssetAtPath<Texture2D>(imageAssetPath);
-            var request = new ImageVariationRequest(image, size: ImageSize.Small, responseFormat: ImageResponseFormat.B64_Json);
+            var request = new ImageVariationRequest(image, size: "256x256", responseFormat: ImageResponseFormat.B64_Json);
             var imageResults = await OpenAIClient.ImagesEndPoint.CreateImageVariationAsync(request);
 
             Assert.IsNotNull(imageResults);

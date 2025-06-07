@@ -1,13 +1,13 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using OpenAI.Extensions;
 using UnityEngine;
 using Utilities.Async;
 using Utilities.WebRequestRest;
@@ -55,9 +55,23 @@ namespace OpenAI.Images
 
             try
             {
-                using var imageData = new MemoryStream();
-                await request.Image.CopyToAsync(imageData, cancellationToken);
-                payload.AddBinaryData("image", imageData.ToArray(), request.ImageName);
+                if (!string.IsNullOrWhiteSpace(request.Model))
+                {
+                    payload.AddField("model", request.Model);
+                }
+
+                payload.AddField("prompt", request.Prompt);
+
+                async Task ProcessImageAsync(WWWForm content, int index, KeyValuePair<string, Stream> value)
+                {
+                    using var imageData = new MemoryStream();
+                    var (name, image) = value;
+                    await image.CopyToAsync(imageData, cancellationToken);
+                    content.AddBinaryData($"image_{index}", imageData.ToArray(), name);
+                }
+
+                await Task.WhenAll(request.Images.Select((image, i)
+                    => ProcessImageAsync(payload, i, image)).ToList());
 
                 if (request.Mask != null)
                 {
@@ -66,10 +80,25 @@ namespace OpenAI.Images
                     payload.AddBinaryData("mask", maskData.ToArray(), request.MaskName);
                 }
 
-                payload.AddField("prompt", request.Prompt);
-                payload.AddField("n", request.Number.ToString());
-                payload.AddField("size", request.Size);
-                payload.AddField("response_format", request.ResponseFormat.ToString().ToLower());
+                if (request.Number.HasValue)
+                {
+                    payload.AddField("n", request.Number.ToString());
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.Size))
+                {
+                    payload.AddField("size", request.Size);
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.Quality))
+                {
+                    payload.AddField("quality", request.Quality);
+                }
+
+                if (request.ResponseFormat > 0)
+                {
+                    payload.AddField("response_format", request.ResponseFormat.ToString().ToLower());
+                }
 
                 if (!string.IsNullOrWhiteSpace(request.User))
                 {
@@ -100,10 +129,28 @@ namespace OpenAI.Images
             {
                 using var imageData = new MemoryStream();
                 await request.Image.CopyToAsync(imageData, cancellationToken);
+
                 payload.AddBinaryData("image", imageData.ToArray(), request.ImageName);
-                payload.AddField("n", request.Number.ToString());
-                payload.AddField("size", request.Size);
-                payload.AddField("response_format", request.ResponseFormat.ToString().ToLower());
+
+                if (!string.IsNullOrWhiteSpace(request.Model))
+                {
+                    payload.AddField("model", request.Model);
+                }
+
+                if (request.Number.HasValue)
+                {
+                    payload.AddField("n", request.Number.ToString());
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.Size))
+                {
+                    payload.AddField("size", request.Size);
+                }
+
+                if (request.ResponseFormat > 0)
+                {
+                    payload.AddField("response_format", request.ResponseFormat.ToString().ToLower());
+                }
 
                 if (!string.IsNullOrWhiteSpace(request.User))
                 {
