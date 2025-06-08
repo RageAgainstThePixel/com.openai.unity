@@ -62,16 +62,17 @@ namespace OpenAI.Images
 
                 payload.AddField("prompt", request.Prompt);
 
-                async Task ProcessImageAsync(WWWForm content, int index, KeyValuePair<string, Stream> value)
+                var imageLabel = request.Images.Count > 1 ? "image[]" : "image";
+
+                async Task ProcessImageAsync(WWWForm content, KeyValuePair<string, Stream> value)
                 {
                     using var imageData = new MemoryStream();
                     var (name, image) = value;
                     await image.CopyToAsync(imageData, cancellationToken);
-                    content.AddBinaryData($"image_{index}", imageData.ToArray(), name);
+                    content.AddBinaryData(imageLabel, imageData.ToArray(), name);
                 }
 
-                await Task.WhenAll(request.Images.Select((image, i)
-                    => ProcessImageAsync(payload, i, image)).ToList());
+                await Task.WhenAll(request.Images.Select(image => ProcessImageAsync(payload, image)).ToList());
 
                 if (request.Mask != null)
                 {
@@ -172,7 +173,8 @@ namespace OpenAI.Images
 
             var imagesResponse = response.Deserialize<ImagesResponse>(client);
 
-            if (imagesResponse?.Results is not { Count: not 0 })
+            if (imagesResponse == null ||
+                imagesResponse.Results.Count == 0)
             {
                 throw new Exception($"No image content returned!\n{response.Body}");
             }
@@ -202,6 +204,17 @@ namespace OpenAI.Images
             }
 
             await Task.WhenAll(downloads).ConfigureAwait(true);
+
+            foreach (var result in imagesResponse.Results)
+            {
+                result.CreatedAt = DateTimeOffset.FromUnixTimeSeconds(imagesResponse.CreatedAtUnixSeconds).UtcDateTime;
+                result.Background = imagesResponse.Background;
+                result.OutputFormat = imagesResponse.OutputFormat;
+                result.Quality = imagesResponse.Quality;
+                result.Size = imagesResponse.Size;
+                result.Usage = imagesResponse.Usage;
+            }
+
             return imagesResponse.Results;
         }
     }

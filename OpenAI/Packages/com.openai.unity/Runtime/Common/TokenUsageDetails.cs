@@ -3,11 +3,25 @@
 using Newtonsoft.Json;
 using UnityEngine.Scripting;
 
-namespace OpenAI.Realtime
+namespace OpenAI
 {
     [Preserve]
     public sealed class TokenUsageDetails
     {
+        [Preserve]
+        [JsonConstructor]
+        internal TokenUsageDetails(
+            [JsonProperty("cached_tokens")] int? cachedTokens,
+            [JsonProperty("text_tokens")] int? textTokens,
+            [JsonProperty("audio_tokens")] int? audioTokens,
+            [JsonProperty("image_tokens")] int? imageTokens)
+        {
+            CachedTokens = cachedTokens;
+            TextTokens = textTokens;
+            AudioTokens = audioTokens;
+            ImageTokens = imageTokens;
+        }
+
         /// <summary>
         /// The number of cached tokens used in the Response.
         /// </summary>
@@ -29,6 +43,9 @@ namespace OpenAI.Realtime
         [JsonProperty("audio_tokens")]
         public int? AudioTokens { get; }
 
+        /// <summary>
+        /// The number of image tokens used in the Response.
+        /// </summary>
         [Preserve]
         [JsonProperty("image_tokens")]
         public int? ImageTokens { get; }
