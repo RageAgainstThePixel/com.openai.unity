@@ -272,7 +272,7 @@ namespace OpenAI.Tests
         }
 
         [Test]
-        public async Task Test_03_04_CreateImageVariation_Texture_B64_Json()
+        public async Task Test_03_03_CreateImageVariation_Texture_B64_Json()
         {
             try
             {
@@ -293,7 +293,7 @@ namespace OpenAI.Tests
                     Assert.IsFalse(string.IsNullOrWhiteSpace(result.B64_Json));
                     var imageBytes = Convert.FromBase64String(result.B64_Json);
                     Assert.IsNotNull(imageBytes);
-                    var path = Path.Combine(testDirectory, $"{nameof(Test_03_04_CreateImageVariation_Texture_B64_Json)}-{i}-{DateTime.UtcNow:yyyyMMddHHmmss}.png");
+                    var path = Path.Combine(testDirectory, $"{nameof(Test_03_03_CreateImageVariation_Texture_B64_Json)}-{i}-{DateTime.UtcNow:yyyyMMddHHmmss}.png");
                     await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
                     await fileStream.WriteAsync(imageBytes, 0, imageBytes.Length);
                 }
