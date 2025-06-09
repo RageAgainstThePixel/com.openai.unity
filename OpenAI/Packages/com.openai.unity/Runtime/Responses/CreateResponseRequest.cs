@@ -15,7 +15,7 @@ namespace OpenAI.Responses
     {
         [Preserve]
         public static implicit operator CreateResponseRequest(string textInput) =>
-            new(new List<IResponseItem> { new MessageItem(Role.User, new TextContent(textInput)) });
+            new(new List<IResponseItem> { new Message(Role.User, new TextContent(textInput)) });
 
         [Preserve]
         public CreateResponseRequest(
@@ -40,7 +40,7 @@ namespace OpenAI.Responses
             Truncation truncation = Truncation.Auto,
             string user = null)
         : this(
-            input: new List<IResponseItem> { new MessageItem(Role.User, new TextContent(textInput)) },
+            input: new List<IResponseItem> { new Message(Role.User, new TextContent(textInput)) },
             model: model,
             background: background,
             include: include,
@@ -114,7 +114,7 @@ namespace OpenAI.Responses
                 };
             }
 
-            tools.ProcessTools(toolChoice, out var toolList, out var activeTool);
+            tools.ProcessTools<ITool>(toolChoice, out var toolList, out var activeTool);
             Tools = toolList;
             ToolChoice = activeTool;
             TopP = topP;
@@ -273,7 +273,7 @@ namespace OpenAI.Responses
         /// </summary>
         [Preserve]
         [JsonProperty("tools", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public IReadOnlyList<Tool> Tools { get; }
+        public IReadOnlyList<ITool> Tools { get; }
 
         /// <summary>
         /// An alternative to sampling with temperature, called nucleus sampling,

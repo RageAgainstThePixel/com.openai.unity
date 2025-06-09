@@ -22,17 +22,17 @@ namespace OpenAI.Responses
 
             return type switch
             {
-                "message" => jObject.ToObject<MessageItem>(serializer),
+                "message" => jObject.ToObject<Message>(serializer),
                 "computer_call" => jObject.ToObject<ComputerToolCall>(serializer),
                 "computer_call_output" => jObject.ToObject<ComputerToolCall>(serializer),
                 "function_call" => jObject.ToObject<FunctionToolCall>(serializer),
-                "function_call_output" => jObject.ToObject<FunctionToolCall>(serializer),
+                "function_call_output" => jObject.ToObject<FunctionToolCallOutput>(serializer),
                 "image_generation_call" => jObject.ToObject<ImageGenerationCall>(serializer),
                 "local_shell_call" => jObject.ToObject<LocalShellCall>(serializer),
                 "local_shell_call_output" => jObject.ToObject<LocalShellCall>(serializer),
                 "file_search_call" => jObject.ToObject<FileSearchToolCall>(serializer),
                 "web_search_call" => jObject.ToObject<WebSearchToolCall>(serializer),
-                "reasoning" => jObject.ToObject<Reasoning>(serializer),
+                "reasoning" => jObject.ToObject<ReasoningItem>(serializer),
                 "mcp_call" => jObject.ToObject<MCPToolCall>(serializer),
                 "mcp_approval_request" => jObject.ToObject<MCPApprovalRequest>(serializer),
                 "mcp_approval_response" => jObject.ToObject<MCPApprovalResponse>(serializer),

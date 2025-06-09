@@ -1,7 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using OpenAI.Responses;
 using UnityEngine.Scripting;
 
 namespace OpenAI
@@ -10,42 +9,44 @@ namespace OpenAI
     /// **o-series models only**
     /// Configuration options for reasoning models.
     /// </summary>
-    public sealed class Reasoning : BaseResponse, IResponseItem
+    [Preserve]
+    public sealed class Reasoning
     {
-        /// <inheritdoc />
-        [Preserve]
-        [JsonProperty("id", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string Id { get; }
+        public static implicit operator Reasoning(ReasoningEffort effort) => new(effort);
 
-        /// <inheritdoc />
         [Preserve]
-        [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Include)]
-        public ResponseItemType Type { get; }
+        [JsonConstructor]
+        internal Reasoning(
+            [JsonProperty("effort")] ReasoningEffort? effort = null,
+            [JsonProperty("summary")] ReasoningSummary? summary = null)
+        {
+            Effort = effort;
+            Summary = summary;
+        }
 
-        /// <inheritdoc />
         [Preserve]
-        [JsonProperty("object", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string Object { get; }
-
-        /// <inheritdoc />
-        [Preserve]
-        [JsonProperty("status", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public ResponseStatus Status { get; }
+        public Reasoning(ReasoningEffort effort, ReasoningSummary summary = ReasoningSummary.Auto)
+        {
+            Effort = effort;
+            Summary = summary;
+        }
 
         /// <summary>
         /// Constrains effort on reasoning for reasoning models.
         /// Currently supported values are: Low, Medium, High.
         /// Reducing reasoning effort can result in faster responses and fewer tokens used on reasoning in a response.
         /// </summary>
+        [Preserve]
         [JsonProperty("effort", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public ReasoningEffort Effort { get; }
+        public ReasoningEffort? Effort { get; }
 
         /// <summary>
         /// A summary of the reasoning performed by the model.
         /// This can be useful for debugging and understanding the model's reasoning process.
         /// One of `auto`, `concise`, or `detailed`.
         /// </summary>
+        [Preserve]
         [JsonProperty("summary", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public ReasoningSummary Summary { get; }
+        public ReasoningSummary? Summary { get; }
     }
 }

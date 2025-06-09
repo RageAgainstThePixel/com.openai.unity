@@ -4,16 +4,26 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Responses
 {
     [Preserve]
-    public sealed class MessageItem : BaseResponse, IResponseItem
+    public sealed class Message : BaseResponse, IResponseItem
     {
         [Preserve]
+        public static implicit operator Message(string input) => new(Role.User, input);
+
+        [Preserve]
+        public static implicit operator Message(Texture2D input) => new(Role.User, input);
+
+        [Preserve]
+        public static implicit operator Message(AudioClip input) => new(Role.User, input);
+
+        [Preserve]
         [JsonConstructor]
-        internal MessageItem(
+        internal Message(
             [JsonProperty("id")] string id,
             [JsonProperty("type")] ResponseItemType type,
             [JsonProperty("object")] string @object,
@@ -30,13 +40,31 @@ namespace OpenAI.Responses
         }
 
         [Preserve]
-        public MessageItem(Role role, IResponseContent content)
+        public Message(Role role, string text)
+            : this(role, new TextContent(text))
+        {
+        }
+
+        [Preserve]
+        public Message(Role role, Texture2D image)
+            : this(role, new ImageContent(image))
+        {
+        }
+
+        [Preserve]
+        public Message(Role role, AudioClip clip)
+            : this(role, new AudioContent(clip))
+        {
+        }
+
+        [Preserve]
+        public Message(Role role, IResponseContent content)
             : this(role, new[] { content })
         {
         }
 
         [Preserve]
-        public MessageItem(Role role, IEnumerable<IResponseContent> content)
+        public Message(Role role, IEnumerable<IResponseContent> content)
         {
             Type = ResponseItemType.Message;
             Role = role;

@@ -59,6 +59,11 @@ namespace OpenAI.Responses
                 IServerSentEvent serverSentEvent = null;
                 var @event = ssEvent.Value.Value<string>();
                 var @object = ssEvent.Data ?? ssEvent.Value;
+                var text = @object["text"]?.Value<string>();
+                var delta = @object["delta"]?.Value<string>();
+                var itemId = @object["item_id"]?.Value<string>();
+                var outputIndex = @object["output_index"]?.Value<int>();
+                var contentIndex = @object["content_index"]?.Value<int>();
 
                 // ReSharper disable once AccessToModifiedClosure
                 try
@@ -98,17 +103,20 @@ namespace OpenAI.Responses
                             break;
                         case "response.content_part.added":
                         case "response.content_part.done":
-                            var outputIndex = @object["output_index"]!.Value<int>();
-                            var contentIndex = @object["content_index"]!.Value<int>();
-                            var itemId = @object["item_id"]!.Value<string>();
-                            var part = sseResponse.Deserialize<TextContent>(@object["part"], client);
-                            var messageItem = (MessageItem)response!.Output[outputIndex];
+                            var part = sseResponse.Deserialize<IResponseContent>(@object["part"], client);
+                            var messageItem = (Message)response!.Output[outputIndex!.Value];
+
                             if (messageItem.Id != itemId)
                             {
                                 throw new InvalidOperationException($"MessageItem ID mismatch! Expected: {messageItem.Id}, got: {itemId}");
                             }
-                            messageItem.AddContentItem(part, contentIndex);
-                            serverSentEvent = messageItem;
+
+                            messageItem.AddContentItem(part, contentIndex!.Value);
+
+                            if (@event == "response.content_part.done")
+                            {
+                                serverSentEvent = part;
+                            }
                             break;
                         case "response.file_search_call.completed":
                         case "response.file_search_call.in_progress":
@@ -116,32 +124,31 @@ namespace OpenAI.Responses
                             break;
                         case "response.output_item.added":
                         case "response.output_item.done":
-                            outputIndex = @object["output_index"]!.Value<int>();
                             var item = sseResponse.Deserialize<IResponseItem>(@object["item"], client);
-                            response!.InsertOutputItem(item, outputIndex);
-                            serverSentEvent = item;
+                            response!.InsertOutputItem(item, outputIndex!.Value);
+
+                            if (@event == "response.output_item.done")
+                            {
+                                serverSentEvent = item;
+                            }
                             break;
                         case "response.audio.delta":
                         case "response.audio.done":
                         case "response.audio.transcript.delta":
                         case "response.audio.transcript.done":
-                        case "response.function_call_arguments.delta":
-                        case "response.function_call_arguments.done":
                         case "response.output_text.annotation.added":
                         case "response.output_text.delta":
                         case "response.output_text.done":
                         case "response.refusal.delta":
                         case "response.refusal.done":
-                            outputIndex = @object["output_index"]!.Value<int>();
-                            contentIndex = @object["content_index"]!.Value<int>();
-                            itemId = @object["item_id"]!.Value<string>();
-                            var delta = @object["delta"]?.Value<string>();
-                            messageItem = (MessageItem)response!.Output[outputIndex];
+                            messageItem = (Message)response!.Output[outputIndex!.Value];
+
                             if (messageItem.Id != itemId)
                             {
                                 throw new InvalidOperationException($"MessageItem ID mismatch! Expected: {messageItem.Id}, got: {itemId}");
                             }
-                            var contentItem = messageItem.Content[contentIndex];
+
+                            var contentItem = messageItem.Content[contentIndex!.Value];
 
                             switch (contentItem)
                             {
@@ -168,17 +175,12 @@ namespace OpenAI.Responses
                                     }
                                     break;
                                 case TextContent textContent:
-                                    var text = @object["text"]?.Value<string>();
-
                                     if (!string.IsNullOrWhiteSpace(text))
                                     {
                                         textContent.Text = text;
                                     }
 
-                                    if (!string.IsNullOrWhiteSpace(delta))
-                                    {
-                                        textContent.Delta = delta;
-                                    }
+                                    textContent.Delta = !string.IsNullOrWhiteSpace(delta) ? delta : null;
 
                                     var annotationIndex = @object["annotation_index"]?.Value<int>();
 
@@ -209,9 +211,30 @@ namespace OpenAI.Responses
                             break;
                         case "response.reasoning_summary_part.added":
                         case "response.reasoning_summary_part.done":
+                            var summaryIndex = @object["summary_index"]!.Value<int>();
+                            var reasoningItem = (ReasoningItem)response!.Output[outputIndex!.Value];
+                            var summaryItem = sseResponse.Deserialize<ReasoningSummary>(@object["part"], client);
+                            reasoningItem.InsertSummary(summaryItem, summaryIndex);
+
+                            if (@event == "response.reasoning_summary_part.done")
+                            {
+                                serverSentEvent = summaryItem;
+                            }
+
                             break;
                         case "response.reasoning_summary_text.delta":
                         case "response.reasoning_summary_text.done":
+                            summaryIndex = @object["summary_index"]!.Value<int>();
+                            reasoningItem = (ReasoningItem)response!.Output[outputIndex!.Value];
+                            summaryItem = reasoningItem.Summary[summaryIndex];
+
+                            if (!string.IsNullOrWhiteSpace(text))
+                            {
+                                summaryItem.Text = text;
+                            }
+
+                            summaryItem.Delta = !string.IsNullOrWhiteSpace(delta) ? delta : null;
+                            serverSentEvent = summaryItem;
                             break;
                         case "response.web_search_call.completed":
                         case "response.web_search_call.in_progress":

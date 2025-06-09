@@ -18,7 +18,7 @@ namespace OpenAI.Responses
             [JsonProperty("status")] ResponseStatus status,
             [JsonProperty("server_label")] string serverLabel,
             [JsonProperty("error")] string error,
-            [JsonProperty("tools")] IReadOnlyList<MCPTool> tools)
+            [JsonProperty("tools")] IReadOnlyList<MCPServerTool> tools)
         {
             Id = id;
             Type = type;
@@ -26,7 +26,7 @@ namespace OpenAI.Responses
             Status = status;
             ServerLabel = serverLabel;
             Error = error;
-            Tools = tools ?? new List<MCPTool>();
+            Tools = tools ?? new List<MCPServerTool>();
         }
 
         /// <inheritdoc />
@@ -68,6 +68,6 @@ namespace OpenAI.Responses
         /// </summary>
         [Preserve]
         [JsonProperty("tools")]
-        public IReadOnlyList<MCPTool> Tools { get; }
+        public IReadOnlyList<MCPServerTool> Tools { get; }
     }
 }

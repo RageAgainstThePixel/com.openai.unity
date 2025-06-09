@@ -2,11 +2,12 @@
 
 using Newtonsoft.Json;
 using UnityEngine.Scripting;
+using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI.Responses
 {
     [Preserve]
-    public sealed class ReasoningSummary
+    public sealed class ReasoningSummary : IServerSentEvent
     {
         [Preserve]
         [JsonConstructor]
@@ -27,6 +28,23 @@ namespace OpenAI.Responses
         /// </summary>
         [Preserve]
         [JsonProperty("text")]
-        public string Text { get; }
+        public string Text { get; internal set; }
+
+        [Preserve]
+        [JsonIgnore]
+        public string Delta { get; internal set; }
+
+        [Preserve]
+        [JsonIgnore]
+        public string Object
+            => Type;
+
+        [Preserve]
+        public string ToJsonString()
+            => JsonConvert.SerializeObject(this, OpenAIClient.JsonSerializationOptions);
+
+        [Preserve]
+        public override string ToString()
+            => Text;
     }
 }

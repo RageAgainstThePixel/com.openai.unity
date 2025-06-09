@@ -193,7 +193,15 @@ namespace OpenAI.Realtime
                     }
                     catch (Exception e)
                     {
-                        Debug.LogException(e);
+                        switch (e)
+                        {
+                            case TaskCanceledException:
+                            case OperationCanceledException:
+                                break;
+                            default:
+                                Debug.LogException(e);
+                                break;
+                        }
                     }
                 } while (!cancellationToken.IsCancellationRequested && websocketClient.State == State.Open);
             }
@@ -293,7 +301,7 @@ namespace OpenAI.Realtime
                 return null;
             }
 
-            var response = await tcs.Task.WithCancellation(eventCts.Token);
+            var response = await tcs.Task.WithCancellation(eventCts.Token).ConfigureAwait(true);
 
             if (EnableDebug)
             {

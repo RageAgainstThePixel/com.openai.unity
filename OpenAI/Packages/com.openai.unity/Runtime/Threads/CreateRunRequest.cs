@@ -146,7 +146,7 @@ namespace OpenAI.Threads
             Instructions = instructions;
             AdditionalInstructions = additionalInstructions;
             AdditionalMessages = additionalMessages?.ToList();
-            tools.ProcessTools(toolChoice, out var toolList, out var activeTool);
+            tools.ProcessTools<Tool>(toolChoice, out var toolList, out var activeTool);
             Tools = toolList;
             ToolChoice = activeTool;
             Metadata = metadata;

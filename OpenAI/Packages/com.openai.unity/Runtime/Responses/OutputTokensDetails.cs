@@ -24,5 +24,9 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonProperty("reasoning_tokens")]
         public int ReasoningTokens { get; }
+
+        [Preserve]
+        public override string ToString()
+            => JsonConvert.SerializeObject(this, Formatting.Indented, OpenAIClient.JsonSerializationOptions);
     }
 }
