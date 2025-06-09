@@ -1,12 +1,13 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using NUnit.Framework;
+using OpenAI.Extensions;
+using OpenAI.Models;
+using OpenAI.Realtime;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using NUnit.Framework;
-using OpenAI.Models;
-using OpenAI.Realtime;
 using UnityEngine;
 
 namespace OpenAI.Tests
@@ -17,6 +18,7 @@ namespace OpenAI.Tests
         public async Task Test_01_RealtimeSession()
         {
             RealtimeSession session = null;
+            Tool.ClearRegisteredTools();
 
             try
             {
@@ -32,8 +34,8 @@ namespace OpenAI.Tests
                         {
                            wasGoodbyeCalled = true;
                         }
-                        Debug.Log("Hanging up...");
                         cts.Cancel();
+                        Debug.Log("Hanging up...");
                         return "Goodbye!";
                     })
                 };
@@ -71,9 +73,8 @@ namespace OpenAI.Tests
                         case ResponseFunctionCallArgumentsResponse functionCallResponse:
                             if (functionCallResponse.IsDone)
                             {
-                                var toolCall = (ToolCall)functionCallResponse;
-                                Debug.Log($"tool_call: {toolCall.Function.Name}");
-                                await toolCall.InvokeFunctionAsync(cts.Token);
+                                Debug.Log($"tool_call: {functionCallResponse.Name}");
+                                await functionCallResponse.InvokeFunctionAsync(cts.Token);
                             }
 
                             break;
@@ -102,6 +103,7 @@ namespace OpenAI.Tests
         public async Task Test_02_RealtimeSession_Semantic_VAD()
         {
             RealtimeSession session = null;
+            Tool.ClearRegisteredTools();
 
             try
             {
@@ -117,8 +119,8 @@ namespace OpenAI.Tests
                         {
                             wasGoodbyeCalled = true;
                         }
-                        Debug.Log("Hanging up...");
                         cts.Cancel();
+                        Debug.Log("Hanging up...");
                         return "Goodbye!";
                     })
                 };
@@ -159,9 +161,8 @@ namespace OpenAI.Tests
                         case ResponseFunctionCallArgumentsResponse functionCallResponse:
                             if (functionCallResponse.IsDone)
                             {
-                                var toolCall = (ToolCall)functionCallResponse;
-                                Debug.Log($"tool_call: {toolCall.Function.Name}");
-                                await toolCall.InvokeFunctionAsync(cts.Token);
+                                Debug.Log($"tool_call: {functionCallResponse.Name}");
+                                await functionCallResponse.InvokeFunctionAsync(cts.Token);
                             }
 
                             break;
@@ -190,6 +191,7 @@ namespace OpenAI.Tests
         public async Task Test_03_RealtimeSession_VAD_Disabled()
         {
             RealtimeSession session = null;
+            Tool.ClearRegisteredTools();
 
             try
             {
@@ -205,8 +207,8 @@ namespace OpenAI.Tests
                         {
                             wasGoodbyeCalled = true;
                         }
-                        Debug.Log("Hanging up...");
                         cts.Cancel();
+                        Debug.Log("Hanging up...");
                         return "Goodbye!";
                     })
                 };
@@ -247,9 +249,8 @@ namespace OpenAI.Tests
                         case ResponseFunctionCallArgumentsResponse functionCallResponse:
                             if (functionCallResponse.IsDone)
                             {
-                                var toolCall = (ToolCall)functionCallResponse;
-                                Debug.Log($"tool_call: {toolCall.Function.Name}");
-                                await toolCall.InvokeFunctionAsync(cts.Token);
+                                Debug.Log($"tool_call: {functionCallResponse.Name}");
+                                await functionCallResponse.InvokeFunctionAsync(cts.Token);
                             }
 
                             break;

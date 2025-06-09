@@ -24,5 +24,9 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonProperty("cached_tokens")]
         public int CachedTokens { get; }
+
+        [Preserve]
+        public override string ToString()
+            => JsonConvert.SerializeObject(this, Formatting.Indented, OpenAIClient.JsonSerializationOptions);
     }
 }

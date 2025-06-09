@@ -5,6 +5,7 @@ using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using UnityEngine.Scripting;
 using Utilities.WebRequestRest.Interfaces;
 
@@ -19,28 +20,28 @@ namespace OpenAI.Responses
             [JsonProperty("id")] string id,
             [JsonProperty("object")] string @object,
             [JsonProperty("created_at")] int createdAtUnixSeconds,
-            [JsonProperty("background")] bool? background,
-            [JsonProperty("error")] Error error,
-            [JsonProperty("incomplete_details")] IncompleteDetails incompleteDetails,
-            [JsonProperty("output")] IReadOnlyList<IResponseItem> output,
-            [JsonProperty("output_text")] string outputText,
-            [JsonProperty("usage")] ResponseUsage usage,
-            [JsonProperty("parallel_tool_calls")] bool? parallelToolCalls,
-            [JsonProperty("instructions")] string instructions,
-            [JsonProperty("max_output_tokens")] int? maxOutputTokens,
-            [JsonProperty("metadata")] IReadOnlyDictionary<string, string> metadata,
-            [JsonProperty("model")] string model,
-            [JsonProperty("previous_response_id")] string previousResponseId,
-            [JsonProperty("reasoning")] Reasoning reasoning,
-            [JsonProperty("service_tier")] string serviceTier,
-            [JsonProperty("status")] ResponseStatus status,
-            [JsonProperty("temperature")] double? temperature,
-            [JsonProperty("text")] TextResponseFormatConfiguration textResponseFormatConfiguration,
-            [JsonProperty("tool_choice")] object toolChoice,
-            [JsonProperty("tools")] IReadOnlyList<Tool> tools,
-            [JsonProperty("top_p")] double? topP,
-            [JsonProperty("truncation")] Truncation truncation,
-            [JsonProperty("user")] string user)
+            [JsonProperty("background")] bool? background = null,
+            [JsonProperty("error")] Error error = null,
+            [JsonProperty("incomplete_details")] IncompleteDetails incompleteDetails = null,
+            [JsonProperty("output")] IReadOnlyList<IResponseItem> output = null,
+            [JsonProperty("output_text")] string outputText = null,
+            [JsonProperty("usage")] ResponseUsage usage = null,
+            [JsonProperty("parallel_tool_calls")] bool? parallelToolCalls = null,
+            [JsonProperty("instructions")] string instructions = null,
+            [JsonProperty("max_output_tokens")] int? maxOutputTokens = null,
+            [JsonProperty("metadata")] IReadOnlyDictionary<string, string> metadata = null,
+            [JsonProperty("model")] string model = null,
+            [JsonProperty("previous_response_id")] string previousResponseId = null,
+            [JsonProperty("reasoning")] Reasoning reasoning = null,
+            [JsonProperty("service_tier")] string serviceTier = null,
+            [JsonProperty("status")] ResponseStatus status = 0,
+            [JsonProperty("temperature")] double? temperature = null,
+            [JsonProperty("text")] TextResponseFormatConfiguration textResponseFormatConfiguration = null,
+            [JsonProperty("tool_choice")] object toolChoice = null,
+            [JsonProperty("tools")] IReadOnlyList<Tool> tools = null,
+            [JsonProperty("top_p")] double? topP = null,
+            [JsonProperty("truncation")] Truncation truncation = 0,
+            [JsonProperty("user")] string user = null)
         {
             Id = id;
             Object = @object;
@@ -279,6 +280,7 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonProperty("user", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string User { get; }
+
         internal void InsertOutputItem(IResponseItem item, int index)
         {
             if (item == null)
@@ -296,5 +298,15 @@ namespace OpenAI.Responses
 
             output.Insert(index, item);
         }
+
+        public void PrintUsage()
+        {
+            if (Usage == null) { return; }
+            var message = $"{Id} | {Model} | {Usage}";
+            Debug.Log(message);
+        }
+
+        public override string ToString()
+            => JsonConvert.SerializeObject(this, Formatting.Indented, OpenAIClient.JsonSerializationOptions);
     }
 }

@@ -1,7 +1,9 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Responses
@@ -48,11 +50,38 @@ namespace OpenAI.Responses
         [JsonProperty("status", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public ResponseStatus Status { get; }
 
+        private List<ReasoningSummary> summary = new();
+
         /// <summary>
         /// Reasoning text contents.
         /// </summary>
         [Preserve]
-        [JsonProperty("summary")]
-        public IReadOnlyList<ReasoningSummary> Summary { get; }
+        [JsonProperty("summary", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public IReadOnlyList<ReasoningSummary> Summary
+        {
+            get => summary;
+            private set => summary = value?.ToList() ?? new();
+        }
+
+        [Preserve]
+        internal void InsertSummary(ReasoningSummary item, int index)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            summary ??= new();
+
+            if (index > summary.Count)
+            {
+                for (var i = summary.Count; i < index; i++)
+                {
+                    summary.Add(null);
+                }
+            }
+
+            summary.Insert(index, item);
+        }
     }
 }

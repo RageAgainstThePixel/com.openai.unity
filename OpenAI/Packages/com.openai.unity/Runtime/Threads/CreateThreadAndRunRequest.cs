@@ -146,7 +146,7 @@ namespace OpenAI.Threads
             AssistantId = assistantId;
             Model = model;
             Instructions = instructions;
-            tools.ProcessTools(toolChoice, out var toolList, out var activeTool);
+            tools.ProcessTools<Tool>(toolChoice, out var toolList, out var activeTool);
             Tools = toolList;
             ToolChoice = activeTool;
             ToolResources = toolResources;

@@ -58,6 +58,7 @@ namespace OpenAI.Responses
         [JsonIgnore]
         public string Object => Type.ToString();
 
+        [Preserve]
         internal void InsertAnnotation(Annotation item, int index)
         {
             if (item == null)
@@ -77,5 +78,9 @@ namespace OpenAI.Responses
 
             annotations.Insert(index, item);
         }
+
+        [Preserve]
+        public override string ToString()
+            => Text;
     }
 }

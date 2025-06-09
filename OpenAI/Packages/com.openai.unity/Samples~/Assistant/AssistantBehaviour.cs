@@ -281,11 +281,11 @@ namespace OpenAI.Samples.Assistant
             {
                 Debug.Log(nameof(ProcessToolCalls));
                 var toolCalls = run.RequiredAction.SubmitToolOutputs.ToolCalls;
-                var toolOutputs = await Task.WhenAll(toolCalls.Select(toolCall => ProcessToolCall(toolCall))).ConfigureAwait(true);
+                var toolOutputs = await Task.WhenAll(toolCalls.Select(ProcessToolCall)).ConfigureAwait(true);
                 await run.SubmitToolOutputsAsync(new SubmitToolOutputsRequest(toolOutputs), cancellationToken: destroyCancellationToken);
             }
 
-            async Task<ToolOutput> ProcessToolCall(ToolCall toolCall)
+            async Task<ToolOutput> ProcessToolCall(IToolCall toolCall)
             {
                 string result;
 
@@ -305,7 +305,7 @@ namespace OpenAI.Samples.Assistant
                     result = $"{{\"result\":\"{e.Message}\"}}";
                 }
 
-                return new ToolOutput(toolCall.Id, result);
+                return new ToolOutput(toolCall.CallId, result);
             }
         }
 

@@ -14,13 +14,30 @@ using UnityEngine.Scripting;
 namespace OpenAI
 {
     [Preserve]
-    public sealed class Tool : IAppendable<Tool>
+    public sealed class Tool : IAppendable<Tool>, ITool
     {
         [Preserve]
         public Tool() { }
 
         [Preserve]
         public Tool(Tool other) => AppendFrom(other);
+
+        [Preserve]
+        public Tool(ITool iTool)
+        {
+            if (iTool.Type == "function" &&
+                iTool is Function function)
+            {
+                Type = "function";
+                Function = function;
+                TryRegisterTool(this);
+            }
+            else
+            {
+                Type = "tool";
+                Reference = iTool;
+            }
+        }
 
         [Preserve]
         public Tool(Function function)
@@ -86,16 +103,21 @@ namespace OpenAI
         public string Type { get; private set; }
 
         [Preserve]
-        [JsonIgnore]
-        public bool IsFunction => Type == "function";
-
-        [Preserve]
         [JsonProperty("function", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public Function Function { get; private set; }
 
         [Preserve]
         [JsonProperty("file_search", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public FileSearchOptions FileSearchOptions { get; private set; }
+
+        [JsonIgnore]
+        public bool IsFunction => Type == "function";
+
+        [JsonIgnore]
+        internal ITool Reference { get; }
+
+        [JsonIgnore]
+        internal bool IsReference => Type == "tool";
 
         [Preserve]
         public void AppendFrom(Tool other)
@@ -137,14 +159,14 @@ namespace OpenAI
 
         #region Tool Calling
 
-        private void ValidateToolCall(ToolCall toolCall)
+        private void ValidateToolCall(IToolCall toolCall)
         {
             if (!IsFunction)
             {
                 throw new InvalidOperationException("This tool is not a function.");
             }
 
-            if (Function.Name != toolCall.Function.Name)
+            if (Function.Name != toolCall.Name)
             {
                 throw new InvalidOperationException("Tool does not match tool call!");
             }
@@ -160,14 +182,14 @@ namespace OpenAI
         /// <summary>
         /// Invokes the function and returns the result as json.
         /// </summary>
-        /// <param name="toolCall">The <see cref="ToolCall"/> with the function arguments to invoke.</param>
+        /// <param name="toolCall">The <see cref="IToolCall"/> with the function arguments to invoke.</param>
         /// <returns>The result of the function as json.</returns>
         /// <exception cref="InvalidOperationException">Raised if function call is invalid or tool is not a function.</exception>
         [Preserve]
-        public string InvokeFunction(ToolCall toolCall)
+        public string InvokeFunction(IToolCall toolCall)
         {
             ValidateToolCall(toolCall);
-            Function.Arguments = toolCall.Function.Arguments;
+            Function.Arguments = toolCall.Arguments;
             return Function.Invoke();
         }
 
@@ -187,14 +209,14 @@ namespace OpenAI
         /// Invokes the function and returns the result.
         /// </summary>
         /// <typeparam name="T">The type to deserialize the result to.</typeparam>
-        /// <param name="toolCall">The <see cref="ToolCall"/> with the function arguments to invoke.</param>
+        /// <param name="toolCall">The <see cref="IToolCall"/> with the function arguments to invoke.</param>
         /// <returns>The result of the function.</returns>
         /// <exception cref="InvalidOperationException">Raised if function call is invalid or tool is not a function.</exception>
         [Preserve]
-        public T InvokeFunction<T>(ToolCall toolCall)
+        public T InvokeFunction<T>(IToolCall toolCall)
         {
             ValidateToolCall(toolCall);
-            Function.Arguments = toolCall.Function.Arguments;
+            Function.Arguments = toolCall.Arguments;
             return Function.Invoke<T>();
         }
 
@@ -204,7 +226,7 @@ namespace OpenAI
         /// <param name="cancellationToken">Optional, A token to cancel the request.</param>
         /// <returns>The result of the function as json.</returns>
         [Preserve]
-        [Obsolete("Use overload with ToolCall parameter")]
+        [Obsolete("Use overload with IToolCall parameter")]
         public async Task<string> InvokeFunctionAsync(CancellationToken cancellationToken = default)
             => IsFunction
                 ? await Function.InvokeAsync(cancellationToken)
@@ -213,15 +235,15 @@ namespace OpenAI
         /// <summary>
         /// Invokes the function and returns the result as json.
         /// </summary>
-        /// <param name="toolCall">The <see cref="ToolCall"/> with the function arguments to invoke.</param>
+        /// <param name="toolCall">The <see cref="IToolCall"/> with the function arguments to invoke.</param>
         /// <param name="cancellationToken">Optional, A token to cancel the request.</param>
         /// <returns>The result of the function as json.</returns>
         /// <exception cref="InvalidOperationException">Raised if function call is invalid or tool is not a function.</exception>
         [Preserve]
-        public async Task<string> InvokeFunctionAsync(ToolCall toolCall, CancellationToken cancellationToken = default)
+        public async Task<string> InvokeFunctionAsync(IToolCall toolCall, CancellationToken cancellationToken = default)
         {
             ValidateToolCall(toolCall);
-            Function.Arguments = toolCall.Function.Arguments;
+            Function.Arguments = toolCall.Arguments;
             return await Function.InvokeAsync(cancellationToken);
         }
 
@@ -232,7 +254,7 @@ namespace OpenAI
         /// <param name="cancellationToken">Optional, A token to cancel the request.</param>
         /// <returns>The result of the function.</returns>
         [Preserve]
-        [Obsolete("Use overload with ToolCall parameter")]
+        [Obsolete("Use overload with IToolCall parameter")]
         public async Task<T> InvokeFunctionAsync<T>(CancellationToken cancellationToken = default)
             => IsFunction
                 ? await Function.InvokeAsync<T>(cancellationToken)
@@ -242,15 +264,15 @@ namespace OpenAI
         /// Invokes the function and returns the result.
         /// </summary>
         /// <typeparam name="T">The type to deserialize the result to.</typeparam>
-        /// <param name="toolCall">The <see cref="ToolCall"/> with the function arguments to invoke.</param>
+        /// <param name="toolCall">The <see cref="IToolCall"/> with the function arguments to invoke.</param>
         /// <param name="cancellationToken">Optional, A token to cancel the request.</param>
         /// <returns>The result of the function.</returns>
         /// <exception cref="InvalidOperationException">Raised if function call is invalid or tool is not a function.</exception>
         [Preserve]
-        public async Task<T> InvokeFunctionAsync<T>(ToolCall toolCall, CancellationToken cancellationToken = default)
+        public async Task<T> InvokeFunctionAsync<T>(IToolCall toolCall, CancellationToken cancellationToken = default)
         {
             ValidateToolCall(toolCall);
-            Function.Arguments = toolCall.Function.Arguments;
+            Function.Arguments = toolCall.Arguments;
             return await Function.InvokeAsync<T>(cancellationToken);
         }
 
@@ -258,11 +280,7 @@ namespace OpenAI
 
         #region Tool Cache
 
-        private static readonly List<Tool> toolCache = new()
-        {
-            FileSearch,
-            CodeInterpreter
-        };
+        private static readonly List<Tool> toolCache = new();
 
         /// <summary>
         /// Gets a list of all available tools.
@@ -319,8 +337,6 @@ namespace OpenAI
         {
             toolCache.Clear();
             Function.ClearFunctionCache();
-            toolCache.Add(CodeInterpreter);
-            toolCache.Add(FileSearch);
         }
 
         /// <summary>
@@ -453,11 +469,11 @@ namespace OpenAI
         }
 
         [Preserve]
-        internal static bool TryGetTool(ToolCall toolCall, out Tool tool)
+        internal static bool TryGetTool(IToolCall toolCall, out Tool tool)
         {
             tool = toolCache
-                .Where(knownTool => knownTool.Type == toolCall.Type)
-                .FirstOrDefault(knownTool => knownTool.Function.Name == toolCall.Function.Name);
+                .Where(knownTool => knownTool.IsFunction)
+                .FirstOrDefault(knownTool => knownTool.Function.Name == toolCall.Name);
             return tool != null;
         }
 
@@ -620,5 +636,10 @@ namespace OpenAI
         }
 
         #endregion Func<,> Overloads
+    }
+
+    public interface ITool
+    {
+        public string Type { get; }
     }
 }

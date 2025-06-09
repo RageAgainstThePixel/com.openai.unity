@@ -61,5 +61,9 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonProperty("total_tokens")]
         public int TotalTokens { get; }
+
+        [Preserve]
+        public override string ToString()
+            => JsonConvert.SerializeObject(this, Formatting.Indented, OpenAIClient.JsonSerializationOptions);
     }
 }

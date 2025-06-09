@@ -108,13 +108,8 @@ namespace OpenAI.Realtime
                 ? "whisper-1"
                 : transcriptionModel);
             VoiceActivityDetectionSettings = turnDetectionSettings ?? new();
-            tools.ProcessTools(toolChoice, out var toolList, out var activeTool);
-            Tools = toolList?.Select(tool =>
-            {
-                // Realtime only support function calling tools
-                tool.Function.Type = "function";
-                return tool.Function;
-            }).ToList();
+            tools.ProcessTools<Tool>(toolChoice, out var toolList, out var activeTool);
+            Tools = toolList?.Where(tool => tool.IsFunction).Select(tool => tool.Function).ToList();
             ToolChoice = activeTool;
             Temperature = temperature;
 
