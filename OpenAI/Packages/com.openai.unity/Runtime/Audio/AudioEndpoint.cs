@@ -68,7 +68,23 @@ namespace OpenAI.Audio
 
             lock (mutex)
             {
-                clipName = $"{request.Voice}-{DateTime.UtcNow:yyyyMMddThhmmssfffff}.{ext}";
+                
+                // Sanitize the voice name to ensure it's a valid filename
+                string safeVoiceName = request.Voice;
+                if (string.IsNullOrEmpty(safeVoiceName))
+                {
+                    safeVoiceName = "unnamed";
+                }
+                else
+                {
+                    // Replace invalid characters with underscores
+                    foreach (char c in Path.GetInvalidFileNameChars())
+                    {
+                        safeVoiceName = safeVoiceName.Replace(c, '_');
+                    }
+                }
+
+                clipName = $"{safeVoiceName}-{DateTime.UtcNow:yyyyMMddThhmmssfffff}.{ext}";
             }
 
             Rest.TryGetDownloadCacheItem(clipName, out var cachedPath);
