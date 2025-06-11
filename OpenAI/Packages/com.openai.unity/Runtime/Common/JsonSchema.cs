@@ -79,7 +79,7 @@ namespace OpenAI
         public JToken Schema { get; private set; }
 
         [Preserve]
-        public static implicit operator ResponseFormatObject(JsonSchema jsonSchema) => new(jsonSchema);
+        public static implicit operator TextResponseFormatConfiguration(JsonSchema jsonSchema) => new(jsonSchema);
 
         public static implicit operator JsonSchema(Type type) => new(type.Name, type.GenerateJsonSchema());
 

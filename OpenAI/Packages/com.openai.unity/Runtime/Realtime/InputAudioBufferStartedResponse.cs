@@ -19,9 +19,9 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonConstructor]
         internal InputAudioBufferStartedResponse(
-        [JsonProperty("event_id")] string eventId,
-        [JsonProperty("type")] string type,
-        [JsonProperty("audio_start_ms")] int audioStartMs,
+            [JsonProperty("event_id")] string eventId,
+            [JsonProperty("type")] string type,
+            [JsonProperty("audio_start_ms")] int audioStartMs,
             [JsonProperty("item_id")] string itemId)
         {
             EventId = eventId;

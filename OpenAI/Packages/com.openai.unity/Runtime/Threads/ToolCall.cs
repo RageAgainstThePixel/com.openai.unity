@@ -1,14 +1,17 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OpenAI.Extensions;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Threads
 {
     [Preserve]
-    public sealed class ToolCall : IAppendable<ToolCall>
+    public sealed class ToolCall : IAppendable<ToolCall>, IToolCall
     {
         [Preserve]
         public ToolCall() { }
@@ -79,6 +82,18 @@ namespace OpenAI.Threads
         public bool IsFunction => Type == "function";
 
         [Preserve]
+        [JsonIgnore]
+        public string CallId => Id;
+
+        [Preserve]
+        [JsonIgnore]
+        public string Name => FunctionCall.Name;
+
+        [Preserve]
+        [JsonIgnore]
+        public JToken Arguments => FunctionCall.Arguments;
+
+        [Preserve]
         public void AppendFrom(ToolCall other)
         {
             if (other == null)
@@ -127,7 +142,19 @@ namespace OpenAI.Threads
         }
 
         [Preserve]
-        public static implicit operator OpenAI.ToolCall(ToolCall toolCall)
-            => new(toolCall.Id, toolCall.FunctionCall.Name, toolCall.FunctionCall.Arguments);
+        public string InvokeFunction()
+            => ToolExtensions.InvokeFunction(this);
+
+        [Preserve]
+        public T InvokeFunction<T>()
+            => ToolExtensions.InvokeFunction<T>(this);
+
+        [Preserve]
+        public Task<string> InvokeFunctionAsync(CancellationToken cancellationToken = default)
+            => ToolExtensions.InvokeFunctionAsync(this, cancellationToken);
+
+        [Preserve]
+        public Task<T> InvokeFunctionAsync<T>(CancellationToken cancellationToken = default)
+            => ToolExtensions.InvokeFunctionAsync<T>(this, cancellationToken);
     }
 }

@@ -1,6 +1,7 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using OpenAI.Models;
 using System;
 using System.Collections.Generic;
@@ -107,43 +108,9 @@ namespace OpenAI.Realtime
                 ? "whisper-1"
                 : transcriptionModel);
             VoiceActivityDetectionSettings = turnDetectionSettings ?? new();
-
-            var toolList = tools?.ToList();
-
-            if (toolList is { Count: > 0 })
-            {
-                if (string.IsNullOrWhiteSpace(toolChoice))
-                {
-                    ToolChoice = "auto";
-                }
-                else
-                {
-                    if (!toolChoice.Equals("none") &&
-                        !toolChoice.Equals("required") &&
-                        !toolChoice.Equals("auto"))
-                    {
-                        var tool = toolList.FirstOrDefault(t => t.Function.Name.Contains(toolChoice)) ??
-                                   throw new ArgumentException($"The specified tool choice '{toolChoice}' was not found in the list of tools");
-                        ToolChoice = new { type = "function", function = new { name = tool.Function.Name } };
-                    }
-                    else
-                    {
-                        ToolChoice = toolChoice;
-                    }
-                }
-
-                foreach (var tool in toolList.Where(tool => tool?.Function?.Arguments != null))
-                {
-                    // just in case clear any lingering func args.
-                    tool.Function.Arguments = null;
-                }
-            }
-
-            Tools = toolList?.Select(tool =>
-            {
-                tool.Function.Type = "function";
-                return tool.Function;
-            }).ToList();
+            tools.ProcessTools<Tool>(toolChoice, out var toolList, out var activeTool);
+            Tools = toolList?.Where(tool => tool.IsFunction).Select(tool => tool.Function).ToList();
+            ToolChoice = activeTool;
             Temperature = temperature;
 
             if (maxResponseOutputTokens.HasValue)
