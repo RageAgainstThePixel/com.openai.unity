@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Globalization;
 using System.IO;
@@ -66,25 +67,16 @@ namespace OpenAI.Audio
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
             string clipName;
 
+            if (string.IsNullOrEmpty(request?.Voice))
+            {
+                throw new ArgumentNullException(nameof(request.Voice));
+            }
+
+            var voice = request.Voice.GetPathSafeString();
+
             lock (mutex)
             {
-                
-                // Sanitize the voice name to ensure it's a valid filename
-                string safeVoiceName = request.Voice;
-                if (string.IsNullOrEmpty(safeVoiceName))
-                {
-                    safeVoiceName = "unnamed";
-                }
-                else
-                {
-                    // Replace invalid characters with underscores
-                    foreach (char c in Path.GetInvalidFileNameChars())
-                    {
-                        safeVoiceName = safeVoiceName.Replace(c, '_');
-                    }
-                }
-
-                clipName = $"{safeVoiceName}-{DateTime.UtcNow:yyyyMMddThhmmssfffff}.{ext}";
+                clipName = $"{voice}-{DateTime.UtcNow:yyyyMMddThhmmssfffff}.{ext}";
             }
 
             Rest.TryGetDownloadCacheItem(clipName, out var cachedPath);
