@@ -184,11 +184,15 @@ namespace OpenAI.Tests
         public void Test_11_AzureConfigurationSettings()
         {
             var auth = new OpenAIAuthentication("testKeyAaBbCcDd");
-            var settings = new OpenAISettings(resourceName: "test-resource", deploymentId: "deployment-id-test");
+            const string domain = "custom.azure.openai.com";
+            const string resource = "test-resource";
+            const string deploymentId = "deployment-id-test";
+            var settings = new OpenAISettings(resourceName: resource, deploymentId: deploymentId, azureDomain: domain);
             var api = new OpenAIClient(auth, settings);
             Debug.Log(api.Settings.Info.BaseRequest);
             Debug.Log(api.Settings.Info.BaseRequestUrlFormat);
-            Assert.AreEqual("https://test-resource.openai.azure.com/openai/{0}", api.Settings.Info.BaseRequestUrlFormat);
+            Assert.AreEqual(deploymentId, api.Settings.Info.DeploymentId);
+            Assert.AreEqual($"https://{resource}.{domain}/openai/{{0}}", api.Settings.Info.BaseRequestUrlFormat);
         }
 
         [Test]

@@ -81,14 +81,22 @@ namespace OpenAI
         /// The name of your model deployment. You're required to first deploy a model before you can make calls.
         /// </param>
         /// <param name="apiVersion">
-        /// Optional, defaults to 2022-12-01
+        /// Optional, defaults to 2024-10-21
         /// </param>
         /// <param name="useActiveDirectoryAuthentication">
         /// Optional, set to true if you want to use Azure Active Directory for Authentication.
         /// </param>
-        public OpenAISettings(string resourceName, string deploymentId, string apiVersion = OpenAISettingsInfo.DefaultAzureApiVersion, bool useActiveDirectoryAuthentication = false)
+        /// <param name="azureDomain">
+        /// Optional, defaults to "openai.azure.com".
+        /// </param>
+        public OpenAISettings(
+            string resourceName,
+            string deploymentId,
+            string apiVersion = OpenAISettingsInfo.DefaultAzureApiVersion,
+            bool useActiveDirectoryAuthentication = false,
+            string azureDomain = OpenAISettingsInfo.AzureOpenAIDomain)
         {
-            Info = new OpenAISettingsInfo(resourceName, deploymentId, apiVersion, useActiveDirectoryAuthentication);
+            Info = new OpenAISettingsInfo(resourceName, deploymentId, apiVersion, useActiveDirectoryAuthentication, azureDomain);
             cachedDefault = this;
         }
 
