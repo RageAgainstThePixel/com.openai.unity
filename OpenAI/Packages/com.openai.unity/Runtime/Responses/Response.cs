@@ -29,7 +29,7 @@ namespace OpenAI.Responses
             [JsonProperty("incomplete_details")] IncompleteDetails incompleteDetails = null,
             [JsonProperty("output")] IReadOnlyList<IResponseItem> output = null,
             [JsonProperty("output_text")] string outputText = null,
-            [JsonProperty("usage")] ResponseUsage usage = null,
+            [JsonProperty("usage")] TokenUsage usage = null,
             [JsonProperty("parallel_tool_calls")] bool? parallelToolCalls = null,
             [JsonProperty("instructions")] string instructions = null,
             [JsonProperty("max_output_tokens")] int? maxOutputTokens = null,
@@ -133,7 +133,7 @@ namespace OpenAI.Responses
 
         [Preserve]
         [JsonProperty("usage", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public ResponseUsage Usage { get; }
+        public TokenUsage Usage { get; }
 
         /// <summary>
         /// Whether to allow the model to run tool calls in parallel.

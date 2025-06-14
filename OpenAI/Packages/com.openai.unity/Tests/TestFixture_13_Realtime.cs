@@ -67,6 +67,9 @@ namespace OpenAI.Tests
                 {
                     switch (@event)
                     {
+                        case RealtimeResponse realtimeResponse:
+                            realtimeResponse.Response.PrintUsage();
+                            break;
                         case ResponseAudioTranscriptResponse transcriptResponse:
                             Debug.Log(transcriptResponse.ToString());
                             break;
@@ -90,8 +93,15 @@ namespace OpenAI.Tests
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
-                throw;
+                switch (e)
+                {
+                    case TaskCanceledException:
+                    case OperationCanceledException:
+                        break;
+                    default:
+                        Debug.LogException(e);
+                        throw;
+                }
             }
             finally
             {
@@ -155,6 +165,9 @@ namespace OpenAI.Tests
                 {
                     switch (@event)
                     {
+                        case RealtimeResponse realtimeResponse:
+                            realtimeResponse.Response.PrintUsage();
+                            break;
                         case ResponseAudioTranscriptResponse transcriptResponse:
                             Debug.Log(transcriptResponse.ToString());
                             break;
@@ -178,8 +191,15 @@ namespace OpenAI.Tests
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
-                throw;
+                switch (e)
+                {
+                    case TaskCanceledException:
+                    case OperationCanceledException:
+                        break;
+                    default:
+                        Debug.LogException(e);
+                        throw;
+                }
             }
             finally
             {
@@ -243,6 +263,9 @@ namespace OpenAI.Tests
                 {
                     switch (@event)
                     {
+                        case RealtimeResponse realtimeResponse:
+                            realtimeResponse.Response.PrintUsage();
+                            break;
                         case ResponseAudioTranscriptResponse transcriptResponse:
                             Debug.Log(transcriptResponse.ToString());
                             break;
@@ -266,8 +289,15 @@ namespace OpenAI.Tests
             }
             catch (Exception e)
             {
-                Debug.LogException(e);
-                throw;
+                switch (e)
+                {
+                    case TaskCanceledException:
+                    case OperationCanceledException:
+                        break;
+                    default:
+                        Debug.LogException(e);
+                        throw;
+                }
             }
             finally
             {
