@@ -359,15 +359,23 @@ namespace OpenAI.Tests
                 Tool.GetOrCreateTool(typeof(WeatherService), nameof(WeatherService.GetCurrentWeatherAsync))
             };
             Assert.IsTrue(tools.All(tool => tool.Function?.Arguments == null), "Expected all tool function arguments to be null");
-            var assistantRequest = new CreateAssistantRequest(tools: tools, instructions: "You are a helpful weather assistant. Use the appropriate unit based on geographical location.");
+            var assistantRequest = new CreateAssistantRequest(
+                instructions: "You are a helpful weather assistant. Use the appropriate unit based on geographical location.",
+                tools: tools);
             var assistant = await OpenAIClient.AssistantsEndpoint.CreateAssistantAsync(assistantRequest);
             Assert.NotNull(assistant);
             ThreadResponse thread = null;
+            // check if any exceptions thrown in stream event handler
+            var exceptionThrown = false;
+            var hasInvokedCallback = false;
 
             try
             {
+
                 async Task StreamEventHandler(IServerSentEvent streamEvent)
                 {
+                    hasInvokedCallback = true;
+
                     try
                     {
                         switch (streamEvent)
@@ -385,9 +393,13 @@ namespace OpenAI.Tests
                                         Debug.Log($"Tool Output: {toolOutput}");
                                     }
 
-                                    await runResponse.SubmitToolOutputsAsync(toolOutputs, StreamEventHandler);
+                                    var toolRun = await runResponse.SubmitToolOutputsAsync(toolOutputs, StreamEventHandler);
+                                    Assert.NotNull(toolRun);
+                                    Assert.IsTrue(toolRun.Status == RunStatus.Completed, $"Failed to complete submit tool outputs! {toolRun.Status}");
                                 }
                                 break;
+                            case Error errorResponse:
+                                throw errorResponse.Exception ?? new Exception(errorResponse.Message);
                             default:
                                 Debug.Log(streamEvent.ToJsonString());
                                 break;
@@ -396,16 +408,23 @@ namespace OpenAI.Tests
                     catch (Exception e)
                     {
                         Debug.LogException(e);
+                        exceptionThrown = true;
                     }
                 }
 
                 var run = await assistant.CreateThreadAndRunAsync("I'm in Kuala-Lumpur, please tell me what's the temperature now?", StreamEventHandler);
                 Assert.NotNull(thread);
                 Assert.IsNotNull(run);
+                Assert.IsTrue(hasInvokedCallback);
                 run = await run.WaitForStatusChangeAsync();
                 Assert.IsNotNull(run);
-                Assert.IsTrue(run.Status == RunStatus.Completed);
+                Assert.NotNull(thread);
+                Assert.IsFalse(exceptionThrown);
+                Assert.IsTrue(run.Status == RunStatus.Completed, $"Failed to complete run! {run.Status}");
+
                 var messages = await thread.ListMessagesAsync();
+                Assert.NotNull(messages);
+                Assert.IsNotEmpty(messages.Items);
 
                 foreach (var response in messages.Items.Reverse())
                 {

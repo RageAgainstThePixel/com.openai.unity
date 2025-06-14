@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Assistants
@@ -221,7 +220,8 @@ namespace OpenAI.Assistants
             Name = name;
             Description = description;
             Instructions = instructions;
-            Tools = tools?.ToList();
+            tools.ProcessTools<Tool>(null, out var toolList, out _);
+            Tools = toolList;
             ToolResources = toolResources;
             Metadata = metadata;
             Temperature = reasoningEffort > 0 ? null : temperature;

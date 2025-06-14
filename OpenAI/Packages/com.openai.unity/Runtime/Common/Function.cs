@@ -181,8 +181,8 @@ namespace OpenAI
         public string Name { get; private set; }
 
         [Preserve]
-        [JsonProperty("type")]
-        public string Type { get; internal set; } = "function";
+        [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Type { get; internal set; }
 
         /// <summary>
         /// The optional description of the function.
