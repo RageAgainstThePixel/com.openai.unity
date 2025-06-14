@@ -141,7 +141,10 @@ namespace OpenAI.Tests
             Assert.AreEqual(Voice.Alloy.Id, chatRequest.AudioConfig.Voice);
             Assert.AreEqual(AudioFormat.Pcm16, chatRequest.AudioConfig.Format);
             Assert.AreEqual(Modality.Text | Modality.Audio, chatRequest.Modalities);
-            var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, Assert.IsNotNull, true);
+            var response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
+            {
+                Debug.Log(partialResponse.ToJsonString());
+            }, true);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             Assert.IsNotEmpty(response.Choices);
@@ -160,7 +163,10 @@ namespace OpenAI.Tests
             Assert.IsNotNull(messages[2]);
             Assert.AreEqual(Role.Assistant, messages[2].Role);
             Assert.IsNotNull(messages[2].AudioOutput);
-            response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, Assert.IsNotNull, true);
+            response = await OpenAIClient.ChatEndpoint.StreamCompletionAsync(chatRequest, partialResponse =>
+            {
+                Debug.Log(partialResponse.ToJsonString());
+            }, true);
             Assert.IsNotNull(response);
             Assert.IsNotNull(response.Choices);
             Assert.IsNotEmpty(response.Choices);
