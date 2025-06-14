@@ -15,6 +15,10 @@ namespace OpenAI.Responses
     public sealed class Response : BaseResponse, IServerSentEvent
     {
         [Preserve]
+        public static implicit operator string(Response response)
+            => response?.Id;
+
+        [Preserve]
         [JsonConstructor]
         internal Response(
             [JsonProperty("id")] string id,
@@ -309,7 +313,6 @@ namespace OpenAI.Responses
         }
 
         [Preserve]
-        public override string ToString()
-            => JsonConvert.SerializeObject(this, Formatting.Indented, OpenAIClient.JsonSerializationOptions);
+        public override string ToString() => Id;
     }
 }

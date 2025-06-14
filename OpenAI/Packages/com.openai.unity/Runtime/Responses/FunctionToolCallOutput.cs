@@ -5,6 +5,7 @@ using UnityEngine.Scripting;
 
 namespace OpenAI.Responses
 {
+    [Preserve]
     public sealed class FunctionToolCallOutput : BaseResponse, IResponseItem
     {
         [Preserve]

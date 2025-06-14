@@ -41,51 +41,69 @@ namespace OpenAI.Tests
         [Test]
         public async Task Test_01_01_SimpleTextInput()
         {
-            Assert.NotNull(OpenAIClient.ResponsesEndpoint);
-            var response = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync("Tell me a three sentence bedtime story about a unicorn.");
-            Assert.NotNull(response);
-            Assert.IsNotEmpty(response.Id);
-            Assert.AreEqual(ResponseStatus.Completed, response.Status);
-            var responseItem = response.Output.LastOrDefault();
-            Assert.NotNull(responseItem);
-            Assert.AreEqual(ResponseItemType.Message, responseItem.Type);
-            Assert.IsInstanceOf<Message>(responseItem);
-            var messageItem = responseItem as Message;
-            Assert.NotNull(messageItem);
-            Assert.IsNotEmpty(messageItem!.Content);
-            Assert.IsInstanceOf<Responses.TextContent>(messageItem.Content[0]);
-            var textContent = messageItem.Content[0] as Responses.TextContent;
-            Assert.NotNull(textContent);
-            Assert.IsNotEmpty(textContent!.Text);
-            Debug.Log($"{messageItem.Role}: {messageItem}");
-            response.PrintUsage();
+            try
+            {
+                Assert.NotNull(OpenAIClient.ResponsesEndpoint);
+                var response = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync("Tell me a three sentence bedtime story about a unicorn.");
+                Assert.NotNull(response);
+                Assert.IsNotEmpty(response.Id);
+                Assert.AreEqual(ResponseStatus.Completed, response.Status);
+                var responseItem = response.Output.LastOrDefault();
+                Assert.NotNull(responseItem);
+                Assert.AreEqual(ResponseItemType.Message, responseItem.Type);
+                Assert.IsInstanceOf<Message>(responseItem);
+                var messageItem = responseItem as Message;
+                Assert.NotNull(messageItem);
+                Assert.IsNotEmpty(messageItem!.Content);
+                Assert.IsInstanceOf<Responses.TextContent>(messageItem.Content[0]);
+                var textContent = messageItem.Content[0] as Responses.TextContent;
+                Assert.NotNull(textContent);
+                Assert.IsNotEmpty(textContent!.Text);
+                Debug.Log($"{messageItem.Role}: {messageItem}");
+                response.PrintUsage();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw;
+            }
         }
 
         [Test]
         public async Task Test_01_02_SimpleTestInput_Streaming()
         {
-            Assert.NotNull(OpenAIClient.ResponsesEndpoint);
-            var response = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync("Tell me a three sentence bedtime story about a unicorn.", async (@event, sseEvent) =>
+            try
             {
-                Debug.Log($"{@event}:{sseEvent.ToJsonString()}");
-                await Task.CompletedTask;
-            });
-            Assert.NotNull(response);
-            Assert.IsNotEmpty(response.Id);
-            Assert.AreEqual(ResponseStatus.Completed, response.Status);
-            var responseItem = response.Output.LastOrDefault();
-            Assert.NotNull(responseItem);
-            Assert.AreEqual(ResponseItemType.Message, responseItem.Type);
-            Assert.IsInstanceOf<Message>(responseItem);
-            var messageItem = responseItem as Message;
-            Assert.NotNull(messageItem);
-            Assert.IsNotEmpty(messageItem!.Content);
-            Assert.IsInstanceOf<Responses.TextContent>(messageItem.Content[0]);
-            var textContent = messageItem.Content[0] as Responses.TextContent;
-            Assert.NotNull(textContent);
-            Assert.IsNotEmpty(textContent!.Text);
-            Debug.Log($"{messageItem.Role}: {messageItem}");
-            response.PrintUsage();
+                Assert.NotNull(OpenAIClient.ResponsesEndpoint);
+
+                var response = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync("Tell me a three sentence bedtime story about a unicorn.", async (@event, sseEvent) =>
+                {
+                    Debug.Log($"{@event}:{sseEvent.ToJsonString()}");
+                    await Task.CompletedTask;
+                });
+
+                Assert.NotNull(response);
+                Assert.IsNotEmpty(response.Id);
+                Assert.AreEqual(ResponseStatus.Completed, response.Status);
+                var responseItem = response.Output.LastOrDefault();
+                Assert.NotNull(responseItem);
+                Assert.AreEqual(ResponseItemType.Message, responseItem.Type);
+                Assert.IsInstanceOf<Message>(responseItem);
+                var messageItem = responseItem as Message;
+                Assert.NotNull(messageItem);
+                Assert.IsNotEmpty(messageItem!.Content);
+                Assert.IsInstanceOf<Responses.TextContent>(messageItem.Content[0]);
+                var textContent = messageItem.Content[0] as Responses.TextContent;
+                Assert.NotNull(textContent);
+                Assert.IsNotEmpty(textContent!.Text);
+                Debug.Log($"{messageItem.Role}: {messageItem}");
+                response.PrintUsage();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw;
+            }
         }
 
         [Test]
@@ -94,15 +112,18 @@ namespace OpenAI.Tests
             try
             {
                 Assert.NotNull(OpenAIClient.ResponsesEndpoint);
+
                 var conversation = new List<IResponseItem>
                 {
                     new Message(Role.System, "You are a helpful weather assistant. Always ask the user for their location."),
                     new Message(Role.User, "What's the weather like today?"),
                 };
+
                 var tools = new List<Tool>
                 {
                     Tool.GetOrCreateTool(typeof(WeatherService), nameof(WeatherService.GetCurrentWeatherAsync)),
                 };
+
                 var request = new CreateResponseRequest(conversation, Model.GPT4_1_Nano, tools: tools, toolChoice: "none");
                 var response = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync(request);
                 Assert.NotNull(response);
@@ -119,7 +140,7 @@ namespace OpenAI.Tests
                 var textContent = messageItem.Content[0] as Responses.TextContent;
                 Assert.NotNull(textContent);
                 Assert.IsNotEmpty(textContent!.Text);
-                Debug.Log($"{messageItem.Role}:{textContent.Text}");
+                Debug.Log($"{messageItem.Role}: {messageItem}");
                 response.PrintUsage();
                 conversation.Add(messageItem);
                 conversation.Add(new Message(Role.User, "I'm currently in San Francisco"));
@@ -176,15 +197,18 @@ namespace OpenAI.Tests
             try
             {
                 Assert.NotNull(OpenAIClient.ResponsesEndpoint);
+
                 var conversation = new List<IResponseItem>
                 {
                     new Message(Role.System, "You are a helpful assistant."),
                     new Message(Role.User, "What time is it?"),
                 };
+
                 var tools = new List<Tool>
                 {
                     Tool.GetOrCreateTool(typeof(DateTimeUtility), nameof(DateTimeUtility.GetDateTime))
                 };
+
                 var request = new CreateResponseRequest(conversation, Model.GPT4_1_Nano, tools: tools);
 
                 async Task StreamCallback(string @event, IServerSentEvent sseEvent)
@@ -194,6 +218,7 @@ namespace OpenAI.Tests
                         case Message messageItem:
                             Assert.NotNull(messageItem);
                             conversation.Add(messageItem);
+
                             break;
                         case FunctionToolCall functionToolCall:
                             Assert.NotNull(functionToolCall);
@@ -203,6 +228,7 @@ namespace OpenAI.Tests
                             conversation.Add(functionToolCall);
                             var output = await functionToolCall.InvokeFunctionAsync();
                             conversation.Add(output);
+
                             break;
                     }
                 }
@@ -299,12 +325,15 @@ namespace OpenAI.Tests
                         case ReasoningItem ri:
                             Assert.NotNull(ri);
                             reasoningItem = ri;
+
                             break;
                         case Message m:
                             Assert.NotNull(m);
                             messageItem = m;
+
                             break;
                     }
+
                     await Task.CompletedTask;
                 }
 

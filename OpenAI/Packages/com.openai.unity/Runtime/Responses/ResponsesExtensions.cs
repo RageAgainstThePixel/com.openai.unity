@@ -3,15 +3,18 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine.Scripting;
 using Utilities.Async;
 
 namespace OpenAI.Responses
 {
     public static class ResponsesExtensions
     {
+        [Preserve]
         public static Task<Response> UpdateAsync(this Response response, CancellationToken cancellationToken = default)
             => response.Client.ResponsesEndpoint.GetModelResponseAsync(response.Id, cancellationToken);
 
+        [Preserve]
         public static async Task<Response> WaitForStatusChangeAsync(this Response response, int? pollingInterval = null, int? timeout = null, CancellationToken cancellationToken = default)
         {
             using CancellationTokenSource cts = timeout is < 0

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine.Scripting;
 using Utilities.WebRequestRest;
 using Utilities.WebRequestRest.Interfaces;
 
@@ -50,6 +51,7 @@ namespace OpenAI.Responses
             return response.Deserialize<Response>(client);
         }
 
+        [Preserve]
         private async Task<Response> StreamResponseAsync(string endpoint, string payload, Func<string, IServerSentEvent, Task> streamEventHandler, CancellationToken cancellationToken)
         {
             Response response = null;
@@ -296,17 +298,17 @@ namespace OpenAI.Responses
         }
 
         /// <summary>
-        /// Deletes a model response with the given ID.
+        /// Returns a list of input items for a given response.
         /// </summary>
-        /// <param name="responseId">The ID of the response to delete.</param>
+        /// <param name="responseId">The ID of the response to retrieve input items for.</param>
+        /// <param name="query"><see cref="ListQuery"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns>True if the response was deleted, false otherwise.</returns>
-        public async Task<bool> DeleteModelResponseAsync(string responseId, CancellationToken cancellationToken = default)
+        /// <returns><see cref="ListResponse{BaseResponse}"/>.</returns>
+        public async Task<ListResponse<IResponseItem>> ListInputItemsAsync(string responseId, ListQuery query = null, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.DeleteAsync(GetUrl($"/{responseId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.GetAsync(GetUrl($"/{responseId}/input_items", query), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            var result = response.Deserialize<DeletedResponse>(client);
-            return result.Deleted;
+            return response.Deserialize<ListResponse<IResponseItem>>(client);
         }
 
         /// <summary>
@@ -326,17 +328,17 @@ namespace OpenAI.Responses
         }
 
         /// <summary>
-        /// Returns a list of input items for a given response.
+        /// Deletes a model response with the given ID.
         /// </summary>
-        /// <param name="responseId">The ID of the response to retrieve input items for.</param>
-        /// <param name="query"><see cref="ListQuery"/>.</param>
+        /// <param name="responseId">The ID of the response to delete.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
-        /// <returns><see cref="ListResponse{BaseResponse}"/>.</returns>
-        public async Task<ListResponse<IResponseItem>> ListInputItemsAsync(string responseId, ListQuery query = null, CancellationToken cancellationToken = default)
+        /// <returns>True if the response was deleted, false otherwise.</returns>
+        public async Task<bool> DeleteModelResponseAsync(string responseId, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.GetAsync(GetUrl($"/{responseId}/input_items", query), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.DeleteAsync(GetUrl($"/{responseId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             response.Validate(EnableDebug);
-            return response.Deserialize<ListResponse<IResponseItem>>(client);
+            var result = response.Deserialize<DeletedResponse>(client);
+            return result.Deleted;
         }
     }
 }
