@@ -105,6 +105,7 @@ namespace OpenAI.Responses
             private set => content = value?.ToList() ?? new();
         }
 
+        [Preserve]
         internal void AddContentItem(IResponseContent item, int index)
         {
             if (item == null)
@@ -122,5 +123,9 @@ namespace OpenAI.Responses
 
             content.Insert(index, item);
         }
+
+        [Preserve]
+        public override string ToString()
+            => Content?.LastOrDefault()?.ToString() ?? string.Empty;
     }
 }

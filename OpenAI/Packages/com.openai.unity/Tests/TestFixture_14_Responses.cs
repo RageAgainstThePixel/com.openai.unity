@@ -57,7 +57,7 @@ namespace OpenAI.Tests
             var textContent = messageItem.Content[0] as Responses.TextContent;
             Assert.NotNull(textContent);
             Assert.IsNotEmpty(textContent!.Text);
-            Debug.Log($"{messageItem.Role}:{textContent.Text}");
+            Debug.Log($"{messageItem.Role}: {messageItem}");
             response.PrintUsage();
         }
 
@@ -84,7 +84,7 @@ namespace OpenAI.Tests
             var textContent = messageItem.Content[0] as Responses.TextContent;
             Assert.NotNull(textContent);
             Assert.IsNotEmpty(textContent!.Text);
-            Debug.Log($"{messageItem.Role}:{textContent.Text}");
+            Debug.Log($"{messageItem.Role}: {messageItem}");
             response.PrintUsage();
         }
 
@@ -119,7 +119,7 @@ namespace OpenAI.Tests
                 var textContent = messageItem.Content[0] as Responses.TextContent;
                 Assert.NotNull(textContent);
                 Assert.IsNotEmpty(textContent!.Text);
-                Console.WriteLine($"{messageItem.Role}:{textContent.Text}");
+                Debug.Log($"{messageItem.Role}:{textContent.Text}");
                 response.PrintUsage();
                 conversation.Add(messageItem);
                 conversation.Add(new Message(Role.User, "I'm currently in San Francisco"));
@@ -138,11 +138,11 @@ namespace OpenAI.Tests
                 Assert.IsNotEmpty(usedTool.Name);
                 Assert.IsTrue(usedTool.Name.Contains(nameof(WeatherService.GetCurrentWeatherAsync)));
                 Assert.NotNull(usedTool.Arguments);
-                Console.WriteLine($"{usedTool.Name}: {usedTool.Arguments}");
+                Debug.Log($"{usedTool.Name}: {usedTool.Arguments}");
                 response.PrintUsage();
                 var functionResult = await usedTool.InvokeFunctionAsync();
                 Assert.IsNotNull(functionResult);
-                Console.WriteLine($"{usedTool.Name} Result: {functionResult}");
+                Debug.Log($"{usedTool.Name} Result: {functionResult}");
                 conversation.Add(functionResult);
                 request = new(conversation, Model.GPT4_1_Nano, tools: tools, toolChoice: "none");
                 response = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync(request);
@@ -160,7 +160,7 @@ namespace OpenAI.Tests
                 textContent = messageItem.Content[0] as Responses.TextContent;
                 Assert.NotNull(textContent);
                 Assert.IsNotEmpty(textContent!.Text);
-                Console.WriteLine($"{messageItem.Role}:{textContent.Text}");
+                Debug.Log($"{messageItem.Role}: {messageItem}");
                 response.PrintUsage();
             }
             catch (Exception e)
@@ -220,7 +220,7 @@ namespace OpenAI.Tests
                 Assert.IsNotEmpty(usedTool.Name);
                 Assert.IsTrue(usedTool.Name.Contains(nameof(DateTimeUtility.GetDateTime)));
                 Assert.NotNull(usedTool.Arguments);
-                Console.WriteLine($"{usedTool.Name}: {usedTool.Arguments}");
+                Debug.Log($"{usedTool.Name}: {usedTool.Arguments}");
                 response.PrintUsage();
                 response = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync(new(conversation, Model.GPT4_1_Nano, tools: tools), StreamCallback);
                 Assert.NotNull(response);
@@ -237,7 +237,7 @@ namespace OpenAI.Tests
                 var textContent = messageItem.Content[0] as Responses.TextContent;
                 Assert.NotNull(textContent);
                 Assert.IsNotEmpty(textContent!.Text);
-                Console.WriteLine($"{messageItem.Role}:{textContent.Text}");
+                Debug.Log($"{messageItem.Role}: {messageItem}");
                 response.PrintUsage();
             }
             catch (Exception e)
@@ -272,7 +272,7 @@ namespace OpenAI.Tests
                 var textContent = messageItem.Content[0] as Responses.TextContent;
                 Assert.NotNull(textContent);
                 Assert.IsNotEmpty(textContent!.Text);
-                Console.WriteLine($"{messageItem.Role}:{textContent.Text}");
+                Debug.Log($"{messageItem.Role}: {messageItem}");
                 response.PrintUsage();
             }
             catch (Exception e)
@@ -325,7 +325,7 @@ namespace OpenAI.Tests
                 var textContent = messageItem.Content[0] as Responses.TextContent;
                 Assert.NotNull(textContent);
                 Assert.IsNotEmpty(textContent!.Text);
-                Console.WriteLine($"{messageItem.Role}:{textContent.Text}");
+                Debug.Log($"{messageItem.Role}: {messageItem}");
                 response.PrintUsage();
             }
             catch (Exception e)

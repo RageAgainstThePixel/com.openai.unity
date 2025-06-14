@@ -32,10 +32,20 @@ namespace OpenAI.Responses
         [JsonProperty("refusal")]
         public string Refusal { get; internal set; }
 
+        [Preserve]
         [JsonIgnore]
         public string Delta { get; internal set; }
 
+        [Preserve]
         [JsonIgnore]
         public string Object => Type.ToString();
+
+        [Preserve]
+        public override string ToString()
+            => !string.IsNullOrWhiteSpace(Refusal)
+                ? Refusal
+                : !string.IsNullOrWhiteSpace(Delta)
+                    ? Delta
+                    : string.Empty;
     }
 }

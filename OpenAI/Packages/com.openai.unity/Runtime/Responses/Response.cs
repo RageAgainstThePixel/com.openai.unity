@@ -281,6 +281,7 @@ namespace OpenAI.Responses
         [JsonProperty("user", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string User { get; }
 
+        [Preserve]
         internal void InsertOutputItem(IResponseItem item, int index)
         {
             if (item == null)
@@ -299,6 +300,7 @@ namespace OpenAI.Responses
             output.Insert(index, item);
         }
 
+        [Preserve]
         public void PrintUsage()
         {
             if (Usage == null) { return; }
@@ -306,6 +308,7 @@ namespace OpenAI.Responses
             Debug.Log(message);
         }
 
+        [Preserve]
         public override string ToString()
             => JsonConvert.SerializeObject(this, Formatting.Indented, OpenAIClient.JsonSerializationOptions);
     }

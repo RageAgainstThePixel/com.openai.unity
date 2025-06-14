@@ -81,6 +81,6 @@ namespace OpenAI.Responses
 
         [Preserve]
         public override string ToString()
-            => Text;
+            => Text ?? string.Empty;
     }
 }
