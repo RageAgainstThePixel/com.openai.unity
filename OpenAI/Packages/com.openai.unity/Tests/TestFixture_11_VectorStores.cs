@@ -62,6 +62,8 @@ namespace OpenAI.Tests
                     Assert.IsNotNull(vectorStores);
                     Assert.IsNotEmpty(vectorStores.Items);
 
+                    await Task.Delay(TimeSpan.FromSeconds(5));
+
                     // modify vector store
                     IReadOnlyDictionary<string, object> metadata = new Dictionary<string, object> { { nameof(Test_01_VectorStores_SingleFile), DateTime.UtcNow } };
                     var modifiedVectorStore = await OpenAIClient.VectorStoresEndpoint.ModifyVectorStoreAsync(vectorStore, metadata: metadata);

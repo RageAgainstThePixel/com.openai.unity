@@ -21,7 +21,6 @@ namespace OpenAI.Extensions
 #else
             if (!Rest.TryGetDownloadCacheItem(data, out var localFilePath))
             {
-                localFilePath = localFilePath.GetPathSafeString();
                 await File.WriteAllBytesAsync(localFilePath, imageData, cancellationToken).ConfigureAwait(true);
                 localFilePath = $"file://{localFilePath}";
             }
