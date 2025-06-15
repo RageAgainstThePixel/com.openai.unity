@@ -1626,6 +1626,8 @@ MonoBehaviour:
   contentArea: {fileID: 250955499}
   scrollView: {fileID: 1974642466}
   streamAudioSource: {fileID: 1169396015}
+  voice:
+    id: echo
   systemPrompt: 'Your knowledge cutoff is 2023-10.
 
     You are a helpful, witty,

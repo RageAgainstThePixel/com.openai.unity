@@ -42,7 +42,9 @@ namespace OpenAI.Audio
 
         [Preserve]
         public float[] AudioSamples
-            => PCMEncoder.Decode(AudioData.ToArray(), inputSampleRate: SampleRate, outputSampleRate: AudioSettings.outputSampleRate);
+            => audioSamples ??= PCMEncoder.Decode(AudioData.ToArray(), inputSampleRate: SampleRate, outputSampleRate: AudioSettings.outputSampleRate);
+
+        private float[] audioSamples;
 
         [Preserve]
         public int SampleRate { get; }

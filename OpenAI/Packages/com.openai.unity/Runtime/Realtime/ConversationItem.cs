@@ -96,7 +96,7 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("id")]
-        public string Id { get; private set; }
+        public string Id { get; }
 
         /// <summary>
         /// The type of the item ("message", "function_call", "function_call_output").
@@ -109,56 +109,56 @@ namespace OpenAI.Realtime
         /// The object type, must be "realtime.item".
         /// </summary>
         [Preserve]
-        [JsonProperty("object")]
-        public string Object { get; private set; }
+        [JsonProperty("object", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Object { get; }
 
         /// <summary>
         /// The status of the item ("completed", "in_progress", "incomplete").
         /// </summary>
         [Preserve]
-        [JsonProperty("status")]
-        public RealtimeResponseStatus Status { get; private set; }
+        [JsonProperty("status", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public RealtimeResponseStatus Status { get; }
 
         /// <summary>
         /// The role associated with the item ("user", "assistant", "system").
         /// </summary>
         [Preserve]
-        [JsonProperty("role")]
-        public Role Role { get; private set; }
+        [JsonProperty("role", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Role Role { get; }
 
         /// <summary>
         /// The content of the item.
         /// </summary>
         [Preserve]
         [JsonProperty("content")]
-        public IReadOnlyList<RealtimeContent> Content { get; private set; }
+        public IReadOnlyList<RealtimeContent> Content { get; }
 
         /// <summary>
         /// The ID of the function call (for "function_call" items).
         /// </summary>
         [Preserve]
         [JsonProperty("call_id")]
-        public string FunctionCallId { get; private set; }
+        public string FunctionCallId { get; }
 
         /// <summary>
         /// The name of the function being called.
         /// </summary>
         [Preserve]
         [JsonProperty("name")]
-        public string FunctionName { get; private set; }
+        public string FunctionName { get; }
 
         /// <summary>
         /// The arguments of the function call.
         /// </summary>
         [Preserve]
         [JsonProperty("arguments")]
-        public JToken FunctionArguments { get; private set; }
+        public JToken FunctionArguments { get; }
 
         /// <summary>
         /// The output of the function call (for "function_call_output" items).
         /// </summary>
         [Preserve]
         [JsonProperty("output")]
-        public string FunctionOutput { get; private set; }
+        public string FunctionOutput { get; }
     }
 }

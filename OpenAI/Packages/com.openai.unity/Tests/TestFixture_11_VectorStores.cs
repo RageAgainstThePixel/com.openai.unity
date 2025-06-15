@@ -55,10 +55,14 @@ namespace OpenAI.Tests
                     Assert.IsNotNull(vectorStore);
                     Assert.AreEqual("test-vector-store", vectorStore.Name);
 
+                    await Task.Delay(TimeSpan.FromSeconds(5));
+
                     // list vector stores
                     var vectorStores = await OpenAIClient.VectorStoresEndpoint.ListVectorStoresAsync();
                     Assert.IsNotNull(vectorStores);
                     Assert.IsNotEmpty(vectorStores.Items);
+
+                    await Task.Delay(TimeSpan.FromSeconds(5));
 
                     // modify vector store
                     IReadOnlyDictionary<string, object> metadata = new Dictionary<string, object> { { nameof(Test_01_VectorStores_SingleFile), DateTime.UtcNow } };

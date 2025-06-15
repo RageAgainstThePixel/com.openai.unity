@@ -49,7 +49,7 @@ namespace OpenAI.Threads
             [JsonProperty("truncation_strategy")] TruncationStrategy truncationStrategy,
             [JsonProperty("tool_choice")] object toolChoice,
             [JsonProperty("parallel_tool_calls")] bool parallelToolCalls,
-            [JsonProperty("response_format")][JsonConverter(typeof(ResponseFormatConverter))] ResponseFormatObject responseFormat)
+            [JsonProperty("response_format")][JsonConverter(typeof(TextResponseFormatConverter))] TextResponseFormatConfiguration responseFormat)
         {
             Id = id;
             Object = @object;
@@ -308,7 +308,7 @@ namespace OpenAI.Threads
 
         /// <summary>
         /// Specifies the format that the model must output.
-        /// Setting to <see cref="ChatResponseFormat.Json"/> or <see cref="ChatResponseFormat.JsonSchema"/> enables JSON mode,
+        /// Setting to <see cref="TextResponseFormat.Json"/> or <see cref="TextResponseFormat.JsonSchema"/> enables JSON mode,
         /// which guarantees the message the model generates is valid JSON.
         /// </summary>
         /// <remarks>
@@ -319,13 +319,13 @@ namespace OpenAI.Threads
         /// which indicates the generation exceeded max_tokens or the conversation exceeded the max context length.
         /// </remarks>
         [Preserve]
-        [JsonConverter(typeof(ResponseFormatConverter))]
+        [JsonConverter(typeof(TextResponseFormatConverter))]
         [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public ResponseFormatObject ResponseFormatObject { get; private set; }
+        public TextResponseFormatConfiguration ResponseFormatObject { get; private set; }
 
         [Preserve]
         [JsonIgnore]
-        public ChatResponseFormat ResponseFormat => ResponseFormatObject ?? ChatResponseFormat.Auto;
+        public TextResponseFormat ResponseFormat => ResponseFormatObject ?? TextResponseFormat.Auto;
 
         [Preserve]
         public static implicit operator string(RunResponse run) => run?.ToString();

@@ -89,3 +89,7 @@ OpenAI/Assets/Resources/
 OpenAI/Assets/Resources.meta
 OpenAI/ProjectSettings/SceneTemplateSettings.json
 OpenAI/ProjectSettings/boot.config
+
+# Unit Test Outputs
+OpenAI/Assets/Tests
+OpenAI/Assets/Tests.meta

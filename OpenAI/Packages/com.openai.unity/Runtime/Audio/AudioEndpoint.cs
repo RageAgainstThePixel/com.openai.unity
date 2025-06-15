@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Globalization;
 using System.IO;
@@ -66,9 +67,16 @@ namespace OpenAI.Audio
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
             string clipName;
 
+            if (string.IsNullOrEmpty(request?.Voice))
+            {
+                throw new ArgumentNullException(nameof(request.Voice));
+            }
+
+            var voice = request.Voice.GetPathSafeString();
+
             lock (mutex)
             {
-                clipName = $"{request.Voice}-{DateTime.UtcNow:yyyyMMddThhmmssfffff}.{ext}";
+                clipName = $"{voice}-{DateTime.UtcNow:yyyyMMddThhmmssfffff}.{ext}";
             }
 
             Rest.TryGetDownloadCacheItem(clipName, out var cachedPath);
@@ -143,6 +151,27 @@ namespace OpenAI.Audio
                 payload.AddBinaryData("file", audioData.ToArray(), request.AudioName);
                 payload.AddField("model", request.Model);
 
+                if (request.ChunkingStrategy != null)
+                {
+                    var stringContent = request.ChunkingStrategy.Type == "auto"
+                        ? "auto"
+                        : JsonConvert.SerializeObject(request.ChunkingStrategy, OpenAIClient.JsonSerializationOptions);
+                    payload.AddField("chunking_strategy", stringContent);
+                }
+
+                if (request.Include is { Length: > 0 })
+                {
+                    foreach (var include in request.Include)
+                    {
+                        payload.AddField("include[]", include);
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.Language))
+                {
+                    payload.AddField("language", request.Language);
+                }
+
                 if (!string.IsNullOrWhiteSpace(request.Prompt))
                 {
                     payload.AddField("prompt", request.Prompt);
@@ -154,11 +183,6 @@ namespace OpenAI.Audio
                 if (request.Temperature.HasValue)
                 {
                     payload.AddField("temperature", request.Temperature.Value.ToString(CultureInfo.InvariantCulture));
-                }
-
-                if (!string.IsNullOrWhiteSpace(request.Language))
-                {
-                    payload.AddField("language", request.Language);
                 }
 
                 switch (request.TimestampGranularities)
