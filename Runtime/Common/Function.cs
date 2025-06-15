@@ -20,7 +20,7 @@ namespace OpenAI
     /// <see href="https://platform.openai.com/docs/guides/function-calling"/>
     /// </summary>
     [Preserve]
-    public sealed class Function
+    public sealed class Function : ITool
     {
         private const string NameRegex = "^[a-zA-Z0-9_-]{1,64}$";
 
@@ -205,10 +205,16 @@ namespace OpenAI
         {
             get
             {
-                if (parameters == null &&
-                    !string.IsNullOrWhiteSpace(parametersString))
+                if (parameters == null)
                 {
-                    parameters = JToken.Parse(parametersString);
+                    if (!string.IsNullOrWhiteSpace(parametersString))
+                    {
+                        parameters = JToken.Parse(parametersString);
+                    }
+                    else
+                    {
+                        parameters = null;
+                    }
                 }
 
                 return parameters;
@@ -229,10 +235,16 @@ namespace OpenAI
         {
             get
             {
-                if (arguments == null &&
-                    !string.IsNullOrWhiteSpace(argumentsString))
+                if (arguments == null)
                 {
-                    arguments = JToken.FromObject(argumentsString, OpenAIClient.JsonSerializer);
+                    if (!string.IsNullOrWhiteSpace(argumentsString))
+                    {
+                        arguments = JToken.FromObject(argumentsString, OpenAIClient.JsonSerializer);
+                    }
+                    else
+                    {
+                        arguments = null;
+                    }
                 }
 
                 return arguments;
@@ -263,7 +275,7 @@ namespace OpenAI
         /// </summary>
         [Preserve]
         [JsonIgnore]
-        private MethodInfo MethodInfo { get; }
+        internal MethodInfo MethodInfo { get; }
 
         [Preserve]
         internal void AppendFrom(Function other)

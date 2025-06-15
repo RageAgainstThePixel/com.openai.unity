@@ -28,7 +28,7 @@ namespace OpenAI
         }
 
         [Preserve]
-        internal Error(Exception e)
+        public Error(Exception e)
         {
             Type = e.GetType().Name;
             Message = e.Message;
@@ -67,7 +67,7 @@ namespace OpenAI
         /// The line number of the input file where the error occurred, if applicable.
         /// </summary>
         [Preserve]
-        [JsonProperty("line")]
+        [JsonProperty("line", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? Line { get; }
 
         [Preserve]

@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using OpenAI.Extensions;
+using System.Collections.Generic;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Threads
@@ -15,12 +16,14 @@ namespace OpenAI.Threads
             [JsonProperty("index")] int? index,
             [JsonProperty("type")] CodeInterpreterOutputType type,
             [JsonProperty("logs")] string logs,
-            [JsonProperty("image")] ImageFile image)
+            [JsonProperty("image")] ImageFile image,
+            [JsonProperty("files")] IReadOnlyList<FilePath> files)
         {
             Index = index;
             Type = type;
             Logs = logs;
             Image = image;
+            Files = files;
         }
 
         [Preserve]
@@ -48,6 +51,14 @@ namespace OpenAI.Threads
         [JsonProperty("image", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public ImageFile Image { get; private set; }
 
+        /// <summary>
+        /// Code interpreter file output.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("files", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public IReadOnlyList<FilePath> Files { get; private set; }
+
+        [Preserve]
         public void AppendFrom(CodeInterpreterOutputs other)
         {
             if (other == null) { return; }
@@ -77,6 +88,11 @@ namespace OpenAI.Threads
                 {
                     Image.AppendFrom(other.Image);
                 }
+            }
+
+            if (other.Files is { Count: > 0 })
+            {
+                Files ??= other.Files;
             }
         }
     }

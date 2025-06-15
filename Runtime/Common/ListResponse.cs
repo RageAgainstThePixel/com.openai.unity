@@ -8,7 +8,7 @@ namespace OpenAI
 {
     [Preserve]
     public sealed class ListResponse<TObject> : BaseResponse, IListResponse<TObject>
-        where TObject : BaseResponse
+        where TObject : IListItem
     {
         [Preserve]
         [JsonProperty("object")]

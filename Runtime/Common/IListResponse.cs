@@ -7,9 +7,12 @@ namespace OpenAI
 {
     [Preserve]
     public interface IListResponse<out TObject>
-        where TObject : BaseResponse
+        where TObject : IListItem
     {
         [Preserve]
         IReadOnlyList<TObject> Items { get; }
     }
+
+    [Preserve]
+    public interface IListItem { }
 }

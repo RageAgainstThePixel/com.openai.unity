@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System;
 using UnityEngine;
 using UnityEngine.Scripting;
 
@@ -22,16 +23,36 @@ namespace OpenAI.Images
         }
 
         [Preserve]
-        [JsonProperty("url")]
+        [JsonProperty("url", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Url { get; private set; }
 
         [Preserve]
-        [JsonProperty("b64_json")]
+        [JsonProperty("b64_json", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string B64_Json { get; private set; }
 
         [Preserve]
-        [JsonProperty("revised_prompt")]
+        [JsonProperty("revised_prompt", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string RevisedPrompt { get; private set; }
+
+        [Preserve]
+        [JsonIgnore]
+        public DateTime CreatedAt { get; internal set; }
+
+        [Preserve]
+        [JsonIgnore]
+        public string Background { get; internal set; }
+
+        [Preserve]
+        [JsonIgnore]
+        public string OutputFormat { get; internal set; }
+
+        [Preserve]
+        [JsonIgnore]
+        public string Quality { get; internal set; }
+
+        [Preserve]
+        [JsonIgnore]
+        public string Size { get; internal set; }
 
         [Preserve]
         [JsonIgnore]
@@ -40,6 +61,10 @@ namespace OpenAI.Images
         [Preserve]
         [JsonIgnore]
         public Texture2D Texture { get; internal set; }
+
+        [Preserve]
+        [JsonIgnore]
+        public TokenUsage Usage { get; internal set; }
 
         [Preserve]
         public static implicit operator Texture2D(ImageResult imageResult) => imageResult.Texture;

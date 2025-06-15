@@ -617,7 +617,8 @@ MonoBehaviour:
   contentArea: {fileID: 250955499}
   scrollView: {fileID: 1974642466}
   streamAudioSource: {fileID: 445122400}
-  voice: 0
+  voice:
+    id: verse
   systemPrompt: 'You are a helpful assistant.
 
     - If an image is requested then

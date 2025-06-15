@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Realtime
@@ -18,7 +19,7 @@ namespace OpenAI.Realtime
             [JsonProperty("status_details")] StatusDetails statusDetails,
             [JsonProperty("output")] IReadOnlyList<ConversationItem> output,
             [JsonProperty("metadata")] IReadOnlyDictionary<string, object> metadata,
-            [JsonProperty("usage")] Usage usage,
+            [JsonProperty("usage")] TokenUsage usage,
             [JsonProperty("conversation_id")] string conversationId,
             [JsonProperty("voice")] string voice,
             [JsonProperty("modalities")] Modality modalities,
@@ -94,7 +95,7 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("usage")]
-        public Usage Usage { get; }
+        public TokenUsage Usage { get; }
 
         /// <summary>
         /// Which conversation the response is added to, determined by the `conversation`
@@ -147,5 +148,13 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonProperty("max_output_tokens")]
         public object MaxOutputTokens { get; }
+
+        [Preserve]
+        public void PrintUsage()
+        {
+            if (Usage == null) { return; }
+            var message = $"{Id}: {Usage}";
+            Debug.Log(message);
+        }
     }
 }

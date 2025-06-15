@@ -1,5 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using Newtonsoft.Json;
 using OpenAI.Assistants;
 using OpenAI.Audio;
 using OpenAI.Images;
@@ -51,8 +52,7 @@ namespace OpenAI.Samples.Assistant
         private StreamAudioSource streamAudioSource;
 
         [SerializeField]
-        [Obsolete]
-        private SpeechVoice voice;
+        private Voice voice;
 
         [SerializeField]
         [TextArea(3, 10)]
@@ -281,11 +281,11 @@ namespace OpenAI.Samples.Assistant
             {
                 Debug.Log(nameof(ProcessToolCalls));
                 var toolCalls = run.RequiredAction.SubmitToolOutputs.ToolCalls;
-                var toolOutputs = await Task.WhenAll(toolCalls.Select(toolCall => ProcessToolCall(toolCall))).ConfigureAwait(true);
+                var toolOutputs = await Task.WhenAll(toolCalls.Select(ProcessToolCall)).ConfigureAwait(true);
                 await run.SubmitToolOutputsAsync(new SubmitToolOutputsRequest(toolOutputs), cancellationToken: destroyCancellationToken);
             }
 
-            async Task<ToolOutput> ProcessToolCall(ToolCall toolCall)
+            async Task<ToolOutput> ProcessToolCall(IToolCall toolCall)
             {
                 string result;
 
@@ -298,14 +298,14 @@ namespace OpenAI.Samples.Assistant
                         AddNewImageContent(imageResult);
                     }
 
-                    result = "{\"result\":\"completed\"}";
+                    result = JsonConvert.SerializeObject(new { result = imageResults });
                 }
                 catch (Exception e)
                 {
-                    result = $"{{\"result\":\"{e.Message}\"}}";
+                    result = JsonConvert.SerializeObject(new { error = new Error(e) });
                 }
 
-                return new ToolOutput(toolCall.Id, result);
+                return new ToolOutput(toolCall.CallId, result);
             }
         }
 
@@ -328,9 +328,7 @@ namespace OpenAI.Samples.Assistant
             {
                 text = text.Replace("![Image](output.jpg)", string.Empty);
                 if (string.IsNullOrWhiteSpace(text)) { return; }
-#pragma warning disable CS0612 // Type or member is obsolete
-                var request = new SpeechRequest(text, Model.TTS_1, voice, SpeechResponseFormat.PCM);
-#pragma warning restore CS0612 // Type or member is obsolete
+                var request = new SpeechRequest(input: text, model: Model.TTS_1, voice: voice, responseFormat: SpeechResponseFormat.PCM);
                 var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
                 {
                     streamAudioSource.BufferCallback(partialClip.AudioSamples);

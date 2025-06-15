@@ -1,5 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using Newtonsoft.Json;
 using OpenAI.Audio;
 using OpenAI.Chat;
 using OpenAI.Images;
@@ -49,9 +50,8 @@ namespace OpenAI.Samples.Chat
         [SerializeField]
         private StreamAudioSource streamAudioSource;
 
-        [Obsolete]
         [SerializeField]
-        private SpeechVoice voice;
+        private Voice voice;
 
         [SerializeField]
         [TextArea(3, 10)]
@@ -184,6 +184,7 @@ namespace OpenAI.Samples.Chat
                     async Task ProcessToolCall()
                     {
                         await Awaiters.UnityMainThread;
+                        string result;
 
                         try
                         {
@@ -193,15 +194,16 @@ namespace OpenAI.Samples.Chat
                             {
                                 AddNewImageContent(imageResult);
                             }
+
+                            result = JsonConvert.SerializeObject(new { result = imageResults });
                         }
                         catch (Exception e)
                         {
                             Debug.LogError(e);
-                            conversation.AppendMessage(new(toolCall, $"{{\"result\":\"{e.Message}\"}}"));
-                            return;
+                            result = JsonConvert.SerializeObject(new { error = new Error(e) });
                         }
 
-                        conversation.AppendMessage(new(toolCall, "{\"result\":\"completed\"}"));
+                        conversation.AppendMessage(new(toolCall, result));
                     }
                 }
 
@@ -242,9 +244,7 @@ namespace OpenAI.Samples.Chat
         {
             text = text.Replace("![Image](output.jpg)", string.Empty);
             if (string.IsNullOrWhiteSpace(text)) { return; }
-#pragma warning disable CS0612 // Type or member is obsolete
-            var request = new SpeechRequest(text, Model.TTS_1, voice, SpeechResponseFormat.PCM);
-#pragma warning restore CS0612 // Type or member is obsolete
+            var request = new SpeechRequest(input: text, model: Model.TTS_1, voice: voice, responseFormat: SpeechResponseFormat.PCM);
             var stopwatch = Stopwatch.StartNew();
             var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
             {

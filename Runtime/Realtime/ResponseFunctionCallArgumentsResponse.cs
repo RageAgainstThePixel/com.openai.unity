@@ -7,7 +7,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class ResponseFunctionCallArgumentsResponse : BaseRealtimeEvent, IServerEvent, IRealtimeEventStream
+    public sealed class ResponseFunctionCallArgumentsResponse : BaseRealtimeEvent, IServerEvent, IRealtimeEventStream, IToolCall
     {
         [Preserve]
         [JsonConstructor]

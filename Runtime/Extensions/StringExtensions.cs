@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -45,5 +46,8 @@ namespace OpenAI.Extensions
 
             return directory;
         }
+
+        public static string GetPathSafeString(this string path)
+            => Path.GetInvalidFileNameChars().Aggregate(path, (current, c) => current.Replace(c, '_'));
     }
 }
