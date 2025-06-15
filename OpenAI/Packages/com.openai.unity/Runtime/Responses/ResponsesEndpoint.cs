@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.Scripting;
 using Utilities.WebRequestRest;
 using Utilities.WebRequestRest.Interfaces;
@@ -58,6 +59,11 @@ namespace OpenAI.Responses
 
             var streamResponse = await Rest.PostAsync(endpoint, payload, async (sseResponse, ssEvent) =>
             {
+                if (EnableDebug)
+                {
+                    Debug.Log($"{ssEvent.ToJsonString()}");
+                }
+
                 IServerSentEvent serverSentEvent = null;
                 var @event = ssEvent.Value.Value<string>();
                 var @object = ssEvent.Data ?? ssEvent.Value;

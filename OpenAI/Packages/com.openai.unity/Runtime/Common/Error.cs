@@ -28,7 +28,7 @@ namespace OpenAI
         }
 
         [Preserve]
-        internal Error(Exception e)
+        public Error(Exception e)
         {
             Type = e.GetType().Name;
             Message = e.Message;

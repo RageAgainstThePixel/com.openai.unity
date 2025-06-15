@@ -63,6 +63,7 @@ namespace OpenAI.Chat
         [JsonIgnore]
         public float[] AudioSamples
             => audioSamples ??= PCMEncoder.Decode(AudioData.ToArray(), inputSampleRate: 24000, outputSampleRate: AudioSettings.outputSampleRate);
+
         private float[] audioSamples;
 
         [Preserve]

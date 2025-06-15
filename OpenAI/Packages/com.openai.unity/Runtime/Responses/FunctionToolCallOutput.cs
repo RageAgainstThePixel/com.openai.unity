@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace OpenAI.Responses
 {
     [Preserve]
-    public sealed class FunctionToolCallOutput : BaseResponse, IResponseItem
+    public class FunctionToolCallOutput : BaseResponse, IResponseItem
     {
         [Preserve]
         public FunctionToolCallOutput(FunctionToolCall toolCall, string output)
@@ -75,5 +75,23 @@ namespace OpenAI.Responses
         [Preserve]
         public override string ToString()
             => Output;
+    }
+
+    [Preserve]
+    public sealed class FunctionToolCallOutput<T> : FunctionToolCallOutput
+    {
+        [Preserve]
+        public static implicit operator T(FunctionToolCallOutput<T> output) => output.OutputResult;
+
+        [Preserve]
+        public FunctionToolCallOutput(FunctionToolCall toolCall, T outputResult, string output)
+          : base(toolCall, output)
+        {
+            OutputResult = outputResult;
+        }
+
+        [Preserve]
+        [JsonIgnore]
+        public T OutputResult { get; internal set; }
     }
 }

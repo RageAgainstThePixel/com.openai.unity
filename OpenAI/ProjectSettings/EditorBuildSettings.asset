@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Samples/Assistant/OpenAIAssistantSample.unity
     guid: cdcc67134a32e1f40a96530fa0e2f1e9
+  - enabled: 1
+    path: Assets/Samples/Responses/OpenAIResponsesSample.unity
+    guid: 615a8b068e9c4d94ba889f638e33892e
   m_configObjects: {}

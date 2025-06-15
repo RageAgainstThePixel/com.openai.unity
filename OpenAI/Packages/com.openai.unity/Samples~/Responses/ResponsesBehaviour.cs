@@ -2,10 +2,11 @@
 
 using Newtonsoft.Json;
 using OpenAI.Audio;
-using OpenAI.Chat;
 using OpenAI.Images;
 using OpenAI.Models;
+using OpenAI.Responses;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -18,13 +19,14 @@ using Utilities.Async;
 using Utilities.Audio;
 using Utilities.Encoding.Wav;
 using Utilities.Extensions;
-using Utilities.WebRequestRest;
+using Utilities.WebRequestRest.Interfaces;
 using Debug = UnityEngine.Debug;
+using Message = OpenAI.Responses.Message;
 
-namespace OpenAI.Samples.Chat
+namespace OpenAI.Samples.Responses
 {
     [RequireComponent(typeof(StreamAudioSource))]
-    public class ChatBehaviour : MonoBehaviour
+    public class ResponsesBehaviour : MonoBehaviour
     {
         [SerializeField]
         private OpenAIConfiguration configuration;
@@ -58,22 +60,24 @@ namespace OpenAI.Samples.Chat
         private string systemPrompt = "You are a helpful assistant.\n- If an image is requested then use \"![Image](output.jpg)\" to display it.\n- When performing function calls, use the defaults unless explicitly told to use a specific value.\n- Images should always be generated in base64.";
 
         private OpenAIClient openAI;
-
-        private readonly Conversation conversation = new();
+        private readonly List<IResponseItem> conversation = new();
+        private Tool imageTool;
+        private string toolChoice = "auto";
         private readonly List<Tool> assistantTools = new();
 
 #if !UNITY_2022_3_OR_NEWER
         private readonly CancellationTokenSource lifetimeCts = new();
+
         // ReSharper disable once InconsistentNaming
         private CancellationToken destroyCancellationToken => lifetimeCts.Token;
 #endif
 
         private void OnValidate()
         {
-            inputField.Validate();
-            contentArea.Validate();
             submitButton.Validate();
             recordButton.Validate();
+            inputField.Validate();
+            contentArea.Validate();
 
             if (streamAudioSource == null)
             {
@@ -89,9 +93,9 @@ namespace OpenAI.Samples.Chat
                 EnableDebug = enableDebug
             };
             RecordingManager.EnableDebug = enableDebug;
-
-            assistantTools.Add(Tool.GetOrCreateTool(openAI.ImagesEndPoint, nameof(ImagesEndpoint.GenerateImageAsync)));
-            conversation.AppendMessage(new Message(Role.System, systemPrompt));
+            imageTool = Tool.GetOrCreateTool(openAI.ImagesEndPoint, nameof(ImagesEndpoint.GenerateImageAsync));
+            assistantTools.Add(imageTool);
+            conversation.Add(new Message(Role.Developer, systemPrompt));
             inputField.onSubmit.AddListener(SubmitChat);
             submitButton.onClick.AddListener(SubmitChat);
             recordButton.onClick.AddListener(ToggleRecording);
@@ -116,32 +120,37 @@ namespace OpenAI.Samples.Chat
             inputField.ReleaseSelection();
             inputField.interactable = false;
             submitButton.interactable = false;
-            conversation.AppendMessage(new Message(Role.User, inputField.text));
+            conversation.Add(new Message(Role.User, inputField.text));
             var userMessageContent = AddNewTextMessageContent(Role.User);
             userMessageContent.text = $"User: {inputField.text}";
             inputField.text = string.Empty;
-            var assistantMessageContent = AddNewTextMessageContent(Role.Assistant);
-            assistantMessageContent.text = "Assistant: ";
 
             try
             {
-                var request = new ChatRequest(conversation.Messages, tools: assistantTools);
-                var response = await openAI.ChatEndpoint.StreamCompletionAsync(request, resultHandler: deltaResponse =>
+                var request = new CreateResponseRequest(input: conversation, tools: assistantTools, toolChoice: toolChoice, model: Model.GPT4_1_Nano);
+                async Task StreamEventHandler(string eventName, IServerSentEvent sseEvent)
                 {
-                    if (deltaResponse?.FirstChoice?.Delta == null) { return; }
-                    assistantMessageContent.text += deltaResponse.FirstChoice.Delta.ToString();
-                    scrollView.verticalNormalizedPosition = 0f;
-                }, cancellationToken: destroyCancellationToken);
-
-                conversation.AppendMessage(response.FirstChoice.Message);
-
-                if (response.FirstChoice.FinishReason == "tool_calls")
-                {
-                    response = await ProcessToolCallsAsync(response);
-                    assistantMessageContent.text += response.ToString().Replace("![Image](output.jpg)", string.Empty);
+                    switch (sseEvent)
+                    {
+                        case Message messageItem:
+                            conversation.Add(messageItem);
+                            toolChoice = "auto";
+                            var assistantMessageContent = AddNewTextMessageContent(Role.Assistant);
+                            var message = messageItem.ToString().Replace("![Image](output.jpg)", string.Empty);
+                            assistantMessageContent.text = $"Assistant: {message}";
+                            scrollView.verticalNormalizedPosition = 0f;
+                            await GenerateSpeechAsync(message, destroyCancellationToken);
+                            break;
+                        case FunctionToolCall functionToolCall:
+                            conversation.Add(functionToolCall);
+                            toolChoice = "none";
+                            var output = await ProcessToolCallAsync(functionToolCall, destroyCancellationToken);
+                            conversation.Add(output);
+                            break;
+                    }
                 }
 
-                await GenerateSpeechAsync(response, destroyCancellationToken);
+                await openAI.ResponsesEndpoint.CreateModelResponseAsync(request, StreamEventHandler, cancellationToken: destroyCancellationToken);
             }
             catch (Exception e)
             {
@@ -166,98 +175,67 @@ namespace OpenAI.Samples.Chat
 
                 isChatPending = false;
             }
+        }
 
-            async Task<ChatResponse> ProcessToolCallsAsync(ChatResponse response)
+        private async Task<FunctionToolCallOutput> ProcessToolCallAsync(FunctionToolCall toolCall, CancellationToken cancellationToken)
+        {
+            try
             {
-                var toolCalls = new List<Task>();
-
-                foreach (var toolCall in response.FirstChoice.Message.ToolCalls)
+                if (toolCall.Name == imageTool.Function.Name)
                 {
-                    if (enableDebug)
+                    var output = await toolCall.InvokeFunctionAsync<IReadOnlyList<ImageResult>>(cancellationToken: cancellationToken);
+
+                    foreach (var imageResult in output.OutputResult)
                     {
-                        Debug.Log($"{response.FirstChoice.Message.Role}: {toolCall.Function.Name} | Finish Reason: {response.FirstChoice.FinishReason}");
-                        Debug.Log($"{toolCall.Function.Arguments}");
+                        AddNewImageContent(imageResult);
                     }
 
-                    toolCalls.Add(ProcessToolCall());
-
-                    async Task ProcessToolCall()
-                    {
-                        await Awaiters.UnityMainThread;
-                        string result;
-
-                        try
-                        {
-                            var imageResults = await toolCall.InvokeFunctionAsync<IReadOnlyList<ImageResult>>(destroyCancellationToken).ConfigureAwait(true);
-
-                            foreach (var imageResult in imageResults)
-                            {
-                                AddNewImageContent(imageResult);
-                            }
-
-                            result = JsonConvert.SerializeObject(new { result = imageResults });
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogError(e);
-                            result = JsonConvert.SerializeObject(new { error = new Error(e) });
-                        }
-
-                        conversation.AppendMessage(new(toolCall, result));
-                    }
+                    scrollView.verticalNormalizedPosition = 0f;
+                    return output;
                 }
 
-
-                await Task.WhenAll(toolCalls).ConfigureAwait(true);
-                ChatResponse toolCallResponse;
-
-                try
-                {
-                    var toolCallRequest = new ChatRequest(conversation.Messages, tools: assistantTools);
-                    toolCallResponse = await openAI.ChatEndpoint.GetCompletionAsync(toolCallRequest, destroyCancellationToken);
-                    conversation.AppendMessage(toolCallResponse.FirstChoice.Message);
-                }
-                catch (RestException restEx)
-                {
-                    Debug.LogError(restEx);
-
-                    foreach (var toolCall in response.FirstChoice.Message.ToolCalls)
-                    {
-                        conversation.AppendMessage(new Message(toolCall, restEx.Response.Body));
-                    }
-
-                    var toolCallRequest = new ChatRequest(conversation.Messages, tools: assistantTools);
-                    toolCallResponse = await openAI.ChatEndpoint.GetCompletionAsync(toolCallRequest, destroyCancellationToken);
-                    conversation.AppendMessage(toolCallResponse.FirstChoice.Message);
-                }
-
-                if (toolCallResponse.FirstChoice.FinishReason == "tool_calls")
-                {
-                    return await ProcessToolCallsAsync(toolCallResponse);
-                }
-
-                return toolCallResponse;
+                return await toolCall.InvokeFunctionAsync(cancellationToken);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e);
+                return new FunctionToolCallOutput(toolCall.CallId, JsonConvert.SerializeObject(new { error = new Error(e) }));
             }
         }
 
         private async Task GenerateSpeechAsync(string text, CancellationToken cancellationToken)
         {
-            text = text.Replace("![Image](output.jpg)", string.Empty);
-            if (string.IsNullOrWhiteSpace(text)) { return; }
-            var request = new SpeechRequest(input: text, model: Model.TTS_1, voice: voice, responseFormat: SpeechResponseFormat.PCM);
-            var stopwatch = Stopwatch.StartNew();
-            var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
+            try
             {
-                streamAudioSource.BufferCallback(partialClip.AudioSamples);
-            }, cancellationToken);
-            var playbackTime = speechClip.Length - (float)stopwatch.Elapsed.TotalSeconds + 0.1f;
+                if (string.IsNullOrWhiteSpace(text)) { return; }
 
-            await Awaiters.DelayAsync(TimeSpan.FromSeconds(playbackTime), cancellationToken).ConfigureAwait(true);
-            ((AudioSource)streamAudioSource).clip = speechClip.AudioClip;
+                var request = new SpeechRequest(input: text, model: Model.TTS_1, voice: voice, responseFormat: SpeechResponseFormat.PCM);
+                var stopwatch = Stopwatch.StartNew();
+                var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
+                {
+                    streamAudioSource.BufferCallback(partialClip.AudioSamples);
+                }, cancellationToken);
+                var playbackTime = speechClip.Length - (float)stopwatch.Elapsed.TotalSeconds + 0.1f;
 
-            if (enableDebug)
+                await Awaiters.DelayAsync(TimeSpan.FromSeconds(playbackTime), cancellationToken).ConfigureAwait(true);
+                ((AudioSource)streamAudioSource).clip = speechClip.AudioClip;
+
+                if (enableDebug)
+                {
+                    Debug.Log(speechClip.CachePath);
+                }
+            }
+            catch (Exception e)
             {
-                Debug.Log(speechClip.CachePath);
+                switch (e)
+                {
+                    case TaskCanceledException:
+                    case OperationCanceledException:
+                        break;
+                    default:
+                        Debug.LogError(e);
+                        break;
+                }
             }
         }
 

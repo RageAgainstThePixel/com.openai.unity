@@ -1,5 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OpenAI.Extensions;
@@ -113,22 +114,29 @@ namespace OpenAI.Responses
             set => argumentsString += value;
         }
 
+        [Preserve]
         public FunctionToolCallOutput InvokeFunction()
             => new(this, ToolExtensions.InvokeFunction(this));
 
-        public FunctionToolCallOutput InvokeFunction<T>(JsonSerializerSettings options = null)
-            => new(this, JsonConvert.SerializeObject(ToolExtensions.InvokeFunction<T>(this), options ?? OpenAIClient.JsonSerializationOptions));
+        [Preserve]
+        public FunctionToolCallOutput<T> InvokeFunction<T>(JsonSerializerSettings options = null)
+        {
+            var result = ToolExtensions.InvokeFunction<T>(this);
+            return new(this, result, JsonConvert.SerializeObject(new { result }, options ?? OpenAIClient.JsonSerializationOptions));
+        }
 
+        [Preserve]
         public async Task<FunctionToolCallOutput> InvokeFunctionAsync(CancellationToken cancellationToken = default)
         {
             var result = await ToolExtensions.InvokeFunctionAsync(this, cancellationToken).ConfigureAwait(false);
-            return new FunctionToolCallOutput(this, result);
+            return new(this, result);
         }
 
-        public async Task<FunctionToolCallOutput> InvokeFunctionAsync<T>(JsonSerializerSettings options = null, CancellationToken cancellationToken = default)
+        [Preserve]
+        public async Task<FunctionToolCallOutput<T>> InvokeFunctionAsync<T>(JsonSerializerSettings options = null, CancellationToken cancellationToken = default)
         {
             var result = await this.InvokeFunctionAsync<T>(cancellationToken).ConfigureAwait(false);
-            return new FunctionToolCallOutput(this, JsonConvert.SerializeObject(result, options ?? OpenAIClient.JsonSerializationOptions));
+            return new(this, result, JsonConvert.SerializeObject(new { result }, options ?? OpenAIClient.JsonSerializationOptions));
         }
     }
 }

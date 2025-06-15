@@ -1,0 +1,22 @@
+{
+    "name": "OpenAI.Samples.Responses",
+    "rootNamespace": "OpenAI.Samples.Responses",
+    "references": [
+        "GUID:3248779d86bd31747b5d2214f30b01ac",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:a6609af893242c7438d701ddd4cce46a",
+        "GUID:d25c28436b1dcc9408d86f49a0f5210b",
+        "GUID:f7a0d77b5e1d79742a738fb859ee2f28",
+        "GUID:6ab1da3c58a70364e92dc36aaec78f43",
+        "GUID:7958db66189566541a6363568aee1575"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
