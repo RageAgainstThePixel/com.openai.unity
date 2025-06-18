@@ -6,7 +6,6 @@ using OpenAI.Images;
 using OpenAI.Models;
 using OpenAI.Responses;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -61,8 +60,8 @@ namespace OpenAI.Samples.Responses
 
         private OpenAIClient openAI;
         private readonly List<IResponseItem> conversation = new();
+
         private Tool imageTool;
-        private string toolChoice = "auto";
         private readonly List<Tool> assistantTools = new();
 
 #if !UNITY_2022_3_OR_NEWER
@@ -127,14 +126,13 @@ namespace OpenAI.Samples.Responses
 
             try
             {
-                var request = new CreateResponseRequest(input: conversation, tools: assistantTools, toolChoice: toolChoice, model: Model.GPT4_1_Nano);
+                var request = new CreateResponseRequest(input: conversation, tools: assistantTools, model: Model.GPT4_1_Nano);
                 async Task StreamEventHandler(string eventName, IServerSentEvent sseEvent)
                 {
                     switch (sseEvent)
                     {
                         case Message messageItem:
                             conversation.Add(messageItem);
-                            toolChoice = "auto";
                             var assistantMessageContent = AddNewTextMessageContent(Role.Assistant);
                             var message = messageItem.ToString().Replace("![Image](output.jpg)", string.Empty);
                             assistantMessageContent.text = $"Assistant: {message}";
@@ -143,9 +141,12 @@ namespace OpenAI.Samples.Responses
                             break;
                         case FunctionToolCall functionToolCall:
                             conversation.Add(functionToolCall);
-                            toolChoice = "none";
                             var output = await ProcessToolCallAsync(functionToolCall, destroyCancellationToken);
                             conversation.Add(output);
+                            await openAI.ResponsesEndpoint.CreateModelResponseAsync(
+                                request: new(input: conversation, tools: assistantTools, toolChoice: "none", model: Model.GPT4_1_Nano),
+                                streamEventHandler: StreamEventHandler,
+                                cancellationToken: destroyCancellationToken);
                             break;
                     }
                 }
