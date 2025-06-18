@@ -34,6 +34,8 @@ dotnet_style_predefined_type_for_locals_parameters_members = true
 # Code Style
 csharp_style_var_when_type_is_apparent = true
 
+dotnet_sort_system_directives_first = false
+
 #### Resharper/Rider Rules ####
 # https://www.jetbrains.com/help/resharper/EditorConfig_Properties.html
 
