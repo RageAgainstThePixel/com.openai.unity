@@ -37,7 +37,7 @@ namespace OpenAI
 
             if (client.Settings.Info.IsAzureOpenAI && IsAzureDeployment == true)
             {
-                if (string.IsNullOrWhiteSpace(client.Settings.DeploymentId))
+                if (string.IsNullOrWhiteSpace(client.Settings.Info.DeploymentId))
                 {
                     throw new InvalidOperationException("Deployment ID must be provided for Azure OpenAI endpoints.");
                 }
