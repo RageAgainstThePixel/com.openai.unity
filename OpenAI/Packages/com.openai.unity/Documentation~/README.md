@@ -477,18 +477,17 @@ async Task StreamCallback(string @event, IServerSentEvent sseEvent)
     {
         case Message messageItem:
             conversation.Add(messageItem);
-
             break;
         case FunctionToolCall functionToolCall:
             conversation.Add(functionToolCall);
             var output = await functionToolCall.InvokeFunctionAsync();
             conversation.Add(output);
-            await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync(new(conversation, Model.GPT4_1_Nano, tools: tools, toolChoice: "none"), StreamCallback);
+            await api.ResponsesEndpoint.CreateModelResponseAsync(new(conversation, Model.GPT4_1_Nano, tools: tools, toolChoice: "none"), StreamCallback);
             break;
     }
 }
 
-var response = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync(request, StreamCallback);
+var response = await api.ResponsesEndpoint.CreateModelResponseAsync(request, StreamCallback);
 var responseItem = response.Output.LastOrDefault();
 Debug.Log($"{responseItem.Role}: {responseItem}");
 response.PrintUsage();
