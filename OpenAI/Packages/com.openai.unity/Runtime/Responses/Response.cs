@@ -40,7 +40,7 @@ namespace OpenAI.Responses
             [JsonProperty("service_tier")] string serviceTier = null,
             [JsonProperty("status")] ResponseStatus status = 0,
             [JsonProperty("temperature")] double? temperature = null,
-            [JsonProperty("text")] TextResponseFormatConfiguration textResponseFormatConfiguration = null,
+            [JsonProperty("text")] TextResponseFormatObject textResponseFormatObject = null,
             [JsonProperty("tool_choice")] object toolChoice = null,
             [JsonProperty("tools")] IReadOnlyList<Tool> tools = null,
             [JsonProperty("top_p")] double? topP = null,
@@ -66,7 +66,7 @@ namespace OpenAI.Responses
             ServiceTier = serviceTier;
             Status = status;
             Temperature = temperature;
-            TextResponseFormatConfiguration = textResponseFormatConfiguration;
+            TextResponseFormatObject = textResponseFormatObject;
             ToolChoice = toolChoice;
             Tools = tools;
             TopP = topP;
@@ -233,13 +233,12 @@ namespace OpenAI.Responses
         /// Configuration options for a text response from the model. Can be plain text or structured JSON data.
         /// </summary>
         [Preserve]
-        [JsonConverter(typeof(TextResponseFormatConverter))]
         [JsonProperty("text", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public TextResponseFormatConfiguration TextResponseFormatConfiguration { get; internal set; }
+        public TextResponseFormatObject TextResponseFormatObject { get; internal set; }
 
         [Preserve]
         [JsonIgnore]
-        public TextResponseFormat TextResponseFormat => TextResponseFormatConfiguration ?? TextResponseFormat.Auto;
+        public TextResponseFormat TextResponseFormat => TextResponseFormatObject ?? TextResponseFormat.Auto;
 
         /// <summary>
         /// How the model should select which tool (or tools) to use when generating a response.

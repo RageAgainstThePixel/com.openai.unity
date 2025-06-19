@@ -127,5 +127,12 @@ namespace OpenAI.Responses
         [Preserve]
         public override string ToString()
             => Content?.LastOrDefault()?.ToString() ?? string.Empty;
+
+        [Preserve]
+        public T FromSchema<T>(JsonSerializerSettings options = null)
+        {
+            options ??= OpenAIClient.JsonSerializationOptions;
+            return JsonConvert.DeserializeObject<T>(ToString(), options);
+        }
     }
 }
