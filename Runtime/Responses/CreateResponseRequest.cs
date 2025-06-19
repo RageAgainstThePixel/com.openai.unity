@@ -99,15 +99,15 @@ namespace OpenAI.Responses
             ServiceTier = serviceTier;
             Store = store;
             Temperature = temperature;
-            TextResponseFormatConfiguration = responseFormat;
+            TextResponseFormatObject = responseFormat;
 
             if (jsonSchema != null)
             {
-                TextResponseFormatConfiguration = jsonSchema;
+                TextResponseFormatObject = jsonSchema;
             }
             else
             {
-                TextResponseFormatConfiguration = responseFormat switch
+                TextResponseFormatObject = responseFormat switch
                 {
                     TextResponseFormat.Auto => null,
                     _ => responseFormat
@@ -251,13 +251,12 @@ namespace OpenAI.Responses
         /// Configuration options for a text response from the model. Can be plain text or structured JSON data.
         /// </summary>
         [Preserve]
-        [JsonConverter(typeof(TextResponseFormatConverter))]
         [JsonProperty("text", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public TextResponseFormatConfiguration TextResponseFormatConfiguration { get; internal set; }
+        public TextResponseFormatObject TextResponseFormatObject { get; internal set; }
 
         [Preserve]
         [JsonIgnore]
-        public TextResponseFormat TextResponseFormat => TextResponseFormatConfiguration ?? TextResponseFormat.Auto;
+        public TextResponseFormat TextResponseFormat => TextResponseFormatObject ?? TextResponseFormat.Auto;
 
         /// <summary>
         /// How the model should select which tool (or tools) to use when generating a response.
