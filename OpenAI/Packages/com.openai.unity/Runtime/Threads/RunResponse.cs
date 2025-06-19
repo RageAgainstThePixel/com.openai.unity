@@ -49,7 +49,7 @@ namespace OpenAI.Threads
             [JsonProperty("truncation_strategy")] TruncationStrategy truncationStrategy,
             [JsonProperty("tool_choice")] object toolChoice,
             [JsonProperty("parallel_tool_calls")] bool parallelToolCalls,
-            [JsonProperty("response_format")][JsonConverter(typeof(TextResponseFormatConverter))] TextResponseFormatConfiguration responseFormat)
+            [JsonProperty("response_format")][JsonConverter(typeof(TextResponseFormatConfigurationConverter))] TextResponseFormatConfiguration responseFormat)
         {
             Id = id;
             Object = @object;
@@ -319,7 +319,7 @@ namespace OpenAI.Threads
         /// which indicates the generation exceeded max_tokens or the conversation exceeded the max context length.
         /// </remarks>
         [Preserve]
-        [JsonConverter(typeof(TextResponseFormatConverter))]
+        [JsonConverter(typeof(TextResponseFormatConfigurationConverter))]
         [JsonProperty("response_format", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public TextResponseFormatConfiguration ResponseFormatObject { get; private set; }
 
