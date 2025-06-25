@@ -28,6 +28,7 @@ namespace OpenAI.Responses
             IReadOnlyDictionary<string, string> metadata = null,
             bool? parallelToolCalls = null,
             string previousResponseId = null,
+            Prompt prompt = null,
             Reasoning reasoning = null,
             string serviceTier = null,
             bool? store = null,
@@ -49,6 +50,7 @@ namespace OpenAI.Responses
             metadata: metadata,
             parallelToolCalls: parallelToolCalls,
             previousResponseId: previousResponseId,
+            prompt: prompt,
             reasoning: reasoning,
             serviceTier: serviceTier,
             store: store,
@@ -74,6 +76,7 @@ namespace OpenAI.Responses
             IReadOnlyDictionary<string, string> metadata = null,
             bool? parallelToolCalls = null,
             string previousResponseId = null,
+            Prompt prompt = null,
             Reasoning reasoning = null,
             string serviceTier = null,
             bool? store = null,
@@ -95,6 +98,7 @@ namespace OpenAI.Responses
             Metadata = metadata;
             ParallelToolCalls = parallelToolCalls;
             PreviousResponseId = previousResponseId;
+            Prompt = prompt;
             Reasoning = reasoning;
             ServiceTier = serviceTier;
             Store = store;
@@ -197,8 +201,13 @@ namespace OpenAI.Responses
         /// The unique ID of the previous response to the model.
         /// Use this to create multi-turn conversations.
         /// </summary>
+        [Preserve]
         [JsonProperty("previous_response_id", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string PreviousResponseId { get; }
+
+        [Preserve]
+        [JsonProperty("prompt", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Prompt Prompt { get; }
 
         /// <summary>
         /// Configuration options for reasoning models.

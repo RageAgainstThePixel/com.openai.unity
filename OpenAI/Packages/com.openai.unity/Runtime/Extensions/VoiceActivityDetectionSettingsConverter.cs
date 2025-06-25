@@ -12,9 +12,6 @@ namespace OpenAI
     internal class VoiceActivityDetectionSettingsConverter : JsonConverter
     {
         [Preserve]
-        public override bool CanWrite => true;
-
-        [Preserve]
         public override bool CanConvert(Type objectType) => typeof(IVoiceActivityDetectionSettings).IsAssignableFrom(objectType);
 
         [Preserve]
