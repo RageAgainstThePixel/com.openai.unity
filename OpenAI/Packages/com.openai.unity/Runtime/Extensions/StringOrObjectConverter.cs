@@ -16,6 +16,7 @@ namespace OpenAI.Extensions
                 JsonToken.Null => null,
                 JsonToken.String => reader.Value,
                 JsonToken.StartObject => serializer.Deserialize<T>(reader),
+                JsonToken.StartArray => serializer.Deserialize<T>(reader),
                 _ => throw new JsonSerializationException($"Unexpected token {reader.TokenType} when reading {typeof(T)}")
             };
 
