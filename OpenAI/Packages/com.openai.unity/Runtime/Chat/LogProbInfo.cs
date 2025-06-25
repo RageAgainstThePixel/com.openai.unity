@@ -4,19 +4,21 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using UnityEngine.Scripting;
 
-namespace OpenAI.Chat
+namespace OpenAI
 {
     /// <summary>
     /// Contains log probability information.
     /// </summary>
+    [Preserve]
     public sealed class LogProbInfo
     {
+        [Preserve]
         [JsonConstructor]
-        public LogProbInfo(
+        internal LogProbInfo(
             [JsonProperty("token")] string token,
             [JsonProperty("logprob")] float logProb,
             [JsonProperty("bytes")] int[] bytes,
-            [JsonProperty("top_logprobs")] List<LogProbInfo> topLogProbs)
+            [JsonProperty("top_logprobs")] List<LogProbInfo> topLogProbs = null)
         {
             Token = token;
             LogProb = logProb;
@@ -53,7 +55,7 @@ namespace OpenAI.Chat
         /// In rare cases, there may be fewer than the number of requested top_logprobs returned.
         /// </summary>
         [Preserve]
-        [JsonProperty("top_logprobs")]
+        [JsonProperty("top_logprobs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyList<LogProbInfo> TopLogProbs { get; }
     }
 }
