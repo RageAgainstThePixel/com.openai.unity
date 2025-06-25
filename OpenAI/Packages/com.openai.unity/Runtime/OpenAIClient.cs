@@ -134,8 +134,11 @@ namespace OpenAI
                 new StringEnumConverter(new SnakeCaseNamingStrategy()),
                 new RealtimeClientEventConverter(),
                 new RealtimeServerEventConverter(),
-                new ResponseItemConverter(),
                 new ResponseContentConverter(),
+                new ResponseItemConverter(),
+                new AnnotationConverter(),
+                new FilterConverter(),
+                new ToolConverter(),
             }
         };
 

@@ -1,7 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +35,7 @@ namespace OpenAI.Responses
             [JsonProperty("metadata")] IReadOnlyDictionary<string, string> metadata = null,
             [JsonProperty("model")] string model = null,
             [JsonProperty("previous_response_id")] string previousResponseId = null,
+            [JsonProperty("prompt")] Prompt prompt = null,
             [JsonProperty("reasoning")] Reasoning reasoning = null,
             [JsonProperty("service_tier")] string serviceTier = null,
             [JsonProperty("status")] ResponseStatus status = 0,
@@ -188,6 +188,13 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonProperty("previous_response_id", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string PreviousResponseId { get; }
+
+        /// <summary>
+        /// Reference to a prompt template and its variables.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("prompt", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Prompt Prompt { get; }
 
         /// <summary>
         /// Configuration options for reasoning models.

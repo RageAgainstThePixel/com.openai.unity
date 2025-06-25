@@ -35,34 +35,34 @@ namespace OpenAI.Responses
 
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; private set; } = "approximate";
+        public string Type { get; } = "approximate";
 
         /// <summary>
         /// Free text input for the city of the user, e.g. San Francisco.
         /// </summary>
         [Preserve]
         [JsonProperty("city", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string City { get; private set; }
+        public string City { get; }
 
         /// <summary>
         /// The two-letter ISO country code of the user, e.g. US.
         /// </summary>
         [Preserve]
         [JsonProperty("country", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string Country { get; private set; }
+        public string Country { get; }
 
         /// <summary>
         /// Free text input for the region of the user, e.g. California.
         /// </summary>
         [Preserve]
         [JsonProperty("region", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string Region { get; private set; }
+        public string Region { get; }
 
         /// <summary>
         /// The IANA timezone of the user, e.g. America/Los_Angeles.
         /// </summary>
         [Preserve]
         [JsonProperty("timezone", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string Timezone { get; private set; }
+        public string Timezone { get; }
     }
 }

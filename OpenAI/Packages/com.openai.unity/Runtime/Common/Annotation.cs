@@ -20,8 +20,8 @@ namespace OpenAI
             [JsonProperty("text")] string text,
             [JsonProperty("file_citation")] FileCitation fileCitation,
             [JsonProperty("file_path")] FilePath filePath,
-            [JsonProperty("start_index")] int startIndex,
-            [JsonProperty("end_index")] int endIndex)
+            [JsonProperty("start_index")] int? startIndex,
+            [JsonProperty("end_index")] int? endIndex)
         {
             Index = index;
             Type = annotationType;
@@ -31,10 +31,6 @@ namespace OpenAI
             StartIndex = startIndex;
             EndIndex = endIndex;
         }
-
-        [Preserve]
-        [JsonProperty("index", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public int? Index { get; private set; }
 
         [Preserve]
         [JsonProperty("type")]
@@ -64,12 +60,16 @@ namespace OpenAI
         public FilePath FilePath { get; private set; }
 
         [Preserve]
-        [JsonProperty("start_index")]
-        public int StartIndex { get; private set; }
+        [JsonProperty("index", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? Index { get; private set; }
 
         [Preserve]
-        [JsonProperty("end_index")]
-        public int EndIndex { get; private set; }
+        [JsonProperty("start_index", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? StartIndex { get; private set; }
+
+        [Preserve]
+        [JsonProperty("end_index", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? EndIndex { get; private set; }
 
         public void AppendFrom(Annotation other)
         {

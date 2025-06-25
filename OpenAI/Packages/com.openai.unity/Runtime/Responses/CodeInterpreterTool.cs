@@ -29,8 +29,18 @@ namespace OpenAI.Responses
         }
 
         [Preserve]
+        [JsonConstructor]
+        internal CodeInterpreterTool(
+            [JsonProperty("type")] string type,
+            [JsonProperty("container")][JsonConverter(typeof(StringOrObjectConverter<CodeInterpreterContainer>))] object container)
+        {
+            Type = type;
+            Container = container;
+        }
+
+        [Preserve]
         [JsonProperty("type")]
-        public string Type => "code_interpreter";
+        public string Type { get; } = "code_interpreter";
 
         /// <summary>
         /// The code interpreter container. Can be a container ID or an object that specifies uploaded file IDs to make available to your code.
