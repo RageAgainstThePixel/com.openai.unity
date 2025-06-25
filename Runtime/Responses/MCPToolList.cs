@@ -1,7 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Scripting;
@@ -15,7 +14,7 @@ namespace OpenAI.Responses
         [JsonConstructor]
         public MCPToolList(IEnumerable<string> toolNames)
         {
-            ToolNames = toolNames?.ToList() ?? throw new ArgumentNullException(nameof(toolNames));
+            ToolNames = toolNames?.ToList();
         }
 
         [Preserve]

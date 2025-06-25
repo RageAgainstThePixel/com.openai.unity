@@ -19,11 +19,13 @@ namespace OpenAI.Responses
         internal TextContent(
             [JsonProperty("type")] ResponseContentType type,
             [JsonProperty("text")] string text,
-            [JsonProperty("annotations")] IReadOnlyList<Annotation> annotations)
+            [JsonProperty("annotations")] IReadOnlyList<IAnnotation> annotations,
+            IReadOnlyList<LogProbInfo> logProbs)
         {
             Type = type;
             Text = text;
             Annotations = annotations;
+            LogProbs = logProbs;
         }
 
         [Preserve]
@@ -41,15 +43,19 @@ namespace OpenAI.Responses
         [JsonProperty("text", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Text { get; internal set; }
 
-        private List<Annotation> annotations;
+        private List<IAnnotation> annotations;
 
         [Preserve]
         [JsonProperty("annotations", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public IReadOnlyList<Annotation> Annotations
+        public IReadOnlyList<IAnnotation> Annotations
         {
             get => annotations;
             private set => annotations = value?.ToList();
         }
+
+        [Preserve]
+        [JsonProperty("logprobs", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public IReadOnlyList<LogProbInfo> LogProbs { get; }
 
         [Preserve]
         [JsonProperty("delta", DefaultValueHandling = DefaultValueHandling.Ignore)]
@@ -59,7 +65,7 @@ namespace OpenAI.Responses
         public string Object => Type.ToString();
 
         [Preserve]
-        internal void InsertAnnotation(Annotation item, int index)
+        internal void InsertAnnotation(IAnnotation item, int index)
         {
             if (item == null)
             {

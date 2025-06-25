@@ -23,28 +23,42 @@ namespace OpenAI.Responses
         }
 
         [Preserve]
+        [JsonConstructor]
+        internal ComputerUsePreviewTool(
+            [JsonProperty("type")] string type,
+            [JsonProperty("display_height")] int displayHeight,
+            [JsonProperty("display_width")] int displayWidth,
+            [JsonProperty("environment")] string environment)
+        {
+            Type = type;
+            DisplayHeight = displayHeight;
+            DisplayWidth = displayWidth;
+            Environment = environment;
+        }
+
+        [Preserve]
         [JsonProperty("type")]
-        public string Type => "computer_use_preview";
+        public string Type { get; } = "computer_use_preview";
 
         /// <summary>
         /// The height of the computer display.
         /// </summary>
         [Preserve]
         [JsonProperty("display_height")]
-        public int DisplayHeight { get; private set; }
+        public int DisplayHeight { get; }
 
         /// <summary>
         /// The width of the computer display.
         /// </summary>
         [Preserve]
         [JsonProperty("display_width")]
-        public int DisplayWidth { get; private set; }
+        public int DisplayWidth { get; }
 
         /// <summary>
         /// The type of computer environment to control.
         /// </summary>
         [Preserve]
         [JsonProperty("environment")]
-        public string Environment { get; private set; }
+        public string Environment { get; }
     }
 }

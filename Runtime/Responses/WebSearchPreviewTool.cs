@@ -22,21 +22,33 @@ namespace OpenAI.Responses
         }
 
         [Preserve]
+        [JsonConstructor]
+        internal WebSearchPreviewTool(
+            [JsonProperty("type")] string type,
+            [JsonProperty("search_context_size")] SearchContextSize searchContextSize,
+            [JsonProperty("user_location")] UserLocation userLocation)
+        {
+            Type = type;
+            SearchContextSize = searchContextSize;
+            UserLocation = userLocation;
+        }
+
+        [Preserve]
         [JsonProperty("type")]
-        public string Type => "web_search_preview";
+        public string Type { get; } = "web_search_preview";
 
         /// <summary>
         /// High level guidance for the amount of context window space to use for the search. One of low, medium, or high. medium is the default.
         /// </summary>
         [Preserve]
         [JsonProperty("search_context_size")]
-        public SearchContextSize SearchContextSize { get; private set; }
+        public SearchContextSize SearchContextSize { get; }
 
         /// <summary>
         /// The user's location.
         /// </summary>
         [Preserve]
         [JsonProperty("user_location")]
-        public UserLocation UserLocation { get; private set; }
+        public UserLocation UserLocation { get; }
     }
 }

@@ -9,10 +9,8 @@ namespace OpenAI
 {
     internal class RealtimeClientEventConverter : JsonConverter
     {
-        public override bool CanWrite => false;
-
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-            => throw new NotImplementedException();
+            => serializer.Serialize(writer, value);
 
         public override bool CanConvert(Type objectType) => typeof(IClientEvent) == objectType;
 
