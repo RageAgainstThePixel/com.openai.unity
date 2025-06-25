@@ -39,8 +39,34 @@ namespace OpenAI.Responses
         }
 
         [Preserve]
+        [JsonConstructor]
+        internal ImageGenerationTool(
+            [JsonProperty("type")] string type,
+            [JsonProperty("background", DefaultValueHandling = DefaultValueHandling.Ignore)] string background,
+            [JsonProperty("input_image_mask", DefaultValueHandling = DefaultValueHandling.Ignore)] InputImageMask inputImageMask,
+            [JsonProperty("model", DefaultValueHandling = DefaultValueHandling.Ignore)] string model,
+            [JsonProperty("moderation", DefaultValueHandling = DefaultValueHandling.Ignore)] string moderation,
+            [JsonProperty("output_compression", DefaultValueHandling = DefaultValueHandling.Ignore)] int? outputCompression,
+            [JsonProperty("output_format", DefaultValueHandling = DefaultValueHandling.Ignore)] string outputFormat,
+            [JsonProperty("partial_images", DefaultValueHandling = DefaultValueHandling.Ignore)] int? partialImages,
+            [JsonProperty("quality", DefaultValueHandling = DefaultValueHandling.Ignore)] string quality,
+            [JsonProperty("size", DefaultValueHandling = DefaultValueHandling.Ignore)] string size)
+        {
+            Type = type;
+            Background = background;
+            InputImageMask = inputImageMask;
+            Model = model;
+            Moderation = moderation;
+            OutputCompression = outputCompression;
+            OutputFormat = outputFormat;
+            PartialImages = partialImages;
+            Quality = quality;
+            Size = size;
+        }
+
+        [Preserve]
         [JsonProperty("type")]
-        public string Type => "image_generation";
+        public string Type { get; } = "image_generation";
 
         /// <summary>
         /// Background type for the generated image. One of transparent, opaque, or auto. Default: auto.

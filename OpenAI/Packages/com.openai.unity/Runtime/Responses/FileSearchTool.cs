@@ -33,8 +33,24 @@ namespace OpenAI.Responses
         }
 
         [Preserve]
+        [JsonConstructor]
+        internal FileSearchTool(
+            [JsonProperty("type")] string type,
+            [JsonProperty("vector_store_ids")] IReadOnlyList<string> vectorStoreIds,
+            [JsonProperty("max_num_results", DefaultValueHandling = DefaultValueHandling.Ignore)] int? maxNumberOfResults,
+            [JsonProperty("ranking_options", DefaultValueHandling = DefaultValueHandling.Ignore)] RankingOptions rankingOptions,
+            [JsonProperty("filters", DefaultValueHandling = DefaultValueHandling.Ignore)] IReadOnlyList<IFilter> filters)
+        {
+            Type = type;
+            VectorStoreIds = vectorStoreIds;
+            MaxNumberOfResults = maxNumberOfResults;
+            RankingOptions = rankingOptions;
+            Filters = filters;
+        }
+
+        [Preserve]
         [JsonProperty("type")]
-        public string Type => "file_search";
+        public string Type { get; } = "file_search";
 
         [Preserve]
         [JsonProperty("vector_store_ids")]

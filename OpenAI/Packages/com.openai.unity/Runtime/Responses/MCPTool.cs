@@ -54,8 +54,26 @@ namespace OpenAI.Responses
         }
 
         [Preserve]
+        [JsonConstructor]
+        internal MCPTool(
+            [JsonProperty("type")] string type,
+            [JsonProperty("server_label")] string serverLabel,
+            [JsonProperty("server_url")] string serverUrl,
+            [JsonProperty("allowed_tools")] IReadOnlyList<string> allowedTools,
+            [JsonProperty("headers")] IReadOnlyDictionary<string, object> headers,
+            [JsonProperty("require_approval")] object requireApproval)
+        {
+            Type = type;
+            ServerLabel = serverLabel;
+            ServerUrl = serverUrl;
+            AllowedTools = allowedTools;
+            Headers = headers;
+            RequireApproval = requireApproval;
+        }
+
+        [Preserve]
         [JsonProperty("type")]
-        public string Type => "mcp";
+        public string Type { get; } = "mcp";
 
         /// <summary>
         /// A label for this MCP server, used to identify it in tool calls.
