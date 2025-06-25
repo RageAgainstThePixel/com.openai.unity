@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +31,7 @@ namespace OpenAI.Responses
             [JsonProperty("output_text")] string outputText = null,
             [JsonProperty("usage")] TokenUsage usage = null,
             [JsonProperty("parallel_tool_calls")] bool? parallelToolCalls = null,
-            [JsonProperty("instructions")] string instructions = null,
+            [JsonProperty("instructions")][JsonConverter(typeof(StringOrObjectConverter<IReadOnlyList<IResponseItem>>))] object instructions = null,
             [JsonProperty("max_output_tokens")] int? maxOutputTokens = null,
             [JsonProperty("metadata")] IReadOnlyDictionary<string, string> metadata = null,
             [JsonProperty("model")] string model = null,
@@ -62,6 +63,7 @@ namespace OpenAI.Responses
             Metadata = metadata;
             Model = model;
             PreviousResponseId = previousResponseId;
+            Prompt = prompt;
             Reasoning = reasoning;
             ServiceTier = serviceTier;
             Status = status;
@@ -149,8 +151,9 @@ namespace OpenAI.Responses
         /// This makes it simple to swap out system (or developer) messages in new responses.
         /// </summary>
         [Preserve]
+        [JsonConverter(typeof(StringOrObjectConverter<IReadOnlyList<IResponseItem>>))]
         [JsonProperty("instructions", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string Instructions { get; }
+        public object Instructions { get; }
 
         /// <summary>
         /// An upper bound for the number of tokens that can be generated for a
