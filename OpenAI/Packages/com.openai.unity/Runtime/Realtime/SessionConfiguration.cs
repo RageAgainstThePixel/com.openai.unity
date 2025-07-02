@@ -11,8 +11,6 @@ namespace OpenAI.Realtime
 {
     public sealed class SessionConfiguration
     {
-        public SessionConfiguration() { }
-
         public SessionConfiguration(
             Model model,
             Modality modalities = Modality.Text | Modality.Audio,
@@ -25,10 +23,12 @@ namespace OpenAI.Realtime
             IEnumerable<Tool> tools = null,
             string toolChoice = null,
             float? temperature = null,
-            int? maxResponseOutputTokens = null)
+            int? maxResponseOutputTokens = null,
+            int? expiresAfter = null)
         {
+            ClientSecret = new ClientSecret(expiresAfter);
             Model = string.IsNullOrWhiteSpace(model.Id)
-                ? "gpt-4o-realtime-preview"
+                ? Models.Model.GPT4oRealtime
                 : model;
             Modalities = modalities;
             Voice = voice ?? OpenAI.Voice.Alloy;
@@ -43,7 +43,7 @@ namespace OpenAI.Realtime
             InputAudioFormat = inputAudioFormat;
             OutputAudioFormat = outputAudioFormat;
             InputAudioTranscriptionSettings = new(string.IsNullOrWhiteSpace(transcriptionModel)
-                ? "whisper-1"
+                ? Models.Model.Whisper1
                 : transcriptionModel);
             VoiceActivityDetectionSettings = turnDetectionSettings ?? new ServerVAD();
             tools.ProcessTools<Tool>(toolChoice, out var toolList, out var activeTool);
@@ -94,21 +94,56 @@ namespace OpenAI.Realtime
             MaxResponseOutputTokens = maxResponseOutputTokens;
         }
 
+        [JsonConstructor]
+        internal SessionConfiguration(
+            [JsonProperty("client_secret")] ClientSecret clientSecret,
+            [JsonProperty("modalities")][JsonConverter(typeof(ModalityConverter))] Modality modalities,
+            [JsonProperty("model")] string model,
+            [JsonProperty("instructions")] string instructions,
+            [JsonProperty("voice")] string voice,
+            [JsonProperty("input_audio_format")] RealtimeAudioFormat inputAudioFormat,
+            [JsonProperty("output_audio_format")] RealtimeAudioFormat outputAudioFormat,
+            [JsonProperty("input_audio_transcription")] InputAudioTranscriptionSettings inputAudioTranscriptionSettings,
+            [JsonProperty("turn_detection")][JsonConverter(typeof(VoiceActivityDetectionSettingsConverter))] IVoiceActivityDetectionSettings voiceActivityDetectionSettings,
+            [JsonProperty("tools")] IReadOnlyList<Function> tools,
+            [JsonProperty("tool_choice")] object toolChoice,
+            [JsonProperty("temperature")] float? temperature,
+            [JsonProperty("max_response_output_tokens")] object maxResponseOutputTokens)
+        {
+            ClientSecret = clientSecret;
+            Modalities = modalities;
+            Model = model;
+            Instructions = instructions;
+            Voice = voice;
+            InputAudioFormat = inputAudioFormat;
+            OutputAudioFormat = outputAudioFormat;
+            InputAudioTranscriptionSettings = inputAudioTranscriptionSettings;
+            VoiceActivityDetectionSettings = voiceActivityDetectionSettings;
+            Tools = tools;
+            ToolChoice = toolChoice;
+            Temperature = temperature;
+            MaxResponseOutputTokens = maxResponseOutputTokens;
+        }
+
         [Preserve]
-        [JsonProperty("modalities")]
+        [JsonProperty("client_secret", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public ClientSecret ClientSecret { get; private set; }
+
+        [Preserve]
         [JsonConverter(typeof(ModalityConverter))]
+        [JsonProperty("modalities", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public Modality Modalities { get; private set; }
 
         [Preserve]
-        [JsonProperty("model")]
+        [JsonProperty("model", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Model { get; private set; }
 
         [Preserve]
-        [JsonProperty("instructions")]
+        [JsonProperty("instructions", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Instructions { get; private set; }
 
         [Preserve]
-        [JsonProperty("voice")]
+        [JsonProperty("voice", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Voice { get; private set; }
 
         [Preserve]
@@ -120,28 +155,28 @@ namespace OpenAI.Realtime
         public RealtimeAudioFormat OutputAudioFormat { get; private set; }
 
         [Preserve]
-        [JsonProperty("input_audio_transcription")]
+        [JsonProperty("input_audio_transcription", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public InputAudioTranscriptionSettings InputAudioTranscriptionSettings { get; private set; }
 
         [Preserve]
-        [JsonProperty("turn_detection")]
+        [JsonProperty("turn_detection", DefaultValueHandling = DefaultValueHandling.Ignore)]
         [JsonConverter(typeof(VoiceActivityDetectionSettingsConverter))]
         public IVoiceActivityDetectionSettings VoiceActivityDetectionSettings { get; private set; }
 
         [Preserve]
-        [JsonProperty("tools")]
+        [JsonProperty("tools", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyList<Function> Tools { get; private set; }
 
         [Preserve]
-        [JsonProperty("tool_choice")]
+        [JsonProperty("tool_choice", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public object ToolChoice { get; private set; }
 
         [Preserve]
-        [JsonProperty("temperature")]
+        [JsonProperty("temperature", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public float? Temperature { get; private set; }
 
         [Preserve]
-        [JsonProperty("max_response_output_tokens")]
+        [JsonProperty("max_response_output_tokens", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public object MaxResponseOutputTokens { get; private set; }
     }
 }

@@ -20,7 +20,6 @@ using OpenAI.VectorStores;
 using System.Collections.Generic;
 using System.Security.Authentication;
 using Utilities.WebRequestRest;
-using Utilities.WebSockets;
 
 namespace OpenAI
 {
@@ -237,24 +236,5 @@ namespace OpenAI
         public ResponsesEndpoint ResponsesEndpoint { get; }
 
         #endregion Endpoints
-
-        internal WebSocket CreateWebSocket(string url)
-        {
-            return new WebSocket(url, new Dictionary<string, string>
-            {
-#if !PLATFORM_WEBGL
-                { "User-Agent", "OpenAI-DotNet" },
-                { "OpenAI-Beta", "realtime=v1" },
-                { "Authorization", $"Bearer {Authentication.Info.ApiKey}" }
-#endif
-            }, new List<string>
-            {
-#if PLATFORM_WEBGL // Web browsers do not support headers. https://github.com/openai/openai-realtime-api-beta/blob/339e9553a757ef1cf8c767272fc750c1e62effbb/lib/api.js#L76-L80
-                "realtime",
-                $"openai-insecure-api-key.{Authentication.Info.ApiKey}",
-                "openai-beta.realtime-v1"
-#endif
-            });
-        }
     }
 }
