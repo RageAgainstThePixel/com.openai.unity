@@ -17,6 +17,11 @@ namespace OpenAI
         [Preserve]
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
+            if (reader.TokenType == JsonToken.Null)
+            {
+                return null;
+            }
+
             var jObject = JObject.Load(reader);
             var type = jObject["type"]?.Value<string>() ?? "disabled";
 

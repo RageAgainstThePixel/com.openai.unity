@@ -8,7 +8,6 @@ namespace OpenAI
 {
     public sealed class OpenAISettingsInfo : ISettingsInfo
     {
-        internal const string WS = "ws://";
         internal const string WSS = "wss://";
         internal const string Http = "http://";
         internal const string Https = "https://";
@@ -72,9 +71,7 @@ namespace OpenAI
             DeploymentId = string.Empty;
             BaseRequest = $"/{ApiVersion}/";
             BaseRequestUrlFormat = $"{ResourceName}{BaseRequest}{{0}}";
-            BaseWebSocketUrlFormat = ResourceName.Contains(Https)
-                ? $"{WSS}{domain}{BaseRequest}{{0}}"
-                : $"{WS}{domain}{BaseRequest}{{0}}";
+            BaseWebSocketUrlFormat = $"{WSS}{OpenAIDomain}{BaseRequest}{{0}}";
             UseOAuthAuthentication = true;
         }
 

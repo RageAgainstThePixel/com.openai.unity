@@ -1,5 +1,7 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
+using Newtonsoft.Json;
+using OpenAI.Extensions;
 using OpenAI.Models;
 using System;
 using System.Collections.Generic;
@@ -8,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using Utilities.Async;
+using Utilities.WebRequestRest;
+using Utilities.WebSockets;
 
 namespace OpenAI.Realtime
 {
@@ -16,8 +20,6 @@ namespace OpenAI.Realtime
         public RealtimeEndpoint(OpenAIClient client) : base(client) { }
 
         protected override string Root => "realtime";
-
-        protected override bool? IsWebSocketEndpoint => true;
 
         /// <summary>
         /// Creates a new realtime session with the provided <see cref="SessionConfiguration"/> options.
@@ -39,7 +41,33 @@ namespace OpenAI.Realtime
                 queryParameters["model"] = model;
             }
 
-            var session = new RealtimeSession(client.CreateWebSocket(GetUrl(queryParameters: queryParameters)), EnableDebug);
+            var payload = JsonConvert.SerializeObject(configuration, OpenAIClient.JsonSerializationOptions);
+            var createSessionResponse = await Rest.PostAsync(GetUrl("/sessions"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            createSessionResponse.Validate(EnableDebug);
+            var createSession = createSessionResponse.Deserialize<SessionConfiguration>(client);
+
+            if (createSession == null ||
+                string.IsNullOrWhiteSpace(createSession.ClientSecret?.EphemeralApiKey))
+            {
+                throw new InvalidOperationException("Failed to create a session. Ensure the configuration is valid and the API key is set.");
+            }
+
+            var websocket = new WebSocket(GetWebsocketUri(queryParameters: queryParameters), new Dictionary<string, string>
+            {
+#if !PLATFORM_WEBGL
+                { "User-Agent", "OpenAI-DotNet" },
+                { "OpenAI-Beta", "realtime=v1" },
+                { "Authorization", $"Bearer {createSession.ClientSecret!.EphemeralApiKey}" }
+#endif
+            }, new List<string>
+            {
+#if PLATFORM_WEBGL // Web browsers do not support headers. https://github.com/openai/openai-realtime-api-beta/blob/339e9553a757ef1cf8c767272fc750c1e62effbb/lib/api.js#L76-L80
+                "realtime",
+                $"openai-insecure-api-key.{createSession.ClientSecret!.EphemeralApiKey}",
+                "openai-beta.realtime-v1"
+#endif
+            });
+            var session = new RealtimeSession(websocket, EnableDebug);
             var sessionCreatedTcs = new TaskCompletionSource<SessionResponse>();
 
             try
@@ -49,7 +77,6 @@ namespace OpenAI.Realtime
                 await session.ConnectAsync(cancellationToken).ConfigureAwait(true);
                 var sessionResponse = await sessionCreatedTcs.Task.WithCancellation(cancellationToken).ConfigureAwait(true);
                 session.Configuration = sessionResponse.SessionConfiguration;
-                await session.SendAsync(new UpdateSessionRequest(configuration), cancellationToken: cancellationToken).ConfigureAwait(true);
             }
             finally
             {
