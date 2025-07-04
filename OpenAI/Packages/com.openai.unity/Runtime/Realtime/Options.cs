@@ -106,7 +106,7 @@ namespace OpenAI.Realtime
             OutputAudioFormat = outputAudioFormat;
             InputAudioTranscriptionSettings = new(string.IsNullOrWhiteSpace(transcriptionModel)
                 ? "whisper-1"
-                : transcriptionModel);
+                : transcriptionModel, null, null);
             VoiceActivityDetectionSettings = turnDetectionSettings ?? new();
             tools.ProcessTools<Tool>(toolChoice, out var toolList, out var activeTool);
             Tools = toolList?.Where(t => t.IsFunction).Select(tool =>
