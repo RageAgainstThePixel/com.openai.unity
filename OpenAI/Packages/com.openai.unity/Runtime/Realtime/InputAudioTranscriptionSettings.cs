@@ -12,7 +12,7 @@ namespace OpenAI.Realtime
         [Preserve]
         public InputAudioTranscriptionSettings(Model model, string prompt = null, string language = null)
         {
-            Model = string.IsNullOrWhiteSpace(model.Id) ? Models.Model.Whisper1 : model;
+            Model = string.IsNullOrWhiteSpace(model?.Id) ? Models.Model.Whisper1 : model;
             Prompt = prompt;
             Language = language;
         }
