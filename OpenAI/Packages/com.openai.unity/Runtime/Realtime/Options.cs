@@ -27,7 +27,8 @@ namespace OpenAI.Realtime
                 options.Tools,
                 options.ToolChoice,
                 options.Temperature,
-                options.MaxResponseOutputTokens);
+                options.MaxResponseOutputTokens,
+                null);
 
         public static implicit operator RealtimeResponseCreateParams(Options options)
             => new(
