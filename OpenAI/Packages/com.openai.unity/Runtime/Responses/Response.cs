@@ -33,7 +33,7 @@ namespace OpenAI.Responses
             [JsonProperty("parallel_tool_calls")] bool? parallelToolCalls = null,
             [JsonProperty("instructions")][JsonConverter(typeof(StringOrObjectConverter<IReadOnlyList<IResponseItem>>))] object instructions = null,
             [JsonProperty("max_output_tokens")] int? maxOutputTokens = null,
-            [JsonProperty("metadata")] IReadOnlyDictionary<string, string> metadata = null,
+            [JsonProperty("metadata")] Dictionary<string, string> metadata = null,
             [JsonProperty("model")] string model = null,
             [JsonProperty("previous_response_id")] string previousResponseId = null,
             [JsonProperty("prompt")] Prompt prompt = null,
