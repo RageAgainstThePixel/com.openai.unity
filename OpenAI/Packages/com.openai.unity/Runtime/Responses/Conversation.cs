@@ -33,6 +33,7 @@ namespace OpenAI.Responses
         /// <summary>
         /// The datetime at which the conversation was created.
         /// </summary>
+        [Preserve]
         [JsonIgnore]
         public DateTime CreatedAt
             => DateTimeOffset.FromUnixTimeSeconds(CreatedAtUnitTimeSeconds).UtcDateTime;
