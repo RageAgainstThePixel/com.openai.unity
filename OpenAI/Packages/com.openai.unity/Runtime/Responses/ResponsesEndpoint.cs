@@ -132,13 +132,14 @@ namespace OpenAI.Responses
 
             var streamResponse = await Rest.PostAsync(endpoint, payload, async (sseResponse, ssEvent) =>
             {
-                if (EnableDebug)
-                {
-                    Debug.Log($"{ssEvent.ToJsonString()}");
-                }
-
                 IServerSentEvent serverSentEvent = null;
                 var @event = ssEvent.Value.Value<string>();
+
+                if (EnableDebug)
+                {
+                    Debug.Log($"\"{@event}\": {ssEvent.ToJsonString()}");
+                }
+
                 var @object = ssEvent.Data ?? ssEvent.Value;
                 var text = @object["text"]?.Value<string>();
                 var delta = @object["delta"]?.Value<string>();
