@@ -27,8 +27,7 @@ namespace OpenAI.Realtime
             string toolChoice,
             float? temperature,
             int? maxResponseOutputTokens,
-            int? expiresAfter,
-            NoiseReductionSettings noiseReductionSettings)
+            int? expiresAfter)
           : this(
               model: model,
               modalities: modalities,
@@ -42,8 +41,7 @@ namespace OpenAI.Realtime
               toolChoice: toolChoice,
               temperature: temperature,
               maxResponseOutputTokens: maxResponseOutputTokens,
-              expiresAfter: expiresAfter,
-              noiseReductionSettings: noiseReductionSettings)
+              expiresAfter: expiresAfter)
         {
         }
 

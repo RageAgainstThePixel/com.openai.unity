@@ -1,5 +1,6 @@
-﻿using Newtonsoft.Json;
-using System.Runtime.Serialization;
+﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
+
+using Newtonsoft.Json;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Realtime
@@ -7,23 +8,15 @@ namespace OpenAI.Realtime
     [Preserve]
     public sealed class NoiseReductionSettings
     {
-        public enum NoiseReduction
-        {
-            [EnumMember(Value = "near_field")]
-            near_field,
-            [EnumMember(Value = "far_field")]
-            far_field,
-        }
-
         [Preserve]
         [JsonConstructor]
-        public NoiseReductionSettings(NoiseReduction type = NoiseReduction.near_field)
+        public NoiseReductionSettings([JsonProperty("type")] NoiseReduction type = NoiseReduction.NearField)
         {
             Type = type;
         }
 
         [Preserve]
-        [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Include)]
         public NoiseReduction Type { get; private set; }
     }
 }
