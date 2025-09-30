@@ -2,17 +2,16 @@
 
 using Newtonsoft.Json;
 using UnityEngine.Scripting;
-using Utilities.WebRequestRest.Interfaces;
 
 namespace OpenAI.Responses
 {
     [Preserve]
-    public sealed class ReasoningContent : IServerSentEvent
+    public sealed class ReasoningContent : BaseResponse, IResponseContent
     {
         [Preserve]
         [JsonConstructor]
         internal ReasoningContent(
-            [JsonProperty("type")] string type,
+            [JsonProperty("type")] ResponseContentType type,
             [JsonProperty("text")] string text)
         {
             Type = type;
@@ -24,7 +23,7 @@ namespace OpenAI.Responses
         /// </summary>
         [Preserve]
         [JsonProperty("type")]
-        public string Type { get; }
+        public ResponseContentType Type { get; }
 
         /// <summary>
         /// The reasoning text from the model.
@@ -39,12 +38,7 @@ namespace OpenAI.Responses
 
         [Preserve]
         [JsonIgnore]
-        public string Object
-            => Type;
-
-        [Preserve]
-        public string ToJsonString()
-            => JsonConvert.SerializeObject(this, OpenAIClient.JsonSerializationOptions);
+        public string Object => Type.ToString();
 
         [Preserve]
         public override string ToString()

@@ -204,6 +204,20 @@ namespace OpenAI.Responses
                                 serverSentEvent = item;
                             }
                             break;
+                        case "response.function_call_arguments.delta":
+                        case "response.function_call_arguments.done":
+                            var functionToolCall = (FunctionToolCall)response!.Output[outputIndex!.Value];
+
+                            if (functionToolCall.Id != itemId)
+                            {
+                                throw new InvalidOperationException($"FunctionToolCall ID mismatch! Expected: {functionToolCall.Id}, got: {itemId}");
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(delta))
+                            {
+                                functionToolCall.Delta = delta;
+                            }
+                            break;
                         case "response.audio.delta":
                         case "response.audio.done":
                         case "response.audio.transcript.delta":
@@ -213,6 +227,8 @@ namespace OpenAI.Responses
                         case "response.output_text.done":
                         case "response.refusal.delta":
                         case "response.refusal.done":
+                        case "response.reasoning_summary_text.delta":
+                        case "response.reasoning_summary_text.done":
                             messageItem = (Message)response!.Output[outputIndex!.Value];
 
                             if (messageItem.Id != itemId)
@@ -279,6 +295,18 @@ namespace OpenAI.Responses
 
                                     serverSentEvent = refusalContent;
                                     break;
+                                case ReasoningContent reasoningContent:
+                                    if (!string.IsNullOrWhiteSpace(text))
+                                    {
+                                        reasoningContent.Text = text;
+                                    }
+
+                                    if (!string.IsNullOrWhiteSpace(delta))
+                                    {
+                                        reasoningContent.Delta = delta;
+                                    }
+
+                                    break;
                             }
                             break;
                         case "response.reasoning_summary_part.added":
@@ -308,20 +336,6 @@ namespace OpenAI.Responses
                             reasoningContentItem.Delta = !string.IsNullOrWhiteSpace(delta) ? delta : null;
                             serverSentEvent = reasoningContentItem;
                             break;
-                        case "response.reasoning_summary_text.delta":
-                        case "response.reasoning_summary_text.done":
-                            summaryIndex = @object["summary_index"]!.Value<int>();
-                            reasoningItem = (ReasoningItem)response!.Output[outputIndex!.Value];
-                            summaryItem = reasoningItem.Summary[summaryIndex];
-
-                            if (!string.IsNullOrWhiteSpace(text))
-                            {
-                                summaryItem.Text = text;
-                            }
-
-                            summaryItem.Delta = !string.IsNullOrWhiteSpace(delta) ? delta : null;
-                            serverSentEvent = summaryItem;
-                            break;
                         case "error":
                             serverSentEvent = sseResponse.Deserialize<Error>(client);
                             break;
@@ -336,8 +350,6 @@ namespace OpenAI.Responses
                         case "response.file_search_call.in_progress":
                         case "response.file_search_call.searching":
                         case "response.file_search_call.completed":
-                        case "response.function_call_arguments.delta":
-                        case "response.function_call_arguments.done":
                         case "response.image_generation_call.in_progress":
                         case "response.image_generation_call.generating":
                         case "response.image_generation_call.partial_image":

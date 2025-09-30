@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine.TextCore.Text;
 using Utilities.WebRequestRest;
 
 namespace OpenAI.Responses
@@ -142,7 +141,7 @@ namespace OpenAI.Responses
             var payload = JsonConvert.SerializeObject(new { items }, OpenAIClient.JsonSerializationOptions);
             Dictionary<string, string> query = null;
 
-            if (include != null)
+            if (include is { Length: > 0 })
             {
                 query = new Dictionary<string, string>
                 {
@@ -177,7 +176,7 @@ namespace OpenAI.Responses
 
             Dictionary<string, string> query = null;
 
-            if (include != null)
+            if (include is { Length: > 0 })
             {
                 query = new Dictionary<string, string>
                 {
