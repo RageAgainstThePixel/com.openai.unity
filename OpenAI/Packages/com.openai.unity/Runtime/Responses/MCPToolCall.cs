@@ -1,10 +1,14 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Responses
 {
+    /// <summary>
+    /// An invocation of a tool on an MCP server.
+    /// </summary>
     [Preserve]
     public sealed class MCPToolCall : BaseResponse, IResponseItem
     {
@@ -17,8 +21,9 @@ namespace OpenAI.Responses
             [JsonProperty("status")] ResponseStatus status,
             [JsonProperty("name")] string name,
             [JsonProperty("server_label")] string serverLabel,
-            [JsonProperty("arguments")] string arguments,
-            [JsonProperty("output")] string output)
+            [JsonProperty("arguments")] JToken arguments,
+            [JsonProperty("output")] string output,
+            [JsonProperty("error")] string error)
         {
             Id = id;
             Type = type;
@@ -61,15 +66,15 @@ namespace OpenAI.Responses
         /// The label of the MCP server running the tool.
         /// </summary>
         [Preserve]
-        [JsonProperty("server_label", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        [JsonProperty("server_label")]
         public string ServerLabel { get; }
 
         /// <summary>
         /// A JSON string of the arguments to pass to the function.
         /// </summary>
         [Preserve]
-        [JsonProperty("arguments", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string Arguments { get; }
+        [JsonProperty("arguments")]
+        public JToken Arguments { get; }
 
         /// <summary>
         /// The output from the tool call.
