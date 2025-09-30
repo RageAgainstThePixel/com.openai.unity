@@ -14,7 +14,7 @@ namespace OpenAI.Moderations
         internal ModerationsResponse(
             [JsonProperty("id")] string id,
             [JsonProperty("model")] string model,
-            [JsonProperty("results")] IReadOnlyList<ModerationResult> results)
+            [JsonProperty("results")] List<ModerationResult> results)
         {
             Id = id;
             Model = model;

@@ -13,7 +13,7 @@ namespace OpenAI.Responses
         [JsonConstructor]
         public Prompt(
             [JsonProperty("id")] string id,
-            [JsonProperty("variables")] IReadOnlyDictionary<string, object> variables = null,
+            [JsonProperty("variables")] Dictionary<string, object> variables = null,
             [JsonProperty("version")] string version = null)
         {
             Id = id;

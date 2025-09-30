@@ -19,8 +19,8 @@ namespace OpenAI.Responses
             [JsonProperty("type")] ResponseItemType type,
             [JsonProperty("object")] string @object,
             [JsonProperty("status")] ResponseStatus status,
-            [JsonProperty("queries")] IReadOnlyList<string> queries,
-            [JsonProperty("results")] IReadOnlyList<FileSearchResult> results)
+            [JsonProperty("queries")] List<string> queries,
+            [JsonProperty("results")] List<FileSearchResult> results)
         {
             Id = id;
             Type = type;

@@ -14,7 +14,7 @@ namespace OpenAI.Realtime
         internal RateLimitsResponse(
             [JsonProperty("event_id")] string eventId,
             [JsonProperty("type")] string type,
-            [JsonProperty("rate_limits")] IReadOnlyList<RateLimit> rateLimits)
+            [JsonProperty("rate_limits")] List<RateLimit> rateLimits)
         {
             EventId = eventId;
             Type = type;

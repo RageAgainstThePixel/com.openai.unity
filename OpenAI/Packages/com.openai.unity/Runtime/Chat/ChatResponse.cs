@@ -27,7 +27,7 @@ namespace OpenAI.Chat
             [JsonProperty("service_tier")] string serviceTier,
             [JsonProperty("system_fingerprint")] string systemFingerprint,
             [JsonProperty("usage")] Usage usage,
-            [JsonProperty("choices")] IReadOnlyList<Choice> choices)
+            [JsonProperty("choices")] List<Choice> choices)
         {
             Id = id;
             Object = @object;

@@ -18,7 +18,7 @@ namespace OpenAI.Responses
         [JsonConstructor]
         internal KeyPressComputerAction(
             [JsonProperty("type")] ComputerActionType type,
-            [JsonProperty("keys")] IReadOnlyList<string> keys)
+            [JsonProperty("keys")] List<string> keys)
         {
             Type = type;
             Keys = keys;

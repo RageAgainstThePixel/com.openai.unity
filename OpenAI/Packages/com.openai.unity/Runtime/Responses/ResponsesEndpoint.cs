@@ -152,6 +152,7 @@ namespace OpenAI.Responses
                     switch (@event)
                     {
                         case "response.created":
+                        case "response.queued":
                         case "response.in_progress":
                         case "response.completed":
                         case "response.failed":
@@ -293,6 +294,20 @@ namespace OpenAI.Responses
                             }
 
                             break;
+                        case "response.reasoning_text.delta":
+                        case "response.reasoning_text.done":
+                            var reasoningContentIndex = @object["content_index"]!.Value<int>();
+                            reasoningItem = (ReasoningItem)response!.Output[outputIndex!.Value];
+                            var reasoningContentItem = reasoningItem.Content[reasoningContentIndex];
+
+                            if (!string.IsNullOrWhiteSpace(text))
+                            {
+                                reasoningContentItem.Text = text;
+                            }
+
+                            reasoningContentItem.Delta = !string.IsNullOrWhiteSpace(delta) ? delta : null;
+                            serverSentEvent = reasoningContentItem;
+                            break;
                         case "response.reasoning_summary_text.delta":
                         case "response.reasoning_summary_text.done":
                             summaryIndex = @object["summary_index"]!.Value<int>();
@@ -310,17 +325,34 @@ namespace OpenAI.Responses
                         case "error":
                             serverSentEvent = sseResponse.Deserialize<Error>(client);
                             break;
-                        case "response.code_interpreter_call.code.delta":
-                        case "response.code_interpreter_call.code.done":
-                        case "response.code_interpreter_call.completed":
-                        case "response.code_interpreter_call.in_progress":
+                        // TODO - implement handling for these events:
                         case "response.code_interpreter_call.interpreting":
-                        case "response.file_search_call.completed":
+                        case "response.code_interpreter_call.in_progress":
+                        case "response.code_interpreter_call.completed":
+                        case "response.code_interpreter_call_code.delta":
+                        case "response.code_interpreter_call_code.done":
+                        case "response.custom_tool_call_input.delta":
+                        case "response.custom_tool_call_input.done":
                         case "response.file_search_call.in_progress":
                         case "response.file_search_call.searching":
-                        case "response.web_search_call.completed":
+                        case "response.file_search_call.completed":
+                        case "response.function_call_arguments.delta":
+                        case "response.function_call_arguments.done":
+                        case "response.image_generation_call.in_progress":
+                        case "response.image_generation_call.generating":
+                        case "response.image_generation_call.partial_image":
+                        case "response.image_generation_call.completed":
+                        case "response.mcp_call_arguments.delta":
+                        case "response.mcp_call_arguments.done":
+                        case "response.mcp_call.in_progress":
+                        case "response.mcp_call.completed":
+                        case "response.mcp_call.failed":
+                        case "response.mcp_list_tools.in_progress":
+                        case "response.mcp_list_tools.completed":
+                        case "response.mcp_list_tools.failed":
                         case "response.web_search_call.in_progress":
                         case "response.web_search_call.searching":
+                        case "response.web_search_call.completed":
                         default:
                             // if not properly handled raise it up to caller to deal with it themselves.
                             serverSentEvent = ssEvent;

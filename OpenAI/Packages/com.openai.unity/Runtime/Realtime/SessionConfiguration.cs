@@ -143,7 +143,7 @@ namespace OpenAI.Realtime
             [JsonProperty("output_audio_format")] RealtimeAudioFormat outputAudioFormat,
             [JsonProperty("input_audio_transcription")] InputAudioTranscriptionSettings inputAudioTranscriptionSettings,
             [JsonProperty("turn_detection")][JsonConverter(typeof(VoiceActivityDetectionSettingsConverter))] IVoiceActivityDetectionSettings voiceActivityDetectionSettings,
-            [JsonProperty("tools")] IReadOnlyList<Function> tools,
+            [JsonProperty("tools")] List<Function> tools,
             [JsonProperty("tool_choice")] object toolChoice,
             [JsonProperty("temperature")] float? temperature,
             [JsonProperty("max_response_output_tokens")] object maxResponseOutputTokens,

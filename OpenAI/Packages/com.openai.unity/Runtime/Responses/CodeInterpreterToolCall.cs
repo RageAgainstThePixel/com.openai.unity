@@ -21,7 +21,7 @@ namespace OpenAI.Responses
             [JsonProperty("object")] string @object,
             [JsonProperty("status")] ResponseStatus status,
             [JsonProperty("code")] string code,
-            [JsonProperty("results")] IReadOnlyList<CodeInterpreterOutputs> results,
+            [JsonProperty("results")] List<CodeInterpreterOutputs> results,
             [JsonProperty("container_id")] string containerId)
         {
             Id = id;

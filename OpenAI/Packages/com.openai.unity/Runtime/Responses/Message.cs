@@ -29,7 +29,7 @@ namespace OpenAI.Responses
             [JsonProperty("object")] string @object,
             [JsonProperty("status")] ResponseStatus status,
             [JsonProperty("role")] Role role,
-            [JsonProperty("content")] IReadOnlyList<IResponseContent> content)
+            [JsonProperty("content")] List<IResponseContent> content)
         {
             Id = id;
             Type = type;

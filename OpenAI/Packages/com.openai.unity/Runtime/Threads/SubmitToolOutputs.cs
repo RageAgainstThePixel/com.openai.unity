@@ -11,7 +11,7 @@ namespace OpenAI.Threads
     {
         [Preserve]
         [JsonConstructor]
-        internal SubmitToolOutputs([JsonProperty("tool_calls")] IReadOnlyList<ToolCall> toolCalls)
+        internal SubmitToolOutputs([JsonProperty("tool_calls")] List<ToolCall> toolCalls)
         {
             ToolCalls = toolCalls;
         }

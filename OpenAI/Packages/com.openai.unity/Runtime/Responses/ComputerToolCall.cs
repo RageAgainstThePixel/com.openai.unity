@@ -21,7 +21,7 @@ namespace OpenAI.Responses
             [JsonProperty("status")] ResponseStatus status,
             [JsonProperty("call_id")] string callId,
             [JsonProperty("action")] IComputerAction action,
-            [JsonProperty("pending_safety_checks")] IReadOnlyList<ComputerToolCallSafetyCheck> pendingSafetyChecks,
+            [JsonProperty("pending_safety_checks")] List<ComputerToolCallSafetyCheck> pendingSafetyChecks,
             [JsonProperty("output")] ComputerScreenShot computerScreenShot)
         {
             Id = id;

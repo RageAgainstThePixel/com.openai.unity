@@ -19,8 +19,8 @@ namespace OpenAI.Responses
         internal TextContent(
             [JsonProperty("type")] ResponseContentType type,
             [JsonProperty("text")] string text,
-            [JsonProperty("annotations")] IReadOnlyList<IAnnotation> annotations,
-            IReadOnlyList<LogProbInfo> logProbs)
+            [JsonProperty("annotations")] List<IAnnotation> annotations,
+            [JsonProperty("log_probs")] List<LogProbInfo> logProbs)
         {
             Type = type;
             Text = text;

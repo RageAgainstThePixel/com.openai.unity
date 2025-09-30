@@ -59,8 +59,8 @@ namespace OpenAI.Responses
             [JsonProperty("type")] string type,
             [JsonProperty("server_label")] string serverLabel,
             [JsonProperty("server_url")] string serverUrl,
-            [JsonProperty("allowed_tools")] IReadOnlyList<string> allowedTools,
-            [JsonProperty("headers")] IReadOnlyDictionary<string, object> headers,
+            [JsonProperty("allowed_tools")] List<string> allowedTools,
+            [JsonProperty("headers")] Dictionary<string, object> headers,
             [JsonProperty("require_approval")] object requireApproval)
         {
             Type = type;

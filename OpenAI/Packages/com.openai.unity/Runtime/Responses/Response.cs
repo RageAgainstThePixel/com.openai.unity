@@ -25,25 +25,30 @@ namespace OpenAI.Responses
             [JsonProperty("object")] string @object,
             [JsonProperty("created_at")] int createdAtUnixSeconds,
             [JsonProperty("background")] bool? background = null,
+            [JsonProperty("conversation")] Conversation conversation = null,
             [JsonProperty("error")] Error error = null,
             [JsonProperty("incomplete_details")] IncompleteDetails incompleteDetails = null,
-            [JsonProperty("output")] IReadOnlyList<IResponseItem> output = null,
+            [JsonProperty("output")] List<IResponseItem> output = null,
             [JsonProperty("output_text")] string outputText = null,
             [JsonProperty("usage")] TokenUsage usage = null,
             [JsonProperty("parallel_tool_calls")] bool? parallelToolCalls = null,
-            [JsonProperty("instructions")][JsonConverter(typeof(StringOrObjectConverter<IReadOnlyList<IResponseItem>>))] object instructions = null,
+            [JsonProperty("instructions")][JsonConverter(typeof(StringOrObjectConverter<List<IResponseItem>>))] object instructions = null,
             [JsonProperty("max_output_tokens")] int? maxOutputTokens = null,
+            [JsonProperty("max_tool_calls")] int? maxToolCalls = null,
             [JsonProperty("metadata")] Dictionary<string, string> metadata = null,
             [JsonProperty("model")] string model = null,
             [JsonProperty("previous_response_id")] string previousResponseId = null,
             [JsonProperty("prompt")] Prompt prompt = null,
+            [JsonProperty("prompt_cache_key")] string promptCacheKey = null,
             [JsonProperty("reasoning")] Reasoning reasoning = null,
+            [JsonProperty("safety_identifier")] string safetyIdentifier = null,
             [JsonProperty("service_tier")] string serviceTier = null,
             [JsonProperty("status")] ResponseStatus status = 0,
             [JsonProperty("temperature")] double? temperature = null,
             [JsonProperty("text")] TextResponseFormatObject textResponseFormatObject = null,
             [JsonProperty("tool_choice")] object toolChoice = null,
-            [JsonProperty("tools")] IReadOnlyList<Tool> tools = null,
+            [JsonProperty("tools")] List<Tool> tools = null,
+            [JsonProperty("top_logprobs")] int? topLogProbs = null,
             [JsonProperty("top_p")] double? topP = null,
             [JsonProperty("truncation")] Truncation truncation = 0,
             [JsonProperty("user")] string user = null)
@@ -52,6 +57,7 @@ namespace OpenAI.Responses
             Object = @object;
             CreatedAtUnixSeconds = createdAtUnixSeconds;
             Background = background;
+            Conversation = conversation;
             Error = error;
             IncompleteDetails = incompleteDetails;
             Output = output;
@@ -60,17 +66,21 @@ namespace OpenAI.Responses
             ParallelToolCalls = parallelToolCalls;
             Instructions = instructions;
             MaxOutputTokens = maxOutputTokens;
+            MaxToolCalls = maxToolCalls;
             Metadata = metadata;
             Model = model;
             PreviousResponseId = previousResponseId;
             Prompt = prompt;
+            PromptCacheKey = promptCacheKey;
             Reasoning = reasoning;
+            SafetyIdentifier = safetyIdentifier;
             ServiceTier = serviceTier;
             Status = status;
             Temperature = temperature;
             TextResponseFormatObject = textResponseFormatObject;
             ToolChoice = toolChoice;
             Tools = tools;
+            TopLogProbs = topLogProbs;
             TopP = topP;
             Truncation = truncation;
             User = user;
@@ -107,6 +117,14 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonProperty("background", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool? Background { get; }
+
+        /// <summary>
+        /// The conversation that this response belongs to.
+        /// Input items and output items from this response are automatically added to this conversation.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("conversation", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public Conversation Conversation { get; }
 
         /// <summary>
         /// An error object returned when the model fails to generate a Response.
@@ -165,6 +183,15 @@ namespace OpenAI.Responses
         public int? MaxOutputTokens { get; }
 
         /// <summary>
+        /// The maximum number of total calls to built-in tools that can be processed in a response.
+        /// This maximum number applies across all built-in tool calls, not per individual tool.
+        /// Any further attempts to call a tool by the model will be ignored.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("max_tool_calls", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? MaxToolCalls { get; }
+
+        /// <summary>
         /// Set of 16 key-value pairs that can be attached to an object.
         /// This can be useful for storing additional information about the object in a structured format,
         /// and querying for objects via API or the dashboard.
@@ -200,6 +227,14 @@ namespace OpenAI.Responses
         public Prompt Prompt { get; }
 
         /// <summary>
+        /// Used by OpenAI to cache responses for similar requests to optimize your cache hit rates.
+        /// Replaces the user field.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("prompt_cache_key", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string PromptCacheKey { get; }
+
+        /// <summary>
         /// Configuration options for reasoning models.
         /// </summary>
         /// <remarks>
@@ -208,6 +243,15 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonProperty("reasoning", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public Reasoning Reasoning { get; }
+
+        /// <summary>
+        /// A stable identifier used to help detect users of your application that may be violating OpenAI's usage policies.
+        /// The IDs should be a string that uniquely identifies each user.
+        /// We recommend hashing their username or email address, in order to avoid sending us any identifying information.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("safety_identifier", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string SafetyIdentifier { get; }
 
         /// <summary>
         /// Specifies the latency tier to use for processing the request. This parameter is relevant for customers subscribed to the scale tier service:<br/>
@@ -265,6 +309,14 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonProperty("tools", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyList<Tool> Tools { get; }
+
+        /// <summary>
+        /// An integer between 0 and 20 specifying the number of most likely tokens to return at each token position,
+        /// each with an associated log probability.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("top_logprobs", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? TopLogProbs { get; }
 
         /// <summary>
         /// An alternative to sampling with temperature, called nucleus sampling,

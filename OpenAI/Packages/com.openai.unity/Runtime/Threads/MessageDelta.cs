@@ -14,7 +14,7 @@ namespace OpenAI.Threads
         [JsonConstructor]
         internal MessageDelta(
             [JsonProperty("role")] Role role,
-            [JsonProperty("content")] IReadOnlyList<Content> content)
+            [JsonProperty("content")] List<Content> content)
         {
             Role = role;
             Content = content;

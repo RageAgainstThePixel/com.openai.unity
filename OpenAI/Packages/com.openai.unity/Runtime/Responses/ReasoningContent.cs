@@ -7,11 +7,11 @@ using Utilities.WebRequestRest.Interfaces;
 namespace OpenAI.Responses
 {
     [Preserve]
-    public sealed class ReasoningSummary : IServerSentEvent
+    public sealed class ReasoningContent : IServerSentEvent
     {
         [Preserve]
         [JsonConstructor]
-        internal ReasoningSummary(
+        internal ReasoningContent(
             [JsonProperty("type")] string type,
             [JsonProperty("text")] string text)
         {
@@ -19,12 +19,15 @@ namespace OpenAI.Responses
             Text = text;
         }
 
+        /// <summary>
+        /// The type of the reasoning text. Always reasoning_text.
+        /// </summary>
         [Preserve]
         [JsonProperty("type")]
         public string Type { get; }
 
         /// <summary>
-        /// A short summary of the reasoning used by the model when generating the response.
+        /// The reasoning text from the model.
         /// </summary>
         [Preserve]
         [JsonProperty("text")]

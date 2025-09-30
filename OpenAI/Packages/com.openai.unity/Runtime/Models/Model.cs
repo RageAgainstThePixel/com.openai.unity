@@ -38,7 +38,7 @@ namespace OpenAI.Models
             [JsonProperty("object")] string @object,
             [JsonProperty("created")] int createdAtUnixTimeSeconds,
             [JsonProperty("owned_by")] string ownedBy,
-            [JsonProperty("permission")] IReadOnlyList<Permission> permissions,
+            [JsonProperty("permission")] List<Permission> permissions,
             [JsonProperty("root")] string root,
             [JsonProperty("parent")] string parent)
             : this(id)
