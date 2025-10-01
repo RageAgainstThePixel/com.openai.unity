@@ -158,6 +158,7 @@ namespace OpenAI.Responses
                         case "response.completed":
                         case "response.failed":
                         case "response.incomplete":
+                        {
                             var partialResponse = sseResponse.Deserialize<Response>(@object["response"], client);
 
                             if (response == null)
@@ -178,8 +179,10 @@ namespace OpenAI.Responses
 
                             serverSentEvent = response;
                             break;
+                        }
                         case "response.content_part.added":
                         case "response.content_part.done":
+                        {
                             var part = sseResponse.Deserialize<IResponseContent>(@object["part"], client);
                             var messageItem = (Message)response!.Output[outputIndex!.Value];
 
@@ -195,18 +198,41 @@ namespace OpenAI.Responses
                                 serverSentEvent = part;
                             }
                             break;
+                        }
                         case "response.output_item.added":
                         case "response.output_item.done":
+                        {
                             var item = sseResponse.Deserialize<IResponseItem>(@object["item"], client);
-                            response!.InsertOutputItem(item, outputIndex!.Value);
 
                             if (@event == "response.output_item.done")
                             {
-                                serverSentEvent = item;
+                                if (item.Type == ResponseItemType.ImageGenerationCall &&
+                                    item is ImageGenerationCall imageGenerationCall)
+                                {
+                                    if (!string.IsNullOrWhiteSpace(imageGenerationCall.Result))
+                                    {
+                                        var (texture, _) = await TextureExtensions.ConvertFromBase64Async(imageGenerationCall.Result, EnableDebug, cancellationToken);
+                                        imageGenerationCall.Image = texture;
+                                    }
+
+                                    response!.UpdateOutputItem(imageGenerationCall, outputIndex!.Value);
+                                    serverSentEvent = imageGenerationCall;
+                                }
+                                else
+                                {
+                                    response!.UpdateOutputItem(item, outputIndex!.Value);
+                                    serverSentEvent = item;
+                                }
+                            }
+                            else // response.output_item.added
+                            {
+                                response!.InsertOutputItem(item, outputIndex!.Value);
                             }
                             break;
+                        }
                         case "response.function_call_arguments.delta":
                         case "response.function_call_arguments.done":
+                        {
                             var functionToolCall = (FunctionToolCall)response!.Output[outputIndex!.Value];
 
                             if (functionToolCall.Id != itemId)
@@ -219,6 +245,27 @@ namespace OpenAI.Responses
                                 functionToolCall.Delta = delta;
                             }
                             break;
+                        }
+                        case "response.image_generation_call.in_progress":
+                        case "response.image_generation_call.generating":
+                        case "response.image_generation_call.partial_image":
+                        {
+                            var imageGenerationCall = (ImageGenerationCall)response!.Output[outputIndex!.Value];
+
+                            if (imageGenerationCall.Id != itemId)
+                            {
+                                throw new InvalidOperationException($"ImageGenerationCall ID mismatch! Expected: {imageGenerationCall.Id}, got: {itemId}");
+                            }
+
+                            //if (!string.IsNullOrWhiteSpace(imageGenerationCall.PartialImageResult))
+                            //{
+                            //    var (texture, _) = await TextureExtensions.ConvertFromBase64Async(imageGenerationCall.PartialImageResult, EnableDebug, cancellationToken);
+                            //    imageGenerationCall.Image = texture;
+                            //}
+
+                            serverSentEvent = imageGenerationCall;
+                            break;
+                        }
                         case "response.audio.delta":
                         case "response.audio.done":
                         case "response.audio.transcript.delta":
@@ -230,7 +277,8 @@ namespace OpenAI.Responses
                         case "response.refusal.done":
                         case "response.reasoning_summary_text.delta":
                         case "response.reasoning_summary_text.done":
-                            messageItem = (Message)response!.Output[outputIndex!.Value];
+                        {
+                            var messageItem = (Message)response!.Output[outputIndex!.Value];
 
                             if (messageItem.Id != itemId)
                             {
@@ -243,25 +291,30 @@ namespace OpenAI.Responses
                             {
                                 case AudioContent audioContent:
                                     AudioContent partialContent;
+
                                     switch (@event)
                                     {
                                         case "response.audio.delta":
                                             partialContent = new AudioContent(audioContent.Type, base64Data: delta);
                                             audioContent.AppendFrom(partialContent);
                                             serverSentEvent = partialContent;
+
                                             break;
                                         case "response.audio.transcript.delta":
                                             partialContent = new AudioContent(audioContent.Type, transcript: delta);
                                             audioContent.AppendFrom(partialContent);
                                             serverSentEvent = partialContent;
+
                                             break;
                                         case "response.audio.done":
                                         case "response.audio.transcript.done":
                                             serverSentEvent = audioContent;
+
                                             break;
                                         default:
                                             throw new InvalidOperationException($"Unexpected event type: {@event} for AudioContent.");
                                     }
+
                                     break;
                                 case TextContent textContent:
                                     if (!string.IsNullOrWhiteSpace(text))
@@ -280,6 +333,7 @@ namespace OpenAI.Responses
                                     }
 
                                     serverSentEvent = textContent;
+
                                     break;
                                 case RefusalContent refusalContent:
                                     var refusal = @object["refusal"]?.Value<string>();
@@ -295,6 +349,7 @@ namespace OpenAI.Responses
                                     }
 
                                     serverSentEvent = refusalContent;
+
                                     break;
                                 case ReasoningContent reasoningContent:
                                     if (!string.IsNullOrWhiteSpace(text))
@@ -309,7 +364,9 @@ namespace OpenAI.Responses
 
                                     break;
                             }
+
                             break;
+                        }
                         case "response.reasoning_summary_part.added":
                         case "response.reasoning_summary_part.done":
                             var summaryIndex = @object["summary_index"]!.Value<int>();
@@ -351,9 +408,6 @@ namespace OpenAI.Responses
                         case "response.file_search_call.in_progress":
                         case "response.file_search_call.searching":
                         case "response.file_search_call.completed":
-                        case "response.image_generation_call.in_progress":
-                        case "response.image_generation_call.generating":
-                        case "response.image_generation_call.partial_image":
                         case "response.image_generation_call.completed":
                         case "response.mcp_call_arguments.delta":
                         case "response.mcp_call_arguments.done":

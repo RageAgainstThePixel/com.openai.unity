@@ -366,6 +366,25 @@ namespace OpenAI.Responses
         }
 
         [Preserve]
+        internal void UpdateOutputItem(IResponseItem item, int index)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            if (index >= output.Count)
+            {
+                for (var i = output.Count; i <= index; i++)
+                {
+                    output.Add(null);
+                }
+            }
+
+            output[index] = item;
+        }
+
+        [Preserve]
         public void PrintUsage()
         {
             if (Usage == null) { return; }

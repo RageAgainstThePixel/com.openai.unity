@@ -17,11 +17,13 @@ namespace OpenAI.Responses
         InProgress,
         [EnumMember(Value = "searching")]
         Searching,
+        [EnumMember(Value = "generating")]
+        Generating,
         [EnumMember(Value = "cancelled")]
         Cancelled,
         [EnumMember(Value = "queued")]
         Queued,
         [EnumMember(Value = "incomplete")]
-        Incomplete
+        Incomplete,
     }
 }

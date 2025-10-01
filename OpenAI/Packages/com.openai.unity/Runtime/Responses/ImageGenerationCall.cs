@@ -19,13 +19,25 @@ namespace OpenAI.Responses
             [JsonProperty("type")] ResponseItemType type,
             [JsonProperty("object")] string @object,
             [JsonProperty("status")] ResponseStatus status,
-            [JsonProperty("result")] string result)
+            [JsonProperty("result")] string result,
+            [JsonProperty("partial_image_b64")] string partialImageResult = null,
+            [JsonProperty("output_format")] string outputFormat = null,
+            [JsonProperty("revised_prompt")] string revisedPrompt = null,
+            [JsonProperty("background")] string background = null,
+            [JsonProperty("size")] string size = null,
+            [JsonProperty("quality")] string quality = null)
         {
             Id = id;
             Type = type;
             Object = @object;
             Status = status;
             Result = result;
+            PartialImageResult = partialImageResult;
+            OutputFormat = outputFormat;
+            RevisedPrompt = revisedPrompt;
+            Background = background;
+            Size = size;
+            Quality = quality;
         }
 
         /// <inheritdoc />
@@ -54,6 +66,30 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonProperty("result")]
         public string Result { get; }
+
+        [Preserve]
+        [JsonProperty("partial_image_b64")]
+        public string PartialImageResult { get; }
+
+        [Preserve]
+        [JsonProperty("output_format")]
+        public string OutputFormat { get; }
+
+        [Preserve]
+        [JsonProperty("revised_prompt")]
+        public string RevisedPrompt { get; }
+
+        [Preserve]
+        [JsonProperty("background")]
+        public string Background { get; }
+
+        [Preserve]
+        [JsonProperty("size")]
+        public string Size { get; }
+
+        [Preserve]
+        [JsonProperty("quality")]
+        public string Quality { get; }
 
         [Preserve]
         [JsonIgnore]
