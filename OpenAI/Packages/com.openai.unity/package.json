@@ -19,7 +19,7 @@
   "dependencies": {
     "com.utilities.audio": "2.2.8",
     "com.utilities.encoder.wav": "2.2.4",
-    "com.utilities.rest": "4.0.0",
+    "com.utilities.rest": "4.1.0",
     "com.utilities.websockets": "1.0.6"
   },
   "samples": [
