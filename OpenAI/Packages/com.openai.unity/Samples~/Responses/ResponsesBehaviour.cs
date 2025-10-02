@@ -147,9 +147,10 @@ namespace OpenAI.Samples.Responses
                             await GenerateSpeechAsync(message, destroyCancellationToken);
                             break;
                         case ImageGenerationCall imageGenerationCall:
-                            if (imageGenerationCall.Image != null)
+                            if (!string.IsNullOrWhiteSpace(imageGenerationCall.Result))
                             {
-                                AddNewImageContent(imageGenerationCall.Image);
+                                var image = await imageGenerationCall.LoadTextureAsync(enableDebug, destroyCancellationToken);
+                                AddNewImageContent(image);
                                 scrollView.verticalNormalizedPosition = 0f;
                             }
                             break;

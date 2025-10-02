@@ -134,13 +134,13 @@ namespace OpenAI.Responses
             {
                 IServerSentEvent serverSentEvent = null;
                 var @event = ssEvent.Value.Value<string>();
+                var @object = ssEvent.Data ?? ssEvent.Value;
 
                 if (EnableDebug)
                 {
-                    Debug.Log(ssEvent.ToJsonString());
+                    Debug.Log(@object.ToString(Formatting.None));
                 }
 
-                var @object = ssEvent.Data ?? ssEvent.Value;
                 var text = @object["text"]?.Value<string>();
                 var delta = @object["delta"]?.Value<string>();
                 var itemId = @object["item_id"]?.Value<string>();
@@ -161,20 +161,13 @@ namespace OpenAI.Responses
                         {
                             var partialResponse = sseResponse.Deserialize<Response>(@object["response"], client);
 
-                            if (response == null)
+                            if (response == null || response.Id == partialResponse.Id)
                             {
                                 response = partialResponse;
                             }
                             else
                             {
-                                if (response.Id == partialResponse.Id)
-                                {
-                                    response = partialResponse;
-                                }
-                                else
-                                {
-                                    throw new InvalidOperationException($"Response ID mismatch! Expected: {response.Id}, got: {partialResponse.Id}");
-                                }
+                                throw new InvalidOperationException($"Response ID mismatch! Expected: {response.Id}, got: {partialResponse.Id}");
                             }
 
                             serverSentEvent = response;
@@ -197,36 +190,18 @@ namespace OpenAI.Responses
                             {
                                 serverSentEvent = part;
                             }
+
                             break;
                         }
                         case "response.output_item.added":
                         case "response.output_item.done":
                         {
                             var item = sseResponse.Deserialize<IResponseItem>(@object["item"], client);
+                            response!.InsertOutputItem(item, outputIndex!.Value);
 
                             if (@event == "response.output_item.done")
                             {
-                                if (item.Type == ResponseItemType.ImageGenerationCall &&
-                                    item is ImageGenerationCall imageGenerationCall)
-                                {
-                                    if (!string.IsNullOrWhiteSpace(imageGenerationCall.Result))
-                                    {
-                                        var (texture, _) = await TextureExtensions.ConvertFromBase64Async(imageGenerationCall.Result, EnableDebug, cancellationToken);
-                                        imageGenerationCall.Image = texture;
-                                    }
-
-                                    response!.UpdateOutputItem(imageGenerationCall, outputIndex!.Value);
-                                    serverSentEvent = imageGenerationCall;
-                                }
-                                else
-                                {
-                                    response!.UpdateOutputItem(item, outputIndex!.Value);
-                                    serverSentEvent = item;
-                                }
-                            }
-                            else // response.output_item.added
-                            {
-                                response!.InsertOutputItem(item, outputIndex!.Value);
+                                serverSentEvent = item;
                             }
                             break;
                         }
@@ -244,11 +219,13 @@ namespace OpenAI.Responses
                             {
                                 functionToolCall.Delta = delta;
                             }
+
                             break;
                         }
                         case "response.image_generation_call.in_progress":
                         case "response.image_generation_call.generating":
                         case "response.image_generation_call.partial_image":
+                        case "response.image_generation_call.completed":
                         {
                             var imageGenerationCall = (ImageGenerationCall)response!.Output[outputIndex!.Value];
 
@@ -257,11 +234,13 @@ namespace OpenAI.Responses
                                 throw new InvalidOperationException($"ImageGenerationCall ID mismatch! Expected: {imageGenerationCall.Id}, got: {itemId}");
                             }
 
-                            //if (!string.IsNullOrWhiteSpace(imageGenerationCall.PartialImageResult))
-                            //{
-                            //    var (texture, _) = await TextureExtensions.ConvertFromBase64Async(imageGenerationCall.PartialImageResult, EnableDebug, cancellationToken);
-                            //    imageGenerationCall.Image = texture;
-                            //}
+                            imageGenerationCall.Size = @object["size"]?.Value<string>();
+                            imageGenerationCall.Quality = @object["quality"]?.Value<string>();
+                            imageGenerationCall.Background = @object["background"]?.Value<string>();
+                            imageGenerationCall.OutputFormat = @object["output_format"]?.Value<string>();
+                            imageGenerationCall.RevisedPrompt = @object["revised_prompt"]?.Value<string>();
+                            imageGenerationCall.PartialImageIndex = @object["partial_image_index"]?.Value<int>();
+                            imageGenerationCall.PartialImageResult = @object["partial_image_b64"]?.Value<string>();
 
                             serverSentEvent = imageGenerationCall;
                             break;
@@ -298,18 +277,15 @@ namespace OpenAI.Responses
                                             partialContent = new AudioContent(audioContent.Type, base64Data: delta);
                                             audioContent.AppendFrom(partialContent);
                                             serverSentEvent = partialContent;
-
                                             break;
                                         case "response.audio.transcript.delta":
                                             partialContent = new AudioContent(audioContent.Type, transcript: delta);
                                             audioContent.AppendFrom(partialContent);
                                             serverSentEvent = partialContent;
-
                                             break;
                                         case "response.audio.done":
                                         case "response.audio.transcript.done":
                                             serverSentEvent = audioContent;
-
                                             break;
                                         default:
                                             throw new InvalidOperationException($"Unexpected event type: {@event} for AudioContent.");
@@ -333,7 +309,6 @@ namespace OpenAI.Responses
                                     }
 
                                     serverSentEvent = textContent;
-
                                     break;
                                 case RefusalContent refusalContent:
                                     var refusal = @object["refusal"]?.Value<string>();
@@ -349,7 +324,6 @@ namespace OpenAI.Responses
                                     }
 
                                     serverSentEvent = refusalContent;
-
                                     break;
                                 case ReasoningContent reasoningContent:
                                     if (!string.IsNullOrWhiteSpace(text))
@@ -369,6 +343,7 @@ namespace OpenAI.Responses
                         }
                         case "response.reasoning_summary_part.added":
                         case "response.reasoning_summary_part.done":
+                        {
                             var summaryIndex = @object["summary_index"]!.Value<int>();
                             var reasoningItem = (ReasoningItem)response!.Output[outputIndex!.Value];
                             var summaryItem = sseResponse.Deserialize<ReasoningSummary>(@object["part"], client);
@@ -380,10 +355,12 @@ namespace OpenAI.Responses
                             }
 
                             break;
+                        }
                         case "response.reasoning_text.delta":
                         case "response.reasoning_text.done":
+                        {
                             var reasoningContentIndex = @object["content_index"]!.Value<int>();
-                            reasoningItem = (ReasoningItem)response!.Output[outputIndex!.Value];
+                            var reasoningItem = (ReasoningItem)response!.Output[outputIndex!.Value];
                             var reasoningContentItem = reasoningItem.Content[reasoningContentIndex];
 
                             if (!string.IsNullOrWhiteSpace(text))
@@ -394,9 +371,12 @@ namespace OpenAI.Responses
                             reasoningContentItem.Delta = !string.IsNullOrWhiteSpace(delta) ? delta : null;
                             serverSentEvent = reasoningContentItem;
                             break;
+                        }
                         case "error":
+                        {
                             serverSentEvent = sseResponse.Deserialize<Error>(client);
                             break;
+                        }
                         // TODO - implement handling for these events:
                         case "response.code_interpreter_call.interpreting":
                         case "response.code_interpreter_call.in_progress":
@@ -408,7 +388,6 @@ namespace OpenAI.Responses
                         case "response.file_search_call.in_progress":
                         case "response.file_search_call.searching":
                         case "response.file_search_call.completed":
-                        case "response.image_generation_call.completed":
                         case "response.mcp_call_arguments.delta":
                         case "response.mcp_call_arguments.done":
                         case "response.mcp_call.in_progress":
@@ -421,9 +400,11 @@ namespace OpenAI.Responses
                         case "response.web_search_call.searching":
                         case "response.web_search_call.completed":
                         default:
+                        {
                             // if not properly handled raise it up to caller to deal with it themselves.
                             serverSentEvent = ssEvent;
                             break;
+                        }
                     }
                 }
                 catch (Exception e)
@@ -439,9 +420,7 @@ namespace OpenAI.Responses
             }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
             // ReSharper restore AccessToModifiedClosure
             streamResponse.Validate(EnableDebug);
-
             if (response == null) { return null; }
-
             response = await response.WaitForStatusChangeAsync(timeout: -1, cancellationToken: cancellationToken);
             response.SetResponseData(streamResponse, client);
             return response;

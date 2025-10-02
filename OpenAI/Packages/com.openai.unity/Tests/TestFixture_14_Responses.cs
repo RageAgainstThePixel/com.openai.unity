@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using Utilities.WebRequestRest.Interfaces;
+using Utilities.Extensions;
 
 namespace OpenAI.Tests
 {
@@ -79,7 +80,8 @@ namespace OpenAI.Tests
 
                 var response = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync("Tell me a three sentence bedtime story about a unicorn.", async (@event, sseEvent) =>
                 {
-                    Debug.Log($"{@event}:{sseEvent.ToJsonString()}");
+                    Assert.NotNull(@event);
+                    Assert.NotNull(sseEvent);
                     await Task.CompletedTask;
                 });
 
@@ -361,88 +363,107 @@ namespace OpenAI.Tests
             catch (Exception e)
             {
                 Debug.LogException(e);
+
                 throw;
             }
         }
+
         [Test]
         public async Task Test_04_01_JsonSchema()
         {
-            Assert.IsNotNull(OpenAIClient.ResponsesEndpoint);
+            try
+            {
+                Assert.IsNotNull(OpenAIClient.ResponsesEndpoint);
 
-            var messages = new List<IResponseItem>
+                var messages = new List<IResponseItem>
             {
                 new Message(Role.System, "You are a helpful math tutor. Guide the user through the solution step by step."),
                 new Message(Role.User, "how can I solve 8x + 7 = -23")
             };
 
-            var request = new CreateResponseRequest(messages, model: Model.GPT4_1_Nano);
-            var (mathResponse, response) = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync<MathResponse>(request);
-            Assert.NotNull(response);
-            Assert.IsNotEmpty(response.Id);
-            Assert.AreEqual(ResponseStatus.Completed, response.Status);
-            Assert.NotNull(mathResponse);
-            Assert.IsNotEmpty(mathResponse.Steps);
+                var request = new CreateResponseRequest(messages, model: Model.GPT4_1_Nano);
+                var (mathResponse, response) = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync<MathResponse>(request);
+                Assert.NotNull(response);
+                Assert.IsNotEmpty(response.Id);
+                Assert.AreEqual(ResponseStatus.Completed, response.Status);
+                Assert.NotNull(mathResponse);
+                Assert.IsNotEmpty(mathResponse.Steps);
 
-            for (var i = 0; i < mathResponse.Steps.Count; i++)
-            {
-                var step = mathResponse.Steps[i];
-                Assert.IsNotNull(step.Explanation);
-                Debug.Log($"Step {i}: {step.Explanation}");
-                Assert.IsNotNull(step.Output);
-                Debug.Log($"Result: {step.Output}");
+                for (var i = 0; i < mathResponse.Steps.Count; i++)
+                {
+                    var step = mathResponse.Steps[i];
+                    Assert.IsNotNull(step.Explanation);
+                    Debug.Log($"Step {i}: {step.Explanation}");
+                    Assert.IsNotNull(step.Output);
+                    Debug.Log($"Result: {step.Output}");
+                }
+
+                Assert.IsNotNull(mathResponse.FinalAnswer);
+                Debug.Log($"Final Answer: {mathResponse.FinalAnswer}");
+                response.PrintUsage();
             }
-
-            Assert.IsNotNull(mathResponse.FinalAnswer);
-            Debug.Log($"Final Answer: {mathResponse.FinalAnswer}");
-            response.PrintUsage();
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw;
+            }
         }
 
         [Test]
         public async Task Test_04_02_JsonSchema_Streaming()
         {
-            Assert.IsNotNull(OpenAIClient.ResponsesEndpoint);
+            try
+            {
+                Assert.IsNotNull(OpenAIClient.ResponsesEndpoint);
 
-            var messages = new List<IResponseItem>
+                var messages = new List<IResponseItem>
             {
                 new Message(Role.System, "You are a helpful math tutor. Guide the user through the solution step by step."),
                 new Message(Role.User, "how can I solve 8x + 7 = -23")
             };
 
-            Task StreamCallback(string @event, IServerSentEvent sseEvent)
-            {
-                switch (sseEvent)
+                Task StreamCallback(string @event, IServerSentEvent sseEvent)
                 {
-                    case Message messageItem:
-                        Assert.NotNull(messageItem);
-                        var matchSchema = messageItem.FromSchema<MathResponse>();
-                        Assert.NotNull(matchSchema);
-                        Assert.IsNotEmpty(matchSchema.Steps);
+                    switch (sseEvent)
+                    {
+                        case Message messageItem:
+                            Assert.NotNull(messageItem);
+                            var matchSchema = messageItem.FromSchema<MathResponse>();
+                            Assert.NotNull(matchSchema);
+                            Assert.IsNotEmpty(matchSchema.Steps);
 
-                        for (var i = 0; i < matchSchema.Steps.Count; i++)
-                        {
-                            var step = matchSchema.Steps[i];
-                            Assert.IsNotNull(step.Explanation);
-                            Debug.Log($"Step {i}: {step.Explanation}");
-                            Assert.IsNotNull(step.Output);
-                            Debug.Log($"Result: {step.Output}");
-                        }
+                            for (var i = 0; i < matchSchema.Steps.Count; i++)
+                            {
+                                var step = matchSchema.Steps[i];
+                                Assert.IsNotNull(step.Explanation);
+                                Debug.Log($"Step {i}: {step.Explanation}");
+                                Assert.IsNotNull(step.Output);
+                                Debug.Log($"Result: {step.Output}");
+                            }
 
-                        Assert.IsNotNull(matchSchema.FinalAnswer);
-                        Debug.Log($"Final Answer: {matchSchema.FinalAnswer}");
-                        break;
+                            Assert.IsNotNull(matchSchema.FinalAnswer);
+                            Debug.Log($"Final Answer: {matchSchema.FinalAnswer}");
+
+                            break;
+                    }
+
+                    return Task.CompletedTask;
                 }
 
-                return Task.CompletedTask;
+                var request = new CreateResponseRequest(messages, model: Model.GPT4_1_Nano);
+                var (mathResponse, response) = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync<MathResponse>(request, StreamCallback);
+                Assert.NotNull(response);
+                Assert.IsNotEmpty(response.Id);
+                Assert.AreEqual(ResponseStatus.Completed, response.Status);
+                Assert.NotNull(mathResponse);
+                Assert.IsNotEmpty(mathResponse.Steps);
+                response.PrintUsage();
             }
-
-            var request = new CreateResponseRequest(messages, model: Model.GPT4_1_Nano);
-            var (mathResponse, response) = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync<MathResponse>(request, StreamCallback);
-            Assert.NotNull(response);
-            Assert.IsNotEmpty(response.Id);
-            Assert.AreEqual(ResponseStatus.Completed, response.Status);
-            Assert.NotNull(mathResponse);
-            Assert.IsNotEmpty(mathResponse.Steps);
-            response.PrintUsage();
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw;
+            }
         }
 
         [Test]
@@ -456,16 +477,19 @@ namespace OpenAI.Tests
                 {
                     new Message(Role.User, "What's the weather like today?"),
                 };
+
                 var tools = new List<Tool>
                 {
                     Tool.GetOrCreateTool(typeof(WeatherService), nameof(WeatherService.GetCurrentWeatherAsync)),
                 };
+
                 var request = new CreateResponseRequest(
                     input: conversation,
                     model: Model.GPT4_1_Nano,
                     prompt: new Prompt("pmpt_685c102c61608193b3654325fa76fc880b22337c811a3a71"),
                     tools: tools,
                     toolChoice: "none");
+
                 var response = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync(request);
                 Assert.NotNull(response);
                 Assert.IsNotEmpty(response.Id);
@@ -523,6 +547,52 @@ namespace OpenAI.Tests
                 Assert.NotNull(textContent);
                 Assert.IsNotEmpty(textContent!.Text);
                 Debug.Log($"{messageItem.Role}: {messageItem}");
+                response.PrintUsage();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                throw;
+            }
+        }
+
+        [Test]
+        public async Task Test_06_01_ImageGenerationTool()
+        {
+            try
+            {
+                Assert.NotNull(OpenAIClient.ResponsesEndpoint);
+                var tools = new List<Tool>
+                {
+                    new ImageGenerationTool(
+                        model: Model.GPT_Image_1,
+                        size: "1024x1024",
+                        quality: "low",
+                        outputFormat: "png")
+                };
+                var request = new CreateResponseRequest(
+                    input: new Message(Role.User, "Create an image of a futuristic city with flying cars."),
+                    model: Model.GPT4_1_Nano,
+                    tools: tools,
+                    toolChoice: "auto");
+                var response = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync(request, async serverSentEvent =>
+                {
+                    if (serverSentEvent is ImageGenerationCall { Status: ResponseStatus.Generating } imageGenerationCall)
+                    {
+                        var image = await imageGenerationCall.LoadTextureAsync(debug: true);
+                        Assert.NotNull(image);
+                        image.Destroy();
+                    }
+                });
+                Assert.NotNull(response);
+                Assert.IsNotEmpty(response.Id);
+                Assert.AreEqual(ResponseStatus.Completed, response.Status);
+
+                // make sure we have at least the image generation call in the response output array
+                var imageCall = response.Output.FirstOrDefault(i => i.Type == ResponseItemType.ImageGenerationCall) as ImageGenerationCall;
+                Assert.NotNull(imageCall);
+                Assert.AreEqual(ResponseStatus.Generating, imageCall.Status);
+
                 response.PrintUsage();
             }
             catch (Exception e)

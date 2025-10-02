@@ -1,6 +1,9 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using OpenAI.Extensions;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Scripting;
 
@@ -20,6 +23,7 @@ namespace OpenAI.Responses
             [JsonProperty("object")] string @object,
             [JsonProperty("status")] ResponseStatus status,
             [JsonProperty("result")] string result,
+            [JsonProperty("partial_image_index")] int? partialImageIndex = null,
             [JsonProperty("partial_image_b64")] string partialImageResult = null,
             [JsonProperty("output_format")] string outputFormat = null,
             [JsonProperty("revised_prompt")] string revisedPrompt = null,
@@ -64,35 +68,50 @@ namespace OpenAI.Responses
         /// The generated image encoded in base64.
         /// </summary>
         [Preserve]
-        [JsonProperty("result")]
+        [JsonProperty("result", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Result { get; }
 
         [Preserve]
-        [JsonProperty("partial_image_b64")]
-        public string PartialImageResult { get; }
+        [JsonProperty("partial_image_index", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? PartialImageIndex { get; internal set; }
 
         [Preserve]
-        [JsonProperty("output_format")]
-        public string OutputFormat { get; }
+        [JsonProperty("partial_image_b64", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string PartialImageResult { get; internal set; }
 
         [Preserve]
-        [JsonProperty("revised_prompt")]
-        public string RevisedPrompt { get; }
+        [JsonProperty("output_format", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string OutputFormat { get; internal set; }
 
         [Preserve]
-        [JsonProperty("background")]
-        public string Background { get; }
+        [JsonProperty("revised_prompt", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string RevisedPrompt { get; internal set; }
 
         [Preserve]
-        [JsonProperty("size")]
-        public string Size { get; }
+        [JsonProperty("background", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Background { get; internal set; }
 
         [Preserve]
-        [JsonProperty("quality")]
-        public string Quality { get; }
+        [JsonProperty("size", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Size { get; internal set; }
 
         [Preserve]
-        [JsonIgnore]
-        public Texture2D Image { get; internal set; }
+        [JsonProperty("quality", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Quality { get; internal set; }
+
+        /// <summary>
+        /// Loads the image result as a <see cref="Texture2D"/>.
+        /// </summary>
+        /// <param name="debug">Optional, enable debug logging.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="Texture2D"/>.</returns>
+        [Preserve]
+        public async Task<Texture2D> LoadTextureAsync(bool debug = false, CancellationToken cancellationToken = default)
+        {
+            var image64 = string.IsNullOrWhiteSpace(Result) ? PartialImageResult : Result;
+            if (string.IsNullOrWhiteSpace(image64)) { return null; }
+            var (texture, _) = await TextureExtensions.ConvertFromBase64Async(image64, debug, cancellationToken);
+            return texture;
+        }
     }
 }
