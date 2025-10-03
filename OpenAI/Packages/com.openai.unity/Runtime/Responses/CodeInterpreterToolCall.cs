@@ -58,7 +58,27 @@ namespace OpenAI.Responses
         /// </summary>
         [Preserve]
         [JsonProperty("code")]
-        public string Code { get; }
+        public string Code { get; internal set; }
+
+        private string delta;
+
+        [Preserve]
+        [JsonIgnore]
+        public string Delta
+        {
+            get => delta;
+            internal set
+            {
+                if (value == null)
+                {
+                    delta = null;
+                }
+                else
+                {
+                    delta += value;
+                }
+            }
+        }
 
         /// <summary>
         /// The results of the code interpreter tool call.
@@ -73,5 +93,9 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonProperty("container_id", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string ContainerId { get; }
+
+        [Preserve]
+        public override string ToString()
+            => Delta ?? Code ?? string.Empty;
     }
 }

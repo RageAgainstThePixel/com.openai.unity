@@ -9,10 +9,11 @@ using OpenAI.Tests.Weather;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
-using Utilities.WebRequestRest.Interfaces;
 using Utilities.Extensions;
+using Utilities.WebRequestRest.Interfaces;
+using Message = OpenAI.Responses.Message;
+using Task = System.Threading.Tasks.Task;
 
 namespace OpenAI.Tests
 {
@@ -67,6 +68,7 @@ namespace OpenAI.Tests
             catch (Exception e)
             {
                 Debug.LogException(e);
+
                 throw;
             }
         }
@@ -105,6 +107,7 @@ namespace OpenAI.Tests
             catch (Exception e)
             {
                 Debug.LogException(e);
+
                 throw;
             }
         }
@@ -190,6 +193,7 @@ namespace OpenAI.Tests
             catch (Exception e)
             {
                 Debug.LogException(e);
+
                 throw;
             }
         }
@@ -272,6 +276,7 @@ namespace OpenAI.Tests
             catch (Exception e)
             {
                 Debug.LogException(e);
+
                 throw;
             }
         }
@@ -307,6 +312,7 @@ namespace OpenAI.Tests
             catch (Exception e)
             {
                 Debug.LogException(e);
+
                 throw;
             }
         }
@@ -376,10 +382,10 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(OpenAIClient.ResponsesEndpoint);
 
                 var messages = new List<IResponseItem>
-            {
-                new Message(Role.System, "You are a helpful math tutor. Guide the user through the solution step by step."),
-                new Message(Role.User, "how can I solve 8x + 7 = -23")
-            };
+                {
+                    new Message(Role.System, "You are a helpful math tutor. Guide the user through the solution step by step."),
+                    new Message(Role.User, "how can I solve 8x + 7 = -23")
+                };
 
                 var request = new CreateResponseRequest(messages, model: Model.GPT4_1_Nano);
                 var (mathResponse, response) = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync<MathResponse>(request);
@@ -405,6 +411,7 @@ namespace OpenAI.Tests
             catch (Exception e)
             {
                 Debug.LogException(e);
+
                 throw;
             }
         }
@@ -417,10 +424,10 @@ namespace OpenAI.Tests
                 Assert.IsNotNull(OpenAIClient.ResponsesEndpoint);
 
                 var messages = new List<IResponseItem>
-            {
-                new Message(Role.System, "You are a helpful math tutor. Guide the user through the solution step by step."),
-                new Message(Role.User, "how can I solve 8x + 7 = -23")
-            };
+                {
+                    new Message(Role.System, "You are a helpful math tutor. Guide the user through the solution step by step."),
+                    new Message(Role.User, "how can I solve 8x + 7 = -23")
+                };
 
                 Task StreamCallback(string @event, IServerSentEvent sseEvent)
                 {
@@ -462,6 +469,7 @@ namespace OpenAI.Tests
             catch (Exception e)
             {
                 Debug.LogException(e);
+
                 throw;
             }
         }
@@ -552,6 +560,7 @@ namespace OpenAI.Tests
             catch (Exception e)
             {
                 Debug.LogException(e);
+
                 throw;
             }
         }
@@ -562,6 +571,7 @@ namespace OpenAI.Tests
             try
             {
                 Assert.NotNull(OpenAIClient.ResponsesEndpoint);
+
                 var tools = new List<Tool>
                 {
                     new ImageGenerationTool(
@@ -594,6 +604,62 @@ namespace OpenAI.Tests
                 Assert.AreEqual(ResponseStatus.Generating, imageCall.Status);
 
                 response.PrintUsage();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+
+                throw;
+            }
+        }
+
+        [Test]
+        public async Task Test_07_01_MCPTool()
+        {
+            try
+            {
+                Assert.NotNull(OpenAIClient.ResponsesEndpoint);
+                await Task.CompletedTask;
+
+                var conversation = new List<IResponseItem>
+                {
+                    new Message(Role.System, "You are a Dungeons and Dragons Master. Guide the players through the game turn by turn."),
+                    new Message(Role.User, "Roll 2d4+1")
+                };
+                var tools = new List<Tool>
+                {
+                    new MCPTool(
+                        serverLabel: "dmcp",
+                        serverDescription: "A Dungeons and Dragons MCP server to assist with dice rolling.",
+                        serverUrl: "https://dmcp-server.deno.dev/sse",
+                        requireApproval: MCPToolRequireApproval.Never)
+                };
+
+                Task StreamEventHandler(string @event, IServerSentEvent serverSentEvent)
+                {
+                    switch (serverSentEvent)
+                    {
+                        case MCPListTools mcpListTools:
+                            Assert.NotNull(mcpListTools);
+                            Assert.IsNotEmpty(mcpListTools.Tools);
+                            break;
+                        case MCPToolCall mcpToolCall:
+                            Assert.NotNull(mcpToolCall);
+                            Assert.IsNotEmpty(mcpToolCall.Output);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(serverSentEvent));
+                    }
+
+                    return Task.CompletedTask;
+                }
+
+                var request = new CreateResponseRequest(conversation, Model.GPT4_1_Nano, tools: tools, toolChoice: "auto");
+                var response = await OpenAIClient.ResponsesEndpoint.CreateModelResponseAsync(request, StreamEventHandler);
+
+                Assert.NotNull(response);
+                Assert.IsNotEmpty(response.Id);
+                Assert.AreEqual(ResponseStatus.Completed, response.Status);
             }
             catch (Exception e)
             {

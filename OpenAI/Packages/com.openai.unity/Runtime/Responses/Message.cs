@@ -106,7 +106,7 @@ namespace OpenAI.Responses
         }
 
         [Preserve]
-        internal void AddContentItem(IResponseContent item, int index)
+        internal void AddOrUpdateContentItem(IResponseContent item, int index)
         {
             if (item == null)
             {

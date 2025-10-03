@@ -35,7 +35,7 @@ namespace OpenAI.Responses
                 serverDescription: serverDescription,
                 allowedTools: allowedTools,
                 headers: headers,
-                requireApproval: requireApproval.ToString().ToLower())
+                requireApproval: (object)requireApproval)
         {
         }
 
@@ -79,7 +79,7 @@ namespace OpenAI.Responses
             ServerDescription = serverDescription;
             AllowedTools = allowedTools;
             Headers = headers ?? new Dictionary<string, object>();
-            RequireApproval = requireApproval;
+            RequireApproval = requireApproval is MCPToolRequireApproval ? requireApproval.ToString().ToLower() : requireApproval;
         }
 
         [Preserve]

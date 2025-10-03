@@ -69,12 +69,51 @@ namespace OpenAI.Responses
         [JsonProperty("server_label")]
         public string ServerLabel { get; }
 
+        private string argumentsString;
+
+        private JToken arguments;
+
         /// <summary>
         /// A JSON string of the arguments to pass to the function.
         /// </summary>
         [Preserve]
         [JsonProperty("arguments")]
-        public JToken Arguments { get; }
+        public JToken Arguments
+        {
+            get
+            {
+                if (arguments == null)
+                {
+                    if (!string.IsNullOrWhiteSpace(argumentsString))
+                    {
+                        arguments = JToken.FromObject(argumentsString, OpenAIClient.JsonSerializer);
+                    }
+                    else
+                    {
+                        arguments = null;
+                    }
+                }
+
+                return arguments;
+            }
+            internal set => arguments = value;
+        }
+
+        [JsonIgnore]
+        internal string Delta
+        {
+            set
+            {
+                if (value == null)
+                {
+                    argumentsString = null;
+                }
+                else
+                {
+                    argumentsString += value;
+                }
+            }
+        }
 
         /// <summary>
         /// The output from the tool call.

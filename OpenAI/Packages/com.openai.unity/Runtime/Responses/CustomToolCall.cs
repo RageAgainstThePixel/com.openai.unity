@@ -80,6 +80,26 @@ namespace OpenAI.Responses
         /// </summary>
         [Preserve]
         [JsonProperty("input")]
-        public string Input { get; }
+        public string Input { get; internal set; }
+
+        private string delta;
+
+        [Preserve]
+        [JsonIgnore]
+        public string Delta
+        {
+            get => delta;
+            internal set
+            {
+                if (value == null)
+                {
+                    delta = null;
+                }
+                else
+                {
+                    delta += value;
+                }
+            }
+        }
     }
 }

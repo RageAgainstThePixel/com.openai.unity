@@ -30,9 +30,25 @@ namespace OpenAI.Responses
         [JsonProperty("text")]
         public string Text { get; internal set; }
 
+        private string delta;
+
         [Preserve]
         [JsonIgnore]
-        public string Delta { get; internal set; }
+        public string Delta
+        {
+            get => delta;
+            internal set
+            {
+                if (value == null)
+                {
+                    delta = null;
+                }
+                else
+                {
+                    delta += value;
+                }
+            }
+        }
 
         [Preserve]
         [JsonIgnore]
@@ -45,6 +61,6 @@ namespace OpenAI.Responses
 
         [Preserve]
         public override string ToString()
-            => string.IsNullOrWhiteSpace(Text) ? Delta : Text;
+            => Delta ?? Text ?? string.Empty;
     }
 }
