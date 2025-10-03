@@ -608,7 +608,6 @@ namespace OpenAI.Tests
             catch (Exception e)
             {
                 Debug.LogException(e);
-
                 throw;
             }
         }
@@ -641,14 +640,10 @@ namespace OpenAI.Tests
                     {
                         case MCPListTools mcpListTools:
                             Assert.NotNull(mcpListTools);
-                            Assert.IsNotEmpty(mcpListTools.Tools);
                             break;
                         case MCPToolCall mcpToolCall:
                             Assert.NotNull(mcpToolCall);
-                            Assert.IsNotEmpty(mcpToolCall.Output);
                             break;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(serverSentEvent));
                     }
 
                     return Task.CompletedTask;

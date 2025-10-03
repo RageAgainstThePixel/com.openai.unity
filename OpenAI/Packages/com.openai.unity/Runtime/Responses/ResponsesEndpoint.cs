@@ -218,6 +218,8 @@ namespace OpenAI.Responses
 
                             functionToolCall.Delta = delta;
                             functionToolCall.Arguments = @object["arguments"];
+                            response!.InsertOutputItem(functionToolCall, outputIndex!.Value);
+                            serverSentEvent = functionToolCall;
                             break;
                         }
                         case "response.custom_tool_call_input.delta":
@@ -232,6 +234,8 @@ namespace OpenAI.Responses
 
                             customToolCall.Delta = delta;
                             customToolCall.Input = @object["input"]?.Value<string>();
+                            response!.InsertOutputItem(customToolCall, outputIndex!.Value);
+                            serverSentEvent = customToolCall;
                             break;
                         }
                         case "response.image_generation_call.in_progress":
