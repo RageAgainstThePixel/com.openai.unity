@@ -36,7 +36,7 @@ namespace OpenAI.Threads
             Role role = Role.User,
             IEnumerable<Attachment> attachments = null,
             IReadOnlyDictionary<string, string> metadata = null)
-            : this(new List<Content> { new(content) }, role, attachments, metadata)
+            : this(new List<Content> { new(content) }, role, attachments, (Dictionary<string, string>)metadata)
         {
         }
 
@@ -63,7 +63,7 @@ namespace OpenAI.Threads
             [JsonProperty("content")] IEnumerable<Content> content,
             [JsonProperty("role")] Role role = Role.User,
             [JsonProperty("attachments")] IEnumerable<Attachment> attachments = null,
-            [JsonProperty("metadata")] IReadOnlyDictionary<string, string> metadata = null)
+            [JsonProperty("metadata")] Dictionary<string, string> metadata = null)
         {
             Content = content?.ToList();
             Role = role;

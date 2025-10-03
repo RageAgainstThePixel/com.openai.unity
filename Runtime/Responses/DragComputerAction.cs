@@ -18,7 +18,7 @@ namespace OpenAI.Responses
         [JsonConstructor]
         internal DragComputerAction(
             [JsonProperty("type")] ComputerActionType type,
-            [JsonProperty("path")] IReadOnlyList<Coordinate> path)
+            [JsonProperty("path")] List<Coordinate> path)
         {
             Type = type;
             Path = path;

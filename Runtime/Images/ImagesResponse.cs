@@ -13,7 +13,7 @@ namespace OpenAI.Images
         [JsonConstructor]
         internal ImagesResponse(
             [JsonProperty("created")] long createdAtUnixSeconds,
-            [JsonProperty("data")] IReadOnlyList<ImageResult> results,
+            [JsonProperty("data")] List<ImageResult> results,
             [JsonProperty("background")] string background,
             [JsonProperty("output_format")] string outputFormat,
             [JsonProperty("quality")] string quality,

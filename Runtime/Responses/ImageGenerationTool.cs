@@ -19,6 +19,7 @@ namespace OpenAI.Responses
         public ImageGenerationTool(
             Model model = null,
             string background = null,
+            string inputFidelity = null,
             InputImageMask inputImageMask = null,
             string moderation = null,
             int? outputCompression = null,
@@ -29,6 +30,7 @@ namespace OpenAI.Responses
         {
             Model = string.IsNullOrWhiteSpace(model?.Id) ? Models.Model.GPT_Image_1 : model;
             Background = background;
+            InputFidelity = inputFidelity;
             InputImageMask = inputImageMask;
             Moderation = moderation;
             OutputCompression = outputCompression;
@@ -42,18 +44,20 @@ namespace OpenAI.Responses
         [JsonConstructor]
         internal ImageGenerationTool(
             [JsonProperty("type")] string type,
-            [JsonProperty("background", DefaultValueHandling = DefaultValueHandling.Ignore)] string background,
-            [JsonProperty("input_image_mask", DefaultValueHandling = DefaultValueHandling.Ignore)] InputImageMask inputImageMask,
-            [JsonProperty("model", DefaultValueHandling = DefaultValueHandling.Ignore)] string model,
-            [JsonProperty("moderation", DefaultValueHandling = DefaultValueHandling.Ignore)] string moderation,
-            [JsonProperty("output_compression", DefaultValueHandling = DefaultValueHandling.Ignore)] int? outputCompression,
-            [JsonProperty("output_format", DefaultValueHandling = DefaultValueHandling.Ignore)] string outputFormat,
-            [JsonProperty("partial_images", DefaultValueHandling = DefaultValueHandling.Ignore)] int? partialImages,
-            [JsonProperty("quality", DefaultValueHandling = DefaultValueHandling.Ignore)] string quality,
-            [JsonProperty("size", DefaultValueHandling = DefaultValueHandling.Ignore)] string size)
+            [JsonProperty("background")] string background,
+            [JsonProperty("input_fidelity")] string inputFidelity,
+            [JsonProperty("input_image_mask")] InputImageMask inputImageMask,
+            [JsonProperty("model")] string model,
+            [JsonProperty("moderation")] string moderation,
+            [JsonProperty("output_compression")] int? outputCompression,
+            [JsonProperty("output_format")] string outputFormat,
+            [JsonProperty("partial_images")] int? partialImages,
+            [JsonProperty("quality")] string quality,
+            [JsonProperty("size")] string size)
         {
             Type = type;
             Background = background;
+            InputFidelity = inputFidelity;
             InputImageMask = inputImageMask;
             Model = model;
             Moderation = moderation;
@@ -74,6 +78,15 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonProperty("background", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Background { get; }
+
+        /// <summary>
+        /// Control how much effort the model will exert to match the style and features, especially facial features, of input images.
+        /// This parameter is only supported for gpt-image-1.<br/>
+        /// Supports high and low. Defaults to low.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("input_fidelity", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string InputFidelity { get; }
 
         /// <summary>
         /// Optional mask for inpainting. Contains image_url (string, optional) and file_id (string, optional).

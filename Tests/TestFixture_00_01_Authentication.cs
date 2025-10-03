@@ -206,7 +206,7 @@ namespace OpenAI.Tests
             Debug.Log(api.Settings.Info.BaseRequestUrlFormat);
             Debug.Log(api.Settings.Info.BaseWebSocketUrlFormat);
             Assert.AreEqual($"https://{domain}/v1/{{0}}", api.Settings.Info.BaseRequestUrlFormat);
-            Assert.AreEqual($"wss://{domain}/v1/{{0}}", api.Settings.Info.BaseWebSocketUrlFormat);
+            Assert.AreEqual($"wss://{OpenAISettingsInfo.OpenAIDomain}/v1/{{0}}", api.Settings.Info.BaseWebSocketUrlFormat);
         }
 
         [TearDown]

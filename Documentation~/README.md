@@ -80,6 +80,15 @@ openupm add com.openai.unity
   - [List Input Items](#list-input-items)
   - [Cancel Response](#cancel-response)
   - [Delete Response](#delete-response)
+- [Conversations](#conversations) :new:
+  - [Create Conversation](#create-conversation) :new:
+  - [Retrieve Conversation](#retrieve-conversation) :new:
+  - [Update Conversation](#update-conversation) :new:
+  - [Delete Conversation](#delete-conversation) :new:
+  - [List Conversation Items](#list-conversation-items) :new:
+  - [Create Conversation Item](#create-conversation-item) :new:
+  - [Retrieve Conversation Item](#retrieve-conversation-item) :new:
+  - [Delete Conversation Item](#delete-conversation-item) :new:
 - [Realtime](#realtime)
   - [Create Realtime Session](#create-realtime-session)
   - [Client Events](#client-events)
@@ -452,7 +461,7 @@ Creates a model response. Provide text or image inputs to generate text or JSON 
 var api = new OpenAIClient();
 var response = await api.ResponsesEndpoint.CreateModelResponseAsync("Tell me a three sentence bedtime story about a unicorn.");
 var responseItem = response.Output.LastOrDefault();
-Debug.Log($"{messageItem.Role}:{textContent.Text}");
+Debug.Log($"{responseItem.Role}:{responseItem}");
 response.PrintUsage();
 ```
 
@@ -469,7 +478,7 @@ var tools = new List<Tool>
 {
     Tool.GetOrCreateTool(typeof(DateTimeUtility), nameof(DateTimeUtility.GetDateTime))
 };
-var request = new CreateResponseRequest(conversation, Model.GPT4_1_Nano, tools: tools);
+var request = new CreateResponseRequest(conversation, Model.GPT5_Nano, tools: tools);
 
 async Task StreamCallback(string @event, IServerSentEvent sseEvent)
 {
@@ -482,7 +491,7 @@ async Task StreamCallback(string @event, IServerSentEvent sseEvent)
             conversation.Add(functionToolCall);
             var output = await functionToolCall.InvokeFunctionAsync();
             conversation.Add(output);
-            await api.ResponsesEndpoint.CreateModelResponseAsync(new(conversation, Model.GPT4_1_Nano, tools: tools, toolChoice: "none"), StreamCallback);
+            await api.ResponsesEndpoint.CreateModelResponseAsync(new(conversation, Model.GPT5_Nano, tools: tools, toolChoice: "none"), StreamCallback);
             break;
     }
 }
@@ -536,6 +545,120 @@ Deletes a model response with the given ID.
 ```csharp
 var api = new OpenAIClient();
 var isDeleted = await api.ResponsesEndpoint.DeleteModelResponseAsync("response-id");
+Assert.IsTrue(isDeleted);
+```
+
+---
+
+### [Conversations](https://platform.openai.com/docs/api-reference/conversations)
+
+Create and manage conversations to store and retrieve conversation state across Response API calls.
+
+The Conversations API is accessed via `OpenAIClient.ConversationsEndpoint`
+
+#### [Create Conversation](https://platform.openai.com/docs/api-reference/conversations/create)
+
+Create a conversation.
+
+```csharp
+var api = new OpenAIClient();
+conversation = await api.ConversationsEndpoint.CreateConversationAsync(
+    new CreateConversationRequest(new Message(Role.Developer, systemPrompt)));
+Debug.Log(conversation.ToString());
+// use the conversation object when creating responses.
+var request = await api.ResponsesEndpoint.CreateResponseAsync(
+    new CreateResponseRequest(textInput: "Hello!", conversationId: conversation, model: Model.GPT5_Nano));
+var response = await openAI.ResponsesEndpoint.CreateModelResponseAsync(request);
+var responseItem = response.Output.LastOrDefault();
+Debug.Log($"{responseItem.Role}:{responseItem}");
+response.PrintUsage();
+```
+
+#### [Retrieve Conversation](https://platform.openai.com/docs/api-reference/conversations/retrieve)
+
+Get a conversation by id.
+
+```csharp
+var api = new OpenAIClient();
+var conversation = await api.ConversationsEndpoint.GetConversationAsync("conversation-id");
+Debug.Log(conversation.ToString());
+```
+
+#### [Update Conversation](https://platform.openai.com/docs/api-reference/conversations/update)
+
+Update a conversation with custom metadata.
+
+```csharp
+var api = new OpenAIClient();
+var metadata = new Dictionary<string, object>
+{
+    { "favorite_color", "blue" },
+    { "favorite_food", "pizza" }
+};
+var updatedConversation = await api.ConversationsEndpoint.UpdateConversationAsync("conversation-id", metadata);
+```
+
+#### [Delete Conversation](https://platform.openai.com/docs/api-reference/conversations/delete)
+
+Delete a conversation by id.
+
+```csharp
+var api = new OpenAIClient();
+var isDeleted = await api.ConversationsEndpoint.DeleteConversationAsync("conversation-id");
+Assert.IsTrue(isDeleted);
+```
+
+#### [List Conversation Items](https://platform.openai.com/docs/api-reference/conversations/list-items)
+
+List all items for a conversation with the given ID.
+
+```csharp
+var api = new OpenAIClient();
+var query = new ListQuery(limit: 10);
+var items = await api.ConversationsEndpoint.ListConversationItemsAsync("conversation-id", query);
+
+foreach (var item in items)
+{
+    Debug.Log(item.ToJsonString());
+}
+```
+
+#### [Create Conversation Item](https://platform.openai.com/docs/api-reference/conversations/create-item)
+
+Create a new conversation item for a conversation with the given ID.
+
+```csharp
+var api = new OpenAIClient();
+var items = new List<IResponseItem>
+{
+    new Message(Role.User, "Hello!"),
+    new Message(Role.Assistant, "Hi! How can I help you?")
+}
+var addedItems = await api.ConversationsEndpoint.CreateConversationItemsAsync("conversation-id", items);
+
+foreach (var item in addedItems)
+{
+    Debug.Log(item.ToJsonString());
+}
+```
+
+#### [Retrieve Conversation Item](https://platform.openai.com/docs/api-reference/conversations/retrieve-item)
+
+Get a conversation item by id.
+
+```csharp
+var api = new OpenAIClient();
+var item = await api.ConversationsEndpoint.GetConversationItemAsync("conversation-id", "item-id");
+Debug.Log(item.ToJsonString());
+```
+
+#### [Delete Conversation Item](https://platform.openai.com/docs/api-reference/conversations/delete-item)
+
+Delete a conversation item by id.
+
+```csharp
+var api = new OpenAIClient();
+var isDeleted = await api.ConversationsEndpoint.DeleteConversationItemAsync("conversation-id", "item-id");
 Assert.IsTrue(isDeleted);
 ```
 
@@ -903,7 +1026,8 @@ Debug.Log($"Retrieve thread {thread.Id} -> {thread.CreatedAt}");
 
 Modifies a thread.
 
-> Note: Only the metadata can be modified.
+> [!NOTE]
+> Only the metadata can be modified.
 
 ```csharp
 var api = new OpenAIClient();
@@ -981,7 +1105,8 @@ Debug.Log($"{message.Id}: {message.Role}: {message.PrintContent()}");
 
 Modify a message.
 
-> Note: Only the message metadata can be modified.
+> [!NOTE]
+> Only the message metadata can be modified.
 
 ```csharp
 var api = new OpenAIClient();
@@ -1076,7 +1201,8 @@ Debug.Log($"[{run.Id}] {run.Status} | {run.CreatedAt}");
 
 Modifies a run.
 
-> Note: Only the metadata can be modified.
+> [!NOTE]
+> Only the metadata can be modified.
 
 ```csharp
 var api = new OpenAIClient();
@@ -1795,7 +1921,7 @@ Generates audio from the input text.
 ```csharp
 var api = new OpenAIClient();
 var request = new SpeechRequest("Hello world!");
-var speechClip = await api.AudioEndpoint.CreateSpeechAsync(request);
+var speechClip = await api.AudioEndpoint.GetSpeechAsync(request);
 audioSource.PlayOneShot(speechClip);
 Debug.Log(speechClip);
 ```
@@ -1807,7 +1933,7 @@ Generate streamed audio from the input text.
 ```csharp
 var api = new OpenAIClient();
 var request = new SpeechRequest("Hello world!", responseFormat: SpeechResponseFormat.PCM);
-var speechClip = await api.AudioEndpoint.CreateSpeechStreamAsync(request, partialClip =>
+var speechClip = await api.AudioEndpoint.GetSpeechAsync(request, partialClip =>
 {
     audioSource.PlayOneShot(partialClip);
 });

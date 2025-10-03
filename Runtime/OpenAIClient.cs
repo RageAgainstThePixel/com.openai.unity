@@ -63,6 +63,7 @@ namespace OpenAI
             VectorStoresEndpoint = new VectorStoresEndpoint(this);
             RealtimeEndpoint = new RealtimeEndpoint(this);
             ResponsesEndpoint = new ResponsesEndpoint(this);
+            ConversationsEndpoint = new ConversationsEndpoint(this);
         }
 
         protected override void SetupDefaultRequestHeaders()
@@ -72,7 +73,6 @@ namespace OpenAI
 #if !UNITY_WEBGL
                 { "User-Agent", "com.openai.unity" },
 #endif
-                { "OpenAI-Beta", "assistants=v2" }
             };
 
             if (Settings.Info.BaseRequestUrlFormat.Contains(OpenAISettingsInfo.OpenAIDomain) &&
@@ -234,6 +234,12 @@ namespace OpenAI
         /// <see href="https://platform.openai.com/docs/api-reference/responses"/>
         /// </summary>
         public ResponsesEndpoint ResponsesEndpoint { get; }
+
+        /// <summary>
+        /// Create and manage conversations to store and retrieve conversation state across Response API calls.
+        /// <see href="https://platform.openai.com/docs/api-reference/conversations"/>
+        /// </summary>
+        public ConversationsEndpoint ConversationsEndpoint { get; }
 
         #endregion Endpoints
     }

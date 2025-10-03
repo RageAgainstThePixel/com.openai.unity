@@ -18,7 +18,7 @@ namespace OpenAI.Responses
             [JsonProperty("status")] ResponseStatus status,
             [JsonProperty("server_label")] string serverLabel,
             [JsonProperty("error")] string error,
-            [JsonProperty("tools")] IReadOnlyList<MCPServerTool> tools)
+            [JsonProperty("tools")] List<MCPServerTool> tools)
         {
             Id = id;
             Type = type;

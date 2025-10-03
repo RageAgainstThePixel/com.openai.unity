@@ -14,8 +14,8 @@ namespace OpenAI.Responses
         [JsonConstructor]
         internal LocalShellAction(
             [JsonProperty("type")] string type,
-            [JsonProperty("command")] IReadOnlyList<string> command,
-            [JsonProperty("env")] IReadOnlyDictionary<string, string> environment,
+            [JsonProperty("command")] List<string> command,
+            [JsonProperty("env")] Dictionary<string, string> environment,
             [JsonProperty("timeout_ms")] int? timeoutMilliseconds,
             [JsonProperty("user")] string user,
             [JsonProperty("working_directory")] string workingDirectory)

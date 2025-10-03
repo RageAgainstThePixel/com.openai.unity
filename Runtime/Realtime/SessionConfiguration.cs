@@ -59,7 +59,8 @@ namespace OpenAI.Realtime
             string toolChoice = null,
             float? temperature = null,
             int? maxResponseOutputTokens = null,
-            int? expiresAfter = null)
+            int? expiresAfter = null,
+            NoiseReductionSettings noiseReductionSettings = null)
         {
             ClientSecret = new ClientSecret(expiresAfter);
             Model = string.IsNullOrWhiteSpace(model?.Id) ? Models.Model.GPT4oRealtime : model;
@@ -95,6 +96,8 @@ namespace OpenAI.Realtime
                     _ => maxResponseOutputTokens
                 };
             }
+
+            InputAudioNoiseReduction = noiseReductionSettings;
         }
 
         [Preserve]
@@ -110,7 +113,8 @@ namespace OpenAI.Realtime
             IReadOnlyList<Function> tools,
             object toolChoice,
             float? temperature,
-            object maxResponseOutputTokens)
+            object maxResponseOutputTokens,
+            NoiseReductionSettings noiseReductionSettings)
         {
             Model = model;
             Modalities = modalities;
@@ -124,6 +128,7 @@ namespace OpenAI.Realtime
             ToolChoice = toolChoice;
             Temperature = temperature;
             MaxResponseOutputTokens = maxResponseOutputTokens;
+            InputAudioNoiseReduction = noiseReductionSettings;
         }
 
         [Preserve]
@@ -138,10 +143,11 @@ namespace OpenAI.Realtime
             [JsonProperty("output_audio_format")] RealtimeAudioFormat outputAudioFormat,
             [JsonProperty("input_audio_transcription")] InputAudioTranscriptionSettings inputAudioTranscriptionSettings,
             [JsonProperty("turn_detection")][JsonConverter(typeof(VoiceActivityDetectionSettingsConverter))] IVoiceActivityDetectionSettings voiceActivityDetectionSettings,
-            [JsonProperty("tools")] IReadOnlyList<Function> tools,
+            [JsonProperty("tools")] List<Function> tools,
             [JsonProperty("tool_choice")] object toolChoice,
             [JsonProperty("temperature")] float? temperature,
-            [JsonProperty("max_response_output_tokens")] object maxResponseOutputTokens)
+            [JsonProperty("max_response_output_tokens")] object maxResponseOutputTokens,
+            [JsonProperty("input_audio_noise_reduction")] NoiseReductionSettings inputAudioNoiseReductionSettings)
         {
             ClientSecret = clientSecret;
             Modalities = modalities;
@@ -156,6 +162,7 @@ namespace OpenAI.Realtime
             ToolChoice = toolChoice;
             Temperature = temperature;
             MaxResponseOutputTokens = maxResponseOutputTokens;
+            InputAudioNoiseReduction = inputAudioNoiseReductionSettings;
         }
 
         [Preserve]
@@ -211,5 +218,9 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonProperty("max_response_output_tokens", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public object MaxResponseOutputTokens { get; private set; }
+
+        [Preserve]
+        [JsonProperty("input_audio_noise_reduction", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public NoiseReductionSettings InputAudioNoiseReduction { get; private set; }
     }
 }

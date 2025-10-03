@@ -28,6 +28,7 @@ namespace OpenAI.Responses
                 "input_image" => jObject.ToObject<ImageContent>(serializer),
                 "input_file" => jObject.ToObject<FileContent>(serializer),
                 "refusal" => jObject.ToObject<RefusalContent>(serializer),
+                "reasoning_text" => jObject.ToObject<ReasoningContent>(serializer),
                 _ => throw new NotImplementedException($"Unknown response content type: {type}")
             };
         }

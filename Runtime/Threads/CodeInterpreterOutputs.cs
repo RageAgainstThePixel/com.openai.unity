@@ -17,7 +17,7 @@ namespace OpenAI.Threads
             [JsonProperty("type")] CodeInterpreterOutputType type,
             [JsonProperty("logs")] string logs,
             [JsonProperty("image")] ImageFile image,
-            [JsonProperty("files")] IReadOnlyList<FilePath> files)
+            [JsonProperty("files")] List<FilePath> files)
         {
             Index = index;
             Type = type;

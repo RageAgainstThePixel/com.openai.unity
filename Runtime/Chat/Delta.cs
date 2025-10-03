@@ -18,7 +18,7 @@ namespace OpenAI.Chat
             [JsonProperty("content")] string content,
             [JsonProperty("refusal")] string refusal,
             [JsonProperty("name")] string name,
-            [JsonProperty("function_call")] IReadOnlyList<ToolCall> toolCalls)
+            [JsonProperty("function_call")] List<ToolCall> toolCalls)
         {
             Role = role;
             Content = content;

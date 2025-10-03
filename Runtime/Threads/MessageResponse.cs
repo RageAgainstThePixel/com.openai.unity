@@ -37,7 +37,7 @@ namespace OpenAI.Threads
             [JsonProperty("content")] List<Content> content,
             [JsonProperty("assistant_id")] string assistantId,
             [JsonProperty("run_id")] string runId,
-            [JsonProperty("attachments")] IReadOnlyList<Attachment> attachments,
+            [JsonProperty("attachments")] List<Attachment> attachments,
             [JsonProperty("metadata")] Dictionary<string, string> metadata)
         {
             Id = id;
@@ -184,7 +184,7 @@ namespace OpenAI.Threads
 
         [Preserve]
         public static implicit operator Message(MessageResponse response)
-            => new(response.Content, response.Role, response.Attachments, response.Metadata);
+            => new(response.Content, response.Role, response.Attachments, (Dictionary<string, string>)response.Metadata);
 
         [Preserve]
         public override string ToString() => Id;

@@ -13,7 +13,7 @@ namespace OpenAI.Embeddings
         [JsonConstructor]
         internal EmbeddingsResponse(
             [JsonProperty("object")] string @object,
-            [JsonProperty("data")] IReadOnlyList<Datum> data,
+            [JsonProperty("data")] List<Datum> data,
             [JsonProperty("model")] string model,
             [JsonProperty("usage")] Usage usage)
         {

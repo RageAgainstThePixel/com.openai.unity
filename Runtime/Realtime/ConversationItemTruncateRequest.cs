@@ -47,7 +47,7 @@ namespace OpenAI.Realtime
         /// The index of the content part to truncate. Set this to 0.
         /// </summary>
         [Preserve]
-        [JsonProperty("content_index")]
+        [JsonProperty("content_index", DefaultValueHandling = DefaultValueHandling.Include)]
         public int ContentIndex { get; }
 
         /// <summary>

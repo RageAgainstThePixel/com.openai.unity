@@ -31,7 +31,7 @@ namespace OpenAI.Batch
             [JsonProperty("expired_at")] int? expiredAt,
             [JsonProperty("cancelled_at")] int? cancelledAt,
             [JsonProperty("request_counts")] RequestCounts requestCounts,
-            [JsonProperty("metadata")] IReadOnlyDictionary<string, object> metadata)
+            [JsonProperty("metadata")] Dictionary<string, object> metadata)
         {
             Id = id;
             Object = @object;
