@@ -20,7 +20,7 @@ namespace OpenAI.Realtime
             [JsonProperty("object")] string @object,
             [JsonProperty("status")] RealtimeResponseStatus status,
             [JsonProperty("role")] Role role,
-            [JsonProperty("content")] IReadOnlyList<RealtimeContent> content,
+            [JsonProperty("content")] List<RealtimeContent> content,
             [JsonProperty("call_id")] string functionCallId,
             [JsonProperty("name")] string functionName,
             [JsonProperty("arguments")] string functionArguments,

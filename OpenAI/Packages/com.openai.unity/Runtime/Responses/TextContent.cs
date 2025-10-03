@@ -19,8 +19,8 @@ namespace OpenAI.Responses
         internal TextContent(
             [JsonProperty("type")] ResponseContentType type,
             [JsonProperty("text")] string text,
-            [JsonProperty("annotations")] IReadOnlyList<IAnnotation> annotations,
-            IReadOnlyList<LogProbInfo> logProbs)
+            [JsonProperty("annotations")] List<IAnnotation> annotations,
+            [JsonProperty("log_probs")] List<LogProbInfo> logProbs)
         {
             Type = type;
             Text = text;
@@ -57,9 +57,25 @@ namespace OpenAI.Responses
         [JsonProperty("logprobs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyList<LogProbInfo> LogProbs { get; }
 
+        private string delta;
+
         [Preserve]
         [JsonProperty("delta", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string Delta { get; internal set; }
+        public string Delta
+        {
+            get => delta;
+            internal set
+            {
+                if (value == null)
+                {
+                    delta = null;
+                }
+                else
+                {
+                    delta += value;
+                }
+            }
+        }
 
         [JsonIgnore]
         public string Object => Type.ToString();
@@ -87,6 +103,6 @@ namespace OpenAI.Responses
 
         [Preserve]
         public override string ToString()
-            => Text ?? string.Empty;
+            => Delta ?? Text ?? string.Empty;
     }
 }

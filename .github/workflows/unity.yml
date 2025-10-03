@@ -3,94 +3,44 @@ on:
   schedule:
     - cron: '0 0 * * 0' # Every Sunday at midnight
   push:
-    branches:
-      - 'main'
+    branches: [main]
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
-    branches:
-      - '**'
-  workflow_dispatch:
+    branches: ['**']
+  workflow_dispatch: # manual workflow trigger
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{(github.event_name == 'pull_request' || github.event.action == 'synchronize')}}
 jobs:
-  build:
-    name: ${{ matrix.os }} ${{ matrix.unity-version }} ${{ matrix.build-target }}
-    runs-on: ${{ matrix.os }}
+  setup:
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-latest
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        include: # for each os specify the build targets
-          - os: ubuntu-latest
-            unity-version: 2022.x
-            build-target: Android
-          - os: ubuntu-latest
-            unity-version: 6000.x
-            build-target: Android
-          - os: ubuntu-latest
-            unity-version: 2022.x
-            build-target: StandaloneLinux64
-          - os: ubuntu-latest
-            unity-version: 6000.x
-            build-target: StandaloneLinux64
-          - os: ubuntu-latest
-            unity-version: 2022.x
-            build-target: WebGL
-          - os: ubuntu-latest
-            unity-version: 6000.x
-            build-target: WebGL
-          - os: windows-latest
-            unity-version: 2022.x
-            build-target: StandaloneWindows64
-          - os: windows-latest
-            unity-version: 6000.x
-            build-target: StandaloneWindows64
-          - os: windows-latest
-            unity-version: 2022.x
-            build-target: WSAPlayer
-          - os: windows-latest
-            unity-version: 6000.x
-            build-target: WSAPlayer
-          - os: macos-latest
-            unity-version: 2022.x
-            build-target: iOS
-          - os: macos-latest
-            unity-version: 6000.x
-            build-target: iOS
-          - os: macos-latest
-            unity-version: 2022.x
-            build-target: StandaloneOSX
-          - os: macos-latest
-            unity-version: 6000.x
-            build-target: StandaloneOSX
     steps:
-      - uses: actions/checkout@v4
-      - uses: RageAgainstThePixel/unity-setup@v1
+      - uses: actions/checkout@v5
         with:
-          unity-version: ${{ matrix.unity-version }}
-          build-targets: ${{ matrix.build-target }}
-      - uses: RageAgainstThePixel/activate-unity-license@v1
+          sparse-checkout: .github/
+      - uses: RageAgainstThePixel/job-builder@v1
+        id: setup-jobs
         with:
-          license: 'Personal'
-          username: ${{ secrets.UNITY_USERNAME }}
-          password: ${{ secrets.UNITY_PASSWORD }}
-      - uses: RageAgainstThePixel/unity-action@v1
-        name: '${{ matrix.build-target }}-Validate'
-        with:
-          build-target: ${{ matrix.build-target }}
-          log-name: '${{ matrix.build-target }}-Validate'
-          args: '-quit -nographics -batchmode -executeMethod Utilities.Editor.BuildPipeline.UnityPlayerBuildTools.ValidateProject -importTMProEssentialsAsset'
-      - uses: RageAgainstThePixel/unity-action@v1
-        name: '${{ matrix.build-target }}-Build'
-        with:
-          build-target: ${{ matrix.build-target }}
-          log-name: '${{ matrix.build-target }}-Build'
-          args: '-quit -nographics -batchmode -executeMethod Utilities.Editor.BuildPipeline.UnityPlayerBuildTools.StartCommandLineBuild'
-      - uses: actions/upload-artifact@v4
-        if: success() || failure()
-        with:
-          name: '${{ github.run_number }}.${{ github.run_attempt }}-${{ matrix.os }}-${{ matrix.unity-version }}-${{ matrix.build-target }}-Artifacts'
-          path: '${{ github.workspace }}/**/*.log'
+          build-options: ./.github/workflows/build-options.json
+          group-by: 'unity-version'
+          job-name-prefix: 'Build'
+    outputs:
+      jobs: ${{ steps.setup-jobs.outputs.jobs }}
+  validate:
+    if: ${{ needs.setup.outputs.jobs }}
+    needs: setup
+    name: ${{ matrix.jobs.name }}
+    permissions:
+      contents: read
+      actions: write
+    strategy:
+      matrix: ${{ fromJSON(needs.setup.outputs.jobs) }}
+      fail-fast: false
+      max-parallel: 1
+    secrets: inherit
+    uses: RageAgainstThePixel/workflows/.github/workflows/build-unity-package.yml@main
+    with:
+      matrix: ${{ toJSON(matrix.jobs.matrix) }}

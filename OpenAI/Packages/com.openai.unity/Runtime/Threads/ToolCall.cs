@@ -24,7 +24,7 @@ namespace OpenAI.Threads
             [JsonProperty("type")] string type,
             [JsonProperty("function")] FunctionCall functionCall,
             [JsonProperty("code_interpreter")] CodeInterpreter codeInterpreter,
-            [JsonProperty("file_search")] IReadOnlyDictionary<string, object> fileSearch)
+            [JsonProperty("file_search")] Dictionary<string, object> fileSearch)
         {
             Index = index;
             Id = id;

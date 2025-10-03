@@ -25,6 +25,8 @@ namespace OpenAI.Responses
                 "computer_call_output" => jObject.ToObject<ComputerToolCall>(serializer),
                 "function_call" => jObject.ToObject<FunctionToolCall>(serializer),
                 "function_call_output" => jObject.ToObject<FunctionToolCallOutput>(serializer),
+                "custom_tool_call" => jObject.ToObject<CustomToolCall>(serializer),
+                "custom_tool_call_output" => jObject.ToObject<CustomToolCallOutput>(serializer),
                 "image_generation_call" => jObject.ToObject<ImageGenerationCall>(serializer),
                 "local_shell_call" => jObject.ToObject<LocalShellCall>(serializer),
                 "local_shell_call_output" => jObject.ToObject<LocalShellCall>(serializer),

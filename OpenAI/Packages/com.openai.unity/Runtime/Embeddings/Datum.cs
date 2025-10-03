@@ -13,7 +13,7 @@ namespace OpenAI.Embeddings
         [JsonConstructor]
         internal Datum(
             [JsonProperty("object")] string @object,
-            [JsonProperty("embedding")] IReadOnlyList<double> embedding,
+            [JsonProperty("embedding")] List<double> embedding,
             [JsonProperty("index")] int index)
         {
             Object = @object;

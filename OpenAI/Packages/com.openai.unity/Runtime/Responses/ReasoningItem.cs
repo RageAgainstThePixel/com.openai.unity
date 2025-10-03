@@ -21,13 +21,16 @@ namespace OpenAI.Responses
             [JsonProperty("type")] ResponseItemType type,
             [JsonProperty("object")] string @object,
             [JsonProperty("status")] ResponseStatus status,
-            [JsonProperty("summary")] IReadOnlyList<ReasoningSummary> summary)
+            [JsonProperty("summary")] List<ReasoningSummary> summary,
+            [JsonProperty("content")] List<ReasoningContent> content,
+            [JsonProperty("encrypted_content")] string encryptedContent)
         {
             Id = id;
             Type = type;
             Object = @object;
             Status = status;
             Summary = summary;
+            EncryptedContent = encryptedContent;
         }
 
         /// <inheritdoc />
@@ -61,6 +64,47 @@ namespace OpenAI.Responses
         {
             get => summary;
             private set => summary = value?.ToList() ?? new();
+        }
+
+        private List<ReasoningContent> content;
+
+        /// <summary>
+        /// Reasoning text content.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("content", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public IReadOnlyList<ReasoningContent> Content
+        {
+            get => content;
+            private set => content = value?.ToList() ?? new();
+        }
+
+        /// <summary>
+        /// The encrypted content of the reasoning item - populated when a response is generated with reasoning.encrypted_content in the include parameter.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("encrypted_content", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string EncryptedContent { get; }
+
+        [Preserve]
+        internal void InsertReasoningContent(ReasoningContent reasoningContent, int index)
+        {
+            if (reasoningContent == null)
+            {
+                throw new ArgumentNullException(nameof(reasoningContent));
+            }
+
+            content ??= new();
+
+            if (index > content.Count)
+            {
+                for (var i = content.Count; i < index; i++)
+                {
+                    content.Add(null);
+                }
+            }
+
+            content.Insert(index, reasoningContent);
         }
 
         [Preserve]

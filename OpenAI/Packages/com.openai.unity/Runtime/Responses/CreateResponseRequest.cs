@@ -39,7 +39,12 @@ namespace OpenAI.Responses
             IEnumerable<Tool> tools = null,
             double? topP = null,
             Truncation truncation = Truncation.Auto,
-            string user = null)
+            string user = null,
+            string conversationId = null,
+            int? maxToolCalls = null,
+            string promptCacheKey = null,
+            string safetyIdentifier = null,
+            int? topLogProbs = null)
         : this(
             input: new List<IResponseItem> { new Message(Role.User, new TextContent(textInput)) },
             model: model,
@@ -61,7 +66,70 @@ namespace OpenAI.Responses
             tools: tools,
             topP: topP,
             truncation: truncation,
-            user: user)
+            user: user,
+            conversationId: conversationId,
+            maxToolCalls: maxToolCalls,
+            promptCacheKey: promptCacheKey,
+            safetyIdentifier: safetyIdentifier,
+            topLogProbs: topLogProbs)
+        {
+        }
+
+        [Preserve]
+        public CreateResponseRequest(
+            IResponseItem input,
+            Model model = null,
+            bool? background = null,
+            IEnumerable<string> include = null,
+            string instructions = null,
+            int? maxOutputTokens = null,
+            IReadOnlyDictionary<string, string> metadata = null,
+            bool? parallelToolCalls = null,
+            string previousResponseId = null,
+            Prompt prompt = null,
+            Reasoning reasoning = null,
+            string serviceTier = null,
+            bool? store = null,
+            double? temperature = null,
+            TextResponseFormat responseFormat = TextResponseFormat.Auto,
+            JsonSchema jsonSchema = null,
+            string toolChoice = null,
+            IEnumerable<Tool> tools = null,
+            double? topP = null,
+            Truncation truncation = Truncation.Auto,
+            string user = null,
+            string conversationId = null,
+            int? maxToolCalls = null,
+            string promptCacheKey = null,
+            string safetyIdentifier = null,
+            int? topLogProbs = null)
+            : this(
+                input: new[] { input },
+                model: model,
+                background: background,
+                include: include,
+                instructions: instructions,
+                maxOutputTokens: maxOutputTokens,
+                metadata: metadata,
+                parallelToolCalls: parallelToolCalls,
+                previousResponseId: previousResponseId,
+                prompt: prompt,
+                reasoning: reasoning,
+                serviceTier: serviceTier,
+                store: store,
+                temperature: temperature,
+                responseFormat: responseFormat,
+                jsonSchema: jsonSchema,
+                toolChoice: toolChoice,
+                tools: tools,
+                topP: topP,
+                truncation: truncation,
+                user: user,
+                conversationId: conversationId,
+                maxToolCalls: maxToolCalls,
+                promptCacheKey: promptCacheKey,
+                safetyIdentifier: safetyIdentifier,
+                topLogProbs: topLogProbs)
         {
         }
 
@@ -87,7 +155,12 @@ namespace OpenAI.Responses
             IEnumerable<Tool> tools = null,
             double? topP = null,
             Truncation truncation = Truncation.Auto,
-            string user = null)
+            string user = null,
+            string conversationId = null,
+            int? maxToolCalls = null,
+            string promptCacheKey = null,
+            string safetyIdentifier = null,
+            int? topLogProbs = null)
         {
             Input = input?.ToArray() ?? throw new ArgumentNullException(nameof(input));
             Model = string.IsNullOrWhiteSpace(model) ? Models.Model.ChatGPT4o : model;
@@ -122,8 +195,13 @@ namespace OpenAI.Responses
             Tools = toolList;
             ToolChoice = activeTool;
             TopP = topP;
+            TopLogProbs = topLogProbs;
             Truncation = truncation;
             User = user;
+            ConversationId = conversationId;
+            MaxToolCalls = maxToolCalls;
+            PromptCacheKey = promptCacheKey;
+            SafetyIdentifier = safetyIdentifier;
         }
 
         /// <summary>
@@ -295,6 +373,14 @@ namespace OpenAI.Responses
         public double? TopP { get; }
 
         /// <summary>
+        /// An integer between 0 and 20 specifying the number of most likely tokens to return at each token position,
+        /// each with an associated log probability.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("top_logprobs", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? TopLogProbs { get; }
+
+        /// <summary>
         /// The truncation strategy to use for the model response.<br/>
         /// - Auto: If the context of this response and previous ones exceeds the model's context window size,
         /// the model will truncate the response to fit the context window by dropping input items in the middle of the conversation.<br/>
@@ -310,5 +396,39 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonProperty("user", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string User { get; }
+
+        /// <summary>
+        /// The conversation id that this response belongs to.
+        /// Items from this conversation are prepended to `input_items` for this response request.
+        /// Input items and output items from this response are automatically added to this conversation after this response completes.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("conversation", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string ConversationId { get; }
+
+        /// <summary>
+        /// The maximum number of total calls to built-in tools that can be processed in a response.
+        /// This maximum number applies across all built-in tool calls, not per individual tool.
+        /// Any further attempts to call a tool by the model will be ignored.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("max_tool_calls", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? MaxToolCalls { get; }
+
+        /// <summary>
+        /// Used by OpenAI to cache responses for similar requests to optimize your cache hit rates. Replaces the user field.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("prompt_cache_key", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string PromptCacheKey { get; }
+
+        /// <summary>
+        /// A stable identifier used to help detect users of your application that may be violating OpenAI's usage policies.
+        /// The IDs should be a string that uniquely identifies each user.
+        /// We recommend hashing their username or email address, in order to avoid sending us any identifying information.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("safety_identifier", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string SafetyIdentifier { get; }
     }
 }

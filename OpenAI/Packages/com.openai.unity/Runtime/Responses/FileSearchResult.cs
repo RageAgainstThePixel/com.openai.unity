@@ -15,7 +15,7 @@ namespace OpenAI.Responses
             [JsonProperty("file_id")] string fileId,
             [JsonProperty("text")] string text,
             [JsonProperty("file_name")] string fileName,
-            [JsonProperty("attributes")] IReadOnlyDictionary<string, object> attributes,
+            [JsonProperty("attributes")] Dictionary<string, object> attributes,
             [JsonProperty("score")] float? score)
         {
             FileId = fileId;

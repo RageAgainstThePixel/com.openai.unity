@@ -11,22 +11,22 @@ namespace OpenAI.Extensions
 {
     internal static class TextureExtensions
     {
-        public static async Task<(Texture2D, string)> ConvertFromBase64Async(string data, bool debug, CancellationToken cancellationToken)
+        public static async Task<(Texture2D, string)> ConvertFromBase64Async(string b64, bool debug, CancellationToken cancellationToken)
         {
-            var imageData = Convert.FromBase64String(data);
+            var imageData = Convert.FromBase64String(b64);
 #if PLATFORM_WEBGL
             var texture = new Texture2D(2, 2);
             texture.LoadImage(imageData);
             return await Task.FromResult((texture, string.Empty));
 #else
-            if (!Rest.TryGetDownloadCacheItem(data, out var localFilePath))
+            if (!Rest.TryGetDownloadCacheItem(b64, out var localFilePath))
             {
                 await File.WriteAllBytesAsync(localFilePath, imageData, cancellationToken).ConfigureAwait(true);
                 localFilePath = $"file://{localFilePath}";
             }
 
             var texture = await Rest.DownloadTextureAsync(localFilePath, parameters: new RestParameters(debug: debug), cancellationToken: cancellationToken);
-            Rest.TryGetDownloadCacheItem(data, out var cachedPath);
+            Rest.TryGetDownloadCacheItem(b64, out var cachedPath);
             return (texture, cachedPath);
 #endif
         }

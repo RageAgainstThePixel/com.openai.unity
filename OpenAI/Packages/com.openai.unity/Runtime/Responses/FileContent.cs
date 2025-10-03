@@ -14,12 +14,14 @@ namespace OpenAI.Responses
             [JsonProperty("type")] ResponseContentType type,
             [JsonProperty("file_data")] string fileData,
             [JsonProperty("file_id")] string fileId,
-            [JsonProperty("file_name")] string fileName)
+            [JsonProperty("file_name")] string fileName,
+            [JsonProperty("file_url")] string fileUrl)
         {
             Type = type;
             FileData = fileData;
             FileId = fileId;
             FileName = fileName;
+            FileUrl = fileUrl;
         }
 
         [Preserve]
@@ -30,11 +32,24 @@ namespace OpenAI.Responses
             FileName = fileName;
         }
 
+        /// <summary>
+        /// The input file, can be a file id or a file url.
+        /// </summary>
+        /// <param name="fileId">The id or url of the file.</param>
+        /// <remarks>If the fileId starts with "http" or "https", it is a file url, otherwise it is a file id.</remarks>
         [Preserve]
         public FileContent(string fileId)
         {
             Type = ResponseContentType.InputFile;
-            FileId = fileId;
+
+            if (fileId.StartsWith("http"))
+            {
+                FileUrl = fileId;
+            }
+            else
+            {
+                FileId = fileId;
+            }
         }
 
         [Preserve]
@@ -56,6 +71,10 @@ namespace OpenAI.Responses
         [Preserve]
         [JsonProperty("file_id", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string FileId { get; }
+
+        [Preserve]
+        [JsonProperty("file_url", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string FileUrl { get; private set; }
 
         [Preserve]
         [JsonProperty("file_name", DefaultValueHandling = DefaultValueHandling.Ignore)]

@@ -1,8 +1,6 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
-using Newtonsoft.Json;
 using OpenAI.Audio;
-using OpenAI.Images;
 using OpenAI.Models;
 using OpenAI.Responses;
 using System;
@@ -56,12 +54,11 @@ namespace OpenAI.Samples.Responses
 
         [SerializeField]
         [TextArea(3, 10)]
-        private string systemPrompt = "You are a helpful assistant.\n- If an image is requested then use \"![Image](output.jpg)\" to display it.\n- When performing function calls, use the defaults unless explicitly told to use a specific value.\n- Images should always be generated in base64.";
+        private string systemPrompt = "You are a helpful assistant.\n- If an image is requested then use \"![Image](output.jpg)\" to display it.\n- When performing tool calls, tell the user what you're doing before calling, and always use the defaults unless explicitly told to use a specific value.";
 
         private OpenAIClient openAI;
-        private readonly List<IResponseItem> conversation = new();
+        private Conversation conversation;
 
-        private Tool imageTool;
         private readonly List<Tool> assistantTools = new();
 
 #if !UNITY_2022_3_OR_NEWER
@@ -84,20 +81,31 @@ namespace OpenAI.Samples.Responses
             }
         }
 
-        private void Awake()
+        private async void Awake()
         {
             OnValidate();
+
             openAI = new OpenAIClient(configuration)
             {
                 EnableDebug = enableDebug
             };
+
             RecordingManager.EnableDebug = enableDebug;
-            imageTool = Tool.GetOrCreateTool(openAI.ImagesEndPoint, nameof(ImagesEndpoint.GenerateImageAsync));
-            assistantTools.Add(imageTool);
-            conversation.Add(new Message(Role.Developer, systemPrompt));
+            assistantTools.Add(new ImageGenerationTool());
             inputField.onSubmit.AddListener(SubmitChat);
             submitButton.onClick.AddListener(SubmitChat);
             recordButton.onClick.AddListener(ToggleRecording);
+
+            try
+            {
+                conversation = await openAI.ConversationsEndpoint.CreateConversationAsync(
+                    new CreateConversationRequest(new Message(Role.Developer, systemPrompt)),
+                    destroyCancellationToken);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
 
 #if !UNITY_2022_3_OR_NEWER
@@ -119,34 +127,32 @@ namespace OpenAI.Samples.Responses
             inputField.ReleaseSelection();
             inputField.interactable = false;
             submitButton.interactable = false;
-            conversation.Add(new Message(Role.User, inputField.text));
+            var userInput = inputField.text;
             var userMessageContent = AddNewTextMessageContent(Role.User);
-            userMessageContent.text = $"User: {inputField.text}";
+            userMessageContent.text = $"User: {userInput}";
             inputField.text = string.Empty;
 
             try
             {
-                var request = new CreateResponseRequest(input: conversation, tools: assistantTools, model: Model.GPT4_1_Nano);
+                var request = new CreateResponseRequest(textInput: userInput, conversationId: conversation, tools: assistantTools, model: Model.GPT5_Nano);
                 async Task StreamEventHandler(string eventName, IServerSentEvent sseEvent)
                 {
                     switch (sseEvent)
                     {
                         case Message messageItem:
-                            conversation.Add(messageItem);
                             var assistantMessageContent = AddNewTextMessageContent(Role.Assistant);
                             var message = messageItem.ToString().Replace("![Image](output.jpg)", string.Empty);
                             assistantMessageContent.text = $"Assistant: {message}";
                             scrollView.verticalNormalizedPosition = 0f;
                             await GenerateSpeechAsync(message, destroyCancellationToken);
                             break;
-                        case FunctionToolCall functionToolCall:
-                            conversation.Add(functionToolCall);
-                            var output = await ProcessToolCallAsync(functionToolCall, destroyCancellationToken);
-                            conversation.Add(output);
-                            await openAI.ResponsesEndpoint.CreateModelResponseAsync(
-                                request: new(input: conversation, tools: assistantTools, toolChoice: "none", model: Model.GPT4_1_Nano),
-                                streamEventHandler: StreamEventHandler,
-                                cancellationToken: destroyCancellationToken);
+                        case ImageGenerationCall imageGenerationCall:
+                            if (!string.IsNullOrWhiteSpace(imageGenerationCall.Result))
+                            {
+                                var image = await imageGenerationCall.LoadTextureAsync(enableDebug, destroyCancellationToken);
+                                AddNewImageContent(image);
+                                scrollView.verticalNormalizedPosition = 0f;
+                            }
                             break;
                     }
                 }
@@ -178,44 +184,18 @@ namespace OpenAI.Samples.Responses
             }
         }
 
-        private async Task<FunctionToolCallOutput> ProcessToolCallAsync(FunctionToolCall toolCall, CancellationToken cancellationToken)
-        {
-            try
-            {
-                if (toolCall.Name == imageTool.Function.Name)
-                {
-                    var output = await toolCall.InvokeFunctionAsync<IReadOnlyList<ImageResult>>(cancellationToken: cancellationToken);
-
-                    foreach (var imageResult in output.OutputResult)
-                    {
-                        AddNewImageContent(imageResult);
-                    }
-
-                    scrollView.verticalNormalizedPosition = 0f;
-                    return output;
-                }
-
-                return await toolCall.InvokeFunctionAsync(cancellationToken);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
-                return new FunctionToolCallOutput(toolCall.CallId, JsonConvert.SerializeObject(new { error = new Error(e) }));
-            }
-        }
-
         private async Task GenerateSpeechAsync(string text, CancellationToken cancellationToken)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(text)) { return; }
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    return;
+                }
 
                 var request = new SpeechRequest(input: text, model: Model.TTS_1, voice: voice, responseFormat: SpeechResponseFormat.PCM);
                 var stopwatch = Stopwatch.StartNew();
-                var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
-                {
-                    streamAudioSource.BufferCallback(partialClip.AudioSamples);
-                }, cancellationToken);
+                var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip => { streamAudioSource.BufferCallback(partialClip.AudioSamples); }, cancellationToken);
                 var playbackTime = speechClip.Length - (float)stopwatch.Elapsed.TotalSeconds + 0.1f;
 
                 await Awaiters.DelayAsync(TimeSpan.FromSeconds(playbackTime), cancellationToken).ConfigureAwait(true);
@@ -235,8 +215,13 @@ namespace OpenAI.Samples.Responses
                         break;
                     default:
                         Debug.LogError(e);
+
                         break;
                 }
+            }
+            finally
+            {
+                ((AudioSource)streamAudioSource).clip = null;
             }
         }
 

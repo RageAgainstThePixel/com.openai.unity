@@ -24,7 +24,7 @@ namespace OpenAI.Assistants
             [JsonProperty("description")] string description,
             [JsonProperty("model")] string model,
             [JsonProperty("instructions")] string instructions,
-            [JsonProperty("tools")] IReadOnlyList<Tool> tools,
+            [JsonProperty("tools")] List<Tool> tools,
             [JsonProperty("tool_resources")] ToolResources toolResources,
             [JsonProperty("metadata")] Dictionary<string, string> metadata,
             [JsonProperty("temperature")] float? temperature,

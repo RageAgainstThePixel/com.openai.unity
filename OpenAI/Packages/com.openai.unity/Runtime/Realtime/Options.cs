@@ -27,7 +27,8 @@ namespace OpenAI.Realtime
                 options.Tools,
                 options.ToolChoice,
                 options.Temperature,
-                options.MaxResponseOutputTokens);
+                options.MaxResponseOutputTokens,
+                null);
 
         public static implicit operator RealtimeResponseCreateParams(Options options)
             => new(
@@ -53,7 +54,7 @@ namespace OpenAI.Realtime
             [JsonProperty("output_audio_format")] RealtimeAudioFormat outputAudioFormat,
             [JsonProperty("input_audio_transcription")] InputAudioTranscriptionSettings inputAudioTranscriptionSettings,
             [JsonProperty("turn_detection")] VoiceActivityDetectionSettings voiceActivityDetectionSettings,
-            [JsonProperty("tools")] IReadOnlyList<Function> tools,
+            [JsonProperty("tools")] List<Function> tools,
             [JsonProperty("tool_choice")] object toolChoice,
             [JsonProperty("temperature")] float? temperature,
             [JsonProperty("max_response_output_tokens")] object maxResponseOutputTokens)

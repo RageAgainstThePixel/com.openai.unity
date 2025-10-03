@@ -2,6 +2,7 @@
 
 using Newtonsoft.Json;
 using OpenAI.Extensions;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Utilities.WebRequestRest;
@@ -10,7 +11,20 @@ namespace OpenAI.Assistants
 {
     public sealed class AssistantsEndpoint : OpenAIBaseEndpoint
     {
-        internal AssistantsEndpoint(OpenAIClient client) : base(client) { }
+        internal AssistantsEndpoint(OpenAIClient client) : base(client)
+        {
+            var assistantHeaders = new Dictionary<string, string>();
+
+            foreach (var (key, value) in client.DefaultRequestHeaders)
+            {
+                assistantHeaders[key] = value;
+            }
+
+            assistantHeaders["OpenAI-Beta"] = "assistants=v2";
+            headers = assistantHeaders;
+        }
+
+        private readonly IReadOnlyDictionary<string, string> headers;
 
         protected override string Root => "assistants";
 
@@ -22,7 +36,7 @@ namespace OpenAI.Assistants
         /// <returns><see cref="ListResponse{AssistantResponse}"/></returns>
         public async Task<ListResponse<AssistantResponse>> ListAssistantsAsync(ListQuery query = null, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.GetAsync(GetUrl(queryParameters: query), parameters: new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.GetAsync(GetUrl(queryParameters: query), parameters: new RestParameters(headers), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<ListResponse<AssistantResponse>>(client);
         }
@@ -58,7 +72,7 @@ namespace OpenAI.Assistants
         {
             request ??= new CreateAssistantRequest();
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl(), payload, new RestParameters(headers), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<AssistantResponse>(client);
         }
@@ -71,7 +85,7 @@ namespace OpenAI.Assistants
         /// <returns><see cref="AssistantResponse"/>.</returns>
         public async Task<AssistantResponse> RetrieveAssistantAsync(string assistantId, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.GetAsync(GetUrl($"/{assistantId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.GetAsync(GetUrl($"/{assistantId}"), new RestParameters(headers), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<AssistantResponse>(client);
         }
@@ -86,7 +100,7 @@ namespace OpenAI.Assistants
         public async Task<AssistantResponse> ModifyAssistantAsync(string assistantId, CreateAssistantRequest request, CancellationToken cancellationToken = default)
         {
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
-            var response = await Rest.PostAsync(GetUrl($"/{assistantId}"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.PostAsync(GetUrl($"/{assistantId}"), payload, new RestParameters(headers), cancellationToken);
             response.Validate(EnableDebug);
             return response.Deserialize<AssistantResponse>(client);
         }
@@ -99,7 +113,7 @@ namespace OpenAI.Assistants
         /// <returns>True, if the assistant was deleted.</returns>
         public async Task<bool> DeleteAssistantAsync(string assistantId, CancellationToken cancellationToken = default)
         {
-            var response = await Rest.DeleteAsync(GetUrl($"/{assistantId}"), new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            var response = await Rest.DeleteAsync(GetUrl($"/{assistantId}"), new RestParameters(headers), cancellationToken);
             response.Validate(EnableDebug);
             var result = response.Deserialize<DeletedResponse>(client);
             return result?.Deleted ?? false;

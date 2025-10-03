@@ -11,7 +11,7 @@ namespace OpenAI.Batch
     {
         [Preserve]
         [JsonConstructor]
-        internal BatchErrors([JsonProperty("data")] IReadOnlyList<Error> errors)
+        internal BatchErrors([JsonProperty("data")] List<Error> errors)
         {
             Errors = errors;
         }

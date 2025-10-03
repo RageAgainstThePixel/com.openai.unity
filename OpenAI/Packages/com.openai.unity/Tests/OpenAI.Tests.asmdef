@@ -2,9 +2,10 @@
     "name": "OpenAI.Tests",
     "rootNamespace": "OpenAI.Tests",
     "references": [
+        "GUID:3248779d86bd31747b5d2214f30b01ac",
         "GUID:27619889b8ba8c24980f49ee34dbb44a",
         "GUID:0acc523941302664db1f4e527237feb3",
-        "GUID:3248779d86bd31747b5d2214f30b01ac",
+        "GUID:6ab1da3c58a70364e92dc36aaec78f43",
         "GUID:7958db66189566541a6363568aee1575"
     ],
     "includePlatforms": [
