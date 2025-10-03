@@ -225,7 +225,7 @@ namespace OpenAI.Models
         /// - Context Window: 400,000 context window<br/>
         /// - Max Output Tokens: 128,000 max output tokens
         /// </remarks>
-        public static Model GPT_5 { get; } = new("gpt-5", "openai");
+        public static Model GPT5 { get; } = new("gpt-5", "openai");
 
         /// <summary>
         /// GPT-5 mini is a faster, more cost-efficient version of GPT-5. It's great for well-defined tasks and precise prompts.
@@ -234,7 +234,7 @@ namespace OpenAI.Models
         /// - Context Window: 400,000 context window<br/>
         /// - Max Output Tokens: 128,000 max output tokens
         /// </remarks>
-        public static Model GPT_5_Mini { get; } = new("gpt-5-mini", "openai");
+        public static Model GPT5_Mini { get; } = new("gpt-5-mini", "openai");
 
         /// <summary>
         /// GPT-5 Nano is our fastest, cheapest version of GPT-5. It's great for summarization and classification tasks.
@@ -243,7 +243,7 @@ namespace OpenAI.Models
         /// - Context Window: 400,000 context window<br/>
         /// - Max Output Tokens: 128,000 max output tokens
         /// </remarks>
-        public static Model GPT_5_Nano { get; } = new("gpt-5-nano", "openai");
+        public static Model GPT5_Nano { get; } = new("gpt-5-nano", "openai");
 
         /// <summary>
         /// GPT-5 Chat points to the GPT-5 snapshot currently used in ChatGPT.
@@ -254,7 +254,7 @@ namespace OpenAI.Models
         /// - Context Window: 128,000 context window<br/>
         /// - Max Output Tokens: 16,384 max output tokens
         /// </remarks>
-        public static Model GPT_5_Chat { get; } = new("gpt-5-chat-latest", "openai");
+        public static Model GPT5_Chat { get; } = new("gpt-5-chat-latest", "openai");
 
         /// <summary>
         /// ChatGPT-4o points to the GPT-4o snapshot currently used in ChatGPT.
@@ -269,7 +269,7 @@ namespace OpenAI.Models
         public static Model ChatGPT4o { get; } = new("chatgpt-4o-latest", "openai");
 
         /// <summary>
-        /// GPT-4o (“o” for “omni”) is our versatile, high-intelligence flagship model.
+        /// GPT-4o ('o' for 'omni') is our versatile, high-intelligence flagship model.
         /// It accepts both text and image inputs, and produces text outputs (including Structured Outputs).
         /// It is the best model for most tasks, and is our most capable model outside of our o-series models.
         /// </summary>
@@ -280,7 +280,7 @@ namespace OpenAI.Models
         public static Model GPT4o { get; } = new("gpt-4o", "openai");
 
         /// <summary>
-        /// GPT-4o mini (“o” for “omni”) is a fast, affordable small model for focused tasks.
+        /// GPT-4o mini ('o' for 'omni') is a fast, affordable small model for focused tasks.
         /// It accepts both text and image inputs, and produces text outputs (including Structured Outputs).
         /// It is ideal for fine-tuning, and model outputs from a larger model like GPT-4o can be distilled
         /// to GPT-4o-mini to produce similar results at lower cost and latency.
@@ -512,14 +512,14 @@ namespace OpenAI.Models
         public static Model GPT_Image_1 { get; } = new("gpt-image-1", "openai");
 
         /// <summary>
-        /// DALL·E is an AI system that creates realistic images and art from a natural language description.
-        /// DALL·E 3 currently supports the ability, given a prompt, to create a new image with a specific size.
+        /// DALL-E is an AI system that creates realistic images and art from a natural language description.
+        /// DALL-E 3 currently supports the ability, given a prompt, to create a new image with a specific size.
         /// </summary>
         public static Model DallE_3 { get; } = new("dall-e-3", "openai");
 
         /// <summary>
-        /// DALL·E is an AI system that creates realistic images and art from a natural language description.
-        /// Older than DALL·E 3, DALL·E 2 offers more control in prompting and more requests at once.
+        /// DALL-E is an AI system that creates realistic images and art from a natural language description.
+        /// Older than DALL-E 3, DALL-E 2 offers more control in prompting and more requests at once.
         /// </summary>
         public static Model DallE_2 { get; } = new("dall-e-2", "openai");
 
@@ -535,7 +535,7 @@ namespace OpenAI.Models
         /// - Context Window: 400,000 tokens<br/>
         /// - Max Output Tokens: 128,000 tokens
         /// </remarks>
-        public static Model GPT_5_Codex { get; } = new("gpt-5-codex", "openai");
+        public static Model GPT5_Codex { get; } = new("gpt-5-codex", "openai");
 
         /// <summary>
         /// codex-mini-latest is a fine-tuned version of o4-mini specifically for use in Codex CLI.

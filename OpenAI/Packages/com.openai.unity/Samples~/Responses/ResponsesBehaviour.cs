@@ -134,7 +134,7 @@ namespace OpenAI.Samples.Responses
 
             try
             {
-                var request = new CreateResponseRequest(textInput: userInput, conversationId: conversation, tools: assistantTools, model: Model.GPT4_1_Nano);
+                var request = new CreateResponseRequest(textInput: userInput, conversationId: conversation, tools: assistantTools, model: Model.GPT5_Nano);
                 async Task StreamEventHandler(string eventName, IServerSentEvent sseEvent)
                 {
                     switch (sseEvent)
