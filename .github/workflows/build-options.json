@@ -1,0 +1,43 @@
+{
+  "os": [
+    "ubuntu-latest",
+    "windows-latest",
+    "macos-latest"
+  ],
+  "unity-version": [
+    "2022.x",
+    "6000.0.x",
+    "6000.1.x",
+    "6000.2.x"
+  ],
+  "include": [
+    {
+      "os": "ubuntu-latest",
+      "build-target": "StandaloneLinux64"
+    },
+    {
+      "os": "ubuntu-latest",
+      "build-target": "WebGL"
+    },
+    {
+      "os": "ubuntu-latest",
+      "build-target": "Android"
+    },
+    {
+      "os": "ubuntu-latest",
+      "build-target": "iOS"
+    },
+    {
+      "os": "windows-latest",
+      "build-target": "StandaloneWindows64"
+    },
+    {
+      "os": "windows-latest",
+      "build-target": "WSAPlayer"
+    },
+    {
+      "os": "macos-latest",
+      "build-target": "StandaloneOSX"
+    }
+  ]
+}
