@@ -3,7 +3,6 @@
 using Newtonsoft.Json;
 using OpenAI.Extensions;
 using OpenAI.Models;
-using OpenAI.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
