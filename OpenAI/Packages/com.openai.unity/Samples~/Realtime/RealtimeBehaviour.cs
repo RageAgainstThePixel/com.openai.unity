@@ -105,10 +105,12 @@ namespace OpenAI.Samples.Realtime
                 {
                     Tool.GetOrCreateTool(openAI.ImagesEndPoint, nameof(ImagesEndpoint.GenerateImageAsync))
                 };
+
                 session = await openAI.RealtimeEndpoint.CreateSessionAsync(
                     new SessionConfiguration(
-                        model: Model.GPT4oRealtime,
+                        model: Model.GPT4oRealtimeMini,
                         voice: voice,
+                        inputAudioTranscriptionSettings: new InputAudioTranscriptionSettings(Model.Transcribe_GPT_4o_Mini),
                         instructions: systemPrompt,
                         tools: tools),
                     destroyCancellationToken);

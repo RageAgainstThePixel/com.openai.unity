@@ -3,7 +3,7 @@
   "displayName": "OpenAI",
   "description": "A OpenAI package for the Unity to use though their RESTful API.\n\nIndependently developed, this is not an official library and I am not affiliated with OpenAI.\n\nAn OpenAI API account is required.",
   "keywords": [],
-  "version": "8.8.2",
+  "version": "8.8.3",
   "unity": "2021.3",
   "documentationUrl": "https://github.com/RageAgainstThePixel/com.openai.unity#documentation",
   "changelogUrl": "https://github.com/RageAgainstThePixel/com.openai.unity/releases",
@@ -19,8 +19,8 @@
   "dependencies": {
     "com.utilities.audio": "2.2.8",
     "com.utilities.encoder.wav": "2.2.4",
-    "com.utilities.rest": "4.1.0",
-    "com.utilities.websockets": "1.0.6"
+    "com.utilities.rest": "4.1.1",
+    "com.utilities.websockets": "1.1.0"
   },
   "samples": [
     {

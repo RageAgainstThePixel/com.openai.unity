@@ -1,10 +1,10 @@
 {
   "dependencies": {
     "com.unity.ide.rider": "3.0.38",
-    "com.unity.ide.visualstudio": "2.0.23",
+    "com.unity.ide.visualstudio": "2.0.25",
     "com.unity.textmeshpro": "3.0.9",
     "com.unity.ugui": "1.0.0",
-    "com.utilities.buildpipeline": "1.8.0"
+    "com.utilities.buildpipeline": "1.8.1"
   },
   "scopedRegistries": [
     {
