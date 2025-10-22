@@ -14,6 +14,8 @@ namespace OpenAI
             [JsonProperty("seconds")] float seconds,
             [JsonProperty("type")] string type)
         {
+            Seconds = seconds;
+            Type = type;
         }
 
         [Preserve]
