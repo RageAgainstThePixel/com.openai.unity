@@ -27,23 +27,23 @@ namespace OpenAI
 
             if (!string.IsNullOrWhiteSpace(organizationId))
             {
-                if (!organizationId.Contains(OrganizationPrefix))
+                if (!organizationId!.Contains(OrganizationPrefix))
                 {
                     throw new InvalidCredentialException($"{nameof(organizationId)} must start with '{OrganizationPrefix}'");
                 }
-
-                this.organizationId = organizationId;
             }
+
+            this.organizationId = organizationId;
 
             if (!string.IsNullOrWhiteSpace(projectId))
             {
-                if (!projectId.Contains(ProjectPrefix))
+                if (!projectId!.Contains(ProjectPrefix))
                 {
                     throw new InvalidCredentialException($"{nameof(projectId)} must start with '{ProjectPrefix}'");
                 }
-
-                this.projectId = projectId;
             }
+
+            this.projectId = projectId;
         }
 
         [SerializeField]

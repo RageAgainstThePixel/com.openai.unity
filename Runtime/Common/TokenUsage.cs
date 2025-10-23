@@ -10,11 +10,12 @@ namespace OpenAI
     {
         [Preserve]
         [JsonConstructor]
-        internal TokenUsage(int? totalTokens,
-            int? inputTokens,
-            int? outputTokens,
-            TokenUsageDetails inputTokenDetails,
-            TokenUsageDetails outputTokenDetails)
+        internal TokenUsage(
+            [JsonProperty("total_tokens")] int? totalTokens,
+            [JsonProperty("input_tokens")] int? inputTokens,
+            [JsonProperty("output_tokens")] int? outputTokens,
+            [JsonProperty("input_token_details")] TokenUsageDetails inputTokenDetails,
+            [JsonProperty("output_token_details")] TokenUsageDetails outputTokenDetails)
         {
             TotalTokens = totalTokens;
             InputTokens = inputTokens;
