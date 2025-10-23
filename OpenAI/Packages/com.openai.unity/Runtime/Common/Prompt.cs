@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using UnityEngine.Scripting;
 
-namespace OpenAI.Responses
+namespace OpenAI
 {
     [Preserve]
     public sealed class Prompt

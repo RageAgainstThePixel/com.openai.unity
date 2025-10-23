@@ -31,7 +31,10 @@ namespace OpenAI.Batch
             [JsonProperty("expired_at")] int? expiredAt,
             [JsonProperty("cancelled_at")] int? cancelledAt,
             [JsonProperty("request_counts")] RequestCounts requestCounts,
-            [JsonProperty("metadata")] Dictionary<string, object> metadata)
+            [JsonProperty("metadata")] Dictionary<string, object> metadata,
+            [JsonProperty("error_blob")] string errorBlob,
+            [JsonProperty("input_blob")] string inputBlob,
+            [JsonProperty("output_blob")] string outputBlob)
         {
             Id = id;
             Object = @object;
@@ -52,6 +55,9 @@ namespace OpenAI.Batch
             CancelledAtUnixTimeSeconds = cancelledAt;
             RequestCounts = requestCounts;
             Metadata = metadata;
+            ErrorBlob = errorBlob;
+            InputBlob = inputBlob;
+            OutputBlob = outputBlob;
         }
 
         [Preserve]
@@ -76,7 +82,7 @@ namespace OpenAI.Batch
         /// Errors that occurred during the batch job.
         /// </summary>
         [Preserve]
-        [JsonProperty("errors")]
+        [JsonProperty("errors", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public BatchErrors BatchErrors { get; }
 
         /// <summary>
@@ -104,14 +110,14 @@ namespace OpenAI.Batch
         /// The ID of the file containing the outputs of successfully executed requests.
         /// </summary>
         [Preserve]
-        [JsonProperty("output_file_id")]
+        [JsonProperty("output_file_id", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string OutputFileId { get; }
 
         /// <summary>
         /// The ID of the file containing the outputs of requests with errors.
         /// </summary>
         [Preserve]
-        [JsonProperty("error_file_id")]
+        [JsonProperty("error_file_id", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string ErrorFileId { get; }
 
         /// <summary>
@@ -129,7 +135,7 @@ namespace OpenAI.Batch
         /// The Unix timestamp (in seconds) for when the batch started processing.
         /// </summary>
         [Preserve]
-        [JsonProperty("in_progress_at")]
+        [JsonProperty("in_progress_at", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? InProgressAtUnixTimeSeconds { get; }
 
         [Preserve]
@@ -143,7 +149,7 @@ namespace OpenAI.Batch
         /// The Unix timestamp (in seconds) for when the batch will expire.
         /// </summary>
         [Preserve]
-        [JsonProperty("expires_at")]
+        [JsonProperty("expires_at", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? ExpiresAtUnixTimeSeconds { get; }
 
         [Preserve]
@@ -157,7 +163,7 @@ namespace OpenAI.Batch
         /// The Unix timestamp (in seconds) for when the batch started finalizing.
         /// </summary>
         [Preserve]
-        [JsonProperty("finalizing_at")]
+        [JsonProperty("finalizing_at", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? FinalizingAtUnixTimeSeconds { get; }
 
         [Preserve]
@@ -171,7 +177,7 @@ namespace OpenAI.Batch
         /// The Unix timestamp (in seconds) for when the batch was completed.
         /// </summary>
         [Preserve]
-        [JsonProperty("completed_at")]
+        [JsonProperty("completed_at", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? CompletedAtUnixTimeSeconds { get; }
 
         [Preserve]
@@ -185,7 +191,7 @@ namespace OpenAI.Batch
         /// The Unix timestamp (in seconds) for when the batch failed.
         /// </summary>
         [Preserve]
-        [JsonProperty("failed_at")]
+        [JsonProperty("failed_at", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? FailedAtUnixTimeSeconds { get; }
 
         [Preserve]
@@ -199,7 +205,7 @@ namespace OpenAI.Batch
         /// The Unix timestamp (in seconds) for when the batch expired.
         /// </summary>
         [Preserve]
-        [JsonProperty("expired_at")]
+        [JsonProperty("expired_at", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? ExpiredAtUnixTimeSeconds { get; }
 
         [Preserve]
@@ -213,7 +219,7 @@ namespace OpenAI.Batch
         /// The Unix timestamp (in seconds) for when the batch was cancelled.
         /// </summary>
         [Preserve]
-        [JsonProperty("cancelled_at")]
+        [JsonProperty("cancelled_at", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? CancelledAtUnixTimeSeconds { get; }
 
         [Preserve]
@@ -227,7 +233,7 @@ namespace OpenAI.Batch
         /// The request counts for different statuses within the batch.
         /// </summary>
         [Preserve]
-        [JsonProperty("request_counts")]
+        [JsonProperty("request_counts", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public RequestCounts RequestCounts { get; }
 
         /// <summary>
@@ -236,8 +242,29 @@ namespace OpenAI.Batch
         /// Keys can be a maximum of 64 characters long and values can be a maximum of 512 characters long.
         /// </summary>
         [Preserve]
-        [JsonProperty("metadata")]
+        [JsonProperty("metadata", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReadOnlyDictionary<string, object> Metadata { get; }
+
+        /// <summary>
+        /// The URL of the blob storage location where any errors encountered during processing will be written.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("error_blob", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string ErrorBlob { get; }
+
+        /// <summary>
+        /// The URL of the blob storage location where the batch output will be written.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("output_blob", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string OutputBlob { get; }
+
+        /// <summary>
+        /// The URL of the blob storage location where the batch input was read from.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("input_blob", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string InputBlob { get; }
 
         [Preserve]
         public override string ToString() => Id;

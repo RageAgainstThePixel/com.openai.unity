@@ -1,6 +1,7 @@
 ﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using UnityEngine.Scripting;
 
 namespace OpenAI.Realtime
@@ -13,16 +14,20 @@ namespace OpenAI.Realtime
         internal ConversationItemInputAudioTranscriptionResponse(
             [JsonProperty("event_id")] string eventId,
             [JsonProperty("type")] string type,
-            [JsonProperty("item_id")] string itemId,
             [JsonProperty("content_index")] int? contentIndex,
+            [JsonProperty("item_id")] string itemId,
+            [JsonProperty("logprobs")] List<LogProbInfo> logProbs,
             [JsonProperty("transcript")] string transcript,
+            [JsonProperty("usage")] object usage,
             [JsonProperty("error")] Error error)
         {
             EventId = eventId;
             Type = type;
-            ItemId = itemId;
             ContentIndex = contentIndex;
+            ItemId = itemId;
+            LogProbs = logProbs;
             Transcript = transcript;
+            Usage = usage;
             Error = error;
         }
 
@@ -37,13 +42,6 @@ namespace OpenAI.Realtime
         public override string Type { get; }
 
         /// <summary>
-        /// The ID of the user message item.
-        /// </summary>
-        [Preserve]
-        [JsonProperty("item_id")]
-        public string ItemId { get; }
-
-        /// <summary>
         /// The index of the content part containing the audio.
         /// </summary>
         [Preserve]
@@ -51,11 +49,29 @@ namespace OpenAI.Realtime
         public int? ContentIndex { get; }
 
         /// <summary>
+        /// The ID of the user message item.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("item_id")]
+        public string ItemId { get; }
+
+        /// <summary>
+        /// The log probabilities of the transcription.
+        /// </summary>
+        [Preserve]
+        [JsonProperty("logprobs")]
+        public IReadOnlyList<LogProbInfo> LogProbs { get; }
+
+        /// <summary>
         /// The transcribed text.
         /// </summary>
         [Preserve]
         [JsonProperty("transcript")]
         public string Transcript { get; }
+
+        [Preserve]
+        [JsonProperty("usage")]
+        public object Usage { get; }
 
         /// <summary>
         /// Details of the transcription error.
@@ -71,5 +87,9 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonIgnore]
         public bool IsFailed => Type.Contains("failed");
+
+        [Preserve]
+        public string PrintUsage()
+            => Usage?.ToString() ?? "";
     }
 }
