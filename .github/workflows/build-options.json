@@ -14,19 +14,15 @@
   "include": [
     {
       "os": "ubuntu-latest",
+      "build-target": "Android"
+    },
+    {
+      "os": "ubuntu-latest",
       "build-target": "StandaloneLinux64"
     },
     {
       "os": "ubuntu-latest",
       "build-target": "WebGL"
-    },
-    {
-      "os": "ubuntu-latest",
-      "build-target": "Android"
-    },
-    {
-      "os": "ubuntu-latest",
-      "build-target": "iOS"
     },
     {
       "os": "windows-latest",
@@ -39,6 +35,10 @@
     {
       "os": "macos-latest",
       "build-target": "StandaloneOSX"
+    },
+    {
+      "os": "macos-latest",
+      "build-target": "iOS"
     }
   ]
 }
