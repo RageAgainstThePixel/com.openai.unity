@@ -2,14 +2,16 @@
 
 using Newtonsoft.Json;
 using System;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Scripting;
 using Utilities.Audio;
+using Utilities.Extensions;
 
 namespace OpenAI.Chat
 {
     [Preserve]
-    public sealed class AudioOutput
+    public sealed class AudioOutput : IDisposable
     {
         [Preserve]
         [JsonConstructor]
@@ -24,6 +26,8 @@ namespace OpenAI.Chat
             Data = data;
             Transcript = transcript;
         }
+
+        ~AudioOutput() => Dispose(false);
 
         [Preserve]
         [JsonProperty("id")]
@@ -41,19 +45,20 @@ namespace OpenAI.Chat
 
         [Preserve]
         [JsonIgnore]
-        public ReadOnlyMemory<byte> AudioData
+        public NativeArray<byte> AudioData
         {
             get
             {
-                if (audioData.Length == 0)
+                if (!audioData.HasValue ||
+                    audioData.Value.Length == 0)
                 {
-                    audioData = Convert.FromBase64String(Data);
+                    audioData = NativeArrayExtensions.FromBase64String(Data, Allocator.Persistent);
                 }
 
-                return audioData;
+                return audioData.Value;
             }
         }
-        private Memory<byte> audioData;
+        private NativeArray<byte>? audioData;
 
         [Preserve]
         [JsonIgnore]
@@ -61,10 +66,9 @@ namespace OpenAI.Chat
 
         [Preserve]
         [JsonIgnore]
-        public float[] AudioSamples
-            => audioSamples ??= PCMEncoder.Decode(AudioData.ToArray(), inputSampleRate: 24000, outputSampleRate: AudioSettings.outputSampleRate);
-
-        private float[] audioSamples;
+        public NativeArray<float> AudioSamples
+            => audioSamples ??= PCMEncoder.Decode(AudioData, inputSampleRate: 24000, outputSampleRate: AudioSettings.outputSampleRate);
+        private NativeArray<float>? audioSamples;
 
         [Preserve]
         [JsonIgnore]
@@ -121,6 +125,23 @@ namespace OpenAI.Chat
             {
                 Data += other.Data;
             }
+        }
+
+        [Preserve]
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                audioSamples?.Dispose();
+                AudioData.Dispose();
+            }
+        }
+
+        [Preserve]
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

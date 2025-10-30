@@ -195,7 +195,10 @@ namespace OpenAI.Samples.Responses
 
                 var request = new SpeechRequest(input: text, model: Model.TTS_1, voice: voice, responseFormat: SpeechResponseFormat.PCM);
                 var stopwatch = Stopwatch.StartNew();
-                var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip => { streamAudioSource.BufferCallback(partialClip.AudioSamples); }, cancellationToken);
+                var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
+                {
+                    streamAudioSource.SampleCallback(partialClip.AudioSamples);
+                }, cancellationToken);
                 var playbackTime = speechClip.Length - (float)stopwatch.Elapsed.TotalSeconds + 0.1f;
 
                 await Awaiters.DelayAsync(TimeSpan.FromSeconds(playbackTime), cancellationToken).ConfigureAwait(true);

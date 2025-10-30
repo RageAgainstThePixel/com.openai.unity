@@ -331,7 +331,7 @@ namespace OpenAI.Samples.Assistant
                 var request = new SpeechRequest(input: text, model: Model.TTS_1, voice: voice, responseFormat: SpeechResponseFormat.PCM);
                 var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
                 {
-                    streamAudioSource.BufferCallback(partialClip.AudioSamples);
+                    streamAudioSource.SampleCallback(partialClip.AudioSamples);
                 }, cancellationToken);
                 await Awaiters.DelayAsync(TimeSpan.FromSeconds(speechClip.Length), cancellationToken).ConfigureAwait(true);
                 ((AudioSource)streamAudioSource).clip = speechClip.AudioClip;

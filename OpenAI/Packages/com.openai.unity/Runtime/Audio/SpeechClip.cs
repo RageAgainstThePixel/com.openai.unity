@@ -1,6 +1,7 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using System;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Scripting;
 using Utilities.Audio;
@@ -8,7 +9,7 @@ using Utilities.Audio;
 namespace OpenAI.Audio
 {
     [Preserve]
-    public sealed class SpeechClip
+    public sealed class SpeechClip : IDisposable
     {
         [Preserve]
         internal SpeechClip(string name, string cachePath, AudioClip audioClip)
@@ -17,19 +18,19 @@ namespace OpenAI.Audio
             CachePath = cachePath;
             this.audioClip = audioClip;
             SampleRate = audioClip.frequency;
-            var samples = new float[audioClip.samples];
-            audioClip.GetData(samples, 0);
-            AudioData = PCMEncoder.Encode(samples);
+            AudioData = audioClip.EncodeToPCM(allocator: Allocator.Persistent);
         }
 
         [Preserve]
-        internal SpeechClip(string name, string cachePath, ReadOnlyMemory<byte> audioData, int sampleRate = 24000)
+        internal SpeechClip(string name, string cachePath, byte[] audioData, int sampleRate = 24000)
         {
             Name = name;
             CachePath = cachePath;
-            AudioData = audioData;
+            AudioData = new NativeArray<byte>(audioData, Allocator.Persistent);
             SampleRate = sampleRate;
         }
+
+        ~SpeechClip() => Dispose(false);
 
         [Preserve]
         public string Name { get; }
@@ -38,13 +39,12 @@ namespace OpenAI.Audio
         public string CachePath { get; }
 
         [Preserve]
-        public ReadOnlyMemory<byte> AudioData { get; }
+        public NativeArray<byte> AudioData { get; }
 
         [Preserve]
-        public float[] AudioSamples
-            => audioSamples ??= PCMEncoder.Decode(AudioData.ToArray(), inputSampleRate: SampleRate, outputSampleRate: AudioSettings.outputSampleRate);
-
-        private float[] audioSamples;
+        public NativeArray<float> AudioSamples
+            => audioSamples ??= PCMEncoder.Decode(AudioData, inputSampleRate: SampleRate, outputSampleRate: AudioSettings.outputSampleRate);
+        private NativeArray<float>? audioSamples;
 
         [Preserve]
         public int SampleRate { get; }
@@ -63,7 +63,6 @@ namespace OpenAI.Audio
                 return audioClip;
             }
         }
-
         private AudioClip audioClip;
 
         [Preserve]
@@ -74,5 +73,22 @@ namespace OpenAI.Audio
 
         [Preserve]
         public static implicit operator string(SpeechClip clip) => clip?.CachePath;
+
+        [Preserve]
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                audioSamples?.Dispose();
+                AudioData.Dispose();
+            }
+        }
+
+        [Preserve]
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

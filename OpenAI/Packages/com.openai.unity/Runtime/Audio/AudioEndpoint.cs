@@ -34,7 +34,7 @@ namespace OpenAI.Audio
         [Obsolete("use GetSpeechAsync")]
         public async Task<Tuple<string, AudioClip>> CreateSpeechStreamAsync(SpeechRequest request, Action<AudioClip> partialClipCallback, CancellationToken cancellationToken = default)
         {
-            var result = await GetSpeechAsync(request, speechClip =>
+            using var result = await GetSpeechAsync(request, speechClip =>
             {
                 partialClipCallback.Invoke(speechClip.AudioClip);
             }, cancellationToken);
@@ -92,7 +92,7 @@ namespace OpenAI.Audio
                     }, 8192, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
                     pcmResponse.Validate(EnableDebug);
                     await File.WriteAllBytesAsync(cachedPath, pcmResponse.Data, cancellationToken).ConfigureAwait(true);
-                    return new SpeechClip(clipName, cachedPath, new ReadOnlyMemory<byte>(pcmResponse.Data));
+                    return new SpeechClip(clipName, cachedPath, pcmResponse.Data);
                 }
                 default:
                 {

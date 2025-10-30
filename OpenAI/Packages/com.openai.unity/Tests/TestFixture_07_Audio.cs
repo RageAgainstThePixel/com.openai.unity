@@ -152,7 +152,7 @@ namespace OpenAI.Tests
         {
             Assert.IsNotNull(OpenAIClient.AudioEndpoint);
             var request = new SpeechRequest("Hello world!");
-            var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request);
+            using var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request);
             Debug.Log(speechClip.CachePath);
             Assert.IsNotEmpty(speechClip.AudioSamples);
             Assert.IsNotNull(speechClip.AudioClip);
@@ -168,7 +168,7 @@ namespace OpenAI.Tests
                 model: Model.TTS_GPT_4o_Mini,
                 voice: Voice.Fable,
                 instructions: instructions);
-            var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request);
+            using var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request);
             Debug.Log(speechClip.CachePath);
             Assert.IsNotEmpty(speechClip.AudioSamples);
             Assert.IsNotNull(speechClip.AudioClip);
@@ -182,7 +182,7 @@ namespace OpenAI.Tests
                 input: "Hello world!",
                 responseFormat: SpeechResponseFormat.PCM);
             var clipQueue = new ConcurrentQueue<SpeechClip>();
-            var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request, partialClip => clipQueue.Enqueue(partialClip));
+            using var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request, partialClip => clipQueue.Enqueue(partialClip));
             Debug.Log(speechClip.CachePath);
             Assert.IsNotEmpty(speechClip.AudioSamples);
             Assert.IsNotNull(speechClip.AudioClip);
@@ -201,7 +201,7 @@ namespace OpenAI.Tests
                 responseFormat: SpeechResponseFormat.PCM,
                 instructions: instructions);
             var clipQueue = new ConcurrentQueue<SpeechClip>();
-            var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request, partialClip => clipQueue.Enqueue(partialClip));
+            using var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request, partialClip => clipQueue.Enqueue(partialClip));
             Debug.Log(speechClip.CachePath);
             Assert.IsNotEmpty(speechClip.AudioSamples);
             Assert.IsNotNull(speechClip.AudioClip);

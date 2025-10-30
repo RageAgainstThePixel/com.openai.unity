@@ -248,11 +248,11 @@ namespace OpenAI.Samples.Chat
             var stopwatch = Stopwatch.StartNew();
             var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
             {
-                streamAudioSource.BufferCallback(partialClip.AudioSamples);
+                streamAudioSource.SampleCallback(partialClip.AudioSamples);
             }, cancellationToken);
             var playbackTime = speechClip.Length - (float)stopwatch.Elapsed.TotalSeconds + 0.1f;
 
-            await Awaiters.DelayAsync(TimeSpan.FromSeconds(playbackTime), cancellationToken).ConfigureAwait(true);
+            await Awaiters.DelayAsync(playbackTime, cancellationToken).ConfigureAwait(true);
             ((AudioSource)streamAudioSource).clip = speechClip.AudioClip;
 
             if (enableDebug)
