@@ -4,10 +4,12 @@
     "com.unity.ide.visualstudio": "2.0.25",
     "com.unity.textmeshpro": "3.0.9",
     "com.unity.ugui": "1.0.0",
+    "com.unity.inputsystem": "1.14.2",
     "com.utilities.async": "file:E:/Dev/Rage/com.utilities.async/Utilities.Async/Packages/com.utilities.async",
     "com.utilities.audio": "file:E:/Dev/Rage/com.utilities.audio/Utilities.Audio/Packages/com.utilities.audio",
     "com.utilities.buildpipeline": "1.8.1",
     "com.utilities.encoder.wav": "file:E:/Dev/Rage/com.utilities.encoder.wav/Utilities.Encoder.Wav/Packages/com.utilities.encoder.wav",
+    "com.utilities.extensions": "file:E:/Dev/Rage/com.utilities.extensions/Utilities.Extensions/Packages/com.utilities.extensions",
     "com.utilities.rest": "file:E:/Dev/Rage/com.utilities.rest/Utilities.Rest/Packages/com.utilities.rest",
     "com.utilities.websockets": "file:E:/Dev/Rage/com.utilities.websockets/Utilities.Websockets/Packages/com.utilities.websockets"
   },
