@@ -57,7 +57,11 @@ namespace OpenAI.Audio
                 if (audioClip == null)
                 {
                     audioClip = AudioClip.Create(Name, AudioSamples.Length, 1, AudioSettings.outputSampleRate, false);
+#if UNITY_6000_0_OR_NEWER
                     audioClip.SetData(AudioSamples, 0);
+#else
+                    audioClip.SetData(AudioSamples.ToArray(), 0);
+#endif
                 }
 
                 return audioClip;
