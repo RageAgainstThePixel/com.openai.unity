@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "com.utilities.encoder.wav": "3.0.0",
-    "com.utilities.rest": "5.0.1",
+    "com.utilities.rest": "5.0.2",
     "com.utilities.websockets": "2.0.0"
   },
   "samples": [
