@@ -144,7 +144,7 @@ namespace OpenAI.Realtime
                 };
             }
 
-            InputAudioNoiseReduction = noiseReductionSettings;
+            InputAudioNoiseReduction = inputAudioNoiseSettings;
             Prompt = prompt;
         }
 
