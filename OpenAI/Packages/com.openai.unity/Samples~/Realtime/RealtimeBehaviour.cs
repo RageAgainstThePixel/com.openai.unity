@@ -253,7 +253,7 @@ namespace OpenAI.Samples.Realtime
 
                 do
                 {
-                    var buffer = ArrayPool<byte>.Shared.Rent(1024 * 16);
+                    var buffer = ArrayPool<byte>.Shared.Rent(1024 * 16); // 16 KB buffer
 
                     try
                     {
