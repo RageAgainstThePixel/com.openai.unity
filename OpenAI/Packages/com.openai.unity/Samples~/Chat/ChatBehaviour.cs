@@ -246,7 +246,7 @@ namespace OpenAI.Samples.Chat
             if (string.IsNullOrWhiteSpace(text)) { return; }
             var request = new SpeechRequest(input: text, model: Model.TTS_1, voice: voice, responseFormat: SpeechResponseFormat.PCM);
             var stopwatch = Stopwatch.StartNew();
-            var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
+            using var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
             {
                 streamAudioSource.SampleCallback(partialClip.AudioSamples);
             }, cancellationToken);

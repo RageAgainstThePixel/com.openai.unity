@@ -405,7 +405,7 @@ namespace OpenAI.Samples.Realtime
                     AddNewImageContent(imageResult);
                 }
 
-                toolOutput = JsonConvert.SerializeObject(new { result = imageResults });
+                toolOutput = JsonConvert.SerializeObject(new { results = imageResults.Select(result => result.RevisedPrompt).ToList() });
             }
             catch (Exception e)
             {

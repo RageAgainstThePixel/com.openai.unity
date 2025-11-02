@@ -88,9 +88,18 @@ namespace OpenAI.Audio
                     var part = 0;
                     var pcmResponse = await Rest.PostAsync(GetUrl("/speech"), payload, partialResponse =>
                     {
-                        partialClipCallback?.Invoke(new SpeechClip($"{clipName}_{++part}", null, partialResponse.Data));
+                        if (partialResponse.Data.Length > 0)
+                        {
+                            partialClipCallback?.Invoke(new SpeechClip($"{clipName}_{++part}", null, partialResponse.Data));
+                        }
                     }, 8192, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
                     pcmResponse.Validate(EnableDebug);
+
+                    if (pcmResponse.Data.Length == 0)
+                    {
+                        throw new Exception("No audio data received!");
+                    }
+
                     await File.WriteAllBytesAsync(cachedPath, pcmResponse.Data, cancellationToken).ConfigureAwait(true);
                     return new SpeechClip(clipName, cachedPath, pcmResponse.Data);
                 }
