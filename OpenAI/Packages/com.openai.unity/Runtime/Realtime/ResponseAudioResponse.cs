@@ -2,14 +2,16 @@
 
 using Newtonsoft.Json;
 using System;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Scripting;
 using Utilities.Audio;
+using Utilities.Extensions;
 
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class ResponseAudioResponse : BaseRealtimeEvent, IServerEvent, IRealtimeEventStream
+    public sealed class ResponseAudioResponse : BaseRealtimeEvent, IServerEvent, IRealtimeEventStream, IDisposable
     {
         [Preserve]
         [JsonConstructor]
@@ -30,6 +32,8 @@ namespace OpenAI.Realtime
             ContentIndex = contentIndex;
             Delta = delta;
         }
+
+        ~ResponseAudioResponse() => Dispose(false);
 
         /// <inheritdoc />
         [Preserve]
@@ -75,9 +79,9 @@ namespace OpenAI.Realtime
 
         [Preserve]
         [JsonIgnore]
-        public float[] AudioSamples
-            => audioSamples ??= PCMEncoder.Decode(Convert.FromBase64String(Delta), inputSampleRate: 24000, outputSampleRate: AudioSettings.outputSampleRate);
-        private float[] audioSamples;
+        public NativeArray<float> AudioSamples
+            => audioSamples ??= PCMEncoder.Decode(NativeArrayExtensions.FromBase64String(Delta), inputSampleRate: 24000, outputSampleRate: AudioSettings.outputSampleRate);
+        private NativeArray<float>? audioSamples;
 
         [Preserve]
         [JsonIgnore]
@@ -92,7 +96,11 @@ namespace OpenAI.Realtime
                 if (audioClip == null)
                 {
                     audioClip = AudioClip.Create($"{ItemId}_{OutputIndex}_delta", AudioSamples.Length, 1, AudioSettings.outputSampleRate, false);
+#if UNITY_6000_0_OR_NEWER
                     audioClip.SetData(AudioSamples, 0);
+#else
+                    audioClip.SetData(AudioSamples.ToArray(), 0);
+#endif
                 }
 
                 return audioClip;
@@ -110,5 +118,21 @@ namespace OpenAI.Realtime
 
         [Preserve]
         public static implicit operator AudioClip(ResponseAudioResponse response) => response?.AudioClip;
+
+        [Preserve]
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                audioSamples?.Dispose();
+            }
+        }
+
+        [Preserve]
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
     }
 }

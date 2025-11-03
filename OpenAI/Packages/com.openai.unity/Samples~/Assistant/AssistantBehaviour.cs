@@ -8,6 +8,7 @@ using OpenAI.Models;
 using OpenAI.Threads;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -222,6 +223,15 @@ namespace OpenAI.Samples.Assistant
                                             scrollView.verticalNormalizedPosition = 0f;
                                         }
                                         break;
+                                    case MessageStatus.NotStarted:
+                                    case MessageStatus.Incomplete:
+                                        if (enableDebug)
+                                        {
+                                            Debug.Log($"{nameof(MessageStatus)}::{message.Status}");
+                                        }
+                                        break;
+                                    default:
+                                        throw new ArgumentOutOfRangeException();
                                 }
                                 break;
                             case RunResponse run:
@@ -243,7 +253,7 @@ namespace OpenAI.Samples.Assistant
                             case OperationCanceledException:
                                 break;
                             default:
-                                Debug.LogError(e);
+                                Debug.LogException(e);
                                 break;
                         }
                     }
@@ -260,7 +270,7 @@ namespace OpenAI.Samples.Assistant
                     case OperationCanceledException:
                         break;
                     default:
-                        Debug.LogError(e);
+                        Debug.LogException(e);
                         break;
                 }
             }
@@ -328,13 +338,19 @@ namespace OpenAI.Samples.Assistant
             {
                 text = text.Replace("![Image](output.jpg)", string.Empty);
                 if (string.IsNullOrWhiteSpace(text)) { return; }
-                var request = new SpeechRequest(input: text, model: Model.TTS_1, voice: voice, responseFormat: SpeechResponseFormat.PCM);
-                var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
+                var request = new SpeechRequest(input: text, model: Model.TTS_GPT_4o_Mini, voice: voice, responseFormat: SpeechResponseFormat.PCM);
+                var stopwatch = Stopwatch.StartNew();
+                using var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(
+                    request,
+                    partialClip => streamAudioSource.SampleCallbackAsync(partialClip.AudioSamples),
+                    cancellationToken)
+                    .ConfigureAwait(true);
+                var playbackTime = speechClip.Length - (float)stopwatch.Elapsed.TotalSeconds + 0.1f;
+
+                if (playbackTime > 0)
                 {
-                    streamAudioSource.BufferCallback(partialClip.AudioSamples);
-                }, cancellationToken);
-                await Awaiters.DelayAsync(TimeSpan.FromSeconds(speechClip.Length), cancellationToken).ConfigureAwait(true);
-                ((AudioSource)streamAudioSource).clip = speechClip.AudioClip;
+                    await Awaiters.DelayAsync(playbackTime, cancellationToken).ConfigureAwait(true);
+                }
 
                 if (enableDebug)
                 {

@@ -1,0 +1,19 @@
+name: UPM Release
+on:
+  push:
+    branches: [main]
+jobs:
+  release:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
+    - uses: RageAgainstThePixel/upm-release@v1
+      with:
+        username: ${{ secrets.UNITY_USERNAME }}
+        password: ${{ secrets.UNITY_PASSWORD }}
+        organization-id: ${{ secrets.UNITY_ORG_ID }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}

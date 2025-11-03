@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -230,14 +231,19 @@ namespace OpenAI.Samples.Realtime
                 // ReSharper disable once MethodHasAsyncOverload
                 RecordingManager.StartRecordingStream<WavEncoder>(BufferCallback, 24000, cancellationToken);
 
-                async Task BufferCallback(ReadOnlyMemory<byte> bufferCallback)
+                async Task BufferCallback(NativeArray<byte> bufferCallback)
                 {
                     if (!CanRecord) { return; }
 
                     try
                     {
                         await semaphore.WaitAsync(CancellationToken.None).ConfigureAwait(false);
-                        await memoryStream.WriteAsync(bufferCallback, CancellationToken.None).ConfigureAwait(false);
+                        var bufferLength = bufferCallback.Length;
+
+                        for (var i = 0; i < bufferLength; i++)
+                        {
+                            memoryStream.WriteByte(bufferCallback[i]);
+                        }
                     }
                     finally
                     {
@@ -247,7 +253,7 @@ namespace OpenAI.Samples.Realtime
 
                 do
                 {
-                    var buffer = ArrayPool<byte>.Shared.Rent(1024 * 16);
+                    var buffer = ArrayPool<byte>.Shared.Rent(1024 * 16); // 16 KB buffer
 
                     try
                     {
@@ -320,7 +326,7 @@ namespace OpenAI.Samples.Realtime
                     if (audioResponse.IsDelta)
                     {
                         isAudioResponseInProgress = true;
-                        streamAudioSource.BufferCallback(audioResponse.AudioSamples);
+                        streamAudioSource.SampleCallback(audioResponse.AudioSamples);
                         playbackTimeRemaining += audioResponse.Length;
                     }
                     else if (audioResponse.IsDone)
@@ -399,7 +405,7 @@ namespace OpenAI.Samples.Realtime
                     AddNewImageContent(imageResult);
                 }
 
-                toolOutput = JsonConvert.SerializeObject(new { result = imageResults });
+                toolOutput = JsonConvert.SerializeObject(new { results = imageResults.Select(result => result.RevisedPrompt).ToList() });
             }
             catch (Exception e)
             {

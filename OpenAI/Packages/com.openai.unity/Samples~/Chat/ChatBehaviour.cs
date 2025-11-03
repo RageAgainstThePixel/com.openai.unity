@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -125,7 +126,7 @@ namespace OpenAI.Samples.Chat
 
             try
             {
-                var request = new ChatRequest(conversation.Messages, tools: assistantTools);
+                var request = new ChatRequest(conversation.Messages, model: Model.GPT5_Mini, tools: assistantTools);
                 var response = await openAI.ChatEndpoint.StreamCompletionAsync(request, resultHandler: deltaResponse =>
                 {
                     if (deltaResponse?.FirstChoice?.Delta == null) { return; }
@@ -151,7 +152,7 @@ namespace OpenAI.Samples.Chat
                     case OperationCanceledException:
                         break;
                     default:
-                        Debug.LogError(e);
+                        Debug.LogException(e);
                         break;
                 }
             }
@@ -244,16 +245,19 @@ namespace OpenAI.Samples.Chat
         {
             text = text.Replace("![Image](output.jpg)", string.Empty);
             if (string.IsNullOrWhiteSpace(text)) { return; }
-            var request = new SpeechRequest(input: text, model: Model.TTS_1, voice: voice, responseFormat: SpeechResponseFormat.PCM);
+            var request = new SpeechRequest(input: text, model: Model.TTS_GPT_4o_Mini, voice: voice, responseFormat: SpeechResponseFormat.PCM);
             var stopwatch = Stopwatch.StartNew();
-            var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(request, partialClip =>
-            {
-                streamAudioSource.BufferCallback(partialClip.AudioSamples);
-            }, cancellationToken);
+            using var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(
+                request,
+                partialClip => streamAudioSource.SampleCallbackAsync(partialClip.AudioSamples),
+                cancellationToken)
+                .ConfigureAwait(true);
             var playbackTime = speechClip.Length - (float)stopwatch.Elapsed.TotalSeconds + 0.1f;
 
-            await Awaiters.DelayAsync(TimeSpan.FromSeconds(playbackTime), cancellationToken).ConfigureAwait(true);
-            ((AudioSource)streamAudioSource).clip = speechClip.AudioClip;
+            if (playbackTime > 0)
+            {
+                await Awaiters.DelayAsync(playbackTime, cancellationToken).ConfigureAwait(true);
+            }
 
             if (enableDebug)
             {
@@ -317,7 +321,7 @@ namespace OpenAI.Samples.Chat
             try
             {
                 recordButton.interactable = false;
-                var request = new AudioTranscriptionRequest(clip, temperature: 0.1f, language: "en");
+                var request = new AudioTranscriptionRequest(clip, model: Model.Transcribe_GPT_4o_Mini, temperature: 0.1f, language: "en");
                 var userInput = await openAI.AudioEndpoint.CreateTranscriptionTextAsync(request, destroyCancellationToken);
 
                 if (enableDebug)
