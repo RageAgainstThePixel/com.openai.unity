@@ -2,9 +2,11 @@
 
 using Newtonsoft.Json;
 using System;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Scripting;
 using Utilities.Audio;
+using Utilities.Extensions;
 
 namespace OpenAI.Realtime
 {
@@ -23,7 +25,7 @@ namespace OpenAI.Realtime
     {
         [Preserve]
         public InputAudioBufferAppendRequest(AudioClip audioClip)
-            => Audio = Convert.ToBase64String(audioClip.EncodeToPCM(outputSampleRate: 24000));
+            => Audio = Convert.ToBase64String(audioClip.EncodeToPCM(outputSampleRate: 24000).ToArray());
 
         [Preserve]
         public InputAudioBufferAppendRequest(ReadOnlyMemory<byte> audioData)
@@ -31,17 +33,18 @@ namespace OpenAI.Realtime
         {
         }
 
-        [Preserve]
-        public InputAudioBufferAppendRequest(ReadOnlySpan<byte> audioData)
+        public InputAudioBufferAppendRequest(NativeArray<byte> audioData)
+            : this(audioData.AsSpan())
         {
-            Audio = Convert.ToBase64String(audioData);
         }
 
         [Preserve]
+        public InputAudioBufferAppendRequest(ReadOnlySpan<byte> audioData)
+            => Audio = Convert.ToBase64String(audioData);
+
+        [Preserve]
         public InputAudioBufferAppendRequest(byte[] audioData)
-        {
-            Audio = Convert.ToBase64String(audioData);
-        }
+            => Audio = Convert.ToBase64String(audioData);
 
         /// <inheritdoc />
         [Preserve]

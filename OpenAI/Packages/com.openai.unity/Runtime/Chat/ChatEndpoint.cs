@@ -159,7 +159,7 @@ namespace OpenAI.Chat
                 {
                     Debug.LogError($"{ssEvent}\n{e}");
                 }
-            }, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            }, new RestParameters(client.DefaultRequestHeaders, debug: EnableDebug), cancellationToken);
             response.Validate(EnableDebug);
             if (chatResponse == null) { return null; }
             chatResponse.SetResponseData(response, client);
