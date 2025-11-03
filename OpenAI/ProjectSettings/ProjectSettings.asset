@@ -162,6 +162,7 @@ PlayerSettings:
     Lumin: com.openai.unity
     Standalone: com.openai.unity
     WebGL: com.openai.unity
+    Windows Store Apps: com.openai.unity
     iPhone: com.openai.unity
   buildNumber:
     Standalone: 0
@@ -815,14 +816,81 @@ PlayerSettings:
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: com.openai.unity
-  metroPackageVersion: 8.4.0.0
+  metroPackageVersion: 8.7.4.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
   metroCertificateIssuer: 
   metroCertificateNotAfter: 0000000000000000
   metroApplicationDescription: com.openai.unity
-  wsaImages: {}
+  wsaImages:
+    65552: Assets/Icons/WSAPlayer/PackageLogoTarget16.png
+    65560: Assets/Icons/WSAPlayer/PackageLogoTarget24.png
+    65568: Assets/Icons/WSAPlayer/PackageLogoTarget32.png
+    65584: Assets/Icons/WSAPlayer/PackageLogoTarget48.png
+    65636: Assets/Icons/WSAPlayer/PackageLogo_100.png
+    65661: Assets/Icons/WSAPlayer/PackageLogo_125.png
+    65686: Assets/Icons/WSAPlayer/PackageLogo_150.png
+    65736: Assets/Icons/WSAPlayer/PackageLogo_200.png
+    65792: Assets/Icons/WSAPlayer/PackageLogoTarget256.png
+    65936: Assets/Icons/WSAPlayer/PackageLogo_400.png
+    131088: Assets/Icons/WSAPlayer/SplashScreenImageTarget16.png
+    131096: Assets/Icons/WSAPlayer/SplashScreenImageTarget24.png
+    131104: Assets/Icons/WSAPlayer/SplashScreenImageTarget32.png
+    131120: Assets/Icons/WSAPlayer/SplashScreenImageTarget48.png
+    131172: Assets/Icons/WSAPlayer/SplashScreenImage_100.png
+    131272: Assets/Icons/WSAPlayer/SplashScreenImage_200.png
+    131328: Assets/Icons/WSAPlayer/SplashScreenImageTarget256.png
+    2031632: Assets/Icons/WSAPlayer/UWPSquare44x44LogoTarget16.png
+    2031640: Assets/Icons/WSAPlayer/UWPSquare44x44LogoTarget24.png
+    2031648: Assets/Icons/WSAPlayer/UWPSquare44x44LogoTarget32.png
+    2031664: Assets/Icons/WSAPlayer/UWPSquare44x44LogoTarget48.png
+    2031716: Assets/Icons/WSAPlayer/UWPSquare44x44Logo_100.png
+    2031741: Assets/Icons/WSAPlayer/UWPSquare44x44Logo_125.png
+    2031766: Assets/Icons/WSAPlayer/UWPSquare44x44Logo_150.png
+    2031816: Assets/Icons/WSAPlayer/UWPSquare44x44Logo_200.png
+    2031872: Assets/Icons/WSAPlayer/UWPSquare44x44LogoTarget256.png
+    2032016: Assets/Icons/WSAPlayer/UWPSquare44x44Logo_400.png
+    2097168: Assets/Icons/WSAPlayer/UWPSquare71x71LogoTarget16.png
+    2097176: Assets/Icons/WSAPlayer/UWPSquare71x71LogoTarget24.png
+    2097184: Assets/Icons/WSAPlayer/UWPSquare71x71LogoTarget32.png
+    2097200: Assets/Icons/WSAPlayer/UWPSquare71x71LogoTarget48.png
+    2097252: Assets/Icons/WSAPlayer/UWPSquare71x71Logo_100.png
+    2097277: Assets/Icons/WSAPlayer/UWPSquare71x71Logo_125.png
+    2097302: Assets/Icons/WSAPlayer/UWPSquare71x71Logo_150.png
+    2097352: Assets/Icons/WSAPlayer/UWPSquare71x71Logo_200.png
+    2097408: Assets/Icons/WSAPlayer/UWPSquare71x71LogoTarget256.png
+    2097552: Assets/Icons/WSAPlayer/UWPSquare71x71Logo_400.png
+    2162704: Assets/Icons/WSAPlayer/UWPSquare150x150LogoTarget16.png
+    2162712: Assets/Icons/WSAPlayer/UWPSquare150x150LogoTarget24.png
+    2162720: Assets/Icons/WSAPlayer/UWPSquare150x150LogoTarget32.png
+    2162736: Assets/Icons/WSAPlayer/UWPSquare150x150LogoTarget48.png
+    2162788: Assets/Icons/WSAPlayer/UWPSquare150x150Logo_100.png
+    2162813: Assets/Icons/WSAPlayer/UWPSquare150x150Logo_125.png
+    2162838: Assets/Icons/WSAPlayer/UWPSquare150x150Logo_150.png
+    2162888: Assets/Icons/WSAPlayer/UWPSquare150x150Logo_200.png
+    2162944: Assets/Icons/WSAPlayer/UWPSquare150x150LogoTarget256.png
+    2163088: Assets/Icons/WSAPlayer/UWPSquare150x150Logo_400.png
+    2228240: Assets/Icons/WSAPlayer/UWPSquare310x310LogoTarget16.png
+    2228248: Assets/Icons/WSAPlayer/UWPSquare310x310LogoTarget24.png
+    2228256: Assets/Icons/WSAPlayer/UWPSquare310x310LogoTarget32.png
+    2228272: Assets/Icons/WSAPlayer/UWPSquare310x310LogoTarget48.png
+    2228324: Assets/Icons/WSAPlayer/UWPSquare310x310Logo_100.png
+    2228349: Assets/Icons/WSAPlayer/UWPSquare310x310Logo_125.png
+    2228374: Assets/Icons/WSAPlayer/UWPSquare310x310Logo_150.png
+    2228424: Assets/Icons/WSAPlayer/UWPSquare310x310Logo_200.png
+    2228480: Assets/Icons/WSAPlayer/UWPSquare310x310LogoTarget256.png
+    2228624: Assets/Icons/WSAPlayer/UWPSquare310x310Logo_400.png
+    2293776: Assets/Icons/WSAPlayer/UWPWide310x150LogoTarget16.png
+    2293784: Assets/Icons/WSAPlayer/UWPWide310x150LogoTarget24.png
+    2293792: Assets/Icons/WSAPlayer/UWPWide310x150LogoTarget32.png
+    2293808: Assets/Icons/WSAPlayer/UWPWide310x150LogoTarget48.png
+    2293860: Assets/Icons/WSAPlayer/UWPWide310x150Logo_100.png
+    2293885: Assets/Icons/WSAPlayer/UWPWide310x150Logo_125.png
+    2293910: Assets/Icons/WSAPlayer/UWPWide310x150Logo_150.png
+    2293960: Assets/Icons/WSAPlayer/UWPWide310x150Logo_200.png
+    2294016: Assets/Icons/WSAPlayer/UWPWide310x150LogoTarget256.png
+    2294160: Assets/Icons/WSAPlayer/UWPWide310x150Logo_400.png
   metroTileShortName: OpenAI
   metroTileShowName: 0
   metroMediumTileShowName: 0
@@ -928,7 +996,7 @@ PlayerSettings:
   luminIsChannelApp: 0
   luminVersion:
     m_VersionCode: 1
-    m_VersionName: 8.4.0
+    m_VersionName: 8.7.4
   apiCompatibilityLevel: 3
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
