@@ -1,4 +1,4 @@
-name: Unity Build And Test
+name: Unity
 on:
   schedule:
     - cron: '0 0 * * 0' # Every Sunday at midnight
