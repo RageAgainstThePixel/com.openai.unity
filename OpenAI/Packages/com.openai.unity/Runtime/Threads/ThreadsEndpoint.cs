@@ -272,7 +272,7 @@ namespace OpenAI.Threads
                 }
             }
 
-            request.Stream = streamEventHandler != null;
+            request!.Stream = streamEventHandler != null;
             var endpoint = GetUrl($"/{threadId}/runs");
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
 
@@ -603,7 +603,7 @@ namespace OpenAI.Threads
                     await streamEventHandler.Invoke(@event, serverSentEvent);
                 }
                 // ReSharper restore AccessToModifiedClosure
-            }, new RestParameters(headers), cancellationToken);
+            }, new RestParameters(headers, debug: EnableDebug), cancellationToken);
             response.Validate(EnableDebug);
             if (run == null) { return null; }
             run = await run.WaitForStatusChangeAsync(timeout: -1, cancellationToken: cancellationToken);

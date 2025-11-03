@@ -18,7 +18,7 @@ namespace OpenAI.Audio
             CachePath = cachePath;
             this.audioClip = audioClip;
             SampleRate = audioClip.frequency;
-            AudioData = audioClip.EncodeToPCM(allocator: Allocator.Persistent);
+            audioData = audioClip.EncodeToPCM(allocator: Allocator.Persistent);
         }
 
         [Preserve]
@@ -26,11 +26,11 @@ namespace OpenAI.Audio
         {
             Name = name;
             CachePath = cachePath;
-            AudioData = new NativeArray<byte>(audioData, Allocator.Persistent);
+            this.audioData = new NativeArray<byte>(audioData, Allocator.Persistent);
             SampleRate = sampleRate;
         }
 
-        ~SpeechClip() => Dispose(false);
+        ~SpeechClip() => Dispose();
 
         [Preserve]
         public string Name { get; }
@@ -39,11 +39,29 @@ namespace OpenAI.Audio
         public string CachePath { get; }
 
         [Preserve]
-        public NativeArray<byte> AudioData { get; }
+        public NativeArray<byte> AudioData
+            => audioData ??= new NativeArray<byte>(0, Allocator.Persistent);
+        private NativeArray<byte>? audioData;
 
         [Preserve]
         public NativeArray<float> AudioSamples
-            => audioSamples ??= PCMEncoder.Decode(AudioData, inputSampleRate: SampleRate, outputSampleRate: AudioSettings.outputSampleRate);
+        {
+            get
+            {
+                if (!audioData.HasValue)
+                {
+                    return new NativeArray<float>(0, Allocator.Persistent);
+                }
+
+                audioSamples ??= PCMEncoder.Decode(
+                    pcmData: AudioData,
+                    inputSampleRate: SampleRate,
+                    outputSampleRate: AudioSettings.outputSampleRate,
+                    allocator: Allocator.Persistent);
+                return audioSamples.Value;
+            }
+        }
+
         private NativeArray<float>? audioSamples;
 
         [Preserve]
@@ -54,7 +72,7 @@ namespace OpenAI.Audio
         {
             get
             {
-                if (audioClip == null)
+                if (audioClip == null && (audioSamples.HasValue || audioData.HasValue))
                 {
                     audioClip = AudioClip.Create(Name, AudioSamples.Length, 1, AudioSettings.outputSampleRate, false);
 #if UNITY_6000_0_OR_NEWER
@@ -70,7 +88,23 @@ namespace OpenAI.Audio
         private AudioClip audioClip;
 
         [Preserve]
-        public float Length => AudioSamples.Length / (float)AudioSettings.outputSampleRate;
+        public float Length
+        {
+            get
+            {
+                if (audioClip != null)
+                {
+                    return audioClip.length;
+                }
+
+                if (!audioSamples.HasValue || !audioData.HasValue)
+                {
+                    return 0;
+                }
+
+                return AudioSamples.Length / (float)AudioSettings.outputSampleRate;
+            }
+        }
 
         [Preserve]
         public static implicit operator AudioClip(SpeechClip clip) => clip?.AudioClip;
@@ -79,20 +113,12 @@ namespace OpenAI.Audio
         public static implicit operator string(SpeechClip clip) => clip?.CachePath;
 
         [Preserve]
-        private void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                audioSamples?.Dispose();
-                AudioData.Dispose();
-            }
-        }
-
-        [Preserve]
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            audioSamples?.Dispose();
+            audioSamples = null;
+            audioData?.Dispose();
+            audioData = null;
         }
     }
 }

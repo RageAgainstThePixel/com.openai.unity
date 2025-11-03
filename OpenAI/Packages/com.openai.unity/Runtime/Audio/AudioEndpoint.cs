@@ -27,11 +27,11 @@ namespace OpenAI.Audio
 
         private static readonly object mutex = new();
 
-        [Obsolete("use GetSpeechAsync")]
+        [Obsolete("use GetSpeechAsync with Func<SpeechClip, Task> overload")]
         public async Task<Tuple<string, AudioClip>> CreateSpeechAsync(SpeechRequest request, CancellationToken cancellationToken = default)
             => await CreateSpeechStreamAsync(request, null, cancellationToken);
 
-        [Obsolete("use GetSpeechAsync")]
+        [Obsolete("use GetSpeechAsync with Func<SpeechClip, Task> overload")]
         public async Task<Tuple<string, AudioClip>> CreateSpeechStreamAsync(SpeechRequest request, Action<AudioClip> partialClipCallback, CancellationToken cancellationToken = default)
         {
             using var result = await GetSpeechAsync(request, speechClip =>
@@ -39,6 +39,16 @@ namespace OpenAI.Audio
                 partialClipCallback.Invoke(speechClip.AudioClip);
             }, cancellationToken);
             return Tuple.Create(result.CachePath, result.AudioClip);
+        }
+
+        [Obsolete("use GetSpeechAsync with Func<SpeechClip, Task> overload")]
+        public async Task<SpeechClip> GetSpeechAsync(SpeechRequest request, Action<SpeechClip> partialClipCallback, CancellationToken cancellationToken = default)
+        {
+            return await GetSpeechAsync(request, partialClipCallback: clip =>
+            {
+                partialClipCallback?.Invoke(clip);
+                return Task.CompletedTask;
+            }, cancellationToken);
         }
 
         /// <summary>
@@ -49,7 +59,7 @@ namespace OpenAI.Audio
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="SpeechClip"/></returns>
         [Function("Generates audio from the input text.")]
-        public async Task<SpeechClip> GetSpeechAsync(SpeechRequest request, Action<SpeechClip> partialClipCallback = null, CancellationToken cancellationToken = default)
+        public async Task<SpeechClip> GetSpeechAsync(SpeechRequest request, Func<SpeechClip, Task> partialClipCallback = null, CancellationToken cancellationToken = default)
         {
             if (partialClipCallback != null && request.ResponseFormat != SpeechResponseFormat.PCM)
             {
@@ -86,13 +96,22 @@ namespace OpenAI.Audio
                 case SpeechResponseFormat.PCM:
                 {
                     var part = 0;
-                    var pcmResponse = await Rest.PostAsync(GetUrl("/speech"), payload, partialResponse =>
+                    var pcmResponse = await Rest.PostAsync(GetUrl("/speech"), payload, async partialResponse =>
                     {
-                        if (partialResponse.Data.Length > 0)
+                        if (partialClipCallback != null && partialResponse.Data.Length > 0)
                         {
-                            partialClipCallback?.Invoke(new SpeechClip($"{clipName}_{++part}", null, partialResponse.Data));
+                            var partialClip = new SpeechClip($"{clipName}_{++part}", null, partialResponse.Data);
+
+                            try
+                            {
+                                await partialClipCallback(partialClip).ConfigureAwait(false);
+                            }
+                            finally
+                            {
+                                partialClip.Dispose();
+                            }
                         }
-                    }, 8192, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+                    }, 8192, new RestParameters(client.DefaultRequestHeaders, debug: EnableDebug), cancellationToken);
                     pcmResponse.Validate(EnableDebug);
 
                     if (pcmResponse.Data.Length == 0)
@@ -109,7 +128,7 @@ namespace OpenAI.Audio
                     audioResponse.Validate(EnableDebug);
                     await File.WriteAllBytesAsync(cachedPath, audioResponse.Data, cancellationToken).ConfigureAwait(true);
                     var audioType = request.ResponseFormat == SpeechResponseFormat.MP3 ? AudioType.MPEG : AudioType.WAV;
-                    var finalClip = await Rest.DownloadAudioClipAsync(cachedPath, audioType, fileName: clipName, cancellationToken: cancellationToken);
+                    var finalClip = await Rest.DownloadAudioClipAsync(cachedPath, audioType, fileName: clipName, parameters: new RestParameters(debug: EnableDebug), cancellationToken: cancellationToken);
                     return new SpeechClip(clipName, cachedPath, finalClip);
                 }
             }

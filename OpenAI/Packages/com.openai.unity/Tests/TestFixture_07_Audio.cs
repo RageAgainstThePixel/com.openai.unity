@@ -181,8 +181,12 @@ namespace OpenAI.Tests
             var request = new SpeechRequest(
                 input: "Hello world!",
                 responseFormat: SpeechResponseFormat.PCM);
-            var clipQueue = new ConcurrentQueue<SpeechClip>();
-            using var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request, partialClip => clipQueue.Enqueue(partialClip));
+            var clipQueue = new ConcurrentQueue<AudioClip>();
+            using var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request, partialClip =>
+            {
+                clipQueue.Enqueue(partialClip);
+                return Task.CompletedTask;
+            });
             Debug.Log(speechClip.CachePath);
             Assert.IsNotEmpty(speechClip.AudioSamples);
             Assert.IsNotNull(speechClip.AudioClip);
@@ -200,8 +204,12 @@ namespace OpenAI.Tests
                 voice: Voice.Fable,
                 responseFormat: SpeechResponseFormat.PCM,
                 instructions: instructions);
-            var clipQueue = new ConcurrentQueue<SpeechClip>();
-            using var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request, partialClip => clipQueue.Enqueue(partialClip));
+            var clipQueue = new ConcurrentQueue<AudioClip>();
+            using var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request, partialClip =>
+            {
+                clipQueue.Enqueue(partialClip);
+                return Task.CompletedTask;
+            });
             Debug.Log(speechClip.CachePath);
             Assert.IsNotEmpty(speechClip.AudioSamples);
             Assert.IsNotNull(speechClip.AudioClip);
