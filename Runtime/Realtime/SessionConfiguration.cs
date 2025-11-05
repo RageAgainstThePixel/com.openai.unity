@@ -46,7 +46,6 @@ namespace OpenAI.Realtime
                 maxResponseOutputTokens,
                 expiresAfter)
         {
-
         }
 
         [Obsolete("Use new ctor overload")]
@@ -222,7 +221,7 @@ namespace OpenAI.Realtime
         /// </summary>
         [Preserve]
         [JsonProperty("client_secret", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public ClientSecret ClientSecret { get; private set; }
+        public ClientSecret ClientSecret { get; internal set; }
 
         /// <summary>
         /// The set of modalities the model can respond with.
