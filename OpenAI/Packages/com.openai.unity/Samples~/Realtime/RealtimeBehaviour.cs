@@ -363,7 +363,6 @@ namespace OpenAI.Samples.Realtime
                     if (conversationItemCreated.Item.Role is Role.Assistant or Role.User)
                     {
                         var newContent = AddNewTextMessageContent(conversationItemCreated.Item.Role);
-
                         var textContent = conversationItemCreated.Item.Content.FirstOrDefault(realtimeContent
                             => realtimeContent.Type is RealtimeContentType.InputText or RealtimeContentType.Text);
 
