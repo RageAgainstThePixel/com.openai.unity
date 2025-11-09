@@ -16,8 +16,8 @@ namespace OpenAI.Realtime
         [JsonConstructor]
         internal SemanticVAD(
             [JsonProperty("type")] TurnDetectionType type,
-            [JsonProperty("create_response")] bool createResponse,
-            [JsonProperty("interrupt_response")] bool interruptResponse,
+            [JsonProperty("create_response")] bool? createResponse,
+            [JsonProperty("interrupt_response")] bool? interruptResponse,
             [JsonProperty("eagerness")] VAD_Eagerness eagerness)
         {
             Type = type;
@@ -32,11 +32,11 @@ namespace OpenAI.Realtime
 
         [Preserve]
         [JsonProperty("create_response", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool CreateResponse { get; private set; }
+        public bool? CreateResponse { get; private set; }
 
         [Preserve]
         [JsonProperty("interrupt_response", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool InterruptResponse { get; private set; }
+        public bool? InterruptResponse { get; private set; }
 
         [Preserve]
         [JsonProperty("eagerness", DefaultValueHandling = DefaultValueHandling.Ignore)]

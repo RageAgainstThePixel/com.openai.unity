@@ -7,8 +7,8 @@ namespace OpenAI.Realtime
     public sealed class ServerVAD : IVoiceActivityDetectionSettings
     {
         public ServerVAD(
-            bool createResponse = true,
-            bool interruptResponse = true,
+            bool? createResponse = true,
+            bool? interruptResponse = true,
             int? prefixPadding = null,
             int? silenceDuration = null,
             float? detectionThreshold = null)
@@ -23,8 +23,8 @@ namespace OpenAI.Realtime
         [JsonConstructor]
         internal ServerVAD(
             [JsonProperty("type")] TurnDetectionType type,
-            [JsonProperty("create_response")] bool createResponse,
-            [JsonProperty("interrupt_response")] bool interruptResponse,
+            [JsonProperty("create_response")] bool? createResponse,
+            [JsonProperty("interrupt_response")] bool? interruptResponse,
             [JsonProperty("prefix_padding_ms")] int? prefixPadding,
             [JsonProperty("silence_duration_ms")] int? silenceDuration,
             [JsonProperty("threshold")] float? detectionThreshold)
@@ -43,11 +43,11 @@ namespace OpenAI.Realtime
 
         [Preserve]
         [JsonProperty("create_response", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool CreateResponse { get; private set; }
+        public bool? CreateResponse { get; private set; }
 
         [Preserve]
         [JsonProperty("interrupt_response", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool InterruptResponse { get; private set; }
+        public bool? InterruptResponse { get; private set; }
 
         [Preserve]
         [JsonProperty("prefix_padding_ms", DefaultValueHandling = DefaultValueHandling.Ignore)]
