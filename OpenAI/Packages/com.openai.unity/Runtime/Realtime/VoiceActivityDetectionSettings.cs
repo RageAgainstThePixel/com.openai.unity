@@ -24,7 +24,7 @@ namespace OpenAI.Realtime
             [JsonProperty("threshold")] float? detectionThreshold = null,
             [JsonProperty("prefix_padding_ms")] int? prefixPadding = null,
             [JsonProperty("silence_duration_ms")] int? silenceDuration = null,
-            [JsonProperty("create_response")] bool createResponse = true)
+            [JsonProperty("create_response")] bool? createResponse = true)
         {
             switch (type)
             {
@@ -52,10 +52,10 @@ namespace OpenAI.Realtime
 
         [Preserve]
         [JsonProperty("create_response", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool CreateResponse { get; private set; }
+        public bool? CreateResponse { get; private set; }
 
         [JsonProperty("interrupt_response", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public bool InterruptResponse { get; private set; }
+        public bool? InterruptResponse { get; private set; }
 
         [Preserve]
         [JsonProperty("prefix_padding_ms", DefaultValueHandling = DefaultValueHandling.Ignore)]
