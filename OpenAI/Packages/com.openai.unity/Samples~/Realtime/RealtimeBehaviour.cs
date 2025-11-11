@@ -66,7 +66,7 @@ namespace OpenAI.Samples.Realtime
         private float playbackTimeRemaining;
         private bool isAudioResponseInProgress;
 
-        private bool CanRecord => !isMuted && !isAudioResponseInProgress && playbackTimeRemaining == 0f;
+        private bool CanRecord => !isMuted && !isAudioResponseInProgress; // && playbackTimeRemaining == 0f;
 
         private readonly Dictionary<string, TextMeshProUGUI> responseList = new();
 
@@ -112,6 +112,9 @@ namespace OpenAI.Samples.Realtime
                         model: Model.GPT4oRealtimeMini,
                         voice: voice,
                         inputAudioTranscriptionSettings: new InputAudioTranscriptionSettings(Model.Transcribe_GPT_4o_Mini),
+                        turnDetectionSettings: new SemanticVAD(
+                            false, //<- when false model doesn't response at all. only 'true' works
+                            true, VAD_Eagerness.Auto),
                         instructions: systemPrompt,
                         tools: tools),
                     destroyCancellationToken);
@@ -380,6 +383,12 @@ namespace OpenAI.Samples.Realtime
                     {
                         ProcessToolCall(functionCallResponse);
                     }
+
+                    break;
+                case InputAudioBufferStartedResponse inputAudioBufferStarted:
+                    streamAudioSource.ClearBuffer();
+                    playbackTimeRemaining = 0f;
+                    isAudioResponseInProgress = false;
 
                     break;
             }
