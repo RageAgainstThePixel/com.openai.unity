@@ -9,7 +9,6 @@ using OpenAI.Images;
 using Utilities.Async;
 using System;
 
-
 #if !PLATFORM_WEBGL
 using System.IO;
 using Utilities.WebRequestRest;
@@ -19,7 +18,7 @@ namespace OpenAI.Extensions
 {
     public static class TextureExtensions
     {
-        internal static async Task<(Texture2D, string)> ConvertFromBase64Async(string b64, bool debug = false, CancellationToken cancellationToken = default)
+        internal static async Task<(Texture2D, string)> ConvertFromBase64Async(string b64, bool debug, CancellationToken cancellationToken)
         {
             using var imageData = NativeArrayExtensions.FromBase64String(b64, Allocator.Persistent);
 #if PLATFORM_WEBGL
