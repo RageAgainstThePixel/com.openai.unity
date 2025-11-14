@@ -224,7 +224,7 @@ namespace OpenAI.Tests
                 {
                     Debug.Log(result.ToString());
                     Assert.IsNotNull(result.Texture);
-                    Assert.IsNotNull(result.CachedPathUri);
+                    Assert.IsNull(result.CachedPathUri);
                 }
             }
             catch (Exception e)
@@ -252,7 +252,7 @@ namespace OpenAI.Tests
                 {
                     Debug.Log(result.ToString());
                     Assert.IsNotNull(result.Texture);
-                    Assert.IsNotNull(result.CachedPathUri);
+                    Assert.IsNull(result.CachedPathUri);
                 }
             }
             catch (Exception e)

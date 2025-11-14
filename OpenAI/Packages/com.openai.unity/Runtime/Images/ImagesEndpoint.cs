@@ -181,12 +181,10 @@ namespace OpenAI.Images
 
             await Rest.ValidateCacheDirectoryAsync();
 
-            var downloads = imagesResponse.Results.Select(DownloadAsync).ToList();
-
             Task<(Texture2D, Uri)> DownloadAsync(ImageResult result)
                 => result.LoadTextureAsync(debug: EnableDebug, cancellationToken);
 
-            await Task.WhenAll(downloads).ConfigureAwait(true);
+            await Task.WhenAll(imagesResponse.Results.Select(DownloadAsync).ToList()).ConfigureAwait(true);
 
             for (var i = 0; i < imagesResponse.Results.Count; i++)
             {
