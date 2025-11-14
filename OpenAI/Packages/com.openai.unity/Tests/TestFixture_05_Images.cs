@@ -9,6 +9,7 @@ using System.IO;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
+using OpenAI.Extensions;
 
 namespace OpenAI.Tests
 {
@@ -44,12 +45,10 @@ namespace OpenAI.Tests
                     var result = imageResults[i];
                     Assert.IsNotNull(result);
                     Assert.IsNotNull(result.Texture);
+                    Assert.IsNotNull(result.CachedPathUri);
                     Assert.IsFalse(string.IsNullOrWhiteSpace(result.B64_Json));
-                    var imageBytes = Convert.FromBase64String(result.B64_Json);
-                    Assert.IsNotNull(imageBytes);
                     var path = Path.Combine(testDirectory, $"{nameof(Test_01_01_GenerateImages)}-{i}-{DateTime.UtcNow:yyyyMMddHHmmss}.jpeg");
-                    await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
-                    await fileStream.WriteAsync(imageBytes, 0, imageBytes.Length);
+                    File.Copy(result.CachedPathUri.LocalPath, path, true);
                 }
             }
             catch (Exception e)
@@ -82,12 +81,9 @@ namespace OpenAI.Tests
                     var result = imageResults[i];
                     Assert.IsNotNull(result);
                     Assert.IsNotNull(result.Texture);
-                    Assert.IsFalse(string.IsNullOrWhiteSpace(result.B64_Json));
-                    var imageBytes = Convert.FromBase64String(result.B64_Json);
-                    Assert.IsNotNull(imageBytes);
+                    Assert.IsNotNull(result.CachedPathUri);
                     var path = Path.Combine(testDirectory, $"{nameof(Test_02_01_CreateImageEdit_Path)}-{i}-{DateTime.UtcNow:yyyyMMddHHmmss}.png");
-                    await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
-                    await fileStream.WriteAsync(imageBytes, 0, imageBytes.Length);
+                    File.Copy(result.CachedPathUri.LocalPath, path, true);
                 }
             }
             catch (Exception e)
@@ -122,12 +118,10 @@ namespace OpenAI.Tests
                     var result = imageResults[i];
                     Assert.IsNotNull(result);
                     Assert.IsNotNull(result.Texture);
+                    Assert.IsNotNull(result.CachedPathUri);
                     Assert.IsFalse(string.IsNullOrWhiteSpace(result.B64_Json));
-                    var imageBytes = Convert.FromBase64String(result.B64_Json);
-                    Assert.IsNotNull(imageBytes);
                     var path = Path.Combine(testDirectory, $"{nameof(Test_02_02_CreateImageEdit_Texture)}-{i}-{DateTime.UtcNow:yyyyMMddHHmmss}.png");
-                    await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
-                    await fileStream.WriteAsync(imageBytes, 0, imageBytes.Length);
+                    File.Copy(result.CachedPathUri.LocalPath, path, true);
                 }
             }
             catch (Exception e)
@@ -159,12 +153,10 @@ namespace OpenAI.Tests
                     var result = imageResults[i];
                     Assert.IsNotNull(result);
                     Assert.IsNotNull(result.Texture);
+                    Assert.IsNotNull(result.CachedPathUri);
                     Assert.IsFalse(string.IsNullOrWhiteSpace(result.B64_Json));
-                    var imageBytes = Convert.FromBase64String(result.B64_Json);
-                    Assert.IsNotNull(imageBytes);
                     var path = Path.Combine(testDirectory, $"{nameof(Test_02_03_CreateImageEdit_MaskAsTransparency)}-{i}-{DateTime.UtcNow:yyyyMMddHHmmss}.png");
-                    await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
-                    await fileStream.WriteAsync(imageBytes, 0, imageBytes.Length);
+                    File.Copy(result.CachedPathUri.LocalPath, path, true);
                 }
             }
             catch (Exception e)
@@ -202,12 +194,10 @@ namespace OpenAI.Tests
                     var result = imageResults[i];
                     Assert.IsNotNull(result);
                     Assert.IsNotNull(result.Texture);
+                    Assert.IsNotNull(result.CachedPathUri);
                     Assert.IsFalse(string.IsNullOrWhiteSpace(result.B64_Json));
-                    var imageBytes = Convert.FromBase64String(result.B64_Json);
-                    Assert.IsNotNull(imageBytes);
                     var path = Path.Combine(testDirectory, $"{nameof(Test_02_04_CreateImageEdit_MultipleFiles)}-{i}-{DateTime.UtcNow:yyyyMMddHHmmss}.png");
-                    await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
-                    await fileStream.WriteAsync(imageBytes, 0, imageBytes.Length);
+                    File.Copy(result.CachedPathUri.LocalPath, path, true);
                 }
             }
             catch (Exception e)
@@ -232,8 +222,9 @@ namespace OpenAI.Tests
 
                 foreach (var result in imageResults)
                 {
-                    Assert.IsNotNull(result.Texture);
                     Debug.Log(result.ToString());
+                    Assert.IsNotNull(result.Texture);
+                    Assert.IsNotNull(result.CachedPathUri);
                 }
             }
             catch (Exception e)
@@ -261,6 +252,7 @@ namespace OpenAI.Tests
                 {
                     Debug.Log(result.ToString());
                     Assert.IsNotNull(result.Texture);
+                    Assert.IsNotNull(result.CachedPathUri);
                 }
             }
             catch (Exception e)
@@ -289,12 +281,10 @@ namespace OpenAI.Tests
                     var result = imageResults[i];
                     Assert.IsNotNull(result);
                     Assert.IsNotNull(result.Texture);
+                    Assert.IsNotNull(result.CachedPathUri);
                     Assert.IsFalse(string.IsNullOrWhiteSpace(result.B64_Json));
-                    var imageBytes = Convert.FromBase64String(result.B64_Json);
-                    Assert.IsNotNull(imageBytes);
                     var path = Path.Combine(testDirectory, $"{nameof(Test_03_03_CreateImageVariation_Texture_B64_Json)}-{i}-{DateTime.UtcNow:yyyyMMddHHmmss}.png");
-                    await using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
-                    await fileStream.WriteAsync(imageBytes, 0, imageBytes.Length);
+                    File.Copy(result.CachedPathUri.LocalPath, path, true);
                 }
             }
             catch (Exception e)
