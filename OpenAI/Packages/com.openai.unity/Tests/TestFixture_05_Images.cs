@@ -9,7 +9,6 @@ using System.IO;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
-using OpenAI.Extensions;
 
 namespace OpenAI.Tests
 {

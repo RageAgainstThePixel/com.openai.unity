@@ -9,7 +9,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using Utilities.Async;
 using Utilities.WebRequestRest;
 
 namespace OpenAI.Images
