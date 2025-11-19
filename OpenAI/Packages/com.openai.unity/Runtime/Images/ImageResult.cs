@@ -56,7 +56,12 @@ namespace OpenAI.Images
 
         [Preserve]
         [JsonIgnore]
-        public string CachedPath { get; internal set; }
+        [Obsolete("use CachedPathUri")]
+        public string CachedPath => CachedPathUri?.ToString();
+
+        [Preserve]
+        [JsonIgnore]
+        public Uri CachedPathUri { get; internal set; }
 
         [Preserve]
         [JsonIgnore]
@@ -75,9 +80,9 @@ namespace OpenAI.Images
         [Preserve]
         public override string ToString()
         {
-            if (!string.IsNullOrWhiteSpace(CachedPath))
+            if (CachedPathUri != null)
             {
-                return CachedPath;
+                return CachedPathUri.ToString();
             }
 
             if (!string.IsNullOrWhiteSpace(B64_Json))
