@@ -29,9 +29,9 @@ namespace OpenAI.Responses
         }
 
         [Preserve]
-        public TextContent(string text)
+        public TextContent(string text, ResponseContentType type = ResponseContentType.InputText)
         {
-            Type = ResponseContentType.InputText;
+            Type = type;
             Text = text;
         }
 
