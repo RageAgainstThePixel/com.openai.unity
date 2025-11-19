@@ -37,7 +37,7 @@ namespace OpenAI.Responses
 
         [Preserve]
         [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Include)]
-        public ResponseContentType Type { get; }
+        public ResponseContentType Type { get; internal set; }
 
         [Preserve]
         [JsonProperty("text", DefaultValueHandling = DefaultValueHandling.Ignore)]

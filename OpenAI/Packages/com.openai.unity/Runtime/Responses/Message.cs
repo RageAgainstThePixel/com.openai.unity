@@ -43,6 +43,11 @@ namespace OpenAI.Responses
         public Message(Role role, string text)
             : this(role, new TextContent(text))
         {
+            if (role == Role.Assistant)
+            {
+                TextContent textContent = (TextContent) content[0];
+                textContent.Type = ResponseContentType.OutputText;
+            }
         }
 
         [Preserve]
