@@ -29,15 +29,15 @@ namespace OpenAI.Responses
         }
 
         [Preserve]
-        public TextContent(string text)
+        public TextContent(string text, ResponseContentType type = ResponseContentType.InputText)
         {
-            Type = ResponseContentType.InputText;
+            Type = type;
             Text = text;
         }
 
         [Preserve]
         [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Include)]
-        public ResponseContentType Type { get; internal set; }
+        public ResponseContentType Type { get; }
 
         [Preserve]
         [JsonProperty("text", DefaultValueHandling = DefaultValueHandling.Ignore)]
