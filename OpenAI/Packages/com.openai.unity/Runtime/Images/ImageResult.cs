@@ -18,6 +18,12 @@ namespace OpenAI.Images
             [JsonProperty("revised_prompt")] string revisedPrompt)
         {
             Url = url;
+
+            if (!string.IsNullOrWhiteSpace(url))
+            {
+                Uri = new Uri(url);
+            }
+
             B64_Json = b64_json;
             RevisedPrompt = revisedPrompt;
         }
@@ -25,6 +31,10 @@ namespace OpenAI.Images
         [Preserve]
         [JsonProperty("url", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Url { get; private set; }
+
+        [Preserve]
+        [JsonIgnore]
+        public Uri Uri { get; }
 
         [Preserve]
         [JsonProperty("b64_json", DefaultValueHandling = DefaultValueHandling.Ignore)]

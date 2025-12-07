@@ -8,17 +8,17 @@ using Utilities.Extensions;
 using OpenAI.Images;
 using Utilities.Async;
 using System;
+using Utilities.WebRequestRest;
 
 #if !PLATFORM_WEBGL
 using System.IO;
-using Utilities.WebRequestRest;
 #endif
 
 namespace OpenAI.Extensions
 {
     public static class TextureExtensions
     {
-        internal static async Task<(Texture2D, string)> ConvertFromBase64Async(string b64, bool debug, CancellationToken cancellationToken)
+        internal static async Task<(Texture2D, Uri)> ConvertFromBase64Async(string b64, bool debug, CancellationToken cancellationToken)
         {
             using var imageData = NativeArrayExtensions.FromBase64String(b64, Allocator.Persistent);
 #if PLATFORM_WEBGL
@@ -27,8 +27,8 @@ namespace OpenAI.Extensions
             texture.LoadImage(imageData);
 #else
             texture.LoadImage(imageData.ToArray());
-#endif
-            return await Task.FromResult((texture, string.Empty));
+#endif // UNITY_6000_0_OR_NEWER
+            return await Task.FromResult((texture, null as Uri));
 #else
             if (!Rest.TryGetDownloadCacheItem(b64, out var localFilePath))
             {
@@ -39,8 +39,15 @@ namespace OpenAI.Extensions
 
             var texture = await Rest.DownloadTextureAsync(localFilePath, parameters: new RestParameters(debug: debug), cancellationToken: cancellationToken);
             Rest.TryGetDownloadCacheItem(b64, out var cachedPath);
-            return (texture, cachedPath);
-#endif
+            Uri cachedUri = null;
+
+            if (!string.IsNullOrWhiteSpace(cachedPath))
+            {
+                cachedUri = new Uri(cachedPath);
+            }
+
+            return (texture, cachedUri);
+#endif // !PLATFORM_WEBGL
         }
 
         /// <summary>
@@ -60,9 +67,9 @@ namespace OpenAI.Extensions
             {
                 if (!string.IsNullOrWhiteSpace(imageResult.B64_Json))
                 {
-                    var (texture, cachedPath) = await ConvertFromBase64Async(imageResult.B64_Json, debug, cancellationToken);
+                    var (texture, cachedUri) = await ConvertFromBase64Async(imageResult.B64_Json, debug, cancellationToken);
                     imageResult.Texture = texture;
-                    imageResult.CachedPathUri = new Uri(cachedPath);
+                    imageResult.CachedPathUri = cachedUri;
                 }
                 else
                 {
@@ -74,14 +81,14 @@ namespace OpenAI.Extensions
                         texture = await Rest.DownloadTextureAsync(imageResult.CachedPathUri, parameters: new RestParameters(debug: debug), cancellationToken: cancellationToken);
                         cachedPath = imageResult.CachedPathUri;
                     }
-                    else if (!string.IsNullOrWhiteSpace(imageResult.Url))
+                    else if (imageResult.Uri != null)
                     {
-                        texture = await Rest.DownloadTextureAsync(imageResult.Url, parameters: new RestParameters(debug: debug), cancellationToken: cancellationToken);
-                        cachedPath = Rest.TryGetDownloadCacheItem(new Uri(imageResult.Url), out var path) ? path : null;
+                        texture = await Rest.DownloadTextureAsync(imageResult.Uri, parameters: new RestParameters(debug: debug), cancellationToken: cancellationToken);
+                        cachedPath = Rest.TryGetDownloadCacheItem(imageResult.Uri, out var path) ? path : null;
                     }
                     else
                     {
-                        throw new System.Exception("ImageResult does not contain valid image data.");
+                        throw new Exception("ImageResult does not contain valid image data.");
                     }
 
                     imageResult.Texture = texture;
