@@ -77,7 +77,7 @@ namespace OpenAI.Extensions
                     else if (!string.IsNullOrWhiteSpace(imageResult.Url))
                     {
                         texture = await Rest.DownloadTextureAsync(imageResult.Url, parameters: new RestParameters(debug: debug), cancellationToken: cancellationToken);
-                        cachedPath = Rest.TryGetDownloadCacheItem(imageResult.Url, out var path) ? new Uri(path) : null;
+                        cachedPath = Rest.TryGetDownloadCacheItem(new Uri(imageResult.Url), out var path) ? path : null;
                     }
                     else
                     {
