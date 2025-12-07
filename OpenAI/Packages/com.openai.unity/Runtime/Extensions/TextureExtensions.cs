@@ -57,7 +57,7 @@ namespace OpenAI.Extensions
         /// <param name="debug">Optional, debug flag.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>
-        /// A tuple containing the converted <see cref="Texture2D"/> and the cached file path as a string.
+        /// A tuple containing the converted <see cref="Texture2D"/> and the cached file path as a <see cref="Uri"/>.
         /// </returns>
         public static async Task<(Texture2D, Uri)> LoadTextureAsync(this ImageResult imageResult, bool debug = false, CancellationToken cancellationToken = default)
         {
@@ -88,7 +88,7 @@ namespace OpenAI.Extensions
                     }
                     else
                     {
-                        throw new Exception("ImageResult does not contain valid image data.");
+                        throw new InvalidOperationException("ImageResult does not contain valid image data.");
                     }
 
                     imageResult.Texture = texture;
