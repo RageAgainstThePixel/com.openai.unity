@@ -9,7 +9,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using Utilities.Async;
 using Utilities.WebRequestRest;
 
 namespace OpenAI.Images
@@ -180,33 +179,15 @@ namespace OpenAI.Images
             }
 
             await Rest.ValidateCacheDirectoryAsync();
-            var downloads = imagesResponse.Results.Select(DownloadAsync).ToList();
 
-            async Task DownloadAsync(ImageResult result)
+            Task<(Texture2D, Uri)> DownloadAsync(ImageResult result)
+                => result.LoadTextureAsync(debug: EnableDebug, cancellationToken);
+
+            await Task.WhenAll(imagesResponse.Results.Select(DownloadAsync).ToList()).ConfigureAwait(true);
+
+            for (var i = 0; i < imagesResponse.Results.Count; i++)
             {
-                await Awaiters.UnityMainThread;
-
-                if (string.IsNullOrWhiteSpace(result.Url))
-                {
-                    var (texture, cachePath) = await TextureExtensions.ConvertFromBase64Async(result.B64_Json, EnableDebug, cancellationToken);
-                    result.Texture = texture;
-                    result.CachedPath = cachePath;
-                }
-                else
-                {
-                    result.Texture = await Rest.DownloadTextureAsync(result.Url, parameters: new RestParameters(debug: EnableDebug), cancellationToken: cancellationToken);
-
-                    if (Rest.TryGetDownloadCacheItem(result.Url, out var cachedPath))
-                    {
-                        result.CachedPath = cachedPath;
-                    }
-                }
-            }
-
-            await Task.WhenAll(downloads).ConfigureAwait(true);
-
-            foreach (var result in imagesResponse.Results)
-            {
+                var result = imagesResponse.Results[i];
                 result.CreatedAt = DateTimeOffset.FromUnixTimeSeconds(imagesResponse.CreatedAtUnixSeconds).UtcDateTime;
                 result.Background = imagesResponse.Background;
                 result.OutputFormat = imagesResponse.OutputFormat;

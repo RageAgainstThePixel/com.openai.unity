@@ -34,22 +34,21 @@ namespace OpenAI.Audio
         [Obsolete("use GetSpeechAsync with Func<SpeechClip, Task> overload")]
         public async Task<Tuple<string, AudioClip>> CreateSpeechStreamAsync(SpeechRequest request, Action<AudioClip> partialClipCallback, CancellationToken cancellationToken = default)
         {
-            using var result = await GetSpeechAsync(request, speechClip =>
+            using var result = await GetSpeechAsync(request, async speechClip =>
             {
                 partialClipCallback.Invoke(speechClip.AudioClip);
+                await Task.CompletedTask;
             }, cancellationToken);
             return Tuple.Create(result.CachePath, result.AudioClip);
         }
 
         [Obsolete("use GetSpeechAsync with Func<SpeechClip, Task> overload")]
         public async Task<SpeechClip> GetSpeechAsync(SpeechRequest request, Action<SpeechClip> partialClipCallback, CancellationToken cancellationToken = default)
-        {
-            return await GetSpeechAsync(request, partialClipCallback: clip =>
+            => await GetSpeechAsync(request, partialClipCallback: async clip =>
             {
                 partialClipCallback?.Invoke(clip);
-                return Task.CompletedTask;
+                await Task.CompletedTask;
             }, cancellationToken);
-        }
 
         /// <summary>
         /// Generates audio from the input text.
@@ -61,6 +60,11 @@ namespace OpenAI.Audio
         [Function("Generates audio from the input text.")]
         public async Task<SpeechClip> GetSpeechAsync(SpeechRequest request, Func<SpeechClip, Task> partialClipCallback = null, CancellationToken cancellationToken = default)
         {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
             if (partialClipCallback != null && request.ResponseFormat != SpeechResponseFormat.PCM)
             {
                 Debug.LogWarning("Speech streaming only supported with PCM response format. Overriding to PCM...");
@@ -77,7 +81,7 @@ namespace OpenAI.Audio
             var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
             string clipName;
 
-            if (string.IsNullOrEmpty(request?.Voice))
+            if (string.IsNullOrEmpty(request.Voice))
             {
                 throw new ArgumentNullException(nameof(request.Voice));
             }
@@ -89,7 +93,7 @@ namespace OpenAI.Audio
                 clipName = $"{voice}-{DateTime.UtcNow:yyyyMMddThhmmssfffff}.{ext}";
             }
 
-            Rest.TryGetDownloadCacheItem(clipName, out var cachedPath);
+            var cachePath = Rest.GetCacheItemPath(clipName);
 
             switch (request.ResponseFormat)
             {
@@ -101,15 +105,7 @@ namespace OpenAI.Audio
                         if (partialClipCallback != null && partialResponse.Data.Length > 0)
                         {
                             var partialClip = new SpeechClip($"{clipName}_{++part}", null, partialResponse.Data);
-
-                            try
-                            {
-                                await partialClipCallback(partialClip).ConfigureAwait(false);
-                            }
-                            finally
-                            {
-                                partialClip.Dispose();
-                            }
+                            await partialClipCallback(partialClip).ConfigureAwait(true);
                         }
                     }, 8192, new RestParameters(client.DefaultRequestHeaders, debug: EnableDebug), cancellationToken);
                     pcmResponse.Validate(EnableDebug);
@@ -119,17 +115,17 @@ namespace OpenAI.Audio
                         throw new Exception("No audio data received!");
                     }
 
-                    await File.WriteAllBytesAsync(cachedPath, pcmResponse.Data, cancellationToken).ConfigureAwait(true);
-                    return new SpeechClip(clipName, cachedPath, pcmResponse.Data);
+                    await File.WriteAllBytesAsync(cachePath, pcmResponse.Data, cancellationToken).ConfigureAwait(true);
+                    return new SpeechClip(clipName, cachePath, pcmResponse.Data);
                 }
                 default:
                 {
                     var audioResponse = await Rest.PostAsync(GetUrl("/speech"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
                     audioResponse.Validate(EnableDebug);
-                    await File.WriteAllBytesAsync(cachedPath, audioResponse.Data, cancellationToken).ConfigureAwait(true);
+                    await File.WriteAllBytesAsync(cachePath, audioResponse.Data, cancellationToken).ConfigureAwait(true);
                     var audioType = request.ResponseFormat == SpeechResponseFormat.MP3 ? AudioType.MPEG : AudioType.WAV;
-                    var finalClip = await Rest.DownloadAudioClipAsync(cachedPath, audioType, fileName: clipName, parameters: new RestParameters(debug: EnableDebug), cancellationToken: cancellationToken);
-                    return new SpeechClip(clipName, cachedPath, finalClip);
+                    var finalClip = await Rest.DownloadAudioClipAsync(cachePath, audioType, fileName: clipName, parameters: new RestParameters(debug: EnableDebug), cancellationToken: cancellationToken);
+                    return new SpeechClip(clipName, cachePath, finalClip);
                 }
             }
         }

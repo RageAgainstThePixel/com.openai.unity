@@ -182,10 +182,10 @@ namespace OpenAI.Tests
                 input: "Hello world!",
                 responseFormat: SpeechResponseFormat.PCM);
             var clipQueue = new ConcurrentQueue<AudioClip>();
-            using var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request, partialClip =>
+            using var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request, async partialClip =>
             {
                 clipQueue.Enqueue(partialClip);
-                return Task.CompletedTask;
+                await Task.CompletedTask;
             });
             Debug.Log(speechClip.CachePath);
             Assert.IsNotEmpty(speechClip.AudioSamples);
@@ -205,10 +205,10 @@ namespace OpenAI.Tests
                 responseFormat: SpeechResponseFormat.PCM,
                 instructions: instructions);
             var clipQueue = new ConcurrentQueue<AudioClip>();
-            using var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request, partialClip =>
+            using var speechClip = await OpenAIClient.AudioEndpoint.GetSpeechAsync(request, async partialClip =>
             {
                 clipQueue.Enqueue(partialClip);
-                return Task.CompletedTask;
+                await Task.CompletedTask;
             });
             Debug.Log(speechClip.CachePath);
             Assert.IsNotEmpty(speechClip.AudioSamples);

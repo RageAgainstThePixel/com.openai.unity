@@ -18,6 +18,12 @@ namespace OpenAI.Images
             [JsonProperty("revised_prompt")] string revisedPrompt)
         {
             Url = url;
+
+            if (!string.IsNullOrWhiteSpace(url))
+            {
+                Uri = new Uri(url);
+            }
+
             B64_Json = b64_json;
             RevisedPrompt = revisedPrompt;
         }
@@ -25,6 +31,10 @@ namespace OpenAI.Images
         [Preserve]
         [JsonProperty("url", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Url { get; private set; }
+
+        [Preserve]
+        [JsonIgnore]
+        public Uri Uri { get; }
 
         [Preserve]
         [JsonProperty("b64_json", DefaultValueHandling = DefaultValueHandling.Ignore)]
@@ -56,7 +66,12 @@ namespace OpenAI.Images
 
         [Preserve]
         [JsonIgnore]
-        public string CachedPath { get; internal set; }
+        [Obsolete("use CachedPathUri")]
+        public string CachedPath => CachedPathUri?.ToString();
+
+        [Preserve]
+        [JsonIgnore]
+        public Uri CachedPathUri { get; internal set; }
 
         [Preserve]
         [JsonIgnore]
@@ -75,9 +90,9 @@ namespace OpenAI.Images
         [Preserve]
         public override string ToString()
         {
-            if (!string.IsNullOrWhiteSpace(CachedPath))
+            if (CachedPathUri != null)
             {
-                return CachedPath;
+                return CachedPathUri.ToString();
             }
 
             if (!string.IsNullOrWhiteSpace(B64_Json))
