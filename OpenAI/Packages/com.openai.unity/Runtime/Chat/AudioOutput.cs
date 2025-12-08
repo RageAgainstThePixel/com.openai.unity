@@ -137,7 +137,9 @@ namespace OpenAI.Chat
             if (disposing)
             {
                 audioSamples?.Dispose();
-                AudioData.Dispose();
+                audioSamples = null;
+                audioData?.Dispose();
+                audioData = null;
             }
         }
 

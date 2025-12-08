@@ -22,7 +22,7 @@ csharp_new_line_before_finally = true
 csharp_new_line_before_open_brace = all
 
 # Modifier preferences
-dotnet_style_require_accessibility_modifiers = for_non_interface_members:error
+dotnet_style_require_accessibility_modifiers = error
 
 # Code-block preferences
 csharp_prefer_braces = true:error
@@ -33,8 +33,8 @@ dotnet_style_predefined_type_for_locals_parameters_members = true
 
 # Code Style
 csharp_style_var_when_type_is_apparent = true
-
 dotnet_sort_system_directives_first = false
+dotnet_analyzer_diagnostic.category-Style.severity = none
 
 #### Resharper/Rider Rules ####
 # https://www.jetbrains.com/help/resharper/EditorConfig_Properties.html

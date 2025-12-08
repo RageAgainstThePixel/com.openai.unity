@@ -30,22 +30,14 @@ namespace OpenAI.Extensions
 #endif // UNITY_6000_0_OR_NEWER
             return await Task.FromResult((texture, null as Uri));
 #else
-            if (!Rest.TryGetDownloadCacheItem(b64, out var localFilePath))
+            if (!Rest.TryGetDownloadCacheItem(b64, out Uri localUri))
             {
-                await using var fs = new FileStream(localFilePath, FileMode.Create, FileAccess.Write);
+                await using var fs = new FileStream(localUri.LocalPath, FileMode.Create, FileAccess.Write);
                 await fs.WriteAsync(imageData, cancellationToken: cancellationToken);
-                localFilePath = $"file://{localFilePath}";
             }
 
-            var texture = await Rest.DownloadTextureAsync(localFilePath, parameters: new RestParameters(debug: debug), cancellationToken: cancellationToken);
-            Rest.TryGetDownloadCacheItem(b64, out var cachedPath);
-            Uri cachedUri = null;
-
-            if (!string.IsNullOrWhiteSpace(cachedPath))
-            {
-                cachedUri = new Uri(cachedPath);
-            }
-
+            var texture = await Rest.DownloadTextureAsync(localUri.LocalPath, parameters: new RestParameters(debug: debug), cancellationToken: cancellationToken);
+            Rest.TryGetDownloadCacheItem(b64, out Uri cachedUri);
             return (texture, cachedUri);
 #endif // !PLATFORM_WEBGL
         }
