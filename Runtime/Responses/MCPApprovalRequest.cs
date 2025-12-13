@@ -34,6 +34,7 @@ namespace OpenAI.Responses
             Name = name;
             Arguments = arguments;
             ServerLabel = serverLabel;
+            Type = ResponseItemType.McpApprovalRequest;
         }
 
         /// <inheritdoc />

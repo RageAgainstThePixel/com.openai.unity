@@ -11,7 +11,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
-using Unity.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -249,7 +248,7 @@ namespace OpenAI.Samples.Chat
             var stopwatch = Stopwatch.StartNew();
             using var speechClip = await openAI.AudioEndpoint.GetSpeechAsync(
                 request,
-                partialClip => streamAudioSource.SampleCallbackAsync(partialClip.AudioSamples),
+                async partialClip => await streamAudioSource.SampleCallbackAsync(partialClip.AudioSamples),
                 cancellationToken)
                 .ConfigureAwait(true);
             var playbackTime = speechClip.Length - (float)stopwatch.Elapsed.TotalSeconds + 0.1f;
