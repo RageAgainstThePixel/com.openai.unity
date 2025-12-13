@@ -127,6 +127,6 @@ namespace OpenAI.Responses
         /// </summary>
         [Preserve]
         [JsonProperty("error", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string Error { get; }
+        public JObject Error { get; }
     }
 }

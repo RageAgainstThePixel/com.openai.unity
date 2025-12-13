@@ -12,6 +12,9 @@ namespace OpenAI.Audio
     public sealed class SpeechClip : IDisposable
     {
         [Preserve]
+        private SpeechClip() { }
+
+        [Preserve]
         internal SpeechClip(string name, string cachePath, AudioClip audioClip)
         {
             Name = name;
@@ -30,7 +33,8 @@ namespace OpenAI.Audio
             SampleRate = sampleRate;
         }
 
-        ~SpeechClip() => Dispose();
+        [Preserve]
+        ~SpeechClip() => Dispose(false);
 
         [Preserve]
         public string Name { get; }
@@ -113,12 +117,22 @@ namespace OpenAI.Audio
         public static implicit operator string(SpeechClip clip) => clip?.CachePath;
 
         [Preserve]
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                audioSamples?.Dispose();
+                audioSamples = null;
+                audioData?.Dispose();
+                audioData = null;
+            }
+        }
+
+        [Preserve]
         public void Dispose()
         {
-            audioSamples?.Dispose();
-            audioSamples = null;
-            audioData?.Dispose();
-            audioData = null;
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

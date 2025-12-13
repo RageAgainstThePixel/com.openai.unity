@@ -507,6 +507,7 @@ namespace OpenAI.Threads
             {
                 IServerSentEvent serverSentEvent = null;
                 var @event = ssEvent.Value.Value<string>();
+                var @object = ssEvent.Data ?? ssEvent.Value;
 
                 // ReSharper disable AccessToModifiedClosure
                 try
@@ -580,7 +581,8 @@ namespace OpenAI.Threads
                             serverSentEvent = message;
                             break;
                         case "error":
-                            serverSentEvent = sseResponse.Deserialize<Error>(client);
+                            var error = @object["error"]?.ToObject<Error>();
+                            serverSentEvent = error ?? sseResponse.Deserialize<Error>(client);
                             break;
                         default:
                             // if not properly handled raise it up to caller to deal with it themselves.

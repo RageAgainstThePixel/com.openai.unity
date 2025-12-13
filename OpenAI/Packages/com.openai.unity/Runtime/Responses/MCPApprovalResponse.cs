@@ -28,6 +28,14 @@ namespace OpenAI.Responses
             Reason = reason;
         }
 
+        [Preserve]
+        public MCPApprovalResponse(string approvalRequestId, bool approve)
+        {
+            ApprovalRequestId = approvalRequestId;
+            Approve = approve;
+            Type = ResponseItemType.McpApprovalResponse;
+        }
+
         /// <inheritdoc />
         [Preserve]
         [JsonProperty("id", DefaultValueHandling = DefaultValueHandling.Ignore)]
