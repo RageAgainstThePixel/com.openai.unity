@@ -582,7 +582,7 @@ namespace OpenAI.Threads
                             break;
                         case "error":
                             var error = @object["error"]?.ToObject<Error>();
-                            serverSentEvent = sseResponse.Deserialize<Error>(client);
+                            serverSentEvent = error ?? sseResponse.Deserialize<Error>(client);
                             break;
                         default:
                             // if not properly handled raise it up to caller to deal with it themselves.
