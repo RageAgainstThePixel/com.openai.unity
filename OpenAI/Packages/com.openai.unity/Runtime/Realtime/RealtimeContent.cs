@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using System;
 using UnityEngine;
 using UnityEngine.Scripting;
-using Utilities.Encoding.Wav;
+using Utilities.Audio;
 
 namespace OpenAI.Realtime
 {
@@ -15,7 +15,7 @@ namespace OpenAI.Realtime
         [JsonConstructor]
         internal RealtimeContent(
             [JsonProperty("id")] string id,
-            [JsonProperty("type")] RealtimeContentType type,
+            [JsonProperty("type")][JsonConverter(typeof(RealtimeContentTypeConverter))] RealtimeContentType type,
             [JsonProperty("text")] string text,
             [JsonProperty("audio")] string audio,
             [JsonProperty("transcript")] string transcript)
@@ -33,10 +33,10 @@ namespace OpenAI.Realtime
             Type = type;
             switch (type)
             {
-                case RealtimeContentType.InputText or RealtimeContentType.Text:
+                case RealtimeContentType.InputText or RealtimeContentType.OutputText:
                     Text = text;
                     break;
-                case RealtimeContentType.InputAudio or RealtimeContentType.Audio:
+                case RealtimeContentType.InputAudio or RealtimeContentType.OutputAudio:
                     Audio = text;
                     break;
                 case RealtimeContentType.ItemReference:
@@ -53,7 +53,7 @@ namespace OpenAI.Realtime
             Type = type;
             Audio = type switch
             {
-                RealtimeContentType.InputAudio or RealtimeContentType.Audio => $"data:audio/wav;base64,{Convert.ToBase64String(audioClip.EncodeToWav())}",
+                RealtimeContentType.InputAudio or RealtimeContentType.OutputAudio => Convert.ToBase64String(audioClip.EncodeToPCM(outputSampleRate: 24000).ToArray()),
                 _ => throw new ArgumentException($"Invalid content type {type} for audio content")
             };
             Transcript = transcript;
@@ -71,7 +71,7 @@ namespace OpenAI.Realtime
             Type = type;
             Audio = type switch
             {
-                RealtimeContentType.InputAudio or RealtimeContentType.Audio => Convert.ToBase64String(audioData),
+                RealtimeContentType.InputAudio or RealtimeContentType.OutputAudio => Convert.ToBase64String(audioData),
                 _ => throw new ArgumentException($"Invalid content type {type} for audio content")
             };
             Transcript = transcript;
@@ -83,7 +83,7 @@ namespace OpenAI.Realtime
             Type = type;
             Audio = type switch
             {
-                RealtimeContentType.InputAudio or RealtimeContentType.Audio => Convert.ToBase64String(audioData),
+                RealtimeContentType.InputAudio or RealtimeContentType.OutputAudio => Convert.ToBase64String(audioData),
                 _ => throw new ArgumentException($"Invalid content type {type} for audio content")
             };
             Transcript = transcript;
@@ -98,9 +98,11 @@ namespace OpenAI.Realtime
         public string Id { get; }
 
         /// <summary>
-        /// The content type ("text", "audio", "input_text", "input_audio").
+        /// The content type ("output_text", "output_audio", "input_text", "input_audio"),
+        /// with "text"/"audio" accepted for response content parts.
         /// </summary>
         [Preserve]
+        [JsonConverter(typeof(RealtimeContentTypeConverter))]
         [JsonProperty("type", DefaultValueHandling = DefaultValueHandling.Include)]
         public RealtimeContentType Type { get; }
 

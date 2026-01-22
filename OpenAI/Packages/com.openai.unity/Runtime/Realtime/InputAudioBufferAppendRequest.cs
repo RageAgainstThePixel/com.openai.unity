@@ -58,7 +58,7 @@ namespace OpenAI.Realtime
 
         /// <summary>
         /// Base64-encoded audio bytes.
-        /// This must be in the format specified by the input_audio_format field in the session configuration.
+    /// This must be in the format specified by session.audio.input.format in the session configuration.
         /// </summary>
         [Preserve]
         [JsonProperty("audio")]

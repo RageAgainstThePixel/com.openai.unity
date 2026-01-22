@@ -1,12 +1,20 @@
 {
   "dependencies": {
+    "com.unity.ai.navigation": "2.0.8",
     "com.unity.ide.rider": "3.0.38",
     "com.unity.ide.visualstudio": "2.0.25",
     "com.unity.inputsystem": "1.14.2",
     "com.unity.mobile.android-logcat": "1.4.6",
-    "com.unity.textmeshpro": "3.0.9",
-    "com.unity.ugui": "1.0.0",
-    "com.utilities.buildpipeline": "1.8.1"
+    "com.unity.multiplayer.center": "1.0.0",
+    "com.unity.ugui": "2.0.0",
+    "com.utilities.async": "file:C:/Users/abhay/Desktop/Realtime GA/com.utilities.async-main/Utilities.Async/Packages/com.utilities.async",
+    "com.utilities.audio": "file:C:/Users/abhay/Desktop/Realtime GA/com.utilities.audio-main/Utilities.Audio/Packages/com.utilities.audio",
+    "com.utilities.buildpipeline": "1.8.1",
+    "com.utilities.encoder.wav": "file:C:/Users/abhay/Desktop/Realtime GA/com.utilities.encoder.wav-main/Utilities.Encoder.Wav/Packages/com.utilities.encoder.wav",
+    "com.utilities.extensions": "file:C:/Users/abhay/Desktop/Realtime GA/com.utilities.extensions-main/Utilities.Extensions/Packages/com.utilities.extensions",
+    "com.utilities.rest": "file:C:/Users/abhay/Desktop/Realtime GA/com.utilities.rest-main/Utilities.Rest/Packages/com.utilities.rest",
+    "com.utilities.websockets": "file:C:/Users/abhay/Desktop/Realtime GA/com.utilities.websockets-main/Utilities.Websockets/Packages/com.utilities.websockets",
+    "com.unity.modules.accessibility": "1.0.0"
   },
   "scopedRegistries": [
     {

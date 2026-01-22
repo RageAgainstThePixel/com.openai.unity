@@ -1,4 +1,4 @@
-﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
 using OpenAI.Extensions;
@@ -27,9 +27,24 @@ namespace OpenAI.Realtime
         /// <param name="configuration"><see cref="SessionConfiguration"/>.</param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns><see cref="RealtimeSession"/>.</returns>
-        public async Task<RealtimeSession> CreateSessionAsync(SessionConfiguration configuration = null, CancellationToken cancellationToken = default)
+        public Task<RealtimeSession> CreateSessionAsync(SessionConfiguration configuration = null, CancellationToken cancellationToken = default)
+            => CreateSessionAsync(configuration, GetDefaultApiKey(), cancellationToken);
+
+        /// <summary>
+        /// Creates a new realtime session with the provided <see cref="SessionConfiguration"/> options and auth token.
+        /// </summary>
+        /// <param name="configuration"><see cref="SessionConfiguration"/>.</param>
+        /// <param name="apiKeyOverride">Parent API key or ephemeral key.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="RealtimeSession"/>.</returns>
+        public async Task<RealtimeSession> CreateSessionAsync(SessionConfiguration configuration, string apiKeyOverride, CancellationToken cancellationToken = default)
         {
-            string model = string.IsNullOrWhiteSpace(configuration?.Model) ? Model.GPT4oRealtime : configuration!.Model;
+            if (string.IsNullOrWhiteSpace(apiKeyOverride))
+            {
+                throw new AuthenticationException("Missing API key or ephemeral token.");
+            }
+
+            string model = string.IsNullOrWhiteSpace(configuration?.Model) ? Model.GPT_Realtime : configuration!.Model;
             var queryParameters = new Dictionary<string, string>();
 
             if (client.Settings.Info.IsAzureOpenAI)
@@ -41,32 +56,10 @@ namespace OpenAI.Realtime
                 queryParameters["model"] = model;
             }
 
-            var payload = JsonConvert.SerializeObject(configuration, OpenAIClient.JsonSerializationOptions);
-            var createSessionResponse = await Rest.PostAsync(GetUrl("/sessions"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
-            createSessionResponse.Validate(EnableDebug);
-            var createSession = createSessionResponse.Deserialize<SessionConfiguration>(client);
-
-            if (createSession == null ||
-                string.IsNullOrWhiteSpace(createSession.ClientSecret?.EphemeralApiKey))
-            {
-                throw new InvalidOperationException("Failed to create a session. Ensure the configuration is valid and the API key is set.");
-            }
-
-            var websocket = new WebSocket(GetWebsocketUri(queryParameters: queryParameters), new Dictionary<string, string>
-            {
-#if !PLATFORM_WEBGL
-                { "User-Agent", "OpenAI-DotNet" },
-                { "OpenAI-Beta", "realtime=v1" },
-                { "Authorization", $"Bearer {createSession.ClientSecret!.EphemeralApiKey}" }
-#endif
-            }, new List<string>
-            {
-#if PLATFORM_WEBGL // Web browsers do not support headers. https://github.com/openai/openai-realtime-api-beta/blob/339e9553a757ef1cf8c767272fc750c1e62effbb/lib/api.js#L76-L80
-                "realtime",
-                $"openai-insecure-api-key.{createSession.ClientSecret!.EphemeralApiKey}",
-                "openai-beta.realtime-v1"
-#endif
-            });
+            var websocket = new WebSocket(
+                GetWebsocketUri(queryParameters: queryParameters),
+                BuildRealtimeHeaders(apiKeyOverride),
+                BuildRealtimeProtocols(apiKeyOverride));
             var session = new RealtimeSession(websocket, EnableDebug);
             var sessionCreatedTcs = new TaskCompletionSource<SessionResponse>();
 
@@ -77,6 +70,11 @@ namespace OpenAI.Realtime
                 await session.ConnectAsync(cancellationToken).ConfigureAwait(true);
                 var sessionResponse = await sessionCreatedTcs.Task.WithCancellation(cancellationToken).ConfigureAwait(true);
                 session.Configuration = sessionResponse.SessionConfiguration;
+
+                if (configuration != null)
+                {
+                    await session.SendAsync(new UpdateSessionRequest(configuration), cancellationToken).ConfigureAwait(true);
+                }
             }
             finally
             {
@@ -115,6 +113,90 @@ namespace OpenAI.Realtime
                     sessionCreatedTcs.TrySetException(e);
                 }
             }
+        }
+
+        /// <summary>
+        /// Creates a realtime client secret for use in client environments.
+        /// </summary>
+        /// <param name="configuration">Optional session configuration to bind to the client secret.</param>
+        /// <param name="expiresAfter">Optional expiration settings for the client secret.</param>
+        /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
+        /// <returns><see cref="ClientSecretResponse"/>.</returns>
+        public async Task<ClientSecretResponse> CreateClientSecretAsync(
+            SessionConfiguration configuration = null,
+            ExpiresAfter expiresAfter = null,
+            CancellationToken cancellationToken = default)
+        {
+            var request = new ClientSecretRequest(
+                configuration,
+                expiresAfter ?? configuration?.ExpiresAfter);
+            var payload = JsonConvert.SerializeObject(request, OpenAIClient.JsonSerializationOptions);
+            var response = await Rest.PostAsync(GetUrl("/client_secrets"), payload, new RestParameters(client.DefaultRequestHeaders), cancellationToken);
+            response.Validate(EnableDebug);
+            return response.Deserialize<ClientSecretResponse>(client);
+        }
+
+        private Dictionary<string, string> BuildRealtimeHeaders(string apiKeyOverride)
+        {
+            var headers = new Dictionary<string, string>();
+#if !PLATFORM_WEBGL
+            headers["User-Agent"] = "com.openai.unity";
+
+            if (client.Settings.Info.UseOAuthAuthentication)
+            {
+                headers["Authorization"] = Rest.GetBearerOAuthToken(apiKeyOverride);
+            }
+            else
+            {
+                headers["api-key"] = apiKeyOverride;
+            }
+
+            if (client.DefaultRequestHeaders.TryGetValue("OpenAI-Organization", out var organizationId) &&
+                !string.IsNullOrWhiteSpace(organizationId))
+            {
+                headers["OpenAI-Organization"] = organizationId;
+            }
+
+            if (client.DefaultRequestHeaders.TryGetValue("OpenAI-Project", out var projectId) &&
+                !string.IsNullOrWhiteSpace(projectId))
+            {
+                headers["OpenAI-Project"] = projectId;
+            }
+#endif
+            return headers;
+        }
+
+        private List<string> BuildRealtimeProtocols(string apiKeyOverride)
+        {
+            return new List<string>
+            {
+#if PLATFORM_WEBGL // Web browsers do not support headers.
+                "realtime",
+                $"openai-insecure-api-key.{apiKeyOverride}"
+#endif
+            };
+        }
+
+        private string GetDefaultApiKey()
+        {
+            if (client.DefaultRequestHeaders != null &&
+                client.DefaultRequestHeaders.TryGetValue("Authorization", out var authorization) &&
+                !string.IsNullOrWhiteSpace(authorization))
+            {
+                const string bearerPrefix = "Bearer ";
+                return authorization.StartsWith(bearerPrefix, StringComparison.OrdinalIgnoreCase)
+                    ? authorization.Substring(bearerPrefix.Length).Trim()
+                    : authorization;
+            }
+
+            if (client.DefaultRequestHeaders != null &&
+                client.DefaultRequestHeaders.TryGetValue("api-key", out var apiKey) &&
+                !string.IsNullOrWhiteSpace(apiKey))
+            {
+                return apiKey;
+            }
+
+            return null;
         }
     }
 }

@@ -11,13 +11,15 @@ namespace OpenAI.Realtime
             bool? interruptResponse = true,
             int? prefixPadding = null,
             int? silenceDuration = null,
-            float? detectionThreshold = null)
+            float? detectionThreshold = null,
+            int? idleTimeout = null)
         {
             CreateResponse = createResponse;
             InterruptResponse = interruptResponse;
             PrefixPadding = prefixPadding;
             SilenceDuration = silenceDuration;
             DetectionThreshold = detectionThreshold;
+            IdleTimeout = idleTimeout;
         }
 
         [JsonConstructor]
@@ -27,7 +29,8 @@ namespace OpenAI.Realtime
             [JsonProperty("interrupt_response")] bool? interruptResponse,
             [JsonProperty("prefix_padding_ms")] int? prefixPadding,
             [JsonProperty("silence_duration_ms")] int? silenceDuration,
-            [JsonProperty("threshold")] float? detectionThreshold)
+            [JsonProperty("threshold")] float? detectionThreshold,
+            [JsonProperty("idle_timeout_ms")] int? idleTimeout)
         {
             Type = type;
             CreateResponse = createResponse;
@@ -35,6 +38,7 @@ namespace OpenAI.Realtime
             PrefixPadding = prefixPadding;
             SilenceDuration = silenceDuration;
             DetectionThreshold = detectionThreshold;
+            IdleTimeout = idleTimeout;
         }
 
         [Preserve]
@@ -60,5 +64,9 @@ namespace OpenAI.Realtime
         [Preserve]
         [JsonProperty("threshold", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public float? DetectionThreshold { get; private set; }
+
+        [Preserve]
+        [JsonProperty("idle_timeout_ms", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public int? IdleTimeout { get; private set; }
     }
 }
