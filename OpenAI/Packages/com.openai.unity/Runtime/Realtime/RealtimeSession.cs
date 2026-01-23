@@ -331,7 +331,7 @@ namespace OpenAI.Realtime
                             return;
                         case InputAudioBufferCommitRequest when serverEvent is InputAudioBufferCommittedResponse:
                         case InputAudioBufferClearRequest when serverEvent is InputAudioBufferClearedResponse:
-                        case ConversationItemCreateRequest when serverEvent is ConversationItemCreatedResponse:
+                        case ConversationItemCreateRequest when serverEvent is ConversationItemAddedResponse:
                         case ConversationItemTruncateRequest when serverEvent is ConversationItemTruncatedResponse:
                         case ConversationItemDeleteRequest when serverEvent is ConversationItemDeletedResponse:
                             Complete();

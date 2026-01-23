@@ -65,6 +65,12 @@ namespace OpenAI
         [Preserve]
         public static readonly Voice Verse = new("verse");
 
+        [Preserve]
+        public static readonly Voice Marin = new("marin");
+
+        [Preserve]
+        public static readonly Voice Cedar = new("cedar");
+
         public static readonly string[] All =
         {
             Alloy,
@@ -77,7 +83,9 @@ namespace OpenAI
             Nova,
             Sage,
             Shimmer,
-            Verse
+            Verse,
+            Marin,
+            Cedar
         };
 
 #pragma warning disable CS0618 // Type or member is obsolete

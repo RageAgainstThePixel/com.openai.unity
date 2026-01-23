@@ -78,9 +78,10 @@ namespace OpenAI
             if (Settings.Info.BaseRequestUrlFormat.Contains(OpenAISettingsInfo.OpenAIDomain) &&
                 (string.IsNullOrWhiteSpace(Authentication.Info.ApiKey) ||
                  (!Authentication.Info.ApiKey.Contains(OpenAIAuthInfo.SecretKeyPrefix) &&
-                  !Authentication.Info.ApiKey.Contains(OpenAIAuthInfo.SessionKeyPrefix))))
+                  !Authentication.Info.ApiKey.Contains(OpenAIAuthInfo.SessionKeyPrefix) &&
+                  !Authentication.Info.ApiKey.Contains(OpenAIAuthInfo.EphemeralKeyPrefix))))
             {
-                throw new InvalidCredentialException($"{nameof(Authentication.Info.ApiKey)} must start with '{OpenAIAuthInfo.SecretKeyPrefix}'");
+                throw new InvalidCredentialException($"{nameof(Authentication.Info.ApiKey)} must start with '{OpenAIAuthInfo.SecretKeyPrefix}', '{OpenAIAuthInfo.SessionKeyPrefix}', or '{OpenAIAuthInfo.EphemeralKeyPrefix}'");
             }
 
             if (Settings.Info.UseOAuthAuthentication)
@@ -123,7 +124,7 @@ namespace OpenAI
         /// <summary>
         /// The <see cref="JsonSerializationOptions"/> to use when making calls to the API.
         /// </summary>
-        internal static JsonSerializerSettings JsonSerializationOptions { get; } = new()
+        public static JsonSerializerSettings JsonSerializationOptions { get; } = new()
         {
             NullValueHandling = NullValueHandling.Ignore,
             DefaultValueHandling = DefaultValueHandling.Ignore,

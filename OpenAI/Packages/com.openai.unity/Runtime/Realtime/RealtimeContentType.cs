@@ -8,10 +8,10 @@ namespace OpenAI.Realtime
     [Preserve]
     public enum RealtimeContentType
     {
-        [EnumMember(Value = "text")]
-        Text,
-        [EnumMember(Value = "audio")]
-        Audio,
+        [EnumMember(Value = "output_text")]
+        OutputText,
+        [EnumMember(Value = "output_audio")]
+        OutputAudio,
         [EnumMember(Value = "input_text")]
         InputText,
         [EnumMember(Value = "input_audio")]

@@ -1,4 +1,4 @@
-﻿// Licensed under the MIT License. See LICENSE in the project root for license information.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -21,9 +21,8 @@ namespace OpenAI.Realtime
             [JsonProperty("metadata")] Dictionary<string, object> metadata,
             [JsonProperty("usage")] TokenUsage usage,
             [JsonProperty("conversation_id")] string conversationId,
-            [JsonProperty("voice")] string voice,
-            [JsonProperty("modalities")] Modality modalities,
-            [JsonProperty("output_audio_format")] RealtimeAudioFormat outputAudioFormat,
+            [JsonProperty("output_modalities")][JsonConverter(typeof(ModalityConverter))] Modality modalities,
+            [JsonProperty("audio")] RealtimeAudioConfig audio,
             [JsonProperty("temperature")] float temperature,
             [JsonProperty("max_output_tokens")] object maxOutputTokens)
         {
@@ -35,9 +34,8 @@ namespace OpenAI.Realtime
             Metadata = metadata;
             Usage = usage;
             ConversationId = conversationId;
-            Voice = voice;
             Modalities = modalities;
-            OutputAudioFormat = outputAudioFormat;
+            Audio = audio;
             Temperature = temperature;
             MaxOutputTokens = maxOutputTokens;
         }
@@ -111,29 +109,19 @@ namespace OpenAI.Realtime
         public string ConversationId { get; }
 
         /// <summary>
-        /// The voice the model used to respond.
-        /// Current voice options are `alloy`, `ash`, `ballad`, `coral`, `echo` `sage`, `shimmer` and `verse`.
+        /// The modality the model used to respond (Realtime supports a single modality: audio or text).
         /// </summary>
         [Preserve]
-        [JsonProperty("voice")]
-        public string Voice { get; }
-
-        /// <summary>
-        /// The set of modalities the model used to respond. If there are multiple modalities,
-        /// the model will pick one, for example if `modalities` is `["text", "audio"]`, the model
-        /// could be responding in either text or audio.
-        /// </summary>
-        [Preserve]
-        [JsonProperty("modalities")]
+        [JsonProperty("output_modalities")]
         [JsonConverter(typeof(ModalityConverter))]
         public Modality Modalities { get; }
 
         /// <summary>
-        /// The format of output audio. Options are `pcm16`, `g711_ulaw`, or `g711_alaw`.
+        /// Audio configuration for the response output.
         /// </summary>
         [Preserve]
-        [JsonProperty("output_audio_format")]
-        public RealtimeAudioFormat OutputAudioFormat { get; }
+        [JsonProperty("audio")]
+        public RealtimeAudioConfig Audio { get; }
 
         /// <summary>
         /// Sampling temperature for the model, limited to [0.6, 1.2]. Defaults to 0.8.
@@ -143,11 +131,19 @@ namespace OpenAI.Realtime
         public float Temperature { get; }
 
         /// <summary>
-        ///  Maximum number of output tokens for a single assistant response, inclusive of tool calls, that was used in this response.
+        /// Maximum number of output tokens for a single assistant response, inclusive of tool calls, that was used in this response.
         /// </summary>
         [Preserve]
         [JsonProperty("max_output_tokens")]
         public object MaxOutputTokens { get; }
+
+        [Preserve]
+        [JsonIgnore]
+        public string Voice => Audio?.Output?.Voice;
+
+        [Preserve]
+        [JsonIgnore]
+        public RealtimeAudioFormat OutputAudioFormat => Audio?.Output?.Format?.Type ?? RealtimeAudioFormat.Pcm;
 
         [Preserve]
         public void PrintUsage()

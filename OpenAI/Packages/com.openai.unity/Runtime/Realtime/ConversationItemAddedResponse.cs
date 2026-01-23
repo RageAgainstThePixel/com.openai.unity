@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 namespace OpenAI.Realtime
 {
     [Preserve]
-    public sealed class ConversationItemCreatedResponse : BaseRealtimeEvent, IServerEvent
+    public sealed class ConversationItemAddedResponse : BaseRealtimeEvent, IServerEvent
     {
         [Preserve]
         [JsonConstructor]
-        internal ConversationItemCreatedResponse(
+        internal ConversationItemAddedResponse(
             [JsonProperty("event_id")] string eventId,
             [JsonProperty("type")] string type,
             [JsonProperty("previous_item_id")] string previousItemId,
@@ -40,10 +40,14 @@ namespace OpenAI.Realtime
         public string PreviousItemId { get; }
 
         /// <summary>
-        /// The item that was created.
+        /// The item that was added.
         /// </summary>
         [Preserve]
         [JsonProperty("item")]
         public ConversationItem Item { get; }
+
+        [Preserve]
+        [JsonIgnore]
+        public bool IsDone => Type == "conversation.item.done";
     }
 }

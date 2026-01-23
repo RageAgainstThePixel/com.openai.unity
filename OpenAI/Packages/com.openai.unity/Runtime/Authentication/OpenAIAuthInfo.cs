@@ -14,6 +14,7 @@ namespace OpenAI
         internal const string SecretKeyPrefix = "sk-";
         internal const string ProjectPrefix = "proj_";
         internal const string SessionKeyPrefix = "sess-";
+        internal const string EphemeralKeyPrefix = "ek_";
         internal const string OrganizationPrefix = "org-";
 
         public OpenAIAuthInfo(string apiKey, string organizationId = null, string projectId = null)

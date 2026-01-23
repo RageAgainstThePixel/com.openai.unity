@@ -20,7 +20,6 @@ namespace OpenAI.Realtime
         public UpdateSessionRequest(SessionConfiguration configuration)
         {
             Configuration = configuration;
-            Configuration.ClientSecret = null;
         }
 
         /// <inheritdoc />

@@ -9,7 +9,8 @@ namespace OpenAI.Realtime
     /// Add a new Item to the Conversation's context, including messages, function calls, and function call responses.
     /// This event can be used both to populate a "history" of the conversation and to add new items mid-stream,
     /// but has the current limitation that it cannot populate assistant audio messages.
-    /// If successful, the server will respond with a conversation.item.created event, otherwise an error event will be sent.
+    /// If successful, the server will respond with conversation.item.added and conversation.item.done events,
+    /// otherwise an error event will be sent.
     /// </summary>
     [Preserve]
     public sealed class ConversationItemCreateRequest : BaseRealtimeEvent, IClientEvent

@@ -759,7 +759,7 @@ The library implements `IServerEvent` interface for incoming server sent events.
 - [`RealtimeEventError`](https://platform.openai.com/docs/api-reference/realtime-server-events/error): Returned when an error occurs, which could be a client problem or a server problem.
 - [`SessionResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/session): Returned for both a `session.created` and `session.updated` event.
 - [`RealtimeConversationResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/created): Returned when a new conversation item is created.
-- [`ConversationItemCreatedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/item/created): Returned when a new conversation item is created.
+- [`ConversationItemAddedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/item/added): Returned when a conversation item is added or done.
 - [`ConversationItemInputAudioTranscriptionResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation): Returned when the input audio transcription is completed or failed.
 - [`ConversationItemTruncatedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/item/truncated): Returned when a conversation item is truncated.
 - [`ConversationItemDeletedResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/conversation/item/deleted): Returned when a conversation item is deleted.
@@ -770,9 +770,9 @@ The library implements `IServerEvent` interface for incoming server sent events.
 - [`RealtimeResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response): Returned when a response is created or done.
 - [`ResponseOutputItemResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/output_item): Returned when a response output item is added or done.
 - [`ResponseContentPartResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/content_part): Returned when a response content part is added or done.
-- [`ResponseTextResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/text): Returned when a response text is updated or done.
-- [`ResponseAudioTranscriptResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/audio_transcript): Returned when a response audio transcript is updated or done.
-- [`ResponseAudioResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/audio): Returned when a response audio is updated or done.
+- [`ResponseTextResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/output_text): Returned when a response text is updated or done.
+- [`ResponseAudioTranscriptResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/output_audio_transcript): Returned when a response audio transcript is updated or done.
+- [`ResponseAudioResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/output_audio): Returned when a response audio is updated or done.
 - [`ResponseFunctionCallArgumentsResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/response/function_call_arguments): Returned when a response function call arguments are updated or done.
 - [`RateLimitsResponse`](https://platform.openai.com/docs/api-reference/realtime-server-events/rate_limits): Returned when rate limits are updated.
 
@@ -799,8 +799,8 @@ void ServerEvents(IServerEvent @event)
         case RealtimeConversationResponse conversationResponse:
             // raised when a new conversation is created
             break;
-        case ConversationItemCreatedResponse conversationItemCreated:
-            // raised when a new conversation item is created
+        case ConversationItemAddedResponse conversationItemAdded:
+            // raised when a conversation item is added or done
             break;
         case ConversationItemInputAudioTranscriptionResponse conversationItemTranscription:
             // raised when the input audio transcription is completed or failed
