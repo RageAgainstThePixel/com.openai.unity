@@ -11,9 +11,9 @@ jobs:
     - uses: actions/checkout@v7
       with:
         fetch-depth: 0
-    - uses: RageAgainstThePixel/upm-release@v1
+    - uses: RageAgainstThePixel/upm-release@v3
       with:
-        username: ${{ secrets.UNITY_USERNAME }}
-        password: ${{ secrets.UNITY_PASSWORD }}
         organization-id: ${{ secrets.UNITY_ORG_ID }}
+        upm-service-account-key-id: ${{ secrets.UPM_SERVICE_ACCOUNT_KEY_ID }}
+        upm-service-account-key-secret: ${{ secrets.UPM_SERVICE_ACCOUNT_KEY_SECRET }}
         github-token: ${{ secrets.GITHUB_TOKEN }}
