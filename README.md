@@ -14,6 +14,8 @@ An OpenAI API account is required.
 
 Requires Unity 2021.3 LTS or higher.
 
+Pull requests test the current Unity streams, and a monthly run covers the older lines.
+
 The recommended installation method is though the unity package manager and [OpenUPM](https://openupm.com/packages/com.openai.unity).
 
 ### Via Unity Package Manager and OpenUPM

@@ -1,34 +1,33 @@
 name: Unity
 on:
   schedule:
-    - cron: '0 0 * * 0' # Every Sunday at midnight
+    - cron: '0 8 18 * *' # monthly: the older editors, which no longer change
   push:
     branches: [main]
   pull_request:
     types: [opened, reopened, synchronize, ready_for_review]
     branches: ['**']
   workflow_dispatch: # manual workflow trigger
+    inputs:
+      editors:
+        description: Which editors to test
+        type: choice
+        options: [unity-6-and-newer, legacy]
+        default: unity-6-and-newer
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # the monthly legacy run gets its own group, so a push to main does not cancel it
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'schedule' && 'legacy' || inputs.editors || 'unity-6-and-newer' }}
   cancel-in-progress: ${{(github.event_name == 'pull_request' || github.event.action == 'synchronize')}}
 jobs:
   setup:
-    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          sparse-checkout: .github/
-      - uses: RageAgainstThePixel/job-builder@v1
-        id: setup-jobs
-        with:
-          build-options: ./.github/workflows/build-options.json
-          group-by: unity-version
-          job-name-prefix: Build
-    outputs:
-      jobs: ${{ steps.setup-jobs.outputs.jobs }}
+    # pull requests and pushes test the streams Unity lists; the older editors run monthly or on demand
+    uses: RageAgainstThePixel/workflows/.github/workflows/unity-stream-matrix.yml@main
+    with:
+      legacy: ${{ inputs.editors == 'legacy' }}
+      job-name-prefix: Build
   validate:
     if: ${{ needs.setup.outputs.jobs }}
     needs: setup
@@ -44,3 +43,4 @@ jobs:
     uses: RageAgainstThePixel/workflows/.github/workflows/build-unity-package.yml@main
     with:
       matrix: ${{ toJSON(matrix.jobs.matrix) }}
+      allow-security-alert: ${{ needs.setup.outputs.allow-security-alert == 'true' }}
